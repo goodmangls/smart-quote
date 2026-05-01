@@ -1,1 +1,1 @@
-🔧 ci(seo): Phase 1.5 SEO Checks 워크플로 추가 — robots/sitemap/JSON-LD/Lighthouse SEO 게이트 (≥0.90)
+🏗️ feat(insights): Phase 2 BridgeLogis Insights scaffold — Next.js subapp + npm workspaces + RSS healthcheck/pillar validate scripts + SEO Checks pillar-validate job

@@ -3,6 +3,9 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "workspaces": [
+    "apps/*"
+  ],
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
@@ -12,7 +15,12 @@
     "test:e2e": "npx playwright test",
     "seo:audit": "node scripts/seo-audit.mjs",
     "seo:baseline": "node scripts/seo-audit.mjs --baseline",
-    "seo:compare": "node scripts/seo-audit.mjs --compare"
+    "seo:compare": "node scripts/seo-audit.mjs --compare",
+    "rss:healthcheck": "node scripts/rss-healthcheck.mjs",
+    "pillar:validate": "node scripts/pillar-validate.mjs",
+    "insights:dev": "npm --workspace=apps/insights run dev",
+    "insights:build": "npm --workspace=apps/insights run build",
+    "insights:type-check": "npm --workspace=apps/insights run type-check"
   },
   "dependencies": {
     "@intercom/messenger-js-sdk": "^0.0.18",

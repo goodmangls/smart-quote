@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_04_10_203543) do
+ActiveRecord::Schema[8.0].define(version: 2026_04_23_061200) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -153,7 +153,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_10_203543) do
     t.index ["status"], name: "index_quotes_on_status"
     t.index ["user_id", "status", "created_at"], name: "idx_quotes_user_status_date"
     t.index ["user_id"], name: "index_quotes_on_user_id"
-    t.index ["validity_date"], name: "idx_quotes_stale_drafts", where: "((status)::text = ANY ((ARRAY['draft'::character varying, 'sent'::character varying])::text[]))"
+    t.index ["validity_date"], name: "idx_quotes_stale_drafts", where: "((status)::text = ANY (ARRAY[('draft'::character varying)::text, ('sent'::character varying)::text]))"
   end
 
   create_table "surcharges", force: :cascade do |t|
