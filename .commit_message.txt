@@ -1,1 +1,1 @@
-⚡ perf(build): 메인 번들 760KB→86KB — manualChunks function 형태 + Sentry idle defer + LandingPage lazy
+🔧 fix(lint): apps/insights·output 디렉토리 ignore 추가 — Next.js 워크스페이스는 자체 next lint 사용
