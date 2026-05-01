@@ -1,1 +1,1 @@
-🔧 fix(lint): apps/insights·output 디렉토리 ignore 추가 — Next.js 워크스페이스는 자체 next lint 사용
+🔧 fix(test): vitest exclude 확장 — apps/output/.claude 워크트리 분리
