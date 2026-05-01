@@ -1,1 +1,1 @@
-📋 docs: smart-quote-monorepo-cleanup Design v0.2 — 4 open questions resolved + CL-3 운영데이터 MIGRATE then DELETE 갱신
+🔖 chore: bkit 세션 메타데이터 갱신 (sessionCount 62→63)
