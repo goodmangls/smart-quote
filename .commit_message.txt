@@ -1,1 +1,1 @@
-📋 docs(pdca): phase-1.5-seo-infra Plan 문서 사후 작성 + .bkit-memory.json 등록 (PR #3 추적성 확보)
+🔧 ci(seo): Phase 1.5 SEO Checks 워크플로 추가 — robots/sitemap/JSON-LD/Lighthouse SEO 게이트 (≥0.90)
