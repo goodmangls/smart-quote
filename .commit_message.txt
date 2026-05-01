@@ -1,1 +1,1 @@
-✨ feat(quote): Phase 1.5 deep-link prefill — /quote?origin=...&dest=...&weight=... URL 파라미터로 견적 입력 자동 채우기 (Insights CTA 진입 경로)
+📋 docs(pdca): phase-1.5-seo-infra Plan 문서 사후 작성 + .bkit-memory.json 등록 (PR #3 추적성 확보)
