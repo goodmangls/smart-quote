@@ -1,1 +1,1 @@
-🔄 FSC 요율 업데이트: UPS 50.25% / DHL 47.75% (2026-05-25 기준) + fsc-history 엔트리 추가
+📋 docs(pdca): build-chunk-split Plan 문서 — 메인 번들 760KB→<500KB (Sentry defer + manualChunks 정상화 + LandingPage lazy)
