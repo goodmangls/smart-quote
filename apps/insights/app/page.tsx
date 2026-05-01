@@ -89,7 +89,7 @@ const PILLARS: ReadonlyArray<PillarItem> = [
   },
 ] as const;
 
-export default function InsightsHome(): JSX.Element {
+export default function InsightsHome() {
   return (
     <main
       style={{

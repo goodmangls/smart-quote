@@ -354,6 +354,47 @@ export default function AdminLoginRedirect({
 
 ---
 
+## 8.5. Known Issue — Local Build Failure (Do 단계 발견)
+
+**증상**: `cd apps/insights && npm run build` 가 일관되게 같은 chunk 좌표에서 실패:
+
+```
+Error: <Html> should not be imported outside of pages/_document.
+    at x (.next/server/chunks/611.js:6:1351)
+Error occurred prerendering page "/404" (또는 /500)
+```
+
+**시도한 8가지 변경 모두 동일 좌표 fail** (config 변경이 효과 없음 = root cause 가 config 가 아님):
+1. webpack alias react/react-dom → apps/insights/node_modules
+2. `app/not-found.tsx` 추가
+3. `app/error.tsx` 추가
+4. `app/global-error.tsx` 추가
+5. layout.tsx 의 `<head>` + JSON-LD 제거
+6. `output: 'standalone'`
+7. `@next/mdx` wrapper 제거 + MDX 의존성 비활성화
+8. `pageExtensions` 에 `js`, `jsx` 포함
+
+**진단 결과**:
+- root `node_modules/next` 없음 — duplicate next instance 아님
+- root `react` 없음 — react resolve 깨끗 (apps/insights 내부)
+- `pages/` 디렉토리 없음 — stray pages router 아님
+
+**가설**: macOS 로컬 npm 의 monorepo `outputFileTracingRoot` 가 root `package-lock.json` 을 root 로 잡아서 trace 가 광범위하게 일어나고, 그 과정에서 어떤 의존성이 internal `_error.js` (Pages Router fallback) 을 user route 로 잘못 분류 → prerender 시점에 layout.tsx 의 `<html>` 과 충돌.
+
+**결정**: 로컬 build 디버깅 중단. Vercel 환경에서 신규 프로젝트의 Root Directory = `apps/insights` 로 격리되어 빌드되면 root pollution 영향 없음 → Vercel preview 가 결정적 테스트.
+
+**fallback**:
+- Vercel preview build 도 실패 → 별 사이클 `insights-build-debt` 로 분리 (`outputFileTracingRoot` 명시, `transpilePackages` 점검, lockfile 재생성).
+- Vercel preview build 성공 → 로컬 build 실패는 환경 specific 으로 archive 메모리에 기록(`reference_insights_local_build_quirk.md`).
+
+**검증 통과 항목** (코드 자체는 정상):
+- ✅ `apps/insights/npm run type-check` PASS
+- ✅ Next.js compile 단계 PASS ("Compiled successfully in 8.0s")
+- ✅ middleware/supabase-server/admin 3 파일 type 정상
+- ❌ static page generation 단계만 실패
+
+---
+
 ## 9. Out of Scope (재확인)
 
 - 콘텐츠 이전(`output/phase3/pillars/*.mdx` → `apps/insights/content/`) — 별 사이클

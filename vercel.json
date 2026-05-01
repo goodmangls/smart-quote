@@ -39,6 +39,14 @@
   ],
   "rewrites": [
     {
+      "source": "/insights",
+      "destination": "https://smart-quote-insights.vercel.app/insights"
+    },
+    {
+      "source": "/insights/(.*)",
+      "destination": "https://smart-quote-insights.vercel.app/insights/$1"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }

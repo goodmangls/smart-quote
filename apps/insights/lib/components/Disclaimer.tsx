@@ -96,7 +96,7 @@ export function Disclaimer({
   extra,
   reviewedAt,
   children,
-}: DisclaimerProps): JSX.Element {
+}: DisclaimerProps) {
   const copy = lang === 'en' ? COPY_EN[variant] : COPY_KO[variant];
 
   return (
