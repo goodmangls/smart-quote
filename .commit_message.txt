@@ -1,1 +1,1 @@
-📋 docs(pdca): build-chunk-split Plan 문서 — 메인 번들 760KB→<500KB (Sentry defer + manualChunks 정상화 + LandingPage lazy)
+⚡ perf(build): 메인 번들 760KB→86KB — manualChunks function 형태 + Sentry idle defer + LandingPage lazy
