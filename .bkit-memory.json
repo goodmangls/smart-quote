@@ -1,9 +1,16 @@
 {
-  "activeFeature": null,
-  "phase": "archived",
-  "matchRate": 100,
+  "activeFeature": "insights-deploy",
+  "phase": "plan",
+  "matchRate": 0,
   "iteration": 0,
   "history": [
+    {
+      "feature": "insights-deploy",
+      "phase": "plan",
+      "timestamp": "2026-05-02",
+      "action": "Plan 문서 생성 — 사용자 결정 옵션 C(공개 콘텐츠 + Admin 게이트). 현황 진단: vercel.json rewrites가 /insights를 메인 SPA로 흡수하여 랜딩으로 redirect, apps/insights는 Vercel 미등록. 4 Phase(Deploy / Admin 골격 / Middleware / Cookie 공유) + 5 Open Questions(도메인 전략 / role 저장소 / Vercel 분리 / Admin 1차 범위 / 미인증 redirect 대상). 비범위 명시(콘텐츠 이전·MDX 라우터·OG·i18n은 별 사이클). 다음: /pdca design insights-deploy 진입, Open Questions 답변.",
+      "matchRate": 0
+    },
     {
       "feature": "smart-quote-e2e-debt",
       "phase": "archived",

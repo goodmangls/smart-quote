@@ -1,1 +1,1 @@
-📦 chore(archive): smart-quote-e2e-debt PDCA 4문서 → docs/archive/2026-05/ (Match Rate 100%)
+📋 docs: insights-deploy PDCA Plan — apps/insights production 노출 + /insights/admin Admin 게이트
