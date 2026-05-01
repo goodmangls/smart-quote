@@ -1,9 +1,16 @@
 {
-  "activeFeature": "smart-quote-e2e-debt",
-  "phase": "completed",
+  "activeFeature": null,
+  "phase": "archived",
   "matchRate": 100,
   "iteration": 0,
   "history": [
+    {
+      "feature": "smart-quote-e2e-debt",
+      "phase": "archived",
+      "timestamp": "2026-05-02",
+      "action": "Archived to docs/archive/2026-05/smart-quote-e2e-debt/ (100%) — 4 PDCA 문서(Plan/Design/Analysis/Report) 이동. PR #8 머지 완료(4d5f691 on main). 4 spec files / ~28 insert / ~12 delete, 메인 SPA 0 변경. 학습 메모리 4건 저장(failOnStatusCode 한계 / check→e2e 가림 패턴 / smartQuoteLanguage / Header role=banner).",
+      "matchRate": 100
+    },
     {
       "feature": "smart-quote-e2e-debt",
       "phase": "completed",

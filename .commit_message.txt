@@ -1,1 +1,1 @@
-📋 docs(report): smart-quote-e2e-debt PDCA Completion — Match Rate 100%, 4 학습 + 3 후속 사이클 후보
+📦 chore(archive): smart-quote-e2e-debt PDCA 4문서 → docs/archive/2026-05/ (Match Rate 100%)
