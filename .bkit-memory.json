@@ -1,9 +1,16 @@
 {
   "activeFeature": "smart-quote-e2e-debt",
-  "phase": "plan",
+  "phase": "design",
   "matchRate": 0,
   "iteration": 0,
   "history": [
+    {
+      "feature": "smart-quote-e2e-debt",
+      "phase": "design",
+      "timestamp": "2026-05-02",
+      "action": "Design 문서 생성 — Inventory 정밀 진단(LoginPage 두 form 라벨 중복 확정, LandingPage WCA/MPL/EAN/JCtrans 마크업 0건 확정, magic-link-auth 두 번째 테스트는 i18n/role mismatch 가설). Fix Matrix 11항목(8건 PASS 추정 / 4 spec files ~16 line 수정). Selector 전략 표준 채택(id/role 우선). 4-Step 실행 계획(A selector-only, B magic-link 분기, C ECONNREFUSED 조건부 mock, D 로컬 + push). 메인 SPA 코드 변경 0. 다음: /pdca do 진입, feature 브랜치 생성 후 Step A 부터.",
+      "matchRate": 0
+    },
     {
       "feature": "smart-quote-e2e-debt",
       "phase": "plan",

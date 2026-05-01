@@ -1,1 +1,1 @@
-📋 docs: smart-quote-e2e-debt PDCA Plan — PR #7에서 노출된 pre-existing e2e fail 9건 정리 사이클
+📋 docs: smart-quote-e2e-debt PDCA Design — Fix Matrix 11항목 + Selector 전략 표준
