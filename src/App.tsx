@@ -1,6 +1,5 @@
 import React, { Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { LandingPage } from './pages/LandingPage';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { AuthProvider } from './contexts/AuthContext';
@@ -9,6 +8,9 @@ import { ThemeProvider } from './contexts/ThemeContext';
 import { ToastProvider } from './components/ui/Toast';
 import { Intercom } from './components/Intercom';
 
+const LandingPage = React.lazy(() =>
+  import('./pages/LandingPage').then((m) => ({ default: m.LandingPage })),
+);
 const QuoteCalculator = React.lazy(() => import('./pages/QuoteCalculator'));
 const CustomerDashboard = React.lazy(() => import('./pages/CustomerDashboard'));
 const LoginPage = React.lazy(() => import('./pages/LoginPage'));

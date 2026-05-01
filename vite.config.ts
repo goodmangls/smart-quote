@@ -111,11 +111,13 @@ export default defineConfig({
     cssCodeSplit: true,
     rollupOptions: {
       output: {
-        manualChunks: {
-          'vendor-react': ['react', 'react-dom'],
-          'vendor-router': ['react-router-dom'],
-          'vendor-pdf': ['jspdf'],
-          'vendor-icons': ['lucide-react'],
+        manualChunks(id) {
+          if (!id.includes('node_modules')) return;
+          if (id.includes('react-router')) return 'vendor-router';
+          if (id.includes('react-dom') || id.includes('node_modules/react/')) return 'vendor-react';
+          if (id.includes('jspdf')) return 'vendor-pdf';
+          if (id.includes('lucide-react')) return 'vendor-icons';
+          if (id.includes('@sentry')) return 'vendor-sentry';
         },
       },
     },
