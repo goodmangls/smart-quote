@@ -1,1 +1,1 @@
-🐛 fix(e2e): 라벨 중복·outdated 셀렉터·i18n 텍스트 정리 — 10/10 PASS
+🐛 fix(e2e): magic-link-auth try-catch — ECONNREFUSED 도 skip 으로 처리 (CI fix)

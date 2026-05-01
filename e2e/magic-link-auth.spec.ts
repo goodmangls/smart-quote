@@ -11,26 +11,38 @@ test.describe('magic link auth', () => {
   test.beforeAll(async ({ request }) => {
     // Best effort: ensure the test user exists. Ignore failures so the suite
     // can still skip cleanly when the backend isn't running.
-    await request.post(`${API_URL}/api/v1/auth/register`, {
-      data: {
-        email: TEST_EMAIL,
-        password: 'password123',
-        password_confirmation: 'password123',
-        name: 'E2E Magic',
-        company: 'Test Co',
-        nationality: 'KR',
-      },
-      failOnStatusCode: false,
-    });
+    // `failOnStatusCode: false` only suppresses 4xx/5xx — connect-level errors
+    // (ECONNREFUSED) still throw, so wrap in try/catch.
+    try {
+      await request.post(`${API_URL}/api/v1/auth/register`, {
+        data: {
+          email: TEST_EMAIL,
+          password: 'password123',
+          password_confirmation: 'password123',
+          name: 'E2E Magic',
+          company: 'Test Co',
+          nationality: 'KR',
+        },
+        failOnStatusCode: false,
+      });
+    } catch {
+      // Backend unreachable — proceed; per-test skip handles the actual case.
+    }
   });
 
   test('request → verify → redirect to dashboard', async ({ page, request }) => {
-    // 1. Request a magic link
-    const reqRes = await request.post(`${API_URL}/api/v1/auth/magic_link`, {
-      data: { email: TEST_EMAIL },
-      failOnStatusCode: false,
-    });
-    test.skip(!reqRes.ok(), 'Rails API not reachable in this environment');
+    // 1. Request a magic link. Catch connect-level errors so the test can skip
+    // cleanly when the Rails API isn't reachable (e.g. CI with no backend).
+    let reqRes: Awaited<ReturnType<typeof request.post>> | null = null;
+    try {
+      reqRes = await request.post(`${API_URL}/api/v1/auth/magic_link`, {
+        data: { email: TEST_EMAIL },
+        failOnStatusCode: false,
+      });
+    } catch {
+      // network error — leave reqRes null, skip below.
+    }
+    test.skip(!reqRes || !reqRes.ok(), 'Rails API not reachable in this environment');
 
     // 2. Peek the last issued raw token via the test-only endpoint
     const peek = await request.get(`${API_URL}/api/v1/auth/magic_link/peek`);
