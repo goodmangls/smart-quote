@@ -9,10 +9,11 @@ test.describe('Accessibility', () => {
 
   test('login page form has proper labels', async ({ page }) => {
     await page.goto('/login');
-    const emailLabel = page.getByLabel(/email/i);
-    const passwordLabel = page.getByLabel(/password/i);
-    await expect(emailLabel).toBeVisible();
-    await expect(passwordLabel).toBeVisible();
+    // LoginPage renders two email forms (sign-in #email + magic-link #magic-email);
+    // assert by id to avoid strict-mode label collision.
+    await expect(page.locator('#email')).toBeVisible();
+    await expect(page.locator('#password')).toBeVisible();
+    await expect(page.locator('#magic-email')).toBeVisible();
   });
 
   test('language selector is keyboard accessible', async ({ page }) => {

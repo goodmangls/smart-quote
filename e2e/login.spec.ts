@@ -3,15 +3,15 @@ import { test, expect } from '@playwright/test';
 test.describe('Login Page', () => {
   test('displays login form', async ({ page }) => {
     await page.goto('/login');
-    await expect(page.getByLabel(/email/i)).toBeVisible();
-    await expect(page.getByLabel(/password/i)).toBeVisible();
+    await expect(page.locator('#email')).toBeVisible();
+    await expect(page.locator('#password')).toBeVisible();
   });
 
   test('shows error on empty submit', async ({ page }) => {
     await page.goto('/login');
     await page.getByRole('button', { name: /sign in/i }).click();
-    // Form validation prevents submission with required fields empty
-    const emailInput = page.getByLabel(/email/i);
+    // required HTML attribute blocks submission client-side; assert directly.
+    const emailInput = page.locator('#email');
     await expect(emailInput).toHaveAttribute('required', '');
   });
 

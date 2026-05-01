@@ -47,8 +47,22 @@ test.describe('magic link auth', () => {
   });
 
   test('invalid token shows error and Back to Login button', async ({ page }) => {
+    // Force English locale so i18n strings match the assertion regexes.
+    // LanguageContext persists under localStorage key 'smartQuoteLanguage'.
+    await page.addInitScript(() => {
+      try {
+        window.localStorage.setItem('smartQuoteLanguage', 'en');
+      } catch {
+        // localStorage unavailable in some environments — best effort only.
+      }
+    });
     await page.goto('/auth/verify?token=bogus-token-value');
-    await expect(page.getByText(/invalid|expired/i)).toBeVisible();
+    // Error states shown can be 'Invalid', 'Expired', 'Not Found', or 'Login Failed'
+    // depending on backend availability; assert that *some* error surfaced and the
+    // recovery action exists.
+    await expect(
+      page.getByText(/invalid|expired|not found|login failed/i).first(),
+    ).toBeVisible();
     await expect(page.getByRole('button', { name: /back to login/i })).toBeVisible();
   });
 });
