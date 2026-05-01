@@ -1,9 +1,16 @@
 {
   "activeFeature": "insights-deploy",
-  "phase": "plan",
+  "phase": "design",
   "matchRate": 0,
   "iteration": 0,
   "history": [
+    {
+      "feature": "insights-deploy",
+      "phase": "design",
+      "timestamp": "2026-05-02",
+      "action": "Design 문서 생성 — Open Questions 5/5 default 채택(rewrite/app_metadata.role/신규 Vercel 프로젝트/빈 골격/메인 SPA login redirect). 13-Step 구현 순서 + 7개 신규 파일 + vercel.json rewrites 3줄 변경. middleware.ts/supabase-server.ts 코드 명세 포함. 자동/수동/보안 검증 기준. Open Items 2건(preview redirect 분기, role 데이터 채우기는 운영). 비범위 명확(콘텐츠/MDX/OG/Admin 세부 기능 별 사이클). 다음: /pdca do insights-deploy.",
+      "matchRate": 0
+    },
     {
       "feature": "insights-deploy",
       "phase": "plan",

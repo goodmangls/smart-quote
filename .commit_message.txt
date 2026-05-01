@@ -1,1 +1,1 @@
-📋 docs: insights-deploy PDCA Plan — apps/insights production 노출 + /insights/admin Admin 게이트
+📋 docs: insights-deploy PDCA Design — Open Questions 5/5 default + 13-Step 구현 명세
