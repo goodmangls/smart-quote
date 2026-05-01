@@ -1,0 +1,394 @@
+# Instincts generated from https://github.com/jlinsights/smart-quote
+# Generated: 2026-05-01T01:23:53.443Z
+# Version: 2.0
+# NOTE: This file supplements (does not replace) any existing curated instincts.
+# High-confidence manually curated instincts should be preserved alongside these.
+
+---
+id: smart-quote-commit-length
+trigger: "when writing a commit message"
+confidence: 0.6
+domain: git
+source: repo-analysis
+source_repo: https://github.com/jlinsights/smart-quote
+---
+
+# Smart Quote Commit Length
+
+## Action
+
+Write detailed commit messages (~124 characters for first line)
+
+## Evidence
+
+- Average commit message length: 124 chars
+- Based on 2 commits
+
+---
+id: smart-quote-naming-files
+trigger: "when creating a new file"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: https://github.com/jlinsights/smart-quote
+---
+
+# Smart Quote Naming Files
+
+## Action
+
+Use camelCase naming convention
+
+## Evidence
+
+- Analyzed file naming patterns in repository
+- Dominant pattern: camelCase
+
+---
+id: smart-quote-import-alias
+trigger: "when importing modules"
+confidence: 0.85
+domain: code-style
+source: repo-analysis
+source_repo: https://github.com/jlinsights/smart-quote
+---
+
+# Smart Quote Import Alias
+
+## Action
+
+Use path aliases (@/, ~/) instead of relative imports
+
+## Evidence
+
+- Import analysis shows alias pattern
+- Example: import { x } from '@/lib/x'
+
+---
+id: smart-quote-export-style
+trigger: "when exporting from a module"
+confidence: 0.7
+domain: code-style
+source: repo-analysis
+source_repo: https://github.com/jlinsights/smart-quote
+---
+
+# Smart Quote Export Style
+
+## Action
+
+Prefer mixed exports
+
+## Evidence
+
+- Export pattern analysis
+- Dominant style: mixed
+
+---
+id: smart-quote-arch-feature-based
+trigger: "when adding a new feature"
+confidence: 0.85
+domain: architecture
+source: repo-analysis
+source_repo: https://github.com/jlinsights/smart-quote
+---
+
+# Smart Quote Arch Feature Based
+
+## Action
+
+Create a new folder in src/features/ with all related code colocated
+
+## Evidence
+
+- Feature-based module organization detected
+- Structure: src/features/[feature-name]/
+
+---
+id: smart-quote-test-colocate
+trigger: "when writing tests"
+confidence: 0.85
+domain: testing
+source: repo-analysis
+source_repo: https://github.com/jlinsights/smart-quote
+---
+
+# Smart Quote Test Colocate
+
+## Action
+
+Place test file next to the source file (e.g., Button.test.tsx next to Button.tsx)
+
+## Evidence
+
+- Colocated test pattern detected
+- Tests live alongside source files
+
+---
+id: smart-quote-instinct-file-naming
+trigger: "When creating a new file"
+confidence: 0.9
+domain: code-style
+source: repo-analysis
+source_repo: jlinsights/smart-quote
+---
+
+# Smart Quote Instinct File Naming
+
+## Action
+
+Name the file using camelCase
+
+## Evidence
+
+- Pattern in namingConventions.files
+
+---
+id: smart-quote-instinct-function-naming
+trigger: "When defining a new function"
+confidence: 0.9
+domain: code-style
+source: repo-analysis
+source_repo: jlinsights/smart-quote
+---
+
+# Smart Quote Instinct Function Naming
+
+## Action
+
+Name the function using camelCase
+
+## Evidence
+
+- Pattern in namingConventions.functions
+
+---
+id: smart-quote-instinct-class-naming
+trigger: "When creating a new class"
+confidence: 0.9
+domain: code-style
+source: repo-analysis
+source_repo: jlinsights/smart-quote
+---
+
+# Smart Quote Instinct Class Naming
+
+## Action
+
+Name the class using PascalCase
+
+## Evidence
+
+- Pattern in namingConventions.classes
+
+---
+id: smart-quote-instinct-constant-naming
+trigger: "When declaring a constant"
+confidence: 0.9
+domain: code-style
+source: repo-analysis
+source_repo: jlinsights/smart-quote
+---
+
+# Smart Quote Instinct Constant Naming
+
+## Action
+
+Name the constant using SCREAMING_SNAKE_CASE
+
+## Evidence
+
+- Pattern in namingConventions.constants
+
+---
+id: smart-quote-instinct-import-alias
+trigger: "When importing modules"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: jlinsights/smart-quote
+---
+
+# Smart Quote Instinct Import Alias
+
+## Action
+
+Use alias import style
+
+## Evidence
+
+- Pattern in importStyle
+
+---
+id: smart-quote-instinct-export-mixed
+trigger: "When exporting modules or functions"
+confidence: 0.7
+domain: code-style
+source: repo-analysis
+source_repo: jlinsights/smart-quote
+---
+
+# Smart Quote Instinct Export Mixed
+
+## Action
+
+Use mixed export style (both default and named exports as appropriate)
+
+## Evidence
+
+- Pattern in exportStyle
+
+---
+id: smart-quote-instinct-test-colocation
+trigger: "When adding tests for a module"
+confidence: 0.9
+domain: testing
+source: repo-analysis
+source_repo: jlinsights/smart-quote
+---
+
+# Smart Quote Instinct Test Colocation
+
+## Action
+
+Place test files next to the code they test (colocated)
+
+## Evidence
+
+- Pattern in architecture.folderStructure.testLocation
+
+---
+id: smart-quote-instinct-feature-test-structure
+trigger: "When writing tests for a feature"
+confidence: 0.8
+domain: testing
+source: repo-analysis
+source_repo: jlinsights/smart-quote
+---
+
+# Smart Quote Instinct Feature Test Structure
+
+## Action
+
+Organize test files within the corresponding feature folder
+
+## Evidence
+
+- Pattern in architecture.srcLayout
+- Pattern in architecture.moduleOrganization
+
+---
+id: smart-quote-instinct-commit-freeform
+trigger: "When writing a commit message"
+confidence: 0.8
+domain: git
+source: repo-analysis
+source_repo: jlinsights/smart-quote
+---
+
+# Smart Quote Instinct Commit Freeform
+
+## Action
+
+Use a freeform commit message without a required prefix
+
+## Evidence
+
+- Pattern in commits.type
+- Pattern in commits.prefixes
+
+---
+id: smart-quote-instinct-commit-length
+trigger: "When writing a commit message"
+confidence: 0.7
+domain: git
+source: repo-analysis
+source_repo: jlinsights/smart-quote
+---
+
+# Smart Quote Instinct Commit Length
+
+## Action
+
+Keep commit messages concise, around 124 characters on average
+
+## Evidence
+
+- Pattern in commits.averageLength
+
+---
+id: smart-quote-instinct-try-catch-errors
+trigger: "When handling errors in code"
+confidence: 0.9
+domain: code-style
+source: repo-analysis
+source_repo: jlinsights/smart-quote
+---
+
+# Smart Quote Instinct Try Catch Errors
+
+## Action
+
+Use try-catch blocks for error handling
+
+## Evidence
+
+- Pattern in errorHandling.style
+
+---
+id: smart-quote-instinct-no-custom-errors
+trigger: "When handling errors"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: jlinsights/smart-quote
+---
+
+# Smart Quote Instinct No Custom Errors
+
+## Action
+
+Do not create custom error classes
+
+## Evidence
+
+- Pattern in errorHandling.customErrorClasses
+
+---
+id: smart-quote-instinct-no-error-boundaries
+trigger: "When handling errors in React components"
+confidence: 0.7
+domain: code-style
+source: repo-analysis
+source_repo: jlinsights/smart-quote
+---
+
+# Smart Quote Instinct No Error Boundaries
+
+## Action
+
+Do not use error boundaries
+
+## Evidence
+
+- Pattern in errorHandling.errorBoundaries
+
+---
+id: smart-quote-instinct-no-global-error-handler
+trigger: "When considering a global error handler"
+confidence: 0.7
+domain: code-style
+source: repo-analysis
+source_repo: jlinsights/smart-quote
+---
+
+# Smart Quote Instinct No Global Error Handler
+
+## Action
+
+Do not implement a global error handler
+
+## Evidence
+
+- Pattern in errorHandling.globalHandler
+
