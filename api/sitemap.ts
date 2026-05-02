@@ -76,7 +76,7 @@ export default async function handler(_req: VercelRequest, res: VercelResponse) 
     res.setHeader('Cache-Control', 'public, max-age=3600, s-maxage=3600, must-revalidate');
     res.setHeader('X-Robots-Tag', 'noindex'); // sitemap itself shouldn't be indexed
     return res.status(200).send(xml);
-  } catch (err) {
+  } catch {
     // Fail soft — minimum valid sitemap rather than 500
     const fallback = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
