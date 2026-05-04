@@ -1,1 +1,1 @@
-⛽ chore(fsc): 2026-05-04 FSC 업데이트 — UPS 45.50→47.25%, DHL 48.00→47.00% (frontend+backend 동시)
+🔧 chore(render): healthCheckPath /up 추가 — monorepo mode 마이그레이션 사전 보강 (zero-downtime deploy)
