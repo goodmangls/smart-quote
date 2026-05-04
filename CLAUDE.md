@@ -330,9 +330,8 @@ POST   /api/v1/notifications/slack   # Slack webhook proxy
 ## Deployment
 
 - **Frontend**: Vercel (production: `bridgelogis.com` / `smart-quote-main.vercel.app`) — auto-deploy on push to `origin/main`
-- **Backend**: Render.com (Docker, Singapore region, PostgreSQL) — deploys from separate `smart-quote-api.git` repo
-- **Config**: `render.yaml` for backend infrastructure
-- **Backend push**: `git subtree push --prefix=smart-quote-api api-deploy main` (required for backend changes)
+- **Backend**: Render.com (Singapore region, PostgreSQL) — auto-redeploys from `origin/main` when `smart-quote-api/` changes (monorepo mode via `render.yaml` `dockerContext: smart-quote-api`, migrated 2026-05-04)
+- **Config**: `render.yaml` (repo root) for backend infrastructure; `healthCheckPath: /up` for zero-downtime deploys
 - **Seed**: After backend deploy, run `rails runner db/seeds/addon_rates.rb` in Render Shell for new add-on rates
 
 ## Design System (DESIGN.md)

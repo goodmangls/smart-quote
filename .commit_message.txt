@@ -1,1 +1,1 @@
-🔧 chore(render): healthCheckPath /up 추가 — monorepo mode 마이그레이션 사전 보강 (zero-downtime deploy)
+📝 docs(claude): backend deploy 섹션을 monorepo mode로 업데이트 — Render source repo 마이그레이션 완료(2026-05-04), subtree push 폐기, healthCheckPath 명시
