@@ -154,21 +154,9 @@ jobs:
 
       - name: Generate PR-side sitemap
         run: |
-          # Run api/sitemap.ts in a Vercel-compatible Node env
-          # (For local CI, simulate via direct invocation)
-          npm install --no-save @vercel/node
-          node <<'JS' > /tmp/sitemap-pr.xml
-          const handler = require('./api/sitemap.ts').default ||
-                          require('./api/sitemap').default;
-          const req = { headers: {} };
-          const res = {
-            _data: '',
-            setHeader() { return this; },
-            status() { return this; },
-            send(d) { this._data = d; return this; },
-          };
-          handler(req, res).then(() => process.stdout.write(res._data));
-          JS
+          # Render via tsx so the .ts handler loads natively (Node cannot require '.ts').
+          npm install --no-save tsx @vercel/node
+          npx tsx scripts/render-sitemap.mts ./api/sitemap.ts > /tmp/sitemap-pr.xml
           # Extract URLs
           grep -oP '(?<=<loc>)[^<]+' /tmp/sitemap-pr.xml | sort -u > /tmp/urls-pr.txt
           echo "PR-side URLs: $(wc -l < /tmp/urls-pr.txt)"
@@ -178,19 +166,12 @@ jobs:
         run: |
           git fetch origin main
           git stash
-          git checkout origin/main -- api/sitemap.ts || echo "(no main version)"
-          if [ -f api/sitemap.ts ]; then
-            node <<'JS' > /tmp/sitemap-main.xml || true
-            try {
-              const handler = require('./api/sitemap.ts').default ||
-                              require('./api/sitemap').default;
-              const res = { _data: '', setHeader(){return this}, status(){return this}, send(d){this._data=d;return this} };
-              handler({headers:{}}, res).then(() => process.stdout.write(res._data));
-            } catch (e) {
-              console.error('main has no sitemap.ts');
-              process.exit(0);
-            }
-            JS
+          # Pull the main-branch version into a separate path so the PR-side
+          # render script (which expects ./api/sitemap.ts) is not clobbered.
+          mkdir -p /tmp/main-api
+          git show origin/main:api/sitemap.ts > /tmp/main-api/sitemap.ts 2>/dev/null || echo "(no main version)"
+          if [ -s /tmp/main-api/sitemap.ts ]; then
+            npx tsx scripts/render-sitemap.mts /tmp/main-api/sitemap.ts > /tmp/sitemap-main.xml || true
             grep -oP '(?<=<loc>)[^<]+' /tmp/sitemap-main.xml | sort -u > /tmp/urls-main.txt 2>/dev/null || touch /tmp/urls-main.txt
           else
             touch /tmp/urls-main.txt

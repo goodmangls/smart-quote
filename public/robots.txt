@@ -30,15 +30,10 @@ Crawl-delay: 5
 User-agent: MJ12bot
 Crawl-delay: 10
 
-# Allow Googlebot, Bingbot, Naver Yeti, Daum default
-User-agent: Googlebot
-Allow: /
-
-User-agent: Yeti
-Allow: /
-
-User-agent: Daum
-Allow: /
+# Note: Googlebot/Yeti/Daum follow the User-agent: * rules above.
+# Bot-specific groups were removed to prevent accidental override of the
+# global Disallow rules (a bot-specific group with only `Allow: /` would
+# otherwise let those crawlers reach /admin, /api, etc.).
 
 # Sitemaps
 Sitemap: https://bridgelogis.com/sitemap.xml

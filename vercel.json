@@ -73,10 +73,6 @@
       "destination": "/api/sitemap"
     },
     {
-      "source": "/sitemap-:slug.xml",
-      "destination": "/api/sitemap?slug=:slug"
-    },
-    {
       "source": "/((?!api/|assets/|robots\\.txt|sitemap.*\\.xml|favicon|icon|manifest|sw\\.js|goodman-gls.*|naver.*\\.html|data/).*)",
       "destination": "/index.html"
     }

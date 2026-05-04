@@ -1,1 +1,1 @@
-🔧 ci(seo): Phase 1.5 SEO Checks 워크플로 추가 — robots/sitemap/JSON-LD/Lighthouse SEO 게이트 (≥0.90)
+🐛 fix(seo): PR #3 CodeRabbit 리뷰 5건 해소 — workflow tsx 런너(render-sitemap.mts), seo-audit unused import 정리, robots.txt 봇 그룹 제거(글로벌 Disallow 우회 방지), vercel.json slug rewrite 제거
