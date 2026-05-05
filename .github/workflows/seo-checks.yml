@@ -237,6 +237,10 @@ jobs:
             echo "Preview URL: $URL"
           fi
 
+      - name: Install xmllint (libxml2-utils)
+        if: steps.url.outputs.skip != 'true'
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq libxml2-utils
+
       - name: SEO infra smoke test
         if: steps.url.outputs.skip != 'true'
         run: |

@@ -1,1 +1,1 @@
-🔀 merge: origin/main → feature/phase15-seo-infra (Margin 공식 정정 + 추가 docs 동기화)
+🐛 fix(ci): seo-checks 워크플로에 libxml2-utils(xmllint) 설치 단계 추가 — ubuntu-latest 기본 미포함으로 sitemap.xml validation step `command not found` fail
