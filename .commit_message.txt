@@ -1,1 +1,1 @@
-🔧 fix(ci): preview SEO 어설션 error→warn — Vercel preview 자동 X-Robots-Tag:noindex 로 SEO 0.90 달성 불가. preview는 정보성 게이트로 운영, production SEO 검증은 별도 워크플로 필요
+📋 docs(report): phase-1.5-seo-infra PDCA 완료 보고서 — 본 세션 차단 9건 해소 + PR #3 머지(b1bfd40), Vercel Pro 업그레이드 + preview SEO warn 트레이드오프 명시
