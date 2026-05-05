@@ -1,0 +1,39 @@
+# bridgelogis.com — robots.txt
+# Last updated: 2026-05-01
+# Powered by: Goodman GLS
+
+User-agent: *
+Allow: /
+
+# Block authenticated / non-public areas
+Disallow: /admin
+Disallow: /admin/
+Disallow: /dashboard
+Disallow: /dashboard/
+Disallow: /schedule
+Disallow: /schedule/
+Disallow: /api/
+Disallow: /login
+Disallow: /signup
+
+# Block search-result-style URLs (avoid duplicate-content issues)
+Disallow: /*?q=*
+Disallow: /*?search=*
+
+# Crawl delay for aggressive 3rd-party crawlers
+User-agent: AhrefsBot
+Crawl-delay: 5
+
+User-agent: SemrushBot
+Crawl-delay: 5
+
+User-agent: MJ12bot
+Crawl-delay: 10
+
+# Note: Googlebot/Yeti/Daum follow the User-agent: * rules above.
+# Bot-specific groups were removed to prevent accidental override of the
+# global Disallow rules (a bot-specific group with only `Allow: /` would
+# otherwise let those crawlers reach /admin, /api, etc.).
+
+# Sitemaps
+Sitemap: https://bridgelogis.com/sitemap.xml

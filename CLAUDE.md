@@ -188,7 +188,7 @@ Frontend (`src/features/quote/services/calculationService.ts`) and backend (`sma
 
 1. **Item Costs** - Packing dimensions (+10/+10/+15cm), volumetric weight (L*W*H / 5000), packing material/labor, manual surge charges (all carriers)
 2. **Carrier Costs** - Zone lookup (country -> zone code), shared `lookupCarrierRate()` engine (exact table 0.5-20kg -> range table >20kg -> fallback), FSC% surcharge
-3. **Margin** - Dynamic margin via `MarginRuleResolver` (priority-based: P100 per-user flat > P90 per-user weight > P50 nationality > P0 default), `revenue = cost / (1 - margin%)`, rounded up to nearest KRW 100. Admin can manually override at any time.
+3. **Margin** - Dynamic margin via `MarginRuleResolver` (priority-based: P100 per-user flat > P90 per-user weight > P50 nationality > P0 default), **Markup 방식**: `revenue = cost × (1 + margin%)`, rounded up to nearest KRW 100. Admin can manually override at any time. ⚠ 매출 대비 실효 마진율은 명목값보다 낮음 (예: 24% Markup → 실효 마진율 19.35% = margin / revenue).
 4. **Warnings** - Low margin (<10%), high volumetric weight, surge charges, collect terms (EXW/FOB)
 
 ### UPS Zone Mapping (Z1-Z10) — per UPS 2026 Service Guide
@@ -330,9 +330,8 @@ POST   /api/v1/notifications/slack   # Slack webhook proxy
 ## Deployment
 
 - **Frontend**: Vercel (production: `bridgelogis.com` / `smart-quote-main.vercel.app`) — auto-deploy on push to `origin/main`
-- **Backend**: Render.com (Docker, Singapore region, PostgreSQL) — deploys from separate `smart-quote-api.git` repo
-- **Config**: `render.yaml` for backend infrastructure
-- **Backend push**: `git subtree push --prefix=smart-quote-api api-deploy main` (required for backend changes)
+- **Backend**: Render.com (Singapore region, PostgreSQL) — auto-redeploys from `origin/main` when `smart-quote-api/` changes (monorepo mode via `render.yaml` `dockerContext: smart-quote-api`, migrated 2026-05-04)
+- **Config**: `render.yaml` (repo root) for backend infrastructure; `healthCheckPath: /up` for zero-downtime deploys
 - **Seed**: After backend deploy, run `rails runner db/seeds/addon_rates.rb` in Render Shell for new add-on rates
 
 ## Design System (DESIGN.md)

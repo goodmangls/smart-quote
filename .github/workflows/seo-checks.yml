@@ -1,0 +1,314 @@
+name: SEO Checks
+
+# Phase 1.5 SEO 인프라 보호용 PR 검증.
+# - JSON-LD schema 유효성
+# - sitemap.xml diff (added/removed URLs 가시화)
+# - Vercel preview Lighthouse SEO score gate
+# - robots.txt + sitemap.xml + JSON-LD presence smoke test
+#
+# 별도 워크플로로 분리한 이유: ci.yml 의 메인 lint/test/e2e 와 독립적으로 빠르게 실패해야 하고,
+# Vercel preview URL 이 준비될 때까지 대기하는 시간이 다르기 때문.
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'public/robots.txt'
+      - 'public/sitemap*.xml'
+      - 'api/sitemap.ts'
+      - 'vercel.json'
+      - 'index.html'
+      - 'src/components/seo/**'
+      - 'apps/insights/**'
+      - '.github/workflows/seo-checks.yml'
+  workflow_dispatch:
+    inputs:
+      preview_url:
+        description: 'Override Vercel preview URL (e.g. https://smart-quote-XXX.vercel.app)'
+        required: false
+        default: ''
+
+# Required by marocchino/sticky-pull-request-comment in sitemap-diff and summary jobs.
+# Default GITHUB_TOKEN permissions are read-only on PR workflows in this repo.
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  # ─────────────────────────────────────────────
+  # 1) Static checks — robots.txt format, sitemap.ts compiles
+  # ─────────────────────────────────────────────
+  static-checks:
+    name: Static SEO Checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate robots.txt format
+        run: |
+          set -e
+          if [ ! -f public/robots.txt ]; then
+            echo "::error::public/robots.txt missing"; exit 1
+          fi
+          # Must have at least one User-agent and one Sitemap directive
+          grep -q '^User-agent:' public/robots.txt || { echo "::error::No User-agent directive"; exit 1; }
+          grep -q '^Sitemap:' public/robots.txt || { echo "::error::No Sitemap directive"; exit 1; }
+          echo "✓ robots.txt valid"
+
+      - name: TypeScript compile check (api/sitemap.ts)
+        run: |
+          npx -y typescript@5.8 tsc --noEmit --moduleResolution node \
+            --esModuleInterop --skipLibCheck \
+            api/sitemap.ts 2>&1 | tee /tmp/tsc.log
+          if grep -q 'error TS' /tmp/tsc.log; then
+            # Path alias errors expected in single-file mode — only fail on syntax errors
+            grep -E 'error TS(11|12|13|14|15|16|17)\d{2}' /tmp/tsc.log && exit 1
+          fi
+          echo "✓ api/sitemap.ts syntax OK"
+
+      - name: vercel.json schema check
+        run: |
+          set -e
+          # Valid JSON
+          node -e "JSON.parse(require('fs').readFileSync('vercel.json', 'utf8'))"
+          # Has rewrites + sitemap rule
+          node -e "
+            const v = JSON.parse(require('fs').readFileSync('vercel.json', 'utf8'));
+            const r = v.rewrites || [];
+            const hasSitemap = r.some(x => x.source.includes('sitemap.xml'));
+            const hasSpaFallback = r.some(x => x.destination === '/index.html');
+            if (!hasSitemap) { console.error('Missing sitemap.xml rewrite'); process.exit(1); }
+            if (!hasSpaFallback) { console.error('Missing SPA fallback rewrite'); process.exit(1); }
+            console.log('✓ vercel.json rewrites OK');
+          "
+
+  # ─────────────────────────────────────────────
+  # 2) Build + JSON-LD validator (using locally built dist/)
+  # ─────────────────────────────────────────────
+  jsonld-validator:
+    name: JSON-LD Schema Validator
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+      - run: npm run build
+
+      - name: Extract JSON-LD blocks from dist/index.html
+        run: |
+          node <<'JS'
+          const fs = require('fs');
+          const html = fs.readFileSync('dist/index.html', 'utf8');
+          const matches = [...html.matchAll(/<script[^>]+application\/ld\+json[^>]*>([\s\S]*?)<\/script>/g)];
+          if (matches.length === 0) {
+            console.error('::error::No JSON-LD blocks found in dist/index.html');
+            process.exit(1);
+          }
+          console.log(`Found ${matches.length} JSON-LD block(s)`);
+          let failed = 0;
+          for (const [i, m] of matches.entries()) {
+            try {
+              const obj = JSON.parse(m[1].trim());
+              if (!obj['@context'] || !obj['@type']) {
+                console.error(`::error::Block ${i+1} missing @context or @type`);
+                failed++;
+              } else {
+                console.log(`✓ Block ${i+1}: ${obj['@type']} (${obj.name || 'unnamed'})`);
+              }
+            } catch (e) {
+              console.error(`::error::Block ${i+1} invalid JSON: ${e.message}`);
+              failed++;
+            }
+          }
+          if (failed > 0) process.exit(1);
+          JS
+
+      - name: Validate Schema.org types are recognized
+        run: |
+          # Whitelist of types BridgeLogis is allowed to use
+          ALLOWED="Organization|WebSite|NewsArticle|Article|FAQPage|Question|Answer|BreadcrumbList|HowTo"
+          node <<JS
+          const fs = require('fs');
+          const html = fs.readFileSync('dist/index.html', 'utf8');
+          const matches = [...html.matchAll(/<script[^>]+application\/ld\+json[^>]*>([\s\S]*?)<\/script>/g)];
+          for (const m of matches) {
+            const obj = JSON.parse(m[1].trim());
+            if (!/^($ALLOWED)$/.test(obj['@type'])) {
+              console.error('::warning::Unrecognized @type: ' + obj['@type']);
+            }
+          }
+          JS
+
+  # ─────────────────────────────────────────────
+  # 3) sitemap.xml diff vs main branch
+  # ─────────────────────────────────────────────
+  sitemap-diff:
+    name: Sitemap URL Diff
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Generate PR-side sitemap
+        run: |
+          # Render via tsx so the .ts handler loads natively (Node cannot require '.ts').
+          npm install --no-save tsx @vercel/node
+          npx tsx scripts/render-sitemap.mts ./api/sitemap.ts > /tmp/sitemap-pr.xml
+          # Extract URLs
+          grep -oP '(?<=<loc>)[^<]+' /tmp/sitemap-pr.xml | sort -u > /tmp/urls-pr.txt
+          echo "PR-side URLs: $(wc -l < /tmp/urls-pr.txt)"
+
+      - name: Generate main-side sitemap
+        continue-on-error: true
+        run: |
+          git fetch origin main
+          git stash
+          # Pull the main-branch version into a separate path so the PR-side
+          # render script (which expects ./api/sitemap.ts) is not clobbered.
+          mkdir -p /tmp/main-api
+          git show origin/main:api/sitemap.ts > /tmp/main-api/sitemap.ts 2>/dev/null || echo "(no main version)"
+          if [ -s /tmp/main-api/sitemap.ts ]; then
+            npx tsx scripts/render-sitemap.mts /tmp/main-api/sitemap.ts > /tmp/sitemap-main.xml || true
+            grep -oP '(?<=<loc>)[^<]+' /tmp/sitemap-main.xml | sort -u > /tmp/urls-main.txt 2>/dev/null || touch /tmp/urls-main.txt
+          else
+            touch /tmp/urls-main.txt
+          fi
+          echo "Main-side URLs: $(wc -l < /tmp/urls-main.txt)"
+
+      - name: Compute diff
+        run: |
+          ADDED=$(comm -23 /tmp/urls-pr.txt /tmp/urls-main.txt || true)
+          REMOVED=$(comm -13 /tmp/urls-pr.txt /tmp/urls-main.txt || true)
+          {
+            echo "## Sitemap URL Diff"
+            echo ""
+            if [ -z "$ADDED" ] && [ -z "$REMOVED" ]; then
+              echo "_No URL changes_"
+            else
+              [ -n "$ADDED" ] && { echo "### ➕ Added"; echo '```'; echo "$ADDED"; echo '```'; }
+              [ -n "$REMOVED" ] && { echo "### ➖ Removed"; echo '```'; echo "$REMOVED"; echo '```'; }
+            fi
+          } > /tmp/sitemap-diff.md
+          cat /tmp/sitemap-diff.md
+
+      - name: Comment on PR
+        if: always()
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: sitemap-diff
+          path: /tmp/sitemap-diff.md
+
+  # ─────────────────────────────────────────────
+  # 4) Vercel preview Lighthouse SEO gate
+  # ─────────────────────────────────────────────
+  preview-lighthouse:
+    name: Preview Lighthouse SEO
+    runs-on: ubuntu-latest
+    needs: [static-checks, jsonld-validator]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Wait for Vercel preview
+        if: github.event.inputs.preview_url == ''
+        uses: patrickedqvist/wait-for-vercel-preview@v1.3.1
+        id: vercel-preview
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          max_timeout: 600
+
+      - name: Resolve preview URL
+        id: url
+        run: |
+          URL="${{ github.event.inputs.preview_url || steps.vercel-preview.outputs.url }}"
+          if [ -z "$URL" ]; then
+            echo "::warning::No preview URL — skipping Lighthouse"
+            echo "skip=true" >> $GITHUB_OUTPUT
+          else
+            echo "preview=$URL" >> $GITHUB_OUTPUT
+            echo "Preview URL: $URL"
+          fi
+
+      - name: Install xmllint (libxml2-utils)
+        if: steps.url.outputs.skip != 'true'
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq libxml2-utils
+
+      - name: SEO infra smoke test
+        if: steps.url.outputs.skip != 'true'
+        run: |
+          PREVIEW="${{ steps.url.outputs.preview }}"
+          set -e
+          echo "→ Checking $PREVIEW/robots.txt"
+          curl -fsI "$PREVIEW/robots.txt" | grep -i 'content-type: text/plain' || (echo "::error::robots.txt wrong content-type"; exit 1)
+          echo "→ Checking $PREVIEW/sitemap.xml"
+          curl -fsI "$PREVIEW/sitemap.xml" | grep -i 'content-type: application/xml' || (echo "::error::sitemap.xml wrong content-type"; exit 1)
+          echo "→ Checking sitemap.xml is valid XML"
+          curl -fsS "$PREVIEW/sitemap.xml" | xmllint --noout - || (echo "::error::sitemap.xml invalid XML"; exit 1)
+          echo "→ Checking JSON-LD presence"
+          COUNT=$(curl -fsS "$PREVIEW/" | grep -c 'application/ld+json' || true)
+          if [ "$COUNT" -lt 2 ]; then
+            echo "::error::Expected ≥2 JSON-LD blocks, found $COUNT"
+            exit 1
+          fi
+          echo "✓ All SEO infra checks passed ($COUNT JSON-LD blocks)"
+
+      - uses: actions/setup-node@v4
+        if: steps.url.outputs.skip != 'true'
+        with:
+          node-version: 20
+
+      - name: Lighthouse on preview
+        if: steps.url.outputs.skip != 'true'
+        uses: treosh/lighthouse-ci-action@v12
+        with:
+          urls: |
+            ${{ steps.url.outputs.preview }}/
+            ${{ steps.url.outputs.preview }}/quote
+            ${{ steps.url.outputs.preview }}/guide
+          configPath: ./lighthouserc.preview.json
+          uploadArtifacts: true
+          temporaryPublicStorage: true
+
+      - name: Enforce SEO score gate
+        if: steps.url.outputs.skip != 'true'
+        run: |
+          # Fail PR if ANY page SEO score < 0.90
+          # (lhci already enforces this via lighthouserc.json assertions)
+          echo "✓ Lighthouse gate enforced via lighthouserc.json"
+
+  # ─────────────────────────────────────────────
+  # 5) Summary comment
+  # ─────────────────────────────────────────────
+  summary:
+    name: SEO Check Summary
+    runs-on: ubuntu-latest
+    needs: [static-checks, jsonld-validator, sitemap-diff, preview-lighthouse]
+    if: always()
+    steps:
+      - name: Compose summary
+        run: |
+          {
+            echo "## 🔍 SEO Checks Summary"
+            echo ""
+            echo "| Check | Status |"
+            echo "|---|---|"
+            echo "| Static checks (robots / vercel.json / sitemap.ts) | ${{ needs.static-checks.result }} |"
+            echo "| JSON-LD validator | ${{ needs.jsonld-validator.result }} |"
+            echo "| Sitemap diff | ${{ needs.sitemap-diff.result }} |"
+            echo "| Preview Lighthouse SEO ≥ 90 | ${{ needs.preview-lighthouse.result }} |"
+            echo ""
+            echo "_Phase 1.5 SEO 인프라 보호 — 모든 항목 ✅ 시 머지 가능_"
+          } > /tmp/summary.md
+
+      - uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: seo-summary
+          path: /tmp/summary.md

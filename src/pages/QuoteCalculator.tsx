@@ -19,6 +19,7 @@ import {
 } from '@/config/rates';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { useResolvedMargin } from '@/features/dashboard/hooks/useResolvedMargin';
+import { useQuoteDeepLink } from '@/features/quote/hooks/useQuoteDeepLink';
 import { CalculatorActionBar } from './components/CalculatorActionBar';
 import { AdminWidgets } from './components/AdminWidgets';
 import { Footer } from '@/components/layout/Footer';
@@ -53,7 +54,14 @@ const QuoteCalculator: React.FC<{ isPublic?: boolean }> = ({ isPublic = false })
   const hideMargin = isPublic || user?.role === 'member';
   const isKorean = user?.nationality === 'KR';
 
-  const [input, setInput] = useState<QuoteInput>(INITIAL_INPUT);
+  // Phase 1.5 — apply /quote?origin=...&dest=...&weight=... deep-link prefill
+  // exactly once on initial mount. UTM params (utm_source/medium/campaign) are
+  // ignored here and read by GTM/GA4 directly for attribution.
+  const deepLink = useQuoteDeepLink();
+  const [input, setInput] = useState<QuoteInput>(() => ({
+    ...INITIAL_INPUT,
+    ...deepLink.partial,
+  }));
   const [lastFscCarrier, setLastFscCarrier] = useState<string | null>(null);
 
   React.useEffect(() => {

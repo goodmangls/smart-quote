@@ -1,12 +1,26 @@
 {
-  "timestamp": "2026-03-05T11:46:39.186Z",
+  "timestamp": "2026-05-04T05:46:37.179Z",
   "reason": "compaction",
   "status": {
     "version": "2.0",
-    "lastUpdated": "2026-02-26T19:30:00.000Z",
+    "lastUpdated": "2026-04-11T13:00:00.000Z",
     "activeFeatures": [],
     "primaryFeature": null,
     "features": {
+      "flight-schedule-effective-window": {
+        "phase": "archived",
+        "planDoc": "docs/archive/2026-04/flight-schedule-effective-window/flight-schedule-effective-window.plan.md",
+        "designDoc": "docs/archive/2026-04/flight-schedule-effective-window/flight-schedule-effective-window.design.md",
+        "analysisDoc": "docs/archive/2026-04/flight-schedule-effective-window/flight-schedule-effective-window.analysis.md",
+        "reportDoc": "docs/archive/2026-04/flight-schedule-effective-window/flight-schedule-effective-window.report.md",
+        "startedAt": "2026-04-11",
+        "completedAt": "2026-04-11",
+        "archivedAt": "2026-04-11",
+        "archivedTo": "docs/archive/2026-04/flight-schedule-effective-window/",
+        "matchRate": 100,
+        "iterations": 0,
+        "note": "Goodman GLS SU LJ001 10-14 APR vs 15-25 APR rollover 해결. FlightSchedule effective window 도입, vitest 1241/1241, 0 iterations."
+      },
       "widget-upgrades": {
         "phase": "archived",
         "planDoc": null,
@@ -59,6 +73,32 @@
         "archivedAt": "2026-02-24",
         "archivedTo": "docs/archive/2026-02/Save-Quote/",
         "matchRate": 92,
+        "iterations": 0
+      },
+      "dynamic-margin-rules": {
+        "phase": "archived",
+        "planDoc": "docs/archive/2026-03/dynamic-margin-rules/dynamic-margin-rules.plan.md",
+        "designDoc": "docs/archive/2026-03/dynamic-margin-rules/dynamic-margin-rules.design.md",
+        "analysisDoc": "docs/archive/2026-03/dynamic-margin-rules/dynamic-margin-rules.analysis.md",
+        "reportDoc": "docs/archive/2026-03/dynamic-margin-rules/dynamic-margin-rules.report.md",
+        "startedAt": "2026-03-08",
+        "completedAt": "2026-03-08",
+        "archivedAt": "2026-03-08",
+        "archivedTo": "docs/archive/2026-03/dynamic-margin-rules/",
+        "matchRate": 98,
+        "iterations": 1
+      },
+      "security-hardening": {
+        "phase": "archived",
+        "planDoc": "docs/archive/2026-03/security-hardening/security-hardening.plan.md",
+        "designDoc": "docs/archive/2026-03/security-hardening/security-hardening.design.md",
+        "analysisDoc": "docs/archive/2026-03/security-hardening/security-hardening.analysis.md",
+        "reportDoc": "docs/archive/2026-03/security-hardening/security-hardening.report.md",
+        "startedAt": "2026-03-08",
+        "completedAt": "2026-03-08",
+        "archivedAt": "2026-03-08",
+        "archivedTo": "docs/archive/2026-03/security-hardening/",
+        "matchRate": 100,
         "iterations": 0
       },
       "global-port-weather": {

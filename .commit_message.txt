@@ -1,1 +1,5 @@
+<<<<<<< HEAD
 🚀 feat(insights): production 배포 + /insights/admin Admin 게이트 — Vercel 신규 프로젝트 등록 필요
+=======
+📦 chore(archive): production-seo-schedule PDCA 4문서 → docs/archive/2026-05/ — Plan/Design/Analysis/Report 완비, _INDEX.md 갱신 (Match Rate 100%, accessibility 0.90 통과 확인 포함)
+>>>>>>> origin/main

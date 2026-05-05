@@ -24,3 +24,4 @@ services:
         value: 'true'
       - key: SECRET_KEY_BASE
         generateValue: true
+    healthCheckPath: /up

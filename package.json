@@ -9,7 +9,10 @@
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "test": "vitest",
-    "test:e2e": "npx playwright test"
+    "test:e2e": "npx playwright test",
+    "seo:audit": "node scripts/seo-audit.mjs",
+    "seo:baseline": "node scripts/seo-audit.mjs --baseline",
+    "seo:compare": "node scripts/seo-audit.mjs --compare"
   },
   "dependencies": {
     "@intercom/messenger-js-sdk": "^0.0.18",

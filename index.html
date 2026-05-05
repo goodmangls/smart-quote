@@ -29,6 +29,35 @@
     <link rel="apple-touch-icon" href="/icon-192.png" />
     <link rel="dns-prefetch" href="https://open.er-api.com" />
     <link rel="dns-prefetch" href="https://api.open-meteo.com" />
+
+    <!-- Sitemap discovery (Phase 1.5 SEO infra) -->
+    <link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap.xml" />
+
+    <!-- JSON-LD Organization schema (Phase 1.5 SEO infra) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "BridgeLogis",
+      "url": "https://bridgelogis.com",
+      "logo": "https://bridgelogis.com/icon-512.png",
+      "description": "BridgeLogis is a SaaS freight quoting platform for forwarding partners, powered by Goodman GLS.",
+      "parentOrganization": { "@type": "Organization", "name": "Goodman GLS" },
+      "sameAs": ["https://www.linkedin.com/company/goodman-gls"]
+    }
+    </script>
+
+    <!-- JSON-LD WebSite schema with sitelinks search (Phase 1.5 SEO infra) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "BridgeLogis",
+      "url": "https://bridgelogis.com",
+      "publisher": { "@type": "Organization", "name": "BridgeLogis" }
+    }
+    </script>
+
     <title>BridgeLogis — Global Express Freight Quoting Platform | by Goodman GLS</title>
   </head>
   <body class="bg-gray-50 text-slate-800 antialiased dark:bg-gray-900 dark:text-slate-100 transition-colors duration-200">
