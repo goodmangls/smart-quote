@@ -84,7 +84,7 @@ Item Costs → Carrier Costs → FSC → Margin → Final Quote
 | Carrier Costs | Zone lookup → rate table → billable weight pricing. China Southern (CN-S) uses UPS Z10 |
 | FSC | Fuel surcharge % applied to carrier cost |
 | Carrier Add-Ons | Auto-detected surcharges (Surge Fee, EAS/RAS, AHS) + manual add-ons |
-| Margin | `revenue = cost / (1 - margin%)`, rounded up to nearest KRW 100 |
+| Margin | **Markup 방식**: `revenue = cost × (1 + margin%)`, rounded up to nearest KRW 100. 매출 대비 실효 마진율은 명목값보다 낮음 (예: 24% Markup → 19.35%) |
 | Warnings | Low margin (<10%), surcharges, collect terms |
 
 ### Special Packing Info Panel

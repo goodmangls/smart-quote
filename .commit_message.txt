@@ -1,1 +1,1 @@
-🐛 fix(ci): lighthouserc.json "preset": "lighthouse:recommended" 제거 — 5개 audit-level 룰(color-contrast/unminified/unused-js 등)이 category 임계값 외로 실패시키는 회귀. category 임계값(SEO/A11y 0.90 error, perf 0.75 warn)은 유지
+🔀 merge: origin/main → feature/phase15-seo-infra (Margin 공식 정정 + 추가 docs 동기화)

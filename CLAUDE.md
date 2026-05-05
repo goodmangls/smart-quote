@@ -188,7 +188,7 @@ Frontend (`src/features/quote/services/calculationService.ts`) and backend (`sma
 
 1. **Item Costs** - Packing dimensions (+10/+10/+15cm), volumetric weight (L*W*H / 5000), packing material/labor, manual surge charges (all carriers)
 2. **Carrier Costs** - Zone lookup (country -> zone code), shared `lookupCarrierRate()` engine (exact table 0.5-20kg -> range table >20kg -> fallback), FSC% surcharge
-3. **Margin** - Dynamic margin via `MarginRuleResolver` (priority-based: P100 per-user flat > P90 per-user weight > P50 nationality > P0 default), `revenue = cost / (1 - margin%)`, rounded up to nearest KRW 100. Admin can manually override at any time.
+3. **Margin** - Dynamic margin via `MarginRuleResolver` (priority-based: P100 per-user flat > P90 per-user weight > P50 nationality > P0 default), **Markup 방식**: `revenue = cost × (1 + margin%)`, rounded up to nearest KRW 100. Admin can manually override at any time. ⚠ 매출 대비 실효 마진율은 명목값보다 낮음 (예: 24% Markup → 실효 마진율 19.35% = margin / revenue).
 4. **Warnings** - Low margin (<10%), high volumetric weight, surge charges, collect terms (EXW/FOB)
 
 ### UPS Zone Mapping (Z1-Z10) — per UPS 2026 Service Guide
