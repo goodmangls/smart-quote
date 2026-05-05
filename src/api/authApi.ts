@@ -18,10 +18,12 @@ export interface VerifyMagicLinkResponse {
 }
 
 export async function requestMagicLink(email: string): Promise<MagicLinkResponse> {
+  // credentials: 'include' — Rails 가 bl_session httpOnly cookie 를 발급/갱신하므로 필수.
   const response = await fetch(`${API_URL}/api/v1/auth/magic_link`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email }),
+    credentials: 'include',
   });
 
   if (!response.ok) {
@@ -36,7 +38,11 @@ export async function requestMagicLink(email: string): Promise<MagicLinkResponse
 export async function verifyMagicLink(token: string): Promise<VerifyMagicLinkResponse> {
   const response = await fetch(
     `${API_URL}/api/v1/auth/magic_link/verify?token=${encodeURIComponent(token)}`,
-    { method: 'GET', headers: { 'Content-Type': 'application/json' } },
+    {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+    },
   );
 
   if (!response.ok) {

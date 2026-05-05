@@ -51,8 +51,14 @@ export const LoginPage: React.FC = () => {
           const defaultDest = userRole === 'admin' ? '/admin' : '/dashboard';
 
           // ?redirect= 안전 path 가 있으면 최우선 (insights middleware 흐름).
+          // /insights/* 는 Vercel rewrite 를 타야 하므로 SPA navigate() 가 아닌
+          // full document load 사용 — 안 그러면 SPA catch-all 로 떨어져 / 로 redirect.
           if (safeQueryRedirect) {
-            navigate(safeQueryRedirect, { replace: true });
+            if (safeQueryRedirect === '/insights' || safeQueryRedirect.startsWith('/insights/')) {
+              window.location.assign(safeQueryRedirect);
+            } else {
+              navigate(safeQueryRedirect, { replace: true });
+            }
           } else if (from === '/' || from === '/login' || from === '/dashboard') {
             navigate(defaultDest, { replace: true });
           } else {
