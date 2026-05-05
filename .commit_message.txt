@@ -1,1 +1,1 @@
-📋 docs(report): production-seo-schedule PDCA 완료 보고서 — Match Rate 100%, 첫 자동 실행 PASS, Open Q 3건 모두 positive 해소, 다음 단계로 archive 권장
+📦 chore(archive): production-seo-schedule PDCA 4문서 → docs/archive/2026-05/ — Plan/Design/Analysis/Report 완비, _INDEX.md 갱신 (Match Rate 100%, accessibility 0.90 통과 확인 포함)
