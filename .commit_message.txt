@@ -1,1 +1,1 @@
-🐛 fix(ci): seo-checks 워크플로에 libxml2-utils(xmllint) 설치 단계 추가 — ubuntu-latest 기본 미포함으로 sitemap.xml validation step `command not found` fail
+🐛 fix(ci): lighthouse preview 전용 config 분리 — lighthouserc.preview.json (staticDistDir 없이 urls 직접 사용). 이전 fail은 staticDistDir 모드가 urls 입력 무시하고 로컬서버 띄워 404

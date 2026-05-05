@@ -273,7 +273,7 @@ jobs:
             ${{ steps.url.outputs.preview }}/
             ${{ steps.url.outputs.preview }}/quote
             ${{ steps.url.outputs.preview }}/guide
-          configPath: ./lighthouserc.json
+          configPath: ./lighthouserc.preview.json
           uploadArtifacts: true
           temporaryPublicStorage: true
 
