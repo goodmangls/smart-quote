@@ -58,6 +58,7 @@ async function refreshAccessToken(): Promise<boolean> {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ refresh_token: refreshToken }),
+      credentials: 'include',
     });
     if (!res.ok) return false;
     const data = await res.json();
@@ -83,7 +84,10 @@ export async function request<T>(path: string, options?: RequestInit): Promise<T
   const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 
   try {
+    // credentials: 'include' — bl_session httpOnly cookie 송신 (insights-admin-rails-auth).
+    // options 의 credentials 가 명시되면 호출자 의도 우선 (전개 순서).
     let response = await fetch(`${API_URL}${path}`, {
+      credentials: 'include',
       headers: { ...headers, ...(options?.headers || {}) },
       ...options,
       signal: controller.signal,
@@ -105,6 +109,7 @@ export async function request<T>(path: string, options?: RequestInit): Promise<T
           Authorization: `Bearer ${newToken}`,
         };
         response = await fetch(`${API_URL}${path}`, {
+          credentials: 'include',
           ...options,
           headers: retryHeaders,
           signal: controller.signal,

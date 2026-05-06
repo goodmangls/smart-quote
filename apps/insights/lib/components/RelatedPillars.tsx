@@ -41,7 +41,7 @@ export function RelatedPillars({
   items,
   heading,
   lang = 'ko',
-}: RelatedPillarsProps): JSX.Element | null {
+}: RelatedPillarsProps): React.ReactElement | null {
   if (items.length === 0) return null;
 
   const sectionHeading = heading ?? HEADING_DEFAULT[lang];

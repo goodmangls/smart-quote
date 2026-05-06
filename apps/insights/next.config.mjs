@@ -1,8 +1,3 @@
-import createMDX from '@next/mdx';
-import remarkGfm from 'remark-gfm';
-import rehypeSlug from 'rehype-slug';
-import rehypeAutolinkHeadings from 'rehype-autolink-headings';
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   // BridgeLogis Insights는 메인 도메인 /insights 경로 하위에서 서빙
@@ -11,8 +6,11 @@ const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
 
-  // MDX 콘텐츠 페이지 확장자 허용
-  pageExtensions: ['ts', 'tsx', 'md', 'mdx'],
+  // pageExtensions 에 js/jsx 를 빼면 Next 15 의 내부 _error.js / _document.js
+  // 가 user route 로 잘못 인식되어 prerender 시 <Html> import 충돌이 발생한다.
+  // js/jsx 를 포함시켜 Next.js 내장 fallback 페이지가 정상 처리되도록 함.
+  // (MDX 콘텐츠 라우팅은 별 사이클 insights-content-migration 에서 .mdx 추가.)
+  pageExtensions: ['ts', 'tsx', 'js', 'jsx'],
 
   // 이미지 최적화 (메인 도메인 자산 공유)
   images: {
@@ -34,18 +32,6 @@ const nextConfig = {
     ];
   },
 
-  // 실험적 기능
-  experimental: {
-    mdxRs: false,
-  },
 };
 
-const withMDX = createMDX({
-  extension: /\.mdx?$/,
-  options: {
-    remarkPlugins: [remarkGfm],
-    rehypePlugins: [rehypeSlug, [rehypeAutolinkHeadings, { behavior: 'wrap' }]],
-  },
-});
-
-export default withMDX(nextConfig);
+export default nextConfig;

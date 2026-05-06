@@ -1,1 +1,1 @@
-📦 chore(archive): production-seo-schedule PDCA 4문서 → docs/archive/2026-05/ — Plan/Design/Analysis/Report 완비, _INDEX.md 갱신 (Match Rate 100%, accessibility 0.90 통과 확인 포함)
+📝 docs: insights-deploy plan/design + 메인 CLAUDE.md "Supabase: Authentication" 정정 — Rails JWT 가 단일 진실, supersede 링크 추가

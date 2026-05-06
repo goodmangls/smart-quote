@@ -41,7 +41,7 @@ interface AuthContextType {
     nationality?: string,
     networks?: FreightNetwork[],
   ) => Promise<AuthResult>;
-  logout: () => void;
+  logout: () => Promise<void>;
   updatePassword: (currentPassword: string, newPassword: string) => Promise<AuthResult>;
   isAuthenticated: boolean;
   isLoading: boolean;
@@ -83,10 +83,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return;
     }
 
+    // credentials: 'include' — bl_session httpOnly cookie 회전 (insights-admin-rails-auth).
     fetch(`${API_URL}/api/v1/auth/refresh`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ refresh_token: refreshToken }),
+      credentials: 'include',
     })
       .then((res) => {
         if (res.ok) return res.json();
@@ -118,6 +120,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ refresh_token: refreshToken }),
+          credentials: 'include',
         })
           .then((res) => {
             if (res.ok) return res.json();
@@ -145,6 +148,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
+        credentials: 'include',
       });
 
       if (res.ok) {
@@ -184,6 +188,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             nationality,
             networks: networks && networks.length > 0 ? networks : undefined,
           }),
+          credentials: 'include',
         });
 
         if (res.ok) {
@@ -218,7 +223,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, []);
 
-  const logout = useCallback(() => {
+  const logout = useCallback(async () => {
+    // Rails 가 httpOnly bl_session cookie 를 발급하므로 클라이언트가 직접 못 지움.
+    // 서버 endpoint 호출로 만료 cookie 발급 → 클라이언트 토큰 삭제.
+    // 네트워크 실패해도 클라이언트 측은 무조건 정리 (best-effort).
+    try {
+      await fetch(`${API_URL}/api/v1/auth/logout`, {
+        method: 'POST',
+        credentials: 'include',
+      });
+    } catch {
+      // 네트워크 오류여도 클라이언트 정리는 진행
+    }
     clearAllTokens();
     setUser(null);
   }, []);
@@ -251,6 +267,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             password: newPassword,
             password_confirmation: newPassword,
           }),
+          credentials: 'include',
         });
 
         if (res.ok) {

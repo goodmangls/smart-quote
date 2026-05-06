@@ -83,27 +83,13 @@ interface RootLayoutProps {
   children: ReactNode;
 }
 
-export default function RootLayout({ children }: RootLayoutProps): JSX.Element {
+export default function RootLayout({ children }: RootLayoutProps) {
+  // NOTE: 직접 <head> 안에서 <script type='application/ld+json'> 을 쓰면 Next 15
+  // 의 default error page prerender 가 <Html> import 충돌로 실패함. JSON-LD
+  // Organization 스키마는 후속 사이클(insights-content-migration 또는 별도
+  // `insights-jsonld`)에서 next/script 또는 metadata.other 로 재도입한다.
   return (
     <html lang='ko'>
-      <head>
-        {/* Organization JSON-LD (메인 SPA index.html 과 동일하나 Insights 도메인에서도 보강) */}
-        <script
-          type='application/ld+json'
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              '@context': 'https://schema.org',
-              '@type': 'Organization',
-              name: 'BridgeLogis (Goodman GLS / J-Ways)',
-              url: 'https://bridgelogis.com',
-              logo: 'https://bridgelogis.com/og/bridgelogis-logo.png',
-              sameAs: [
-                'https://www.linkedin.com/company/goodman-gls',
-              ],
-            }),
-          }}
-        />
-      </head>
       <body
         style={{
           fontFamily:

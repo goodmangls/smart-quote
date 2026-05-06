@@ -141,7 +141,8 @@ describe('AuthContext', () => {
 
   describe('logout()', () => {
     it('clears all tokens and resets user to null', async () => {
-      vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(
+      const fetchSpy = vi.spyOn(globalThis, 'fetch');
+      fetchSpy.mockResolvedValueOnce(
         new Response(
           JSON.stringify({ token: 'jwt-abc', refresh_token: 'refresh-abc', user: mockUser }),
           {
@@ -149,6 +150,13 @@ describe('AuthContext', () => {
             headers: { 'Content-Type': 'application/json' },
           },
         ),
+      );
+      // logout 은 Rails /api/v1/auth/logout 호출 (insights-admin-rails-auth) — 응답 mock.
+      fetchSpy.mockResolvedValueOnce(
+        new Response(JSON.stringify({ message: 'Logged out' }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        }),
       );
 
       let captured: ReturnType<typeof useAuth> | null = null;
@@ -161,8 +169,8 @@ describe('AuthContext', () => {
       });
       expect(captured!.isAuthenticated).toBe(true);
 
-      act(() => {
-        captured!.logout();
+      await act(async () => {
+        await captured!.logout();
       });
 
       expect(captured!.user).toBeNull();
@@ -359,7 +367,8 @@ describe('AuthContext', () => {
 
   describe('isAuthenticated reflects login state', () => {
     it('transitions from false -> true on login, then true -> false on logout', async () => {
-      vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(
+      const fetchSpy = vi.spyOn(globalThis, 'fetch');
+      fetchSpy.mockResolvedValueOnce(
         new Response(
           JSON.stringify({ token: 'jwt-abc', refresh_token: 'refresh-abc', user: mockUser }),
           {
@@ -367,6 +376,13 @@ describe('AuthContext', () => {
             headers: { 'Content-Type': 'application/json' },
           },
         ),
+      );
+      // logout 은 Rails /api/v1/auth/logout 호출 — 응답 mock.
+      fetchSpy.mockResolvedValueOnce(
+        new Response(JSON.stringify({ message: 'Logged out' }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        }),
       );
 
       let captured: ReturnType<typeof useAuth> | null = null;
@@ -381,8 +397,8 @@ describe('AuthContext', () => {
       });
       expect(captured!.isAuthenticated).toBe(true);
 
-      act(() => {
-        captured!.logout();
+      await act(async () => {
+        await captured!.logout();
       });
       expect(captured!.isAuthenticated).toBe(false);
     });

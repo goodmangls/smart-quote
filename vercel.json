@@ -73,7 +73,15 @@
       "destination": "/api/sitemap"
     },
     {
-      "source": "/((?!api/|assets/|robots\\.txt|sitemap.*\\.xml|favicon|icon|manifest|sw\\.js|goodman-gls.*|naver.*\\.html|data/).*)",
+      "source": "/insights",
+      "destination": "https://smart-quote-insights.vercel.app/insights"
+    },
+    {
+      "source": "/insights/(.*)",
+      "destination": "https://smart-quote-insights.vercel.app/insights/$1"
+    },
+    {
+      "source": "/((?!api/|assets/|robots\\.txt|sitemap.*\\.xml|favicon|icon|manifest|sw\\.js|goodman-gls.*|naver.*\\.html|data/|insights).*)",
       "destination": "/index.html"
     }
   ]

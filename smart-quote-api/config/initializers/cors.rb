@@ -33,6 +33,10 @@ Rails.application.config.middleware.insert_before 0, Rack::Cors do
     resource "*",
       headers: :any,
       expose: [ "Authorization" ],
-      methods: [ :get, :post, :put, :patch, :delete, :options, :head ]
+      methods: [ :get, :post, :put, :patch, :delete, :options, :head ],
+      # insights-admin-rails-auth: bl_session httpOnly cookie 가 cross-origin
+      # fetch 시에도 저장/전송되려면 credentials: true 가 필수. 메인 SPA fetch
+      # 도 `credentials: 'include'` 로 호출해야 한다.
+      credentials: true
   end
 end

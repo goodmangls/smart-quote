@@ -2,6 +2,8 @@
 
 > apps/insights 를 production 에 노출 — 콘텐츠 페이지는 public, `/insights/admin/**` 만 Admin 게이트
 
+> ⚠️ **정정 노트 (2026-05-05)** — 본 plan §52-54 "AuthContext: Supabase JWT 사용"은 사실관계 오류. 메인 SPA 는 실제로 Rails JWT (`/api/v1/auth/login`) 를 사용하며, `src/` 전체에 Supabase 클라이언트 import 0건. 이 잘못된 전제 위에서 design.md §27, §67 이 "Supabase 동일 origin cookie 자동 공유" architecture 를 세웠음. 인증 게이트 부분은 [`insights-admin-rails-auth.plan.md`](./insights-admin-rails-auth.plan.md) 가 supersede (PR #9 close + 신규 PR 로 대체). Vercel rewrites, admin shell, Next 15 업그레이드 등 인프라 자산은 그대로 유효.
+
 ## 1. 개요
 
 | 항목 | 내용 |

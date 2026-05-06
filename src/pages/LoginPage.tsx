@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { useNavigate, useLocation, Link } from 'react-router-dom';
+import { useNavigate, useLocation, useSearchParams, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { Header } from '../components/layout/Header';
 import { LogIn, ArrowLeft, Mail } from 'lucide-react';
 import { requestMagicLink } from '../api/authApi';
+import { resolveLoginRedirect } from '../lib/safeRedirect';
 
 const dotGridStyle: React.CSSProperties = {
   backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.07) 1px, transparent 1px)',
@@ -25,9 +26,13 @@ export const LoginPage: React.FC = () => {
   const { t } = useLanguage();
   const navigate = useNavigate();
   const location = useLocation();
+  const [searchParams] = useSearchParams();
 
   const [isLoading, setIsLoading] = useState(false);
 
+  // apps/insights middleware 가 비로그인 사용자를 `/login?redirect=/insights/admin`
+  // 으로 보낸다. resolveLoginRedirect 가 화이트리스트 prefix + open redirect 방어.
+  const safeQueryRedirect = resolveLoginRedirect(searchParams.get('redirect'));
   const from = location.state?.from?.pathname || '/dashboard';
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -45,7 +50,16 @@ export const LoginPage: React.FC = () => {
           const userRole = result.user?.role || 'user';
           const defaultDest = userRole === 'admin' ? '/admin' : '/dashboard';
 
-          if (from === '/' || from === '/login' || from === '/dashboard') {
+          // ?redirect= 안전 path 가 있으면 최우선 (insights middleware 흐름).
+          // /insights/* 는 Vercel rewrite 를 타야 하므로 SPA navigate() 가 아닌
+          // full document load 사용 — 안 그러면 SPA catch-all 로 떨어져 / 로 redirect.
+          if (safeQueryRedirect) {
+            if (safeQueryRedirect === '/insights' || safeQueryRedirect.startsWith('/insights/')) {
+              window.location.assign(safeQueryRedirect);
+            } else {
+              navigate(safeQueryRedirect, { replace: true });
+            }
+          } else if (from === '/' || from === '/login' || from === '/dashboard') {
             navigate(defaultDest, { replace: true });
           } else {
             navigate(from, { replace: true });

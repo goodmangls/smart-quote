@@ -2,6 +2,8 @@ module Api
   module V1
     class AuthController < ApplicationController
       include JwtAuthenticatable
+      # ActionController::API 는 cookies helper 미포함 — bl_session 발급용으로 명시 include
+      include ActionController::Cookies
       before_action :authenticate_user!, only: [ :update_password, :me ]
 
       # POST /api/v1/auth/register
@@ -10,6 +12,7 @@ module Api
 
         if user.save
           token = encode_token(user)
+          set_session_cookie!(token)
           render json: { token: token, refresh_token: encode_refresh_token(user), user: user_json(user) }, status: :created
         else
           render json: {
@@ -24,6 +27,7 @@ module Api
 
         if user&.authenticate(params[:password])
           token = encode_token(user)
+          set_session_cookie!(token)
           render json: { token: token, refresh_token: encode_refresh_token(user), user: user_json(user) }
         else
           render json: {
@@ -45,14 +49,25 @@ module Api
         user = decode_refresh_token(params[:refresh_token])
 
         if user
+          access_token = encode_token(user)
+          set_session_cookie!(access_token)
           render json: {
-            token: encode_token(user),
+            token: access_token,
             refresh_token: encode_refresh_token(user),
             user: user_json(user)
           }
         else
           render json: { error: { code: "INVALID_TOKEN", message: "Invalid or expired refresh token" } }, status: :unauthorized
         end
+      end
+
+      # POST /api/v1/auth/logout — clear bl_session httpOnly cookie
+      # 클라이언트는 httpOnly cookie 를 직접 못 지우므로 서버가 만료 cookie 로 덮어씀.
+      # access/refresh JWT 자체의 즉시 무효화는 별도 사이클(jti denylist).
+      # 항상 200 — 비로그인 상태에서도 idempotent.
+      def logout
+        cookies.delete(:bl_session, domain: session_cookie_domain)
+        render json: { message: "Logged out" }
       end
 
       # PUT /api/v1/auth/password — change password (authenticated)
@@ -101,7 +116,9 @@ module Api
         end
 
         user.consume_magic_link_token!
-        render json: { token: encode_token(user), refresh_token: encode_refresh_token(user), user: user_json(user) }
+        access_token = encode_token(user)
+        set_session_cookie!(access_token)
+        render json: { token: access_token, refresh_token: encode_refresh_token(user), user: user_json(user) }
       end
 
       # GET /api/v1/auth/magic_link/peek — test-only: return last issued raw token
@@ -136,6 +153,26 @@ module Api
       def register_params
         params.permit(:email, :password, :password_confirmation,
                       :name, :company, :nationality, networks: [])
+      end
+
+      # insights-admin-rails-auth: bl_session httpOnly cookie 발급 (D2=A)
+      # apps/insights middleware 가 cross-origin rewrite 너머에서 .bridgelogis.com
+      # cookie 를 받아 Rails JWT 를 검증할 수 있도록 한다. access_token JWT 와 동일 값.
+      def set_session_cookie!(access_token)
+        cookies[:bl_session] = {
+          value: access_token,
+          domain: session_cookie_domain,
+          httponly: true,
+          secure: Rails.env.production?,
+          same_site: :lax,
+          expires: 15.minutes.from_now
+        }
+      end
+
+      # production 외 환경에서는 :all 로 두어 test/development 도 cookie 가 동작하도록 한다.
+      def session_cookie_domain
+        return :all unless Rails.env.production?
+        ENV.fetch("SESSION_COOKIE_DOMAIN", ".bridgelogis.com")
       end
     end
   end

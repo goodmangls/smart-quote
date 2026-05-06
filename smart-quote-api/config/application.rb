@@ -40,5 +40,10 @@ module SmartQuoteApi
     # Middleware like session, flash, cookies can be added back manually.
     # Skip views, helpers and assets when generating a new resource.
     config.api_only = true
+
+    # insights-admin-rails-auth: bl_session httpOnly cookie 발급용.
+    # apps/insights middleware 가 cross-origin rewrite 너머에서 .bridgelogis.com
+    # cookie 를 받아 Rails JWT 를 검증할 수 있도록 cookies middleware 활성화.
+    config.middleware.use ActionDispatch::Cookies
   end
 end

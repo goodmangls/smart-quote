@@ -240,4 +240,127 @@ RSpec.describe "Api::V1::Auth", type: :request do
       expect(response).to have_http_status(:unauthorized)
     end
   end
+
+  # insights-admin-rails-auth: bl_session httpOnly cookie 발급 (D2=A 결정)
+  # cross-origin rewrite 시 .bridgelogis.com cookie 가 자동 부착되어 apps/insights
+  # middleware 가 Rails JWT 를 검증할 수 있도록 한다.
+  describe "POST /api/v1/auth/login (bl_session cookie)" do
+    let!(:user) { create(:user, email: "cookie@example.com", password: "password123") }
+
+    it "issues bl_session httpOnly cookie on successful login" do
+      post "/api/v1/auth/login", params: { email: "cookie@example.com", password: "password123" }, as: :json
+
+      expect(response).to have_http_status(:ok)
+
+      set_cookie = response.headers["Set-Cookie"]
+      expect(set_cookie).to be_present, "Expected Set-Cookie header to be present"
+      expect(set_cookie).to include("bl_session=")
+      # Set-Cookie attribute names are case-insensitive (RFC 6265). Rack emits lowercase.
+      expect(set_cookie).to match(/HttpOnly/i)
+      expect(set_cookie).to match(/SameSite=Lax/i)
+
+      expect(response.cookies["bl_session"]).to be_present
+    end
+
+    it "cookie value is the same JWT as the response body token" do
+      post "/api/v1/auth/login", params: { email: "cookie@example.com", password: "password123" }, as: :json
+
+      body_token = JSON.parse(response.body)["token"]
+      cookie_token = response.cookies["bl_session"]
+      expect(cookie_token).to eq(body_token)
+    end
+
+    it "does not issue cookie on failed login" do
+      post "/api/v1/auth/login", params: { email: "cookie@example.com", password: "wrong" }, as: :json
+
+      expect(response).to have_http_status(:unauthorized)
+      expect(response.cookies["bl_session"]).to be_nil
+    end
+
+    it "does not issue cookie on nonexistent email" do
+      post "/api/v1/auth/login", params: { email: "ghost@example.com", password: "password123" }, as: :json
+
+      expect(response).to have_http_status(:unauthorized)
+      expect(response.cookies["bl_session"]).to be_nil
+    end
+  end
+
+  describe "POST /api/v1/auth/refresh (bl_session cookie rotation)" do
+    let!(:user) { create(:user, email: "rotate@example.com", password: "password123") }
+
+    it "rotates bl_session cookie when refresh succeeds" do
+      post "/api/v1/auth/login", params: { email: user.email, password: "password123" }, as: :json
+      first_cookie = response.cookies["bl_session"]
+      refresh_token = JSON.parse(response.body)["refresh_token"]
+      expect(first_cookie).to be_present
+      expect(refresh_token).to be_present
+
+      # JWT exp 는 초 단위. 동일 초에 재발급되면 같은 token 이 나올 수 있어 sleep.
+      sleep 1.1
+
+      post "/api/v1/auth/refresh", params: { refresh_token: refresh_token }, as: :json
+
+      expect(response).to have_http_status(:ok)
+      second_cookie = response.cookies["bl_session"]
+      expect(second_cookie).to be_present
+      expect(second_cookie).not_to eq(first_cookie)
+
+      set_cookie = response.headers["Set-Cookie"]
+      expect(set_cookie).to include("bl_session=")
+      # Set-Cookie attribute names are case-insensitive (RFC 6265). Rack emits lowercase.
+      expect(set_cookie).to match(/HttpOnly/i)
+      expect(set_cookie).to match(/SameSite=Lax/i)
+    end
+
+    it "does not issue cookie when refresh token is invalid" do
+      post "/api/v1/auth/refresh", params: { refresh_token: "bogus.token.here" }, as: :json
+
+      expect(response).to have_http_status(:unauthorized)
+      expect(response.cookies["bl_session"]).to be_nil
+    end
+  end
+
+  describe "POST /api/v1/auth/register (bl_session cookie)" do
+    it "issues bl_session cookie on successful registration" do
+      post "/api/v1/auth/register", params: {
+        email: "newcookie@example.com",
+        password: "password123",
+        password_confirmation: "password123",
+        name: "Cookie User",
+        company: "Test",
+        nationality: "KR"
+      }, as: :json
+
+      expect(response).to have_http_status(:created)
+      expect(response.cookies["bl_session"]).to be_present
+
+      set_cookie = response.headers["Set-Cookie"]
+      expect(set_cookie).to match(/HttpOnly/i)
+      expect(set_cookie).to match(/SameSite=Lax/i)
+    end
+  end
+
+  describe "POST /api/v1/auth/logout (bl_session cookie clearance)" do
+    let!(:user) { create(:user, email: "logout@example.com", password: "password123") }
+
+    it "clears bl_session cookie on logout" do
+      # 먼저 로그인하여 cookie 발급
+      post "/api/v1/auth/login", params: { email: user.email, password: "password123" }, as: :json
+      expect(response.cookies["bl_session"]).to be_present
+
+      # 로그인 응답의 cookie 가 다음 요청에 자동 전달되도록 cookie jar 활용
+      post "/api/v1/auth/logout"
+
+      expect(response).to have_http_status(:ok)
+      # 삭제된 cookie 는 빈 값 + 과거 expiry 로 응답
+      set_cookie = response.headers["Set-Cookie"]
+      expect(set_cookie).to include("bl_session=")
+      expect(set_cookie).to match(/expires=Thu, 01 Jan 1970/i).or match(/max-age=0/i)
+    end
+
+    it "succeeds even when no session cookie present (idempotent)" do
+      post "/api/v1/auth/logout"
+      expect(response).to have_http_status(:ok)
+    end
+  end
 end

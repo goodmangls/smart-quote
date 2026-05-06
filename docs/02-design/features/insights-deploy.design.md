@@ -13,8 +13,10 @@ version_value: 0.1.0
 
 > **Summary**: 사용자 결정 5/5 default 채택. 안 1A(rewrite) + app_metadata.role + 신규 Vercel 프로젝트 + 빈 골격 + 메인 SPA `/login` redirect. 본 사이클은 인프라(배포)와 인증 게이트만 다루고 콘텐츠/MDX/OG 등은 별 사이클.
 >
+> ⚠️ **정정 노트 (2026-05-05)** — 본 design 의 §27 "role 저장소 = `app_metadata.role` (Supabase server-set only)" 와 §67 "Supabase 클라이언트가 `bridgelogis.com` 에 cookie set → 동일 origin 자동 공유" 는 잘못된 전제. 메인 SPA 는 Rails JWT 사용, Supabase 클라이언트 import 0건. 인증 architecture 부분은 [`insights-admin-rails-auth`](../../01-plan/features/insights-admin-rails-auth.plan.md) 가 supersede — Rails JWT + httpOnly `bl_session` cookie + middleware fetch `/api/v1/auth/me`. 인프라(rewrite/배포/admin shell/Next 15) 부분은 그대로 유효.
+>
 > **Project**: j-ways-smart-quote-system (smart-quote-main)
-> **Status**: Draft
+> **Status**: Superseded (인증 부분만, by `insights-admin-rails-auth`)
 > **Planning Doc**: [insights-deploy.plan.md](../../01-plan/features/insights-deploy.plan.md)
 
 ---
@@ -351,6 +353,47 @@ export default function AdminLoginRedirect({
 
 1. **Preview/Production redirect URL 분기**: `VERCEL_ENV === 'production'` 시 `bridgelogis.com`, 그 외 `request.nextUrl.origin` 사용. 미들웨어 코드에 분기 추가.
 2. **role 채우기**: 기존 사용자에게 `app_metadata.role` 가 비어 있으면 admin 통과 못 함. Supabase admin SDK 또는 SQL 로 admin 사용자에게 역할 부여 필요. 본 사이클은 게이트만 만들고 데이터 채우기는 운영 작업으로 분리.
+
+---
+
+## 8.5. Known Issue — Local Build Failure (Do 단계 발견)
+
+**증상**: `cd apps/insights && npm run build` 가 일관되게 같은 chunk 좌표에서 실패:
+
+```
+Error: <Html> should not be imported outside of pages/_document.
+    at x (.next/server/chunks/611.js:6:1351)
+Error occurred prerendering page "/404" (또는 /500)
+```
+
+**시도한 8가지 변경 모두 동일 좌표 fail** (config 변경이 효과 없음 = root cause 가 config 가 아님):
+1. webpack alias react/react-dom → apps/insights/node_modules
+2. `app/not-found.tsx` 추가
+3. `app/error.tsx` 추가
+4. `app/global-error.tsx` 추가
+5. layout.tsx 의 `<head>` + JSON-LD 제거
+6. `output: 'standalone'`
+7. `@next/mdx` wrapper 제거 + MDX 의존성 비활성화
+8. `pageExtensions` 에 `js`, `jsx` 포함
+
+**진단 결과**:
+- root `node_modules/next` 없음 — duplicate next instance 아님
+- root `react` 없음 — react resolve 깨끗 (apps/insights 내부)
+- `pages/` 디렉토리 없음 — stray pages router 아님
+
+**가설**: macOS 로컬 npm 의 monorepo `outputFileTracingRoot` 가 root `package-lock.json` 을 root 로 잡아서 trace 가 광범위하게 일어나고, 그 과정에서 어떤 의존성이 internal `_error.js` (Pages Router fallback) 을 user route 로 잘못 분류 → prerender 시점에 layout.tsx 의 `<html>` 과 충돌.
+
+**결정**: 로컬 build 디버깅 중단. Vercel 환경에서 신규 프로젝트의 Root Directory = `apps/insights` 로 격리되어 빌드되면 root pollution 영향 없음 → Vercel preview 가 결정적 테스트.
+
+**fallback**:
+- Vercel preview build 도 실패 → 별 사이클 `insights-build-debt` 로 분리 (`outputFileTracingRoot` 명시, `transpilePackages` 점검, lockfile 재생성).
+- Vercel preview build 성공 → 로컬 build 실패는 환경 specific 으로 archive 메모리에 기록(`reference_insights_local_build_quirk.md`).
+
+**검증 통과 항목** (코드 자체는 정상):
+- ✅ `apps/insights/npm run type-check` PASS
+- ✅ Next.js compile 단계 PASS ("Compiled successfully in 8.0s")
+- ✅ middleware/supabase-server/admin 3 파일 type 정상
+- ❌ static page generation 단계만 실패
 
 ---
 

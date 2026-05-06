@@ -1,0 +1,20 @@
+# dependencies
+node_modules/
+
+# Next.js build output
+.next/
+out/
+dist/
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
+
+# Env (vercel env로 관리)
+.env*.local
+
+# Vercel
+.vercel/
+
+# Logs
+*.log

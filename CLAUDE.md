@@ -259,14 +259,15 @@ UPS/DHL express shipments → **DAP only** (no exceptions). AI chatbot enforces 
 
 ## External APIs
 
-| API             | Endpoint                                | Purpose                   |
-| --------------- | --------------------------------------- | ------------------------- |
-| Rails Backend   | `VITE_API_URL` (default localhost:3000) | Quote CRUD, persistence   |
-| open.er-api.com | `/v6/latest/KRW`                        | Exchange rates (KRW base) |
-| Open-Meteo      | `api.open-meteo.com/v1/forecast`        | Port/airport weather      |
-| US EIA API      | `api.eia.gov/v2/petroleum/pri/spt/data` | USGC Jet Fuel prices      |
-| Supabase        | `VITE_SUPABASE_URL`                     | Authentication            |
-| Slack Webhook   | `/api/v1/notifications/slack`           | Member quote save alerts  |
+| API             | Endpoint                                | Purpose                                          |
+| --------------- | --------------------------------------- | ------------------------------------------------ |
+| Rails Backend   | `VITE_API_URL` (default localhost:3000) | Quote CRUD, persistence, **JWT 인증** (`/api/v1/auth/login`, `/me`, httpOnly `bl_session` cookie) |
+| open.er-api.com | `/v6/latest/KRW`                        | Exchange rates (KRW base)                        |
+| Open-Meteo      | `api.open-meteo.com/v1/forecast`        | Port/airport weather                             |
+| US EIA API      | `api.eia.gov/v2/petroleum/pri/spt/data` | USGC Jet Fuel prices                             |
+| Slack Webhook   | `/api/v1/notifications/slack`           | Member quote save alerts                         |
+
+> 인증은 **Rails JWT** 가 단일 진실. `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY` 환경 변수가 남아있을 수 있으나 `src/` 에 Supabase 클라이언트 import 0건 — dead config. 정리 후보 (`supabase-config-cleanup` 사이클).
 
 ## i18n System
 
