@@ -1,1 +1,1 @@
-📝 docs: insights-deploy plan/design + 메인 CLAUDE.md "Supabase: Authentication" 정정 — Rails JWT 가 단일 진실, supersede 링크 추가
+💱 chore(rates): DEFAULT_EXCHANGE_RATE 1450 → 1400 (하나은행 송금환율 2026-05-07) — frontend/backend/CLAUDE.md 동기화

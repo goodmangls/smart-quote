@@ -10,7 +10,7 @@ export const TRANSIT_TIMES = {
 } as const;
 
 // Market Defaults
-export const DEFAULT_EXCHANGE_RATE = 1450; // Manual: 하나은행 월요일 09시 송금환율 (2026-03-24)
+export const DEFAULT_EXCHANGE_RATE = 1400; // Manual: 하나은행 월요일 09시 송금환율 (2026-05-07)
 
 // ============================================================
 // FSC 주간 업데이트 — 변경 시 아래 두 파일을 반드시 함께 수정

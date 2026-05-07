@@ -58,7 +58,7 @@ bundle exec rspec spec/requests/api/v1/quotes_spec.rb
     config/                    # Rate tables, business rules, UI constants
       ups_tariff.ts            # UPS Z1-Z10 rate tables (synced with backend)
       dhl_tariff.ts            # DHL Z1-Z8 rate tables (synced with backend)
-      rates.ts                 # KRW cost constants, DEFAULT_EXCHANGE_RATE=1450, DEFAULT_FSC_PERCENT=45.50 (UPS), DEFAULT_FSC_PERCENT_DHL=48.00 (DHL)
+      rates.ts                 # KRW cost constants, DEFAULT_EXCHANGE_RATE=1400, DEFAULT_FSC_PERCENT=45.50 (UPS), DEFAULT_FSC_PERCENT_DHL=48.00 (DHL)
       business-rules.ts        # Surge thresholds, packing weight buffer/addition
       options.ts               # Country options, carrier options, incoterm options
       addon-utils.ts           # Shared AddonRateLike/NormalizedRate types, calcAddonFee(), findRate()
@@ -316,7 +316,7 @@ POST   /api/v1/notifications/slack   # Slack webhook proxy
 - **Tailwind**: BridgeLogis brand palette (`brand-blue-*`, `cyan-*`, `navy`, `deep-blue`, `gold`) + Semantic (`success/warning/destructive/info`), class-based dark mode. Phase 2 완료 후 레거시 `jways-*`/`accent-*` 제거.
 - **Environment**: `VITE_API_URL`, `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_EIA_API_KEY`
 - **Tariff sync**: Frontend tariff files in `src/config/` must stay in sync with backend `lib/constants/`
-- **Market defaults**: `DEFAULT_EXCHANGE_RATE=1450` (하나은행 월요일 09시 송금환율), `DEFAULT_FSC_PERCENT=45.50` (UPS 2026-04-27), `DEFAULT_FSC_PERCENT_DHL=48.00` (DHL 2026-04-27) in `src/config/rates.ts`
+- **Market defaults**: `DEFAULT_EXCHANGE_RATE=1400` (하나은행 월요일 09시 송금환율, 2026-05-07), `DEFAULT_FSC_PERCENT=45.50` (UPS 2026-04-27), `DEFAULT_FSC_PERCENT_DHL=48.00` (DHL 2026-04-27) in `src/config/rates.ts`
 - **FSC 업데이트 주기**: UPS/DHL 모두 매주 월요일. `src/config/rates.ts` + `smart-quote-api/lib/constants/rates.rb` 동시 수정 후 Vercel+Render 배포.
 - **Exchange rate policy**: Live API 자동세팅 비활성화, 매주 월요일 수동 업데이트 (하나은행 기준)
 - **Error tracking**: Sentry (`@sentry/browser`) integrated across all catch blocks
