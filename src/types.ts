@@ -227,6 +227,8 @@ export enum Incoterm {
     pagination: Pagination;
   }
 
+  export type AmountCurrency = 'KRW' | 'USD';
+
   export interface QuoteListParams {
     page?: number;
     perPage?: number;
@@ -235,4 +237,7 @@ export enum Incoterm {
     dateFrom?: string;
     dateTo?: string;
     status?: QuoteStatus;
+    minAmount?: number;
+    maxAmount?: number;
+    amountCurrency?: AmountCurrency;
   }

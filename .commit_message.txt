@@ -1,1 +1,1 @@
-✨ feat(quotes#export): xlsx 분기 + amount-range permit + 422 invalid range
+✨ feat(api): exportQuotes 일반화 (csv/xlsx) + listQuotes amount-range params
