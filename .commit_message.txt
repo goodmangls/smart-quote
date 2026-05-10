@@ -1,1 +1,1 @@
-✨ feat(searcher): by_amount_range 체이닝 + min>max 422 가드 + indifferent params
+✨ feat(exporter): xlsx format 분기 추가 (caxlsx 사용, csv 동일 헤더 1행=1quote)
