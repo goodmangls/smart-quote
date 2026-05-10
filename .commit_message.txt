@@ -1,1 +1,1 @@
-✨ feat(history): amount-range filter UI + Export 드롭다운 (CSV/Excel)
+📝 docs(plan): quote-history.plan.md 헤더에 FR-04/FR-07 분리 사이클 완료 노트
