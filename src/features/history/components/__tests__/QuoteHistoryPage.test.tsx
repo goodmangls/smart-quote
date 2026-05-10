@@ -31,7 +31,8 @@ describe('QuoteHistoryPage', () => {
     await waitFor(() => {
       expect(quoteApi.listQuotes).toHaveBeenCalled();
     });
-    const firstCallArgs = (quoteApi.listQuotes as unknown as { mock: { calls: unknown[][] } }).mock.calls[0];
+    const firstCallArgs = (quoteApi.listQuotes as unknown as { mock: { calls: unknown[][] } }).mock
+      .calls[0];
     expect(firstCallArgs[0]).toMatchObject({ amountCurrency: 'KRW' });
   });
 

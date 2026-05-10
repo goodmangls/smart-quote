@@ -1,6 +1,14 @@
-import { QuoteInput, QuoteResult, QuoteDetail, QuoteListResponse, QuoteListParams, CostBreakdown, QuoteStatus } from "@/types";
-import { request, ApiError, API_URL, AUTH_EXPIRED_EVENT } from "./apiClient";
-import { clearAllTokens, getAccessToken } from "@/lib/authStorage";
+import {
+  QuoteInput,
+  QuoteResult,
+  QuoteDetail,
+  QuoteListResponse,
+  QuoteListParams,
+  CostBreakdown,
+  QuoteStatus,
+} from '@/types';
+import { request, ApiError, API_URL, AUTH_EXPIRED_EVENT } from './apiClient';
+import { clearAllTokens, getAccessToken } from '@/lib/authStorage';
 
 export { ApiError as QuoteApiError };
 
@@ -52,10 +60,7 @@ export const fetchQuote = async (input: QuoteInput): Promise<QuoteResult> => {
 
 // ── Quote History CRUD ──
 
-export const saveQuote = async (
-  input: QuoteInput,
-  notes?: string,
-): Promise<QuoteDetail> => {
+export const saveQuote = async (input: QuoteInput, notes?: string): Promise<QuoteDetail> => {
   // Send only input fields — backend recalculates result via QuoteCalculator
   return request<QuoteDetail>('/api/v1/quotes', {
     method: 'POST',
@@ -63,9 +68,7 @@ export const saveQuote = async (
   });
 };
 
-export const listQuotes = async (
-  params: QuoteListParams = {}
-): Promise<QuoteListResponse> => {
+export const listQuotes = async (params: QuoteListParams = {}): Promise<QuoteListResponse> => {
   const searchParams = new URLSearchParams();
   if (params.page != null) searchParams.set('page', String(params.page));
   if (params.perPage != null) searchParams.set('per_page', String(params.perPage));
@@ -90,7 +93,7 @@ export const getQuote = async (id: number): Promise<QuoteDetail> => {
 export const updateQuoteStatus = async (
   id: number,
   status: QuoteStatus,
-  notes?: string
+  notes?: string,
 ): Promise<QuoteDetail> => {
   const raw = await request<QuoteDetail & { breakdown: RawBreakdown }>(`/api/v1/quotes/${id}`, {
     method: 'PATCH',
@@ -103,7 +106,7 @@ export const sendQuoteEmail = async (
   id: number,
   recipientEmail: string,
   recipientName?: string,
-  message?: string
+  message?: string,
 ): Promise<{ success: boolean; message: string }> => {
   return request<{ success: boolean; message: string }>(`/api/v1/quotes/${id}/send_email`, {
     method: 'POST',
@@ -117,7 +120,7 @@ export const deleteQuote = async (id: number): Promise<void> => {
 
 export const exportQuotes = async (
   params: QuoteListParams = {},
-  format: 'csv' | 'xlsx' = 'csv'
+  format: 'csv' | 'xlsx' = 'csv',
 ): Promise<void> => {
   const searchParams = new URLSearchParams();
   if (params.q) searchParams.set('q', params.q);

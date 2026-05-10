@@ -43,22 +43,22 @@ export const QuoteSearchBar: React.FC<Props> = ({
   const rangeInvalid = minAmount != null && maxAmount != null && minAmount > maxAmount;
 
   return (
-    <div className="mb-6 space-y-3">
-      <div className="flex gap-2">
-        <form onSubmit={onSearch} className="flex gap-2 flex-1">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+    <div className='mb-6 space-y-3'>
+      <div className='flex gap-2'>
+        <form onSubmit={onSearch} className='flex gap-2 flex-1'>
+          <div className='relative flex-1'>
+            <Search className='absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400' />
             <input
-              type="text"
+              type='text'
               value={searchInput}
               onChange={(e) => onSearchInputChange(e.target.value)}
-              placeholder="Search by reference no or destination..."
-              className="w-full pl-10 pr-4 py-2.5 text-sm rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-blue-500 focus:border-transparent"
+              placeholder='Search by reference no or destination...'
+              className='w-full pl-10 pr-4 py-2.5 text-sm rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-blue-500 focus:border-transparent'
             />
           </div>
           <button
-            type="submit"
-            className="px-4 py-2.5 text-sm font-medium text-white bg-brand-blue-600 rounded-lg hover:bg-brand-blue-700 transition-colors"
+            type='submit'
+            className='px-4 py-2.5 text-sm font-medium text-white bg-brand-blue-600 rounded-lg hover:bg-brand-blue-700 transition-colors'
           >
             Search
           </button>
@@ -71,14 +71,14 @@ export const QuoteSearchBar: React.FC<Props> = ({
               : 'border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400'
           }`}
         >
-          <Filter className="w-4 h-4" />
+          <Filter className='w-4 h-4' />
         </button>
       </div>
 
       {showFilters && (
-        <div className="space-y-2">
-          <div className="flex flex-wrap gap-2 items-center">
-            <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">Status:</span>
+        <div className='space-y-2'>
+          <div className='flex flex-wrap gap-2 items-center'>
+            <span className='text-xs text-gray-500 dark:text-gray-400 font-medium'>Status:</span>
             {STATUS_OPTIONS.map((s) => (
               <button
                 key={s}
@@ -95,21 +95,21 @@ export const QuoteSearchBar: React.FC<Props> = ({
             {hasActiveFilters && (
               <button
                 onClick={onClearFilters}
-                className="flex items-center gap-1 px-2.5 py-2 sm:px-2 sm:py-1 text-sm sm:text-xs text-red-500 hover:text-red-700 transition-colors"
+                className='flex items-center gap-1 px-2.5 py-2 sm:px-2 sm:py-1 text-sm sm:text-xs text-red-500 hover:text-red-700 transition-colors'
               >
-                <X className="w-4 h-4 sm:w-3 sm:h-3" />
+                <X className='w-4 h-4 sm:w-3 sm:h-3' />
                 Clear all
               </button>
             )}
           </div>
 
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">Amount:</span>
-            <div className="inline-flex rounded-md border border-gray-300 dark:border-gray-600 overflow-hidden">
+          <div className='flex flex-wrap items-center gap-2'>
+            <span className='text-xs text-gray-500 dark:text-gray-400 font-medium'>Amount:</span>
+            <div className='inline-flex rounded-md border border-gray-300 dark:border-gray-600 overflow-hidden'>
               {CURRENCY_OPTIONS.map((c) => (
                 <button
                   key={c}
-                  type="button"
+                  type='button'
                   onClick={() => onCurrencyChange(c)}
                   aria-pressed={amountCurrency === c}
                   className={`px-3 py-1.5 text-xs font-medium transition-colors ${
@@ -123,10 +123,10 @@ export const QuoteSearchBar: React.FC<Props> = ({
               ))}
             </div>
             <input
-              type="number"
-              inputMode="decimal"
+              type='number'
+              inputMode='decimal'
               step={amountStep}
-              placeholder="Min amount"
+              placeholder='Min amount'
               value={minAmount ?? ''}
               onChange={(e) =>
                 onAmountChange({
@@ -134,14 +134,14 @@ export const QuoteSearchBar: React.FC<Props> = ({
                   max: maxAmount,
                 })
               }
-              className="w-32 px-2 py-1.5 text-xs rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+              className='w-32 px-2 py-1.5 text-xs rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white'
             />
-            <span className="text-xs text-gray-400">~</span>
+            <span className='text-xs text-gray-400'>~</span>
             <input
-              type="number"
-              inputMode="decimal"
+              type='number'
+              inputMode='decimal'
               step={amountStep}
-              placeholder="Max amount"
+              placeholder='Max amount'
               value={maxAmount ?? ''}
               onChange={(e) =>
                 onAmountChange({
@@ -149,11 +149,9 @@ export const QuoteSearchBar: React.FC<Props> = ({
                   max: e.target.value === '' ? undefined : Number(e.target.value),
                 })
               }
-              className="w-32 px-2 py-1.5 text-xs rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+              className='w-32 px-2 py-1.5 text-xs rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white'
             />
-            {rangeInvalid && (
-              <span className="text-xs text-red-500">min must be ≤ max</span>
-            )}
+            {rangeInvalid && <span className='text-xs text-red-500'>min must be ≤ max</span>}
           </div>
         </div>
       )}

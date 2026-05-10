@@ -1,1 +1,1 @@
-📝 docs(plan): quote-history.plan.md 헤더에 FR-04/FR-07 분리 사이클 완료 노트
+💄 style(history): prettier 자동 포맷팅 (single-quote, multi-line, no logic change)

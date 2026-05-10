@@ -30,16 +30,9 @@ describe('QuoteSearchBar', () => {
 
   it('calls onSearchInputChange when typing', () => {
     const onSearchInputChange = vi.fn();
-    render(
-      <QuoteSearchBar
-        {...defaultProps}
-        onSearchInputChange={onSearchInputChange}
-      />,
-    );
+    render(<QuoteSearchBar {...defaultProps} onSearchInputChange={onSearchInputChange} />);
 
-    const input = screen.getByPlaceholderText(
-      'Search by reference no or destination...',
-    );
+    const input = screen.getByPlaceholderText('Search by reference no or destination...');
     fireEvent.change(input, { target: { value: 'a' } });
 
     expect(onSearchInputChange).toHaveBeenCalledWith('a');
@@ -66,13 +59,7 @@ describe('QuoteSearchBar', () => {
 
   it('calls onStatusFilter when status button clicked', async () => {
     const onStatusFilter = vi.fn();
-    render(
-      <QuoteSearchBar
-        {...defaultProps}
-        showFilters={true}
-        onStatusFilter={onStatusFilter}
-      />,
-    );
+    render(<QuoteSearchBar {...defaultProps} showFilters={true} onStatusFilter={onStatusFilter} />);
 
     await userEvent.click(screen.getByText('draft'));
 
@@ -80,13 +67,7 @@ describe('QuoteSearchBar', () => {
   });
 
   it('shows Clear all button when hasActiveFilters is true', () => {
-    render(
-      <QuoteSearchBar
-        {...defaultProps}
-        showFilters={true}
-        hasActiveFilters={true}
-      />,
-    );
+    render(<QuoteSearchBar {...defaultProps} showFilters={true} hasActiveFilters={true} />);
 
     expect(screen.getByText('Clear all')).toBeInTheDocument();
   });
@@ -119,11 +100,7 @@ describe('QuoteSearchBar', () => {
     it('calls onCurrencyChange when toggling to USD', async () => {
       const onCurrencyChange = vi.fn();
       render(
-        <QuoteSearchBar
-          {...defaultProps}
-          showFilters={true}
-          onCurrencyChange={onCurrencyChange}
-        />,
+        <QuoteSearchBar {...defaultProps} showFilters={true} onCurrencyChange={onCurrencyChange} />,
       );
       await userEvent.click(screen.getByRole('button', { name: 'USD' }));
       expect(onCurrencyChange).toHaveBeenCalledWith('USD');
@@ -132,11 +109,7 @@ describe('QuoteSearchBar', () => {
     it('calls onAmountChange with parsed numbers when typing min', () => {
       const onAmountChange = vi.fn();
       render(
-        <QuoteSearchBar
-          {...defaultProps}
-          showFilters={true}
-          onAmountChange={onAmountChange}
-        />,
+        <QuoteSearchBar {...defaultProps} showFilters={true} onAmountChange={onAmountChange} />,
       );
       fireEvent.change(screen.getByPlaceholderText('Min amount'), {
         target: { value: '500000' },
