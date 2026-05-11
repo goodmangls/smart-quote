@@ -15,7 +15,7 @@ BridgeLogis runs Smart Quote, a B2B express-shipping quoting SaaS for shippers, 
 
 - **Carriers**: UPS Express (Z1–Z10) + DHL Express (Z1–Z8). FedEx / EMS / sea freight 미지원.
 - **Auto-detected surcharges**: EAS / RAS (86 countries, 39,876 zip ranges, binary search), UPS Surge Fee (Israel KRW 4,722/kg, 중동 KRW 2,004/kg), DHL 19종 add-on, UPS 6종 add-on.
-- **FSC**: 매주 월요일 자동 갱신. 2026-04-27 기준 UPS 45.50% / DHL 48.00%.
+- **FSC**: 매주 월요일 자동 갱신. 최신값은 견적 시스템이 실시간 적용 (UPS/DHL 공식 페이지 기반, Admin DB → fallback 상수 순서로 우선).
 - **환율**: 하나은행 송금환율 매주 월요일 수동 갱신. 기본 1,400 KRW/USD (2026-05-07 기준).
 - **Margin engine**: 4단계 우선순위 룰 — P100 (per-user flat) > P90 (per-user weight) > P50 (nationality) > P0 (default). Markup 방식: `revenue = cost × (1 + margin%)`, KRW 100 단위 올림.
 - **Incoterm policy**: DAP only (UPS/DHL 익스프레스 본 제품의 유일 인코텀).

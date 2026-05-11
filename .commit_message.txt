@@ -1,1 +1,1 @@
-🤖 chore(seo): AI 가독 파일 추가 (llms.txt + pricing.md) + robots.txt/vercel.json 보강
+📝 chore(seo): llms.txt FSC 라인 outdated 절대값 제거 → 정책 명시 (P1, code-analyzer 권고)
