@@ -22,8 +22,8 @@ export const DEFAULT_EXCHANGE_RATE = 1400; // Manual: 하나은행 월요일 09�
 // DHL FSC : 매월 1일 업데이트
 //   출처: https://mydhl.express.dhl/kr/ko/ship/surcharges.html#/fuel_surcharge
 // ============================================================
-export const DEFAULT_FSC_PERCENT = 47.25; // UPS FSC, effective 2026-05-04
-export const DEFAULT_FSC_PERCENT_DHL = 47.0; // DHL FSC, effective 2026-05-04
+export const DEFAULT_FSC_PERCENT = 49.25; // UPS FSC, effective 2026-05-11
+export const DEFAULT_FSC_PERCENT_DHL = 46.75; // DHL FSC, effective 2026-05-11
 export const UPS_FSC_URL =
   'https://www.ups.com/kr/ko/support/shipping-support/shipping-costs-rates/fuel-surcharges.page';
 export const UPS_RATES_HUB_URL =

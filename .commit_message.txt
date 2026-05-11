@@ -1,1 +1,1 @@
-📝 chore(seo): llms.txt FSC 라인 outdated 절대값 제거 → 정책 명시 (P1, code-analyzer 권고)
+🔀 chore: origin/main 동기화 (FSC main fast-track 7236a0d + llms.txt P1 fix 3b2cbd6 통합)
