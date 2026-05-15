@@ -1,1 +1,1 @@
-📝 docs(plan): smart-quote-input-validation plan 신규 (P0 #1, Zod + Rails 검증 강화)
+📐 docs(design): smart-quote-input-validation Phase A (Frontend Zod) design 작성
