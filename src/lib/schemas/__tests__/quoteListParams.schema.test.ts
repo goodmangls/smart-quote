@@ -20,6 +20,14 @@ describe('quoteListParamsSchema — valid', () => {
     });
     expect(r.success).toBe(true);
   });
+
+  // Regression (PR #16 drift): every QuoteStatus union member must pass.
+  it.each(['draft', 'sent', 'accepted', 'rejected', 'confirmed', 'expired'])(
+    'accepts status "%s"',
+    (status) => {
+      expect(quoteListParamsSchema.safeParse({ status }).success).toBe(true);
+    },
+  );
 });
 
 describe('quoteListParamsSchema — date format', () => {

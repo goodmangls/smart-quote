@@ -1,4 +1,5 @@
 import { quoteInputSchema, cargoItemSchema } from '../quoteInput.schema';
+import { Incoterm, PackingType } from '@/types';
 
 const validItem = {
   id: 'item-1',
@@ -13,8 +14,8 @@ const validInput = {
   originCountry: 'KR',
   destinationCountry: 'US',
   destinationZip: '10001',
-  incoterm: 'DAP',
-  packingType: 'Carton Box',
+  incoterm: Incoterm.DAP,
+  packingType: PackingType.WOODEN_BOX,
   items: [validItem],
   marginPercent: 15,
   dutyTaxEstimate: 0,
@@ -84,6 +85,18 @@ describe('quoteInputSchema — valid', () => {
       expect(r.data.destinationZip).toBe('');
       expect(r.data.dutyTaxEstimate).toBe(0);
     }
+  });
+});
+
+describe('quoteInputSchema — enum binding (regression: PR #16 drift)', () => {
+  // Every real Incoterm enum member must pass — guards against schema/enum drift.
+  it.each(Object.values(Incoterm))('accepts Incoterm.%s', (incoterm) => {
+    expect(quoteInputSchema.safeParse({ ...validInput, incoterm }).success).toBe(true);
+  });
+
+  // Every real PackingType enum member must pass.
+  it.each(Object.values(PackingType))('accepts PackingType.%s', (packingType) => {
+    expect(quoteInputSchema.safeParse({ ...validInput, packingType }).success).toBe(true);
   });
 });
 

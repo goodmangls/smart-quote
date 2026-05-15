@@ -1,1 +1,1 @@
-💄 style(validation): quoteListParams.schema prettier 정렬 (datePatternSchema 1줄)
+🚨 fix(validation): Zod enum 불일치 hotfix — incoterm/packingType/status (PR #16 회귀)

@@ -1,6 +1,14 @@
 import { z } from 'zod';
 
-export const quoteStatusSchema = z.enum(['draft', 'sent', 'accepted', 'rejected', 'expired']);
+// Must stay in sync with QuoteStatus union in @/types
+export const quoteStatusSchema = z.enum([
+  'draft',
+  'sent',
+  'accepted',
+  'rejected',
+  'confirmed',
+  'expired',
+]);
 export const amountCurrencySchema = z.enum(['KRW', 'USD']);
 
 const datePatternSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'date must be YYYY-MM-DD');
