@@ -1,1 +1,1 @@
-📐 docs(design): smart-quote-input-validation Phase A (Frontend Zod) design 작성
+🔒 feat(validation): Frontend Zod schema 도입 — QuoteInput + QuoteListParams 런타임 검증 (P0 #1 Phase A)

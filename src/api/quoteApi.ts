@@ -9,8 +9,32 @@ import {
 } from '@/types';
 import { request, ApiError, API_URL, AUTH_EXPIRED_EVENT } from './apiClient';
 import { clearAllTokens, getAccessToken } from '@/lib/authStorage';
+import * as Sentry from '@sentry/browser';
+import { quoteInputSchema } from '@/lib/schemas/quoteInput.schema';
+import { quoteListParamsSchema } from '@/lib/schemas/quoteListParams.schema';
+import { zodErrorToString } from '@/lib/schemas/zodError';
 
 export { ApiError as QuoteApiError };
+
+// Runtime input validation — fails fast with a user-friendly message
+// before hitting the network. See docs/02-design/.../smart-quote-input-validation.
+function assertValidQuoteInput(input: QuoteInput): void {
+  const parsed = quoteInputSchema.safeParse(input);
+  if (!parsed.success) {
+    const msg = zodErrorToString(parsed.error);
+    Sentry.captureMessage(`Invalid QuoteInput: ${msg}`, 'warning');
+    throw new Error(`입력 검증 실패: ${msg}`);
+  }
+}
+
+function assertValidListParams(params: QuoteListParams): void {
+  const parsed = quoteListParamsSchema.safeParse(params);
+  if (!parsed.success) {
+    const msg = zodErrorToString(parsed.error);
+    Sentry.captureMessage(`Invalid QuoteListParams: ${msg}`, 'warning');
+    throw new Error(`조회 조건 검증 실패: ${msg}`);
+  }
+}
 
 // Maps backend breakdown fields (upsBase) to frontend generic names (intlBase).
 // Handles both old saved quotes and future field names.
@@ -51,6 +75,7 @@ export function mapBreakdown(raw: RawBreakdown): CostBreakdown {
 // ── Existing: stateless calculation ──
 
 export const fetchQuote = async (input: QuoteInput): Promise<QuoteResult> => {
+  assertValidQuoteInput(input);
   const raw = await request<QuoteResult & { breakdown: RawBreakdown }>('/api/v1/quotes/calculate', {
     method: 'POST',
     body: JSON.stringify(input),
@@ -61,6 +86,7 @@ export const fetchQuote = async (input: QuoteInput): Promise<QuoteResult> => {
 // ── Quote History CRUD ──
 
 export const saveQuote = async (input: QuoteInput, notes?: string): Promise<QuoteDetail> => {
+  assertValidQuoteInput(input);
   // Send only input fields — backend recalculates result via QuoteCalculator
   return request<QuoteDetail>('/api/v1/quotes', {
     method: 'POST',
@@ -69,6 +95,7 @@ export const saveQuote = async (input: QuoteInput, notes?: string): Promise<Quot
 };
 
 export const listQuotes = async (params: QuoteListParams = {}): Promise<QuoteListResponse> => {
+  assertValidListParams(params);
   const searchParams = new URLSearchParams();
   if (params.page != null) searchParams.set('page', String(params.page));
   if (params.perPage != null) searchParams.set('per_page', String(params.perPage));
@@ -122,6 +149,7 @@ export const exportQuotes = async (
   params: QuoteListParams = {},
   format: 'csv' | 'xlsx' = 'csv',
 ): Promise<void> => {
+  assertValidListParams(params);
   const searchParams = new URLSearchParams();
   if (params.q) searchParams.set('q', params.q);
   if (params.destinationCountry) searchParams.set('destination_country', params.destinationCountry);
