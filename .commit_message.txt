@@ -1,1 +1,1 @@
-🔧 chore(bundle): authStorage dynamic import 제거 — 빌드 경고 해소 + 청크 최적화 정상화
+📝 docs(plan): smart-quote-input-validation plan 신규 (P0 #1, Zod + Rails 검증 강화)
