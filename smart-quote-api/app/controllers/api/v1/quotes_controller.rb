@@ -134,13 +134,33 @@ module Api
         render json: { error: { code: "NOT_FOUND", message: "Quote not found" } }, status: :not_found
       end
 
-      # GET /api/v1/quotes/export.csv
+      # GET /api/v1/quotes/export(.csv|.xlsx)
       def export
-        filtered_scope = QuoteSearcher.call(scoped_quotes, params)
-        result = QuoteExporter.call(filtered_scope)
+        export_filters = params.permit(
+          :q, :destination_country, :date_from, :date_to, :status,
+          :min_amount, :max_amount, :amount_currency
+        ).to_h
+        filtered_scope = QuoteSearcher.call(scoped_quotes, export_filters)
+        format = request.format.symbol == :xlsx ? :xlsx : :csv
+        result = QuoteExporter.call(filtered_scope, format: format)
 
-        AuditLog.track!(user: current_user, action: "quote.exported", resource: Quote.new(id: 0), metadata: { count: result[:count], filters: params.permit(:q, :destination_country, :date_from, :date_to, :status).to_h }, ip_address: request.remote_ip)
-        send_data result[:csv_data], filename: "quotes-#{Date.current}.csv", type: "text/csv"
+        AuditLog.track!(
+          user: current_user,
+          action: "quote.exported",
+          resource: Quote.new(id: 0),
+          metadata: { count: result[:count], format: format, filters: export_filters },
+          ip_address: request.remote_ip
+        )
+
+        if format == :xlsx
+          send_data result[:xlsx_data],
+            filename: "quotes-#{Date.current}.xlsx",
+            type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        else
+          send_data result[:csv_data], filename: "quotes-#{Date.current}.csv", type: "text/csv"
+        end
+      rescue QuoteSearcher::InvalidRangeError => e
+        render json: { error: { code: "INVALID_AMOUNT_RANGE", message: e.message } }, status: :unprocessable_entity
       rescue QuoteExporter::TooLargeError => e
         render json: { error: { code: "EXPORT_TOO_LARGE", message: e.message } }, status: :unprocessable_entity
       end

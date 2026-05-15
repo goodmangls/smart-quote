@@ -360,5 +360,35 @@ RSpec.describe "Api::V1::Quotes", type: :request do
       csv_lines = response.body.split("\n")
       expect(csv_lines.length).to eq(2) # header + 1 own quote
     end
+
+    it "returns xlsx when format=xlsx" do
+      get "/api/v1/quotes/export.xlsx", headers: admin_headers
+
+      expect(response).to have_http_status(:ok)
+      expect(response.content_type).to start_with("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+      expect(response.body[0, 2]).to eq("PK") # zip magic bytes
+    end
+
+    it "filters export by amount range (KRW)" do
+      hi = create(:quote, user: admin, total_quote_amount: 10_000_000, total_quote_amount_usd: 7_000.00)
+      create(:quote, user: admin, total_quote_amount: 50_000, total_quote_amount_usd: 35.00)
+
+      get "/api/v1/quotes/export",
+        params: { min_amount: 5_000_000, amount_currency: "KRW" },
+        headers: admin_headers
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include(hi.reference_no)
+      expect(response.body.lines.size).to eq(2) # header + 1 row
+    end
+
+    it "returns 422 when min_amount > max_amount" do
+      get "/api/v1/quotes/export",
+        params: { min_amount: 1_000_000, max_amount: 100, amount_currency: "KRW" },
+        headers: admin_headers
+
+      expect(response).to have_http_status(:unprocessable_entity)
+      expect(JSON.parse(response.body).dig("error", "code")).to eq("INVALID_AMOUNT_RANGE")
+    end
   end
 end

@@ -40,6 +40,13 @@ class Quote < ApplicationRecord
   scope :search_text, ->(q) {
     where("reference_no ILIKE :q OR destination_country ILIKE :q", q: "%#{sanitize_sql_like(q)}%") if q.present?
   }
+  scope :by_amount_range, ->(min:, max:, currency:) {
+    column = currency == "USD" ? :total_quote_amount_usd : :total_quote_amount
+    s = all
+    s = s.where("#{column} >= ?", min) if min.present?
+    s = s.where("#{column} <= ?", max) if max.present?
+    s
+  }
 
   before_validation :generate_reference_no, on: :create
   before_create :set_validity_date

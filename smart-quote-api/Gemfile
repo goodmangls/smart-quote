@@ -33,6 +33,9 @@ gem "rack-attack"
 gem "csv"
 gem "rss", "~> 0.3.2"
 
+# Excel (xlsx) export
+gem "caxlsx", "~> 4.1"
+
 # Windows does not include zoneinfo files
 gem "tzinfo-data", platforms: %i[ windows jruby ]
 

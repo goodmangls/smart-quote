@@ -143,5 +143,40 @@ RSpec.describe Quote, type: :model do
         expect(Quote.search_text(nil).count).to eq(1)
       end
     end
+
+    describe ".by_amount_range" do
+      let!(:cheap)  { create(:quote, total_quote_amount: 100_000,   total_quote_amount_usd: 70.00) }
+      let!(:medium) { create(:quote, total_quote_amount: 1_000_000, total_quote_amount_usd: 700.00) }
+      let!(:pricey) { create(:quote, total_quote_amount: 5_000_000, total_quote_amount_usd: 3_500.00) }
+
+      it "filters by KRW range when currency=KRW" do
+        result = Quote.by_amount_range(min: 500_000, max: 2_000_000, currency: "KRW")
+        expect(result).to contain_exactly(medium)
+      end
+
+      it "filters by USD range when currency=USD" do
+        result = Quote.by_amount_range(min: 500, max: 1_000, currency: "USD")
+        expect(result).to contain_exactly(medium)
+      end
+
+      it "applies only min when max is nil" do
+        result = Quote.by_amount_range(min: 800_000, max: nil, currency: "KRW")
+        expect(result).to contain_exactly(medium, pricey)
+      end
+
+      it "applies only max when min is nil" do
+        result = Quote.by_amount_range(min: nil, max: 800_000, currency: "KRW")
+        expect(result).to contain_exactly(cheap)
+      end
+
+      it "returns all when both nil" do
+        expect(Quote.by_amount_range(min: nil, max: nil, currency: "KRW").count).to eq(3)
+      end
+
+      it "defaults to KRW when currency is unknown" do
+        result = Quote.by_amount_range(min: 500_000, max: 2_000_000, currency: "EUR")
+        expect(result).to contain_exactly(medium)
+      end
+    end
   end
 end

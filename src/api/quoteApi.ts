@@ -1,6 +1,14 @@
-import { QuoteInput, QuoteResult, QuoteDetail, QuoteListResponse, QuoteListParams, CostBreakdown, QuoteStatus } from "@/types";
-import { request, ApiError, API_URL, AUTH_EXPIRED_EVENT } from "./apiClient";
-import { clearAllTokens, getAccessToken } from "@/lib/authStorage";
+import {
+  QuoteInput,
+  QuoteResult,
+  QuoteDetail,
+  QuoteListResponse,
+  QuoteListParams,
+  CostBreakdown,
+  QuoteStatus,
+} from '@/types';
+import { request, ApiError, API_URL, AUTH_EXPIRED_EVENT } from './apiClient';
+import { clearAllTokens, getAccessToken } from '@/lib/authStorage';
 
 export { ApiError as QuoteApiError };
 
@@ -52,10 +60,7 @@ export const fetchQuote = async (input: QuoteInput): Promise<QuoteResult> => {
 
 // ── Quote History CRUD ──
 
-export const saveQuote = async (
-  input: QuoteInput,
-  notes?: string,
-): Promise<QuoteDetail> => {
+export const saveQuote = async (input: QuoteInput, notes?: string): Promise<QuoteDetail> => {
   // Send only input fields — backend recalculates result via QuoteCalculator
   return request<QuoteDetail>('/api/v1/quotes', {
     method: 'POST',
@@ -63,9 +68,7 @@ export const saveQuote = async (
   });
 };
 
-export const listQuotes = async (
-  params: QuoteListParams = {}
-): Promise<QuoteListResponse> => {
+export const listQuotes = async (params: QuoteListParams = {}): Promise<QuoteListResponse> => {
   const searchParams = new URLSearchParams();
   if (params.page != null) searchParams.set('page', String(params.page));
   if (params.perPage != null) searchParams.set('per_page', String(params.perPage));
@@ -74,6 +77,9 @@ export const listQuotes = async (
   if (params.dateFrom) searchParams.set('date_from', params.dateFrom);
   if (params.dateTo) searchParams.set('date_to', params.dateTo);
   if (params.status) searchParams.set('status', params.status);
+  if (params.minAmount != null) searchParams.set('min_amount', String(params.minAmount));
+  if (params.maxAmount != null) searchParams.set('max_amount', String(params.maxAmount));
+  if (params.amountCurrency) searchParams.set('amount_currency', params.amountCurrency);
 
   const qs = searchParams.toString();
   return request<QuoteListResponse>(`/api/v1/quotes${qs ? `?${qs}` : ''}`);
@@ -87,7 +93,7 @@ export const getQuote = async (id: number): Promise<QuoteDetail> => {
 export const updateQuoteStatus = async (
   id: number,
   status: QuoteStatus,
-  notes?: string
+  notes?: string,
 ): Promise<QuoteDetail> => {
   const raw = await request<QuoteDetail & { breakdown: RawBreakdown }>(`/api/v1/quotes/${id}`, {
     method: 'PATCH',
@@ -100,7 +106,7 @@ export const sendQuoteEmail = async (
   id: number,
   recipientEmail: string,
   recipientName?: string,
-  message?: string
+  message?: string,
 ): Promise<{ success: boolean; message: string }> => {
   return request<{ success: boolean; message: string }>(`/api/v1/quotes/${id}/send_email`, {
     method: 'POST',
@@ -112,8 +118,9 @@ export const deleteQuote = async (id: number): Promise<void> => {
   return request<void>(`/api/v1/quotes/${id}`, { method: 'DELETE' });
 };
 
-export const exportQuotesCsv = async (
-  params: QuoteListParams = {}
+export const exportQuotes = async (
+  params: QuoteListParams = {},
+  format: 'csv' | 'xlsx' = 'csv',
 ): Promise<void> => {
   const searchParams = new URLSearchParams();
   if (params.q) searchParams.set('q', params.q);
@@ -121,17 +128,22 @@ export const exportQuotesCsv = async (
   if (params.dateFrom) searchParams.set('date_from', params.dateFrom);
   if (params.dateTo) searchParams.set('date_to', params.dateTo);
   if (params.status) searchParams.set('status', params.status);
+  if (params.minAmount != null) searchParams.set('min_amount', String(params.minAmount));
+  if (params.maxAmount != null) searchParams.set('max_amount', String(params.maxAmount));
+  if (params.amountCurrency) searchParams.set('amount_currency', params.amountCurrency);
 
   const qs = searchParams.toString();
   const token = getAccessToken();
-  const headers: HeadersInit = { Accept: 'text/csv' };
+  const accept =
+    format === 'xlsx'
+      ? 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      : 'text/csv';
+  const headers: HeadersInit = { Accept: accept };
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;
   }
-  const response = await fetch(
-    `${API_URL}/api/v1/quotes/export${qs ? `?${qs}` : ''}`,
-    { headers }
-  );
+  const url = `${API_URL}/api/v1/quotes/export.${format}${qs ? `?${qs}` : ''}`;
+  const response = await fetch(url, { headers });
 
   if (!response.ok) {
     if (response.status === 401) {
@@ -142,20 +154,28 @@ export const exportQuotesCsv = async (
     if (response.status === 403) {
       throw new ApiError(response.status, 'Access denied');
     }
+    if (response.status === 422) {
+      const body = await response.json().catch(() => null);
+      throw new ApiError(response.status, body?.error?.message ?? 'Invalid filter');
+    }
     if (response.status >= 500) {
       throw new ApiError(response.status, 'Server error');
     }
-    throw new ApiError(response.status, 'Failed to export CSV');
+    throw new ApiError(response.status, `Failed to export ${format.toUpperCase()}`);
   }
 
   const blob = await response.blob();
-  const url = URL.createObjectURL(blob);
+  const objectUrl = URL.createObjectURL(blob);
   try {
     const a = document.createElement('a');
-    a.href = url;
-    a.download = `quotes-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.href = objectUrl;
+    a.download = `quotes-${new Date().toISOString().slice(0, 10)}.${format}`;
     a.click();
   } finally {
-    URL.revokeObjectURL(url);
+    URL.revokeObjectURL(objectUrl);
   }
 };
+
+// Backward-compat alias (deprecated — prefer exportQuotes).
+export const exportQuotesCsv = (params: QuoteListParams = {}): Promise<void> =>
+  exportQuotes(params, 'csv');

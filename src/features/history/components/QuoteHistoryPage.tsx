@@ -1,8 +1,24 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import * as Sentry from '@sentry/browser';
-import { QuoteSummary, QuoteDetail, QuoteListParams, QuoteStatus, Pagination } from '@/types';
-import { listQuotes, getQuote, deleteQuote, exportQuotesCsv } from '@/api/quoteApi';
-import { Download, Filter, FileText, DollarSign, TrendingUp, CheckCircle, Loader2 } from 'lucide-react';
+import {
+  AmountCurrency,
+  QuoteSummary,
+  QuoteDetail,
+  QuoteListParams,
+  QuoteStatus,
+  Pagination,
+} from '@/types';
+import { listQuotes, getQuote, deleteQuote, exportQuotes } from '@/api/quoteApi';
+import {
+  Download,
+  Filter,
+  FileText,
+  DollarSign,
+  TrendingUp,
+  CheckCircle,
+  Loader2,
+  ChevronDown,
+} from 'lucide-react';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { useToast } from '@/components/ui/Toast';
 import { formatNum } from '@/lib/format';
@@ -18,7 +34,11 @@ interface QuoteHistoryPageProps {
 export const QuoteHistoryPage: React.FC<QuoteHistoryPageProps> = ({ onDuplicate }) => {
   const [quotes, setQuotes] = useState<QuoteSummary[]>([]);
   const [pagination, setPagination] = useState<Pagination | null>(null);
-  const [params, setParams] = useState<QuoteListParams>({ page: 1, perPage: 20 });
+  const [params, setParams] = useState<QuoteListParams>({
+    page: 1,
+    perPage: 20,
+    amountCurrency: 'KRW',
+  });
   const [searchInput, setSearchInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -26,7 +46,20 @@ export const QuoteHistoryPage: React.FC<QuoteHistoryPageProps> = ({ onDuplicate 
   const [isLoadingDetail, setIsLoadingDetail] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<{ id: number; refNo: string } | null>(null);
+  const [exportMenuOpen, setExportMenuOpen] = useState(false);
+  const exportMenuRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
+
+  useEffect(() => {
+    if (!exportMenuOpen) return;
+    const handler = (e: MouseEvent) => {
+      if (exportMenuRef.current && !exportMenuRef.current.contains(e.target as Node)) {
+        setExportMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [exportMenuOpen]);
 
   const fetchList = useCallback(async () => {
     setIsLoading(true);
@@ -43,19 +76,21 @@ export const QuoteHistoryPage: React.FC<QuoteHistoryPageProps> = ({ onDuplicate 
     }
   }, [params]);
 
-  useEffect(() => { fetchList(); }, [fetchList]);
+  useEffect(() => {
+    fetchList();
+  }, [fetchList]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    setParams(prev => ({ ...prev, q: searchInput || undefined, page: 1 }));
+    setParams((prev) => ({ ...prev, q: searchInput || undefined, page: 1 }));
   };
 
   const handlePageChange = (page: number) => {
-    setParams(prev => ({ ...prev, page }));
+    setParams((prev) => ({ ...prev, page }));
   };
 
   const handleStatusFilter = (status: QuoteStatus | undefined) => {
-    setParams(prev => ({ ...prev, status, page: 1 }));
+    setParams((prev) => ({ ...prev, status, page: 1 }));
   };
 
   const handleView = async (id: number) => {
@@ -89,60 +124,103 @@ export const QuoteHistoryPage: React.FC<QuoteHistoryPageProps> = ({ onDuplicate 
     }
   };
 
-  const handleExport = async () => {
+  const handleExport = async (format: 'csv' | 'xlsx') => {
     try {
-      await exportQuotesCsv(params);
-      toast('success', 'CSV exported successfully');
+      await exportQuotes(params, format);
+      toast('success', `${format.toUpperCase()} exported successfully`);
     } catch (e) {
       Sentry.captureException(e);
-      toast('error', 'Failed to export CSV');
+      const message = e instanceof Error ? e.message : `Failed to export ${format.toUpperCase()}`;
+      toast('error', message);
     }
+  };
+
+  const handleAmountChange = ({
+    min,
+    max,
+  }: {
+    min: number | undefined;
+    max: number | undefined;
+  }) => {
+    setParams((prev) => ({ ...prev, minAmount: min, maxAmount: max, page: 1 }));
+  };
+
+  const handleCurrencyChange = (next: AmountCurrency) => {
+    setParams((prev) => ({ ...prev, amountCurrency: next, page: 1 }));
   };
 
   const clearFilters = () => {
     setSearchInput('');
-    setParams({ page: 1, perPage: 20 });
+    setParams({ page: 1, perPage: 20, amountCurrency: 'KRW' });
   };
 
-  const hasActiveFilters = !!(params.q || params.status || params.destinationCountry || params.dateFrom || params.dateTo);
+  const hasActiveFilters = !!(
+    params.q ||
+    params.status ||
+    params.destinationCountry ||
+    params.dateFrom ||
+    params.dateTo ||
+    params.minAmount != null ||
+    params.maxAmount != null
+  );
 
   const stats = useMemo(() => {
     const now = new Date();
-    const thisMonth = quotes.filter(q => {
+    const thisMonth = quotes.filter((q) => {
       const d = new Date(q.createdAt);
       return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
     });
     const totalAmount = thisMonth.reduce((sum, q) => sum + q.totalQuoteAmount, 0);
-    const avgMargin = thisMonth.length > 0
-      ? thisMonth.reduce((sum, q) => sum + q.profitMargin, 0) / thisMonth.length
-      : 0;
-    const acceptedCount = quotes.filter(q => q.status === 'accepted').length;
-    const completedCount = quotes.filter(q => q.status === 'accepted' || q.status === 'rejected').length;
+    const avgMargin =
+      thisMonth.length > 0
+        ? thisMonth.reduce((sum, q) => sum + q.profitMargin, 0) / thisMonth.length
+        : 0;
+    const acceptedCount = quotes.filter((q) => q.status === 'accepted').length;
+    const completedCount = quotes.filter(
+      (q) => q.status === 'accepted' || q.status === 'rejected',
+    ).length;
     const winRate = completedCount > 0 ? (acceptedCount / completedCount) * 100 : 0;
     return { count: thisMonth.length, totalAmount, avgMargin, winRate };
   }, [quotes]);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8'>
       {/* Stats Cards */}
       {quotes.length > 0 && (
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-          <StatCard icon={<FileText className="w-4 h-4 text-brand-blue-500" />} label="This Month" value={String(stats.count)} />
-          <StatCard icon={<DollarSign className="w-4 h-4 text-green-500" />} label="Total Amount" value={`${formatNum(stats.totalAmount)}`} sub="KRW" />
-          <StatCard icon={<TrendingUp className="w-4 h-4 text-blue-500" />} label="Avg Margin" value={`${stats.avgMargin.toFixed(1)}%`} />
-          <StatCard icon={<CheckCircle className="w-4 h-4 text-emerald-500" />} label="Win Rate" value={`${stats.winRate.toFixed(0)}%`} />
+        <div className='grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6'>
+          <StatCard
+            icon={<FileText className='w-4 h-4 text-brand-blue-500' />}
+            label='This Month'
+            value={String(stats.count)}
+          />
+          <StatCard
+            icon={<DollarSign className='w-4 h-4 text-green-500' />}
+            label='Total Amount'
+            value={`${formatNum(stats.totalAmount)}`}
+            sub='KRW'
+          />
+          <StatCard
+            icon={<TrendingUp className='w-4 h-4 text-blue-500' />}
+            label='Avg Margin'
+            value={`${stats.avgMargin.toFixed(1)}%`}
+          />
+          <StatCard
+            icon={<CheckCircle className='w-4 h-4 text-emerald-500' />}
+            label='Win Rate'
+            value={`${stats.winRate.toFixed(0)}%`}
+          />
         </div>
       )}
 
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
+      <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4'>
         <div>
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white">Quote History</h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+          <h2 className='text-xl font-bold text-gray-900 dark:text-white'>Quote History</h2>
+          <p className='text-sm text-gray-500 dark:text-gray-400'>
             {pagination ? `${pagination.totalCount} quotes total` : 'Loading...'}
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className='flex items-center gap-2'>
           <button
             onClick={() => setShowFilters(!showFilters)}
             className={`hidden sm:flex items-center gap-1.5 px-3 py-2 text-sm rounded-lg border transition-colors ${
@@ -151,17 +229,52 @@ export const QuoteHistoryPage: React.FC<QuoteHistoryPageProps> = ({ onDuplicate 
                 : 'border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'
             }`}
           >
-            <Filter className="w-4 h-4" />
+            <Filter className='w-4 h-4' />
             Filters
-            {hasActiveFilters && <span className="w-2 h-2 bg-brand-blue-500 rounded-full" />}
+            {hasActiveFilters && <span className='w-2 h-2 bg-brand-blue-500 rounded-full' />}
           </button>
-          <button
-            onClick={handleExport}
-            className="flex items-center gap-1.5 px-3 py-2 text-sm rounded-lg border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-          >
-            <Download className="w-4 h-4" />
-            Export CSV
-          </button>
+          <div className='relative' ref={exportMenuRef}>
+            <button
+              type='button'
+              onClick={() => setExportMenuOpen((v) => !v)}
+              aria-haspopup='menu'
+              aria-expanded={exportMenuOpen}
+              className='flex items-center gap-1.5 px-3 py-2 text-sm rounded-lg border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors'
+            >
+              <Download className='w-4 h-4' />
+              Export
+              <ChevronDown className='w-3.5 h-3.5' />
+            </button>
+            {exportMenuOpen && (
+              <div
+                role='menu'
+                className='absolute right-0 mt-1 w-32 rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-lg z-10'
+              >
+                <button
+                  type='button'
+                  role='menuitem'
+                  onClick={() => {
+                    setExportMenuOpen(false);
+                    void handleExport('csv');
+                  }}
+                  className='block w-full px-3 py-2 text-left text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700'
+                >
+                  CSV
+                </button>
+                <button
+                  type='button'
+                  role='menuitem'
+                  onClick={() => {
+                    setExportMenuOpen(false);
+                    void handleExport('xlsx');
+                  }}
+                  className='block w-full px-3 py-2 text-left text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700'
+                >
+                  Excel
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -176,17 +289,22 @@ export const QuoteHistoryPage: React.FC<QuoteHistoryPageProps> = ({ onDuplicate 
         onToggleFilters={() => setShowFilters(!showFilters)}
         hasActiveFilters={hasActiveFilters}
         onClearFilters={clearFilters}
+        minAmount={params.minAmount}
+        maxAmount={params.maxAmount}
+        amountCurrency={params.amountCurrency ?? 'KRW'}
+        onAmountChange={handleAmountChange}
+        onCurrencyChange={handleCurrencyChange}
       />
 
       {/* Error */}
       {error && (
-        <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-sm text-red-700 dark:text-red-300">
+        <div className='mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-sm text-red-700 dark:text-red-300'>
           {error}
         </div>
       )}
 
       {/* Table + Pagination */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm">
+      <div className='bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm'>
         <QuoteHistoryTable
           quotes={quotes}
           isLoading={isLoading}
@@ -194,20 +312,17 @@ export const QuoteHistoryPage: React.FC<QuoteHistoryPageProps> = ({ onDuplicate 
           onView={handleView}
           onDelete={handleDelete}
         />
-        {pagination && (
-          <QuotePagination
-            pagination={pagination}
-            onPageChange={handlePageChange}
-          />
-        )}
+        {pagination && <QuotePagination pagination={pagination} onPageChange={handlePageChange} />}
       </div>
 
       {/* Loading Overlay */}
       {isLoadingDetail && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
-          <div className="flex items-center gap-3 bg-white dark:bg-gray-800 rounded-xl px-6 py-4 shadow-lg">
-            <Loader2 className="w-5 h-5 animate-spin text-brand-blue-500" />
-            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Loading quote...</span>
+        <div className='fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm'>
+          <div className='flex items-center gap-3 bg-white dark:bg-gray-800 rounded-xl px-6 py-4 shadow-lg'>
+            <Loader2 className='w-5 h-5 animate-spin text-brand-blue-500' />
+            <span className='text-sm font-medium text-gray-700 dark:text-gray-300'>
+              Loading quote...
+            </span>
           </div>
         </div>
       )}
@@ -224,9 +339,9 @@ export const QuoteHistoryPage: React.FC<QuoteHistoryPageProps> = ({ onDuplicate 
 
       <ConfirmDialog
         open={!!deleteTarget}
-        title="Delete Quote"
+        title='Delete Quote'
         message={`Delete quote ${deleteTarget?.refNo}? This cannot be undone.`}
-        confirmLabel="Delete"
+        confirmLabel='Delete'
         onConfirm={handleDeleteConfirm}
         onCancel={() => setDeleteTarget(null)}
       />
@@ -234,15 +349,24 @@ export const QuoteHistoryPage: React.FC<QuoteHistoryPageProps> = ({ onDuplicate 
   );
 };
 
-const StatCard: React.FC<{ icon: React.ReactNode; label: string; value: string; sub?: string }> = ({ icon, label, value, sub }) => (
-  <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 shadow-sm">
-    <div className="flex items-center gap-1.5 mb-1">
+const StatCard: React.FC<{ icon: React.ReactNode; label: string; value: string; sub?: string }> = ({
+  icon,
+  label,
+  value,
+  sub,
+}) => (
+  <div className='bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 shadow-sm'>
+    <div className='flex items-center gap-1.5 mb-1'>
       {icon}
-      <span className="text-[10px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{label}</span>
+      <span className='text-[10px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider'>
+        {label}
+      </span>
     </div>
-    <p className="text-lg font-bold text-gray-900 dark:text-white tabular-nums">
+    <p className='text-lg font-bold text-gray-900 dark:text-white tabular-nums'>
       {value}
-      {sub && <span className="text-xs text-gray-400 dark:text-gray-400 ml-1 font-normal">{sub}</span>}
+      {sub && (
+        <span className='text-xs text-gray-400 dark:text-gray-400 ml-1 font-normal'>{sub}</span>
+      )}
     </p>
   </div>
 );

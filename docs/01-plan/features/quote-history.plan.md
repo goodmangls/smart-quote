@@ -1,5 +1,7 @@
 # Quote History & DB Persistence Planning Document
 
+> ✅ **2026-05-10 분리 사이클 완료** — FR-04 (amount range filter, KRW/USD 토글) + FR-07 (Excel/xlsx export) 두 누락 항목은 [`docs/superpowers/specs/2026-05-10-quote-history-fr04-fr07-design.md`](../../superpowers/specs/2026-05-10-quote-history-fr04-fr07-design.md) + [`docs/superpowers/plans/2026-05-10-quote-history-fr04-fr07.md`](../../superpowers/plans/2026-05-10-quote-history-fr04-fr07.md) 사이클로 분리 · 구현 완료. FR-01~FR-09 의 나머지 항목(Save/List+Pagination/Detail/Load-as-template/Delete/Reference No./Sent status 등)은 본 plan 작성(2026-02-14) 이후 production 에 이미 구현됨.
+
 > **Summary**: Add database persistence to save, browse, and manage quote calculations
 >
 > **Project**: Smart Quote System (j-ways-smart-quote-system)
