@@ -1,1 +1,1 @@
-📝 docs(report): insights-admin-rails-auth PDCA 완료 보고서 보존 (PR #12 2026-05-06 머지 산출물)
+🔖 chore(bkit): 세션 메타데이터 갱신 (sessionCount 67→69)
