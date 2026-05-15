@@ -1,1 +1,1 @@
-🔖 chore(bkit): 세션 메타데이터 갱신 (sessionCount 67→69)
+🔧 chore(bundle): authStorage dynamic import 제거 — 빌드 경고 해소 + 청크 최적화 정상화

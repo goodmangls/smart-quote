@@ -3,6 +3,7 @@ import * as Sentry from '@sentry/browser';
 import { API_URL, AUTH_EXPIRED_EVENT } from '@/api/apiClient';
 import {
   clearAllTokens,
+  getAccessToken,
   getRefreshToken,
   setAccessToken,
   setRefreshToken,
@@ -252,7 +253,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const updatePassword = useCallback(
     async (currentPassword: string, newPassword: string): Promise<AuthResult> => {
       try {
-        const { getAccessToken } = await import('@/lib/authStorage');
         const token = getAccessToken();
         if (!token) throw new Error('No token found');
 
