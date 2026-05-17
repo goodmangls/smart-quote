@@ -1,1 +1,1 @@
-🚨 fix(validation): Zod enum 불일치 hotfix — incoterm/packingType/status (PR #16 회귀)
+🔄 FSC 요율 업데이트: UPS 49.5% / DHL 47.25% (2026-05-18 기준)
