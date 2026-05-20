@@ -1,1 +1,1 @@
-♻️ refactor(history): QuoteHistoryTableParts 추출 (StatusPill/SurchargeStaleBadge/ExpiryBadge/MarginText/RowActions) — Phase B
+♻️ refactor(history): QuoteHistoryTable mobile/desktop 뷰 분리 — 외부 인터페이스 보존 (Phase C)

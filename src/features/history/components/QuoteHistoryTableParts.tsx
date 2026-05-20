@@ -35,8 +35,8 @@ export function StatusPill({ status }: StatusPillProps) {
 
 export function SurchargeStaleBadge() {
   return (
-    <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-medium bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
-      <AlertTriangle className="w-2.5 h-2.5" />
+    <span className='inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-medium bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'>
+      <AlertTriangle className='w-2.5 h-2.5' />
       재확인
     </span>
   );
@@ -47,7 +47,8 @@ export function SurchargeStaleBadge() {
 // ─────────────────────────────────────────────────
 
 export interface ExpiryBadgeProps {
-  validityDate?: string;
+  /** `QuoteSummary.validityDate` 가 `string | null` 이므로 두 형태 모두 허용 */
+  validityDate?: string | null;
   status: QuoteSummary['status'];
   /**
    * variant 별 wrapper 차이:
@@ -68,7 +69,7 @@ export function ExpiryBadge({ validityDate, status, variant = 'mobile' }: Expiry
         : 'text-green-500 dark:text-green-400';
   const content = (
     <>
-      <Clock className="w-2.5 h-2.5" />
+      <Clock className='w-2.5 h-2.5' />
       {expired ? 'Expired' : `${daysLeft}d left`}
     </>
   );
@@ -80,9 +81,7 @@ export function ExpiryBadge({ validityDate, status, variant = 'mobile' }: Expiry
     );
   }
   return (
-    <div
-      className={`flex items-center gap-0.5 mt-0.5 text-[10px] font-medium ${colorClass}`}
-    >
+    <div className={`flex items-center gap-0.5 mt-0.5 text-[10px] font-medium ${colorClass}`}>
       {content}
     </div>
   );
@@ -128,13 +127,7 @@ export interface RowActionsProps {
   variant?: 'mobile' | 'desktop';
 }
 
-export function RowActions({
-  id,
-  refNo,
-  onView,
-  onDelete,
-  variant = 'mobile',
-}: RowActionsProps) {
+export function RowActions({ id, refNo, onView, onDelete, variant = 'mobile' }: RowActionsProps) {
   const isDesktop = variant === 'desktop';
   const btnSize = isDesktop ? 'p-2.5 sm:p-1.5' : 'p-2.5';
   const iconSize = isDesktop ? 'w-5 h-5 sm:w-4 sm:h-4' : 'w-5 h-5';
@@ -147,14 +140,14 @@ export function RowActions({
       <button
         onClick={() => onView(id)}
         className={`${btnSize} rounded-md text-gray-400 hover:text-brand-blue-600 hover:bg-brand-blue-50 dark:hover:bg-brand-blue-900/20 transition-colors`}
-        aria-label="View detail"
+        aria-label='View detail'
       >
         <Eye className={iconSize} />
       </button>
       <button
         onClick={() => onDelete(id, refNo)}
         className={`${btnSize} rounded-md text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors`}
-        aria-label="Delete"
+        aria-label='Delete'
       >
         <Trash2 className={iconSize} />
       </button>

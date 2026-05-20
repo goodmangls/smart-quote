@@ -20,10 +20,6 @@ export function getExpiryInfo(validityDate: string): ExpiryInfo {
   const now = new Date();
   const daysLeft = Math.ceil((expiry.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
   const expired = daysLeft <= 0;
-  const severity: ExpiryInfo['severity'] = expired
-    ? 'expired'
-    : daysLeft <= 3
-      ? 'soon'
-      : 'ok';
+  const severity: ExpiryInfo['severity'] = expired ? 'expired' : daysLeft <= 3 ? 'soon' : 'ok';
   return { daysLeft, expired, severity };
 }
