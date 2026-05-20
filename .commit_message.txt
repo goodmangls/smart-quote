@@ -1,1 +1,1 @@
-📋 docs(design): smart-quote-history-table-refactor design 신규
+📊 docs(analysis): smart-quote-history-table-refactor PDCA Check (matchRate 95%)
