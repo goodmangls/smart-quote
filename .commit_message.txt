@@ -1,1 +1,1 @@
-📋 docs(report): smart-quote-history-table-refactor PDCA 완료 보고서 (matchRate 95%)
+📦 chore(archive): smart-quote-history-table-refactor PDCA 4문서 → docs/archive/2026-05/
