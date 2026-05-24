@@ -1,1 +1,1 @@
-💱 chore(rates): DEFAULT_EXCHANGE_RATE 1400 → 1450 (하나은행 송금환율 2026-05-20)
+🔄 FSC 요율 업데이트: UPS 50.25% / DHL 47.75% (2026-05-25 기준) + fsc-history 엔트리 추가
