@@ -1,1 +1,1 @@
-🔄 FSC 요율 업데이트: UPS 50.25% / DHL 47.75% (2026-05-25 기준) + fsc-history 엔트리 추가
+⚡ perf(build): 메인 번들 760KB→86KB — manualChunks function 형태 + Sentry idle defer + LandingPage lazy
