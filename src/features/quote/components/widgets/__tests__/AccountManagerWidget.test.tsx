@@ -1,8 +1,13 @@
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { AccountManagerWidget } from '../AccountManagerWidget';
+import { showNewMessage } from '@/lib/intercom';
 
 vi.mock('@/contexts/LanguageContext', () => ({
   useLanguage: () => ({ language: 'en', t: (key: string) => key }),
+}));
+
+vi.mock('@/lib/intercom', () => ({
+  showNewMessage: vi.fn(),
 }));
 
 describe('AccountManagerWidget', () => {
@@ -35,7 +40,16 @@ describe('AccountManagerWidget', () => {
 
   it('renders chat CTA button', () => {
     render(<AccountManagerWidget />);
-    expect(screen.getByText('widget.manager.chat')).toBeInTheDocument();
+    expect(screen.getByText('widget.manager.aiChat.title')).toBeInTheDocument();
+    expect(screen.getByText('widget.manager.aiChat.subtitle')).toBeInTheDocument();
+  });
+
+  it('opens Intercom messenger from AI chatbot banner', () => {
+    render(<AccountManagerWidget />);
+    fireEvent.click(screen.getByRole('button', { name: 'widget.manager.aiChat.aria' }));
+    expect(showNewMessage).toHaveBeenCalledWith(
+      'Hello, I have a simple logistics inquiry. Could you help me?',
+    );
   });
 
   it('renders email as mailto link', () => {

@@ -1,1 +1,1 @@
-⚡ perf(build): 메인 번들 760KB→86KB — manualChunks function 형태 + Sentry idle defer + LandingPage lazy
+💬 Intercom AI 챗봇 안내 배너 및 클릭 연결 추가

@@ -13,6 +13,7 @@ import {
   ChevronRight,
 } from 'lucide-react';
 import type { AccountManager } from '@/types/dashboard';
+import { showNewMessage } from '@/lib/intercom';
 
 const MANAGERS: AccountManager[] = [
   {
@@ -59,6 +60,10 @@ export const AccountManagerWidget: React.FC = () => {
   const goPrev = () => setCurrentIdx((prev) => (prev - 1 + totalManagers) % totalManagers);
 
   const displayName = language === 'ko' ? manager.nameKo : manager.name;
+
+  const openAiChatbot = () => {
+    showNewMessage('Hello, I have a simple logistics inquiry. Could you help me?');
+  };
 
   return (
     <div className="bg-gradient-to-br from-brand-blue-50 to-white dark:from-brand-blue-900/40 dark:to-brand-blue-800 rounded-2xl shadow-sm border border-brand-blue-100 dark:border-brand-blue-700/50 overflow-hidden transition-colors duration-200">
@@ -175,9 +180,21 @@ export const AccountManagerWidget: React.FC = () => {
         </div>
 
         {/* CTA */}
-        <button className="w-full flex items-center justify-center py-2.5 px-4 bg-brand-blue-600 hover:bg-brand-blue-700 hover:shadow-md text-white rounded-xl text-sm font-bold transition-all duration-200">
-          <MessageCircle className="w-4 h-4 mr-2" />
-          {t('widget.manager.chat')}
+        <button
+          type="button"
+          onClick={openAiChatbot}
+          className="w-full flex items-start gap-3 rounded-xl bg-brand-blue-600 px-4 py-3 text-left text-white shadow-sm transition-all duration-200 hover:bg-brand-blue-700 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-brand-blue-500 focus:ring-offset-2 dark:focus:ring-offset-brand-blue-900"
+          aria-label={t('widget.manager.aiChat.aria')}
+        >
+          <MessageCircle className="mt-0.5 h-5 w-5 shrink-0" />
+          <span className="min-w-0">
+            <span className="block text-sm font-bold leading-5">
+              {t('widget.manager.aiChat.title')}
+            </span>
+            <span className="mt-1 block text-xs leading-4 text-brand-blue-50">
+              {t('widget.manager.aiChat.subtitle')}
+            </span>
+          </span>
         </button>
       </div>
     </div>

@@ -1,9 +1,51 @@
 {
-  "activeFeature": "insights-deploy",
-  "phase": "design",
-  "matchRate": 0,
+  "activeFeature": null,
+  "phase": "archived",
+  "matchRate": 95,
   "iteration": 0,
   "history": [
+    {
+      "feature": "smart-quote-history-table-refactor",
+      "phase": "archived",
+      "timestamp": "2026-05-20",
+      "action": "Archived to docs/archive/2026-05/smart-quote-history-table-refactor/ (matchRate 95%) — PR #18 squash 머지(e781483), 4 PDCA 문서(plan/design/analysis/report) git mv 이동, _INDEX.md 행 추가. branch refactor/history-table-split 삭제(remote). parent: code-analysis 2026-05-15 P1 #3 close. activeFeature null 처리. 후속 후보: P1 #4 quote-detail-modal-split / P2 supabase-config-cleanup / 백엔드 N+1 점검 등.",
+      "matchRate": 95
+    },
+    {
+      "feature": "smart-quote-history-table-refactor",
+      "phase": "completed",
+      "timestamp": "2026-05-20",
+      "action": "Report 완료 — matchRate 95%, 7 커밋(3 phase + 2 docs + 1 analysis + 1 report) on branch refactor/history-table-split. 하드 게이트 6/6 PASS, soft 게이트 1/2(라인 예산 +34 초과, 비-로직). 핵심 학습 4건 메모리화 후보: (1) subagent 파일 생성 보고 후 즉시 ls/Read 검증 필수(gap-detector 미생성 적발), (2) 라인 예산 책정 시 prettier 다중 라인 + JSDoc 비-로직 비용 +30~+50 사전 반영, (3) advisor design 단계 호출은 비용 대비 가치 높음(3 bug 사전 적발 = do 재작업 0), (4) 행동 기반 테스트(getByText/aria-label/class 존재)는 1:6 컴포넌트 분리 리팩토링도 무수정 통과. 보고서: docs/04-report/features/smart-quote-history-table-refactor.report.md. 다음: /pdca archive 또는 PR(생성·push·머지) 사용자 선택. 후속 사이클 후보: P1 #4 quote-detail-modal-split.",
+      "matchRate": 95
+    },
+    {
+      "feature": "smart-quote-history-table-refactor",
+      "phase": "check",
+      "timestamp": "2026-05-20",
+      "action": "Check 완료 — gap-detector agent 결과 matchRate 95%. 하드 게이트 6/6 PASS(tsc/lint/vitest 50f 1437t/build/외부 IF __tests__ 7/7 무수정 PASS/DOM 등가성). 성공기준 7/7, 컴포넌트 스펙 8/8 (5 parts + 2 views + router) className 1:1, Open Questions 4/4 매칭(단일 파일/variant prop/행 분리 안 함/snapshot 안 함), Out of scope 위반 0. 소프트 게이트 1건 미달: 라인 예산 net +270 → 실제 +304 (+34 초과 = 113%), 사유 prettier 다중 라인 className 포맷 + JSDoc — 모두 비-로직, hard 게이트 영향 없음. Critical gap 0, iterations 불요(≥90% 충족). Positive delta 3건(validityDate nullable 보정/JSDoc 풍부도/3-커밋 통합). 미수행: 수동 스모크 — 배포 전 후속. agent가 analysis 파일 실제 생성 누락 발견 후 수동 작성. 분석: docs/03-analysis/smart-quote-history-table-refactor.analysis.md. 다음: /pdca report (iterate 가치 낮음, JSDoc 축약은 가독성 ↓).",
+      "matchRate": 95
+    },
+    {
+      "feature": "smart-quote-history-table-refactor",
+      "phase": "do",
+      "timestamp": "2026-05-20",
+      "action": "Do 완료 — branch refactor/history-table-split, 3 커밋(Phase A 4dd1123 utils+test / Phase B 6b876ec parts / Phase C 574a7cc views+thin router). 6 파일 src 변경: +544 / -240 = net +304 라인 (design 예산 +270 대비 +34 초과, 사유: prettier 다중 라인 className 포맷 + JSDoc 주석 — 비-로직 증가, 하드 게이트 영향 없음). 하드 게이트 전부 PASS: tsc clean / eslint clean / vitest 50 files 1437 tests PASS (포함 __tests__/QuoteHistoryTable.test.tsx 7/7 무수정 PASS = 외부 인터페이스 보존) / npm run build ✓ 6.23s. DOM 등가성: 라우터 2 wrapper div + Mobile Fragment / Desktop <table> → 원본과 노드별 동일. 미수행: 수동 스모크(모바일/데스크톱/다크) — 배포 전 후속. 다음: /pdca analyze smart-quote-history-table-refactor.",
+      "matchRate": 0
+    },
+    {
+      "feature": "smart-quote-history-table-refactor",
+      "phase": "design",
+      "timestamp": "2026-05-20",
+      "action": "Design 문서 생성 (rev α) — Open Questions 4건 답: (1) 단일 파일 QuoteHistoryTableParts.tsx (QuoteDetailSubcomponents 패턴 일치) (2) ExpiryBadge variant:'mobile'|'desktop' prop, span/div + mt-0.5 분기 (3) 행 단위 분리 안 함, map() 인라인 유지 (4) snapshot 도입 안 함 (기존 사용처 1건 = calculationParity 수치 parity 전용, UI snapshot은 클래스 순서 취약). 5 named export(StatusPill/SurchargeStaleBadge/ExpiryBadge/MarginText/RowActions) prop 시그니처·className 문자열 1:1 정의. 4 Phase 4 커밋: A(utils) → B(parts) → C(views + thin router) → D(검증). hard 게이트: __tests__/QuoteHistoryTable.test.tsx 무수정 PASS + tsc/lint/vitest/build + 수동 스모크(모바일/데스크톱/다크). Out of scope: page/SearchBar/Pagination, TanStack table, 가상 스크롤, QuoteDetailModal split, 새 Parts의 다른 features 확산. 예상 PR net +170~+270 라인(책임 분리 허용 비용, +200 초과 시 재검토). 다음: /pdca do smart-quote-history-table-refactor.",
+      "matchRate": 0
+    },
+    {
+      "feature": "smart-quote-history-table-refactor",
+      "phase": "plan",
+      "timestamp": "2026-05-20",
+      "action": "Plan 문서 생성 (rev α) — parent: code-analysis 2026-05-15 P1 #3. QuoteHistoryTable.tsx 258 라인 mobile/desktop 단일 컴포넌트 분리. 전략 B 채택(파일 분리 + 공유 subcomponents + utils). Phase A(utils:expiry) → B(subcomponents:Status/Expiry/Margin/Actions) → C(Mobile/DesktopQuoteTable + thin router) → D(검증: tsc/lint/vitest 1188/build/스모크). 외부 인터페이스 보존 게이트=기존 테스트 무수정 PASS. Out of scope: page/SearchBar/Pagination 변경, TanStack table, 가상 스크롤, QuoteDetailModal split(별 P1). Open Questions 4건 (subcomponents 디렉토리 컨벤션, ExpiryBadge variant, 행 단위 분리 깊이, snapshot 도입). 다음: /pdca design smart-quote-history-table-refactor.",
+      "matchRate": 0
+    },
     {
       "feature": "insights-deploy",
       "phase": "design",

@@ -2,7 +2,7 @@
 
 > **Goodman GLS & J-Ways** International Logistics Quoting System
 >
-> Version 3.2 | Last Updated: 2026-04-01
+> Version 3.3 | Last Updated: 2026-05-28
 
 ---
 
@@ -53,6 +53,7 @@ After login, you land on the **Customer Dashboard** (`/dashboard`).
 | **Logistics News** | Industry news and company announcements |
 | **Exchange Rates** | Live KRW-based rates for USD, EUR, JPY, CNY, GBP, SGD with trend indicators |
 | **Currency Calculator** | Quick currency conversion tool |
+| **AI Chatbot Banner** | Opens the Intercom AI chatbot for simple inquiries, available 24/7 |
 
 ### Navigation
 

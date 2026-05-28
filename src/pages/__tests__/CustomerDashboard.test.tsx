@@ -64,6 +64,10 @@ vi.mock('@/lib/format', () => ({
   formatKRW: (val: number) => `${val.toLocaleString()}`,
 }));
 
+vi.mock('@/lib/intercom', () => ({
+  showNewMessage: vi.fn(),
+}));
+
 function renderDashboard() {
   return render(
     <MemoryRouter>
@@ -147,6 +151,8 @@ describe('CustomerDashboard', () => {
     expect(screen.getByText('widget.weather')).toBeInTheDocument();
     expect(screen.getByText('widget.exchange')).toBeInTheDocument();
     expect(screen.getByText('widget.calculator')).toBeInTheDocument();
+    expect(screen.getByText('widget.manager')).toBeInTheDocument();
+    expect(screen.getByText('widget.manager.aiChat.title')).toBeInTheDocument();
   });
 
   it('renders exchange rate calculator with swap button', async () => {
