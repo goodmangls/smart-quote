@@ -1,5 +1,6 @@
 import React, { Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { Analytics } from '@vercel/analytics/react';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { AuthProvider } from './contexts/AuthContext';
@@ -100,6 +101,7 @@ function App() {
                 </Suspense>
               </AuthProvider>
             </BrowserRouter>
+            <Analytics />
           </ToastProvider>
         </LanguageProvider>
       </ThemeProvider>
