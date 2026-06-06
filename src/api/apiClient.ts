@@ -1,9 +1,7 @@
 import {
   clearAllTokens,
   getAccessToken,
-  getRefreshToken,
   setAccessToken,
-  setRefreshToken,
 } from '@/lib/authStorage';
 
 export const API_URL: string = import.meta.env.VITE_API_URL || 'http://localhost:3000';
@@ -50,23 +48,15 @@ async function getErrorMessage(response: Response): Promise<string> {
 let refreshPromise: Promise<boolean> | null = null;
 
 async function refreshAccessToken(): Promise<boolean> {
-  const refreshToken = getRefreshToken();
-  if (!refreshToken) return false;
-
   try {
     const res = await fetch(`${API_URL}/api/v1/auth/refresh`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ refresh_token: refreshToken }),
       credentials: 'include',
     });
     if (!res.ok) return false;
     const data = await res.json();
     setAccessToken(data.token);
-    // Refresh token rotation: backend issues new refresh token on each refresh
-    if (data.refresh_token) {
-      setRefreshToken(data.refresh_token);
-    }
     return true;
   } catch {
     return false;
@@ -93,8 +83,8 @@ export async function request<T>(path: string, options?: RequestInit): Promise<T
       signal: controller.signal,
     });
 
-    // 401 → try refresh once, then retry the original request
-    if (response.status === 401 && getRefreshToken()) {
+    // 401 → try HttpOnly-cookie refresh once, then retry the original request
+    if (response.status === 401) {
       if (!refreshPromise) {
         refreshPromise = refreshAccessToken();
       }

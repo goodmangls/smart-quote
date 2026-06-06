@@ -4,9 +4,7 @@ import { API_URL, AUTH_EXPIRED_EVENT } from '@/api/apiClient';
 import {
   clearAllTokens,
   getAccessToken,
-  getRefreshToken,
   setAccessToken,
-  setRefreshToken,
 } from '@/lib/authStorage';
 
 export type UserRole = 'admin' | 'user' | 'member';
@@ -70,25 +68,17 @@ async function getAuthErrorMessage(response: Response, fallback: string): Promis
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(() => !!getRefreshToken());
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Restore session on mount using refresh token
+  // Restore session on mount using the HttpOnly refresh cookie.
   useEffect(() => {
-    const refreshToken = getRefreshToken();
-
-    // Migration: remove legacy localStorage token
+    // Migration: remove legacy localStorage tokens that were readable by JavaScript.
+    localStorage.removeItem('smartQuoteRefresh');
     localStorage.removeItem('smartQuoteToken');
 
-    if (!refreshToken) {
-      setIsLoading(false);
-      return;
-    }
-
-    // credentials: 'include' — bl_session httpOnly cookie 회전 (insights-admin-rails-auth).
     fetch(`${API_URL}/api/v1/auth/refresh`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ refresh_token: refreshToken }),
       credentials: 'include',
     })
       .then((res) => {
@@ -97,10 +87,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       })
       .then((data: { token: string; refresh_token?: string; user: User }) => {
         setAccessToken(data.token);
-        // Refresh token rotation: persist new refresh token if issued
-        if (data.refresh_token) {
-          setRefreshToken(data.refresh_token);
-        }
         setUser(data.user);
       })
       .catch(() => {
@@ -115,12 +101,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (!user) return;
     const interval = setInterval(
       () => {
-        const refreshToken = getRefreshToken();
-        if (!refreshToken) return;
         fetch(`${API_URL}/api/v1/auth/refresh`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ refresh_token: refreshToken }),
           credentials: 'include',
         })
           .then((res) => {
@@ -129,10 +112,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           })
           .then((data: { token: string; refresh_token?: string }) => {
             setAccessToken(data.token);
-            // Refresh token rotation: persist new refresh token if issued
-            if (data.refresh_token) {
-              setRefreshToken(data.refresh_token);
-            }
           })
           .catch(() => {
             /* next API call will trigger 401 → retry logic */
@@ -155,7 +134,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (res.ok) {
         const data = await res.json();
         setAccessToken(data.token);
-        setRefreshToken(data.refresh_token);
         setUser(data.user);
         return { success: true, user: data.user };
       }
@@ -195,7 +173,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (res.ok) {
           const data = await res.json();
           setAccessToken(data.token);
-          setRefreshToken(data.refresh_token);
           setUser(data.user);
           return { success: true, user: data.user };
         }
@@ -214,7 +191,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const { verifyMagicLink } = await import('@/api/authApi');
       const data = await verifyMagicLink(token);
       setAccessToken(data.token);
-      setRefreshToken(data.refresh_token);
       setUser(data.user as User);
       return { success: true, user: data.user as User };
     } catch (e) {
