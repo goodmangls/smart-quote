@@ -1,6 +1,7 @@
 import type { jsPDF } from 'jspdf';
 import { QuoteInput, QuoteResult, PackingType } from '@/types';
 import { COUNTRY_OPTIONS } from '@/config/options';
+import { CUSTOMS_DUTIES_DISCLAIMER } from '@/config/disclaimers';
 import { calculateCo2Kg } from '../co2';
 import {
   COLORS,
@@ -139,6 +140,28 @@ export const drawDisclaimer = (doc: jsPDF, yPos: number): number => {
   doc.text(disclaimerEn, MARGIN_X, yPos);
   yPos = nextLine(yPos, 4);
   doc.text(rateDate, MARGIN_X, yPos);
+  yPos = nextLine(yPos, 6);
+
+  // Customs & Duties disclaimer (intentionally English on every quote).
+  // jsPDF does not auto-paginate, so guard against overlapping the page footer.
+  const customsLines = doc.splitTextToSize(
+    CUSTOMS_DUTIES_DISCLAIMER.body,
+    CONTENT_WIDTH,
+  ) as string[];
+  const pageHeight = doc.internal.pageSize.height;
+  const blockHeight = 4 + customsLines.length * 4;
+  if (yPos + blockHeight > pageHeight - 30) {
+    doc.addPage();
+    yPos = 20;
+  }
+  doc.setFont(FONTS.FAMILY, 'bold');
+  doc.text(CUSTOMS_DUTIES_DISCLAIMER.title, MARGIN_X, yPos);
+  yPos = nextLine(yPos, 4);
+  doc.setFont(FONTS.FAMILY, 'normal');
+  customsLines.forEach((line) => {
+    doc.text(line, MARGIN_X, yPos);
+    yPos = nextLine(yPos, 4);
+  });
   return nextLine(yPos, 6);
 };
 

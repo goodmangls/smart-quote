@@ -8,7 +8,14 @@ vi.mock('@/contexts/LanguageContext', () => ({
 }));
 
 vi.mock('@/features/dashboard/hooks/useExchangeRates', () => ({
-  useExchangeRates: () => ({ data: [], loading: false, error: null, lastUpdated: null, isStale: false, retry: vi.fn() }),
+  useExchangeRates: () => ({
+    data: [],
+    loading: false,
+    error: null,
+    lastUpdated: null,
+    isStale: false,
+    retry: vi.fn(),
+  }),
 }));
 
 vi.mock('@/features/dashboard/hooks/usePortWeather', () => ({
@@ -85,6 +92,13 @@ describe('ResultSection', () => {
     expect(screen.getByText('PDF')).toBeInTheDocument();
   });
 
+  it('renders the English customs & duties disclaimer in the breakdown footer', () => {
+    render(<ResultSection {...defaultProps} />);
+
+    // Hardcoded English (config/disclaimers), so it renders even with t() mocked to echo keys
+    expect(screen.getByText(/remain the sole responsibility of the recipient/)).toBeInTheDocument();
+  });
+
   it('renders key metrics (Act. Weight, Bill. Weight, Margin)', () => {
     render(<ResultSection {...defaultProps} />);
 
@@ -137,13 +151,7 @@ describe('ResultSection', () => {
       totalQuoteAmountUSD: 1142.86,
     });
 
-    render(
-      <ResultSection
-        {...defaultProps}
-        input={mockInput}
-        onSwitchCarrier={vi.fn()}
-      />,
-    );
+    render(<ResultSection {...defaultProps} input={mockInput} onSwitchCarrier={vi.fn()} />);
 
     expect(screen.getByText('comparison.title')).toBeInTheDocument();
   });

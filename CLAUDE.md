@@ -15,7 +15,7 @@ npm run dev          # Dev server on http://localhost:5173
 npm run build        # tsc + vite build
 npm run lint         # ESLint (--max-warnings 0)
 npm run test         # Vitest in watch mode
-npx vitest run       # Run tests once (32 files, 1188 tests)
+npx vitest run       # Run tests once (51 files, 1443 tests)
 npx tsc --noEmit     # Type check only
 ```
 
@@ -325,7 +325,7 @@ POST   /api/v1/notifications/slack   # Slack webhook proxy
 
 - **Frontend**: Vitest + @testing-library/react, jsdom environment, setup in `src/test/setup.ts`
   - Tests use `vitest/globals` (no imports needed for `describe`, `it`, `expect`)
-  - 32 test files, 1188 tests
+  - 51 test files, 1443 tests
 - **Backend**: RSpec + FactoryBot + Shoulda Matchers, factories in `spec/factories/`
 
 ## Deployment
