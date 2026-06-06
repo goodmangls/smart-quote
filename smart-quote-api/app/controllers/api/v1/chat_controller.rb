@@ -3,6 +3,11 @@ module Api
     class ChatController < ApplicationController
       include JwtAuthenticatable
       before_action :authenticate_user!
+      before_action :enforce_chat_rate_limit, only: [ :create ]
+
+      # Per-user rate limit for the Claude-backed chat endpoint (token-cost abuse guard).
+      CHAT_RATE_LIMIT = 20
+      CHAT_RATE_PERIOD = 60 # seconds
 
       # POST /api/v1/chat
       def create
@@ -19,7 +24,9 @@ module Api
         # Build system prompt with logistics context
         system_prompt = build_system_prompt
 
-        client = Anthropic::Client.new(api_key: api_key)
+        # Fail fast for an interactive endpoint: cap timeout, no retries
+        # (SDK default 600s x 2 retries = up to ~30min hang).
+        client = Anthropic::Client.new(api_key: api_key, timeout: 30, max_retries: 0)
 
         response = client.messages.create(
           model: "claude-sonnet-4-20250514",
@@ -41,6 +48,23 @@ module Api
 
       private
 
+      def enforce_chat_rate_limit
+        window = Time.now.to_i / CHAT_RATE_PERIOD
+        key = "chat_rate:#{current_user.id}:#{window}"
+        count = (Rails.cache.read(key) || 0) + 1
+        Rails.cache.write(key, count, expires_in: CHAT_RATE_PERIOD)
+        return if count <= CHAT_RATE_LIMIT
+
+        render json: { error: { code: "RATE_LIMITED", message: "Too many chat requests. Please wait a moment." } },
+               status: :too_many_requests
+      end
+
+      # Strip control chars/newlines and cap length so user-controlled profile fields
+      # cannot inject instructions into the system prompt. Unicode (e.g. Korean) preserved.
+      def sanitize_prompt_field(value, max_length: 80)
+        value.to_s.gsub(/[[:cntrl:]]/, " ").strip.slice(0, max_length)
+      end
+
       def build_system_prompt
         is_admin = current_user.role == "admin"
         <<~PROMPT
@@ -52,7 +76,7 @@ module Api
           - Be friendly, professional, and concise
 
           User Context:
-          - User: #{current_user.name || current_user.email} (#{current_user.company || 'individual'})
+          - User: #{sanitize_prompt_field(current_user.name || current_user.email)} (#{sanitize_prompt_field(current_user.company || 'individual')})
           - Role: #{current_user.role} (#{is_admin ? "Admin — full access including management panel" : "Member — quote calculator, history, dashboard"})
 
           === SYSTEM USER GUIDE (#{is_admin ? "ADMIN" : "MEMBER"}) ===

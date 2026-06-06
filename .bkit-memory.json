@@ -1,9 +1,23 @@
 {
-  "activeFeature": null,
-  "phase": "archived",
-  "matchRate": 95,
+  "activeFeature": "chat-security-hardening",
+  "phase": "do",
+  "matchRate": 0,
   "iteration": 0,
   "history": [
+    {
+      "feature": "chat-security-hardening",
+      "phase": "do",
+      "timestamp": "2026-06-06",
+      "action": "구현 완료(백엔드 한정, TDD) — H6 chat client timeout 30s/max_retries 0, H2 margin resolve own-email/admin authz, H1 chat per-user rate limit 20/min(Rails.cache, memory_store 작동), H3 prompt user-field sanitize(개행/제어문자 제거·유니코드 보존). 신규 12 test(6 resolve RED→GREEN + 6 chat) 통과, 전체 rspec 235/7 실패는 전부 pre-existing(fsc/margin model validation/auth, 내 변경 무관). rubocop 내 코드 clean(2건은 line14 pre-existing). 커밋/PR 대기.",
+      "matchRate": 0
+    },
+    {
+      "feature": "chat-security-hardening",
+      "phase": "plan",
+      "timestamp": "2026-06-06",
+      "action": "Plan 생성 — docs/01-plan/features/chat-security-hardening.plan.md. 분석(2026-06-06) HIGH 4종: H1 chat rate-limit 부재(rack_attack), H2 margin_rules#resolve admin 우회+임의 email, H3 chat 프롬프트 user name/company 인젝션, H6 Anthropic timeout 없음. 백엔드 한정 보안 가드, 구현순서 timeout→authz→rate-limit→sanitize.",
+      "matchRate": 0
+    },
     {
       "feature": "smart-quote-history-table-refactor",
       "phase": "archived",

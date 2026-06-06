@@ -162,9 +162,9 @@ RSpec.describe "Api::V1::MarginRules", type: :request do
              match_nationality: "KR", weight_min: 20, margin_percent: 19)
     end
 
-    it "returns resolved margin for authenticated user" do
+    it "returns resolved margin for own email (non-admin)" do
       get "/api/v1/margin_rules/resolve",
-          params: { email: "test@example.com", nationality: "KR", weight: 25 },
+          params: { email: user.email, nationality: "KR", weight: 25 },
           headers: user_headers
 
       expect(response).to have_http_status(:ok)
@@ -173,9 +173,9 @@ RSpec.describe "Api::V1::MarginRules", type: :request do
       expect(json["fallback"]).to be false
     end
 
-    it "returns fallback when no rule matches" do
+    it "returns fallback when no rule matches (own email)" do
       get "/api/v1/margin_rules/resolve",
-          params: { email: "test@example.com", nationality: "US", weight: 5 },
+          params: { email: user.email, nationality: "US", weight: 5 },
           headers: user_headers
 
       expect(response).to have_http_status(:ok)
@@ -184,10 +184,26 @@ RSpec.describe "Api::V1::MarginRules", type: :request do
       expect(json["fallback"]).to be true
     end
 
-    it "is accessible to non-admin authenticated users" do
+    it "allows a non-admin to resolve their own email (case-insensitive)" do
       get "/api/v1/margin_rules/resolve",
-          params: { email: "test@example.com", nationality: "US", weight: 10 },
+          params: { email: user.email.upcase, nationality: "US", weight: 10 },
           headers: user_headers
+
+      expect(response).to have_http_status(:ok)
+    end
+
+    it "returns 403 when a non-admin resolves a different email" do
+      get "/api/v1/margin_rules/resolve",
+          params: { email: "someone-else@example.com", nationality: "US", weight: 10 },
+          headers: user_headers
+
+      expect(response).to have_http_status(:forbidden)
+    end
+
+    it "allows an admin to resolve any email" do
+      get "/api/v1/margin_rules/resolve",
+          params: { email: "anyone@example.com", nationality: "US", weight: 10 },
+          headers: admin_headers
 
       expect(response).to have_http_status(:ok)
     end
