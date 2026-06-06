@@ -1,9 +1,17 @@
 {
-  "activeFeature": "chat-security-hardening",
-  "phase": "completed",
+  "activeFeature": null,
+  "phase": "archived",
   "matchRate": 100,
   "iteration": 0,
   "history": [
+    {
+      "feature": "chat-security-hardening",
+      "phase": "archived",
+      "timestamp": "2026-06-06",
+      "action": "Archived to docs/archive/2026-06/chat-security-hardening/ (100%). plan+report 이관, _INDEX.md 생성(2026-06 신규). PR #20 ca82f69 admin merge, CI green. analysis는 docs/03-analysis/codebase-health-2026-06-06.analysis.md 다중-finding이라 유지. Render prod 검증 수동 후속.",
+      "matchRate": 100,
+      "archivedTo": "docs/archive/2026-06/chat-security-hardening/"
+    },
     {
       "feature": "chat-security-hardening",
       "phase": "completed",

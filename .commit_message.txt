@@ -1,1 +1,1 @@
-📊 docs(pdca): chat-security-hardening 완료 보고서 — PR #20 merge ca82f69, CI 전 job green, H1/H2/H3/H6 백엔드 보안 가드 + 신규 12 test GREEN·회귀 0, Render prod 검증은 인증 게이트라 수동 후속, .bkit-memory.json phase=completed
+📁 chore(pdca): chat-security-hardening archive — plan+report를 docs/archive/2026-06/ 이관, _INDEX.md 생성, .bkit-memory.json phase=archived (100%, PR #20 ca82f69). analysis는 다중-finding이라 docs/03-analysis 유지
