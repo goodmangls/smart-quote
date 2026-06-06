@@ -1,1 +1,1 @@
-🔒 fix(security): 챗봇 보안 하드닝 H1/H2/H3/H6 (백엔드) — H1 chat per-user rate limit 20/min(429), H2 margin_rules#resolve 본인 email/admin 제한(타 email 403, 가격 enumeration 차단), H3 시스템 프롬프트 user name/company sanitize(개행/제어문자 제거·유니코드 보존), H6 Anthropic client timeout 30s/max_retries 0(최대 ~30분 행 방지). TDD: resolve 403 RED→GREEN + chat 신규 spec, 신규 12 test 통과·회귀 0(7 실패는 pre-existing). 프론트 무변경
+📊 docs(pdca): chat-security-hardening 완료 보고서 — PR #20 merge ca82f69, CI 전 job green, H1/H2/H3/H6 백엔드 보안 가드 + 신규 12 test GREEN·회귀 0, Render prod 검증은 인증 게이트라 수동 후속, .bkit-memory.json phase=completed
