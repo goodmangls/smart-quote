@@ -1,1 +1,1 @@
-📄 feat(quote): 관세·세금 면책 문구 추가 — 견적 PDF 하단 + 비용 산출 카드 푸터(영문 단일 출처 config/disclaimers, 모든 로케일 영어 고정, PDF 페이지넘침 가드)
+📋 docs(analysis): 코드베이스 건강도 분석 2026-06-06 — health 6.7/10, 3개 병렬 에이전트(FE·BE·보안)+직접검증(보안 6건 정정: 과장 4.2→6.5), HIGH 6(AI 챗 rate-limit·프롬프트인젝션·margin resolve 권한·Anthropic timeout + calc복잡도 + rescue), docs/03-analysis/codebase-health-2026-06-06.analysis.md 저장
