@@ -7,6 +7,7 @@ module Api
       before_action :require_admin!, except: [ :resolve ]
       before_action :set_margin_rule, only: [ :update, :destroy ]
       before_action :validate_resolve_params!, only: [ :resolve ]
+      before_action :authorize_resolve_target!, only: [ :resolve ]
 
       # GET /api/v1/margin_rules
       def index
@@ -74,6 +75,19 @@ module Api
         params.permit(:name, :rule_type, :priority, :match_email,
                        :match_nationality, :weight_min, :weight_max,
                        :margin_percent, :is_active)
+      end
+
+      # Margin/pricing is internal: a non-admin may only resolve their own email.
+      # Prevents members enumerating competitors' or other accounts' margin.
+      def authorize_resolve_target!
+        return if current_user.role == "admin"
+
+        requested = params[:email].to_s.downcase.strip
+        own = current_user.email.to_s.downcase.strip
+        return if requested == own
+
+        render json: { error: { code: "FORBIDDEN", message: "You can only resolve margin for your own account." } },
+               status: :forbidden
       end
 
       def validate_resolve_params!
