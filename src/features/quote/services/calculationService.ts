@@ -37,10 +37,15 @@ export const calculateQuote = (input: QuoteInput): QuoteResult => {
   );
 
   // 2. Billable Weight
-  const billableWeight = Math.max(
-    itemResult.totalActualWeight,
-    itemResult.totalPackedVolumetricWeight,
-  );
+  // Global express billing (UPS/DHL): for multi-box shipments (2+ physical boxes),
+  // calculate each box's chargeable weight independently, round each box up to
+  // the 0.5kg rating increment, then sum. A single box keeps the legacy raw
+  // max-of-totals behavior unchanged.
+  const totalBoxCount = input.items.reduce((sum, item) => sum + item.quantity, 0);
+  const billableWeight =
+    totalBoxCount >= 2
+      ? itemResult.totalBillableWeight
+      : Math.max(itemResult.totalActualWeight, itemResult.totalPackedVolumetricWeight);
   const userWarnings = [...itemResult.warnings];
 
   if (itemResult.totalPackedVolumetricWeight > itemResult.totalActualWeight * 1.2) {

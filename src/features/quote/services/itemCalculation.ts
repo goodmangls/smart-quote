@@ -9,6 +9,7 @@ import { applyPackingDimensions } from '@/lib/packing-utils';
 export interface ItemCalculationResult {
   totalActualWeight: number;
   totalPackedVolumetricWeight: number;
+  totalBillableWeight: number;
   packingMaterialCost: number;
   packingLaborCost: number;
   warnings: string[];
@@ -23,6 +24,8 @@ export const calculateVolumetricWeight = (
   return (Math.ceil(l) * Math.ceil(w) * Math.ceil(h)) / divisor;
 };
 
+const roundToHalf = (weight: number): number => Math.ceil(weight * 2) / 2;
+
 export const calculateItemCosts = (
   items: CargoItem[],
   packingType: PackingType,
@@ -31,6 +34,7 @@ export const calculateItemCosts = (
 ): ItemCalculationResult => {
   let totalActualWeight = 0;
   let totalPackedVolumetricWeight = 0;
+  let totalBillableWeight = 0;
   let packingMaterialCost = 0;
   let packingLaborCost = 0;
   const warnings: string[] = [];
@@ -55,9 +59,13 @@ export const calculateItemCosts = (
       packingLaborCost += laborPerItem * item.quantity;
     }
 
+    const volWeight = calculateVolumetricWeight(l, w, h, volumetricDivisor);
+
     totalActualWeight += weight * item.quantity;
-    totalPackedVolumetricWeight +=
-      calculateVolumetricWeight(l, w, h, volumetricDivisor) * item.quantity;
+    totalPackedVolumetricWeight += volWeight * item.quantity;
+    // Per-box chargeable weight: max(actual, volumetric), rounded up to 0.5kg,
+    // accumulated per physical box for multi-box express billing.
+    totalBillableWeight += roundToHalf(Math.max(weight, volWeight)) * item.quantity;
   });
 
   if (manualPackingCost !== undefined && manualPackingCost >= 0) {
@@ -68,6 +76,7 @@ export const calculateItemCosts = (
   return {
     totalActualWeight,
     totalPackedVolumetricWeight,
+    totalBillableWeight,
     packingMaterialCost,
     packingLaborCost,
     warnings,

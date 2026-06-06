@@ -43,7 +43,17 @@ class QuoteCalculator
     end
 
     @packing_total = @item_result[:packing_material_cost] + @item_result[:packing_labor_cost] + @packing_fumigation_cost
-    @billable_weight = [@item_result[:total_actual_weight], @item_result[:total_packed_volumetric_weight]].max
+
+    # Global express billing (UPS/DHL): for multi-box shipments (2+ physical boxes),
+    # calculate each box's chargeable weight independently, round each box up to
+    # the 0.5kg rating increment, then sum. A single box keeps the legacy raw
+    # max-of-totals behavior unchanged.
+    total_box_count = (@input[:items] || []).sum { |item| item[:quantity].to_i }
+    @billable_weight = if total_box_count >= 2
+      @item_result[:total_billable_weight]
+    else
+      [ @item_result[:total_actual_weight], @item_result[:total_packed_volumetric_weight] ].max
+    end
     @user_warnings = @item_result[:warnings].dup
 
     if @item_result[:total_packed_volumetric_weight] > @item_result[:total_actual_weight] * 1.2

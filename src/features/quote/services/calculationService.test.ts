@@ -247,5 +247,47 @@ describe('calculationService', () => {
       // Labor should be exactly 3x for 3 items (not 1.5^3 = 3.375x)
       expect(threeItems.breakdown.packingLabor).toBe(singleItem.breakdown.packingLabor * 3);
     });
+
+    it('multi-box UPS quote sums per-box chargeable weights instead of max-of-totals', () => {
+      const result = calculateQuote({
+        ...baseInput,
+        overseasCarrier: 'UPS',
+        items: [
+          { id: 'A', length: 50, width: 40, height: 30, weight: 5, quantity: 1 },
+          { id: 'B', length: 10, width: 10, height: 10, weight: 20, quantity: 1 },
+        ],
+      });
+
+      // Box A: max(5, 50*40*30/5000=12) = 12
+      // Box B: max(20, 10*10*10/5000=0.2) = 20
+      // Per-box W/T = 32. Legacy max-of-totals would be max(25, 12.2) = 25.
+      expect(result.totalActualWeight).toBe(25);
+      expect(result.totalVolumetricWeight).toBeCloseTo(12.2, 5);
+      expect(result.billableWeight).toBe(32);
+    });
+
+    it('multi-box UPS quote rounds each box chargeable weight up to 0.5kg before summing', () => {
+      const result = calculateQuote({
+        ...baseInput,
+        overseasCarrier: 'UPS',
+        items: [{ id: 'A', length: 30, width: 20, height: 15, weight: 1, quantity: 3 }],
+      });
+
+      // Each box: max(1, 30*20*15/5000=1.8) = 1.8 -> 2.0; 2.0 * 3 = 6.0.
+      // Legacy max-of-totals would be max(3, 5.4) = 5.4.
+      expect(result.totalActualWeight).toBe(3);
+      expect(result.totalVolumetricWeight).toBeCloseTo(5.4, 5);
+      expect(result.billableWeight).toBe(6);
+    });
+
+    it('single-box UPS quote keeps raw max-of-totals behavior', () => {
+      const result = calculateQuote({
+        ...baseInput,
+        overseasCarrier: 'UPS',
+        items: [{ id: 'A', length: 30, width: 20, height: 15, weight: 1, quantity: 1 }],
+      });
+
+      expect(result.billableWeight).toBeCloseTo(1.8, 5);
+    });
   });
 });
