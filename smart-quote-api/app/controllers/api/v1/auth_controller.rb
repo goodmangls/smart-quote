@@ -5,15 +5,14 @@ module Api
       # ActionController::API 는 cookies helper 미포함 — bl_session 발급용으로 명시 include
       include ActionController::Cookies
       before_action :authenticate_user!, only: [ :update_password, :me ]
+      before_action :verify_trusted_origin!, only: [ :register, :login, :refresh, :logout, :verify_magic_link ]
 
       # POST /api/v1/auth/register
       def register
         user = User.new(register_params)
 
         if user.save
-          token = encode_token(user)
-          set_session_cookie!(token)
-          render json: { token: token, refresh_token: encode_refresh_token(user), user: user_json(user) }, status: :created
+          render_auth_response(user, status: :created)
         else
           render json: {
             error: { code: "VALIDATION_ERROR", message: user.errors.full_messages.join(", ") }
@@ -26,9 +25,7 @@ module Api
         user = User.find_by(email: params[:email]&.downcase&.strip)
 
         if user&.authenticate(params[:password])
-          token = encode_token(user)
-          set_session_cookie!(token)
-          render json: { token: token, refresh_token: encode_refresh_token(user), user: user_json(user) }
+          render_auth_response(user)
         else
           render json: {
             error: { code: "UNAUTHORIZED", message: "Invalid email or password" }
@@ -46,17 +43,12 @@ module Api
       # 매 refresh 호출마다 새 refresh token 발급. 이전 token 은 expiry 까지 유효.
       # Level 2 (jti denylist 로 즉시 무효화)는 후속 작업.
       def refresh
-        user = decode_refresh_token(params[:refresh_token])
+        user = decode_refresh_token(refresh_token_from_cookie)
 
         if user
-          access_token = encode_token(user)
-          set_session_cookie!(access_token)
-          render json: {
-            token: access_token,
-            refresh_token: encode_refresh_token(user),
-            user: user_json(user)
-          }
+          render_auth_response(user)
         else
+          clear_refresh_cookie
           render json: { error: { code: "INVALID_TOKEN", message: "Invalid or expired refresh token" } }, status: :unauthorized
         end
       end
@@ -66,7 +58,7 @@ module Api
       # access/refresh JWT 자체의 즉시 무효화는 별도 사이클(jti denylist).
       # 항상 200 — 비로그인 상태에서도 idempotent.
       def logout
-        cookies.delete(:bl_session, domain: session_cookie_domain)
+        clear_refresh_cookie
         render json: { message: "Logged out" }
       end
 
@@ -116,9 +108,7 @@ module Api
         end
 
         user.consume_magic_link_token!
-        access_token = encode_token(user)
-        set_session_cookie!(access_token)
-        render json: { token: access_token, refresh_token: encode_refresh_token(user), user: user_json(user) }
+        render_auth_response(user)
       end
 
       # GET /api/v1/auth/magic_link/peek — test-only: return last issued raw token
@@ -155,24 +145,54 @@ module Api
                       :name, :company, :nationality, networks: [])
       end
 
-      # insights-admin-rails-auth: bl_session httpOnly cookie 발급 (D2=A)
-      # apps/insights middleware 가 cross-origin rewrite 너머에서 .bridgelogis.com
-      # cookie 를 받아 Rails JWT 를 검증할 수 있도록 한다. access_token JWT 와 동일 값.
-      def set_session_cookie!(access_token)
-        cookies[:bl_session] = {
-          value: access_token,
-          domain: session_cookie_domain,
+      def render_auth_response(user, status: :ok)
+        set_refresh_cookie(encode_refresh_token(user))
+        render json: { token: encode_token(user), user: user_json(user) }, status: status
+      end
+
+      def refresh_token_from_cookie
+        cookies[:refresh_token]
+      end
+
+      def set_refresh_cookie(token)
+        cookies[:refresh_token] = refresh_cookie_options.merge(value: token)
+      end
+
+      def clear_refresh_cookie
+        cookies.delete(:refresh_token, refresh_cookie_options.except(:value, :expires))
+      end
+
+      def refresh_cookie_options
+        {
           httponly: true,
-          secure: Rails.env.production?,
-          same_site: :lax,
-          expires: 15.minutes.from_now
+          secure: refresh_cookie_secure?,
+          same_site: refresh_cookie_same_site,
+          expires: 7.days.from_now,
+          path: "/api/v1/auth"
         }
       end
 
-      # production 외 환경에서는 :all 로 두어 test/development 도 cookie 가 동작하도록 한다.
-      def session_cookie_domain
-        return :all unless Rails.env.production?
-        ENV.fetch("SESSION_COOKIE_DOMAIN", ".bridgelogis.com")
+      def refresh_cookie_secure?
+        ENV.fetch("REFRESH_COOKIE_SECURE", Rails.env.production? ? "true" : "false") == "true"
+      end
+
+      def refresh_cookie_same_site
+        ENV.fetch("REFRESH_COOKIE_SAME_SITE", Rails.env.production? ? "None" : "Lax").downcase.to_sym
+      end
+
+      def verify_trusted_origin!
+        return unless Rails.env.production? || ENV["AUTH_ORIGIN_CHECK"] == "true"
+
+        origin = request.headers["Origin"]
+        return if origin.blank?
+
+        allowed_origins = ENV.fetch(
+          "CORS_ORIGINS",
+          "https://smart-quote-main.vercel.app,https://bridgelogis.com,https://www.bridgelogis.com"
+        ).split(",").map(&:strip)
+        return if allowed_origins.include?(origin)
+
+        render json: { error: { code: "FORBIDDEN_ORIGIN", message: "Forbidden origin" } }, status: :forbidden
       end
     end
   end

@@ -7,7 +7,6 @@ export interface MagicLinkResponse {
 
 export interface VerifyMagicLinkResponse {
   token: string;
-  refresh_token: string;
   user: {
     id: number;
     email: string;

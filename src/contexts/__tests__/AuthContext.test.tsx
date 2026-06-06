@@ -4,6 +4,20 @@ import { API_URL } from '@/api/apiClient';
 
 const REFRESH_KEY = 'smartQuoteRefresh';
 
+function refreshUnauthorizedResponse() {
+  return new Response(JSON.stringify({ error: { code: 'INVALID_TOKEN' } }), {
+    status: 401,
+    headers: { 'Content-Type': 'application/json' },
+  });
+}
+
+async function waitForAuthReady(getCtx: () => ReturnType<typeof useAuth> | null) {
+  await waitFor(() => {
+    expect(getCtx()).not.toBeNull();
+    expect(getCtx()!.isLoading).toBe(false);
+  });
+}
+
 // ── Test helpers ──
 
 const mockUser = {
@@ -46,36 +60,40 @@ beforeEach(() => {
 
 describe('AuthContext', () => {
   describe('initial unauthenticated state', () => {
-    it('provides null user, isAuthenticated=false, isLoading=false when no refresh token exists', () => {
+    it('provides null user, isAuthenticated=false, isLoading=false when no refresh cookie exists', async () => {
+      vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(refreshUnauthorizedResponse());
       let captured: ReturnType<typeof useAuth> | null = null;
 
       renderWithAuth((ctx) => {
         captured = ctx;
       });
 
+      await waitForAuthReady(() => captured);
       expect(captured!.user).toBeNull();
       expect(captured!.isAuthenticated).toBe(false);
-      expect(captured!.isLoading).toBe(false);
     });
   });
 
   describe('login()', () => {
-    it('stores refresh token in localStorage, sets user, and returns success', async () => {
-      vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(
-        new Response(
-          JSON.stringify({ token: 'jwt-abc', refresh_token: 'refresh-abc', user: mockUser }),
-          {
-            status: 200,
-            headers: { 'Content-Type': 'application/json' },
-          },
-        ),
-      );
+    it('uses HttpOnly refresh cookie, sets user, and returns success', async () => {
+      vi.spyOn(globalThis, 'fetch')
+        .mockResolvedValueOnce(refreshUnauthorizedResponse())
+        .mockResolvedValueOnce(
+          new Response(
+            JSON.stringify({ token: 'jwt-abc', refresh_token: 'refresh-abc', user: mockUser }),
+            {
+              status: 200,
+              headers: { 'Content-Type': 'application/json' },
+            },
+          ),
+        );
 
       let captured: ReturnType<typeof useAuth> | null = null;
       renderWithAuth((ctx) => {
         captured = ctx;
       });
 
+      await waitForAuthReady(() => captured);
       let result: { success: boolean; user?: unknown; error?: string };
       await act(async () => {
         result = await captured!.login('test@example.com', 'password123');
@@ -83,7 +101,7 @@ describe('AuthContext', () => {
 
       expect(result!.success).toBe(true);
       expect(result!.user).toEqual(mockUser);
-      expect(localStorage.getItem(REFRESH_KEY)).toBe('refresh-abc');
+      expect(localStorage.getItem(REFRESH_KEY)).toBeNull();
       expect(captured!.user).toEqual(mockUser);
       expect(captured!.isAuthenticated).toBe(true);
 
@@ -97,18 +115,21 @@ describe('AuthContext', () => {
     });
 
     it('returns error message on failed login (401)', async () => {
-      vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(
-        new Response(JSON.stringify({ error: { message: 'Invalid credentials' } }), {
-          status: 401,
-          headers: { 'Content-Type': 'application/json' },
-        }),
-      );
+      vi.spyOn(globalThis, 'fetch')
+        .mockResolvedValueOnce(refreshUnauthorizedResponse())
+        .mockResolvedValueOnce(
+          new Response(JSON.stringify({ error: { message: 'Invalid credentials' } }), {
+            status: 401,
+            headers: { 'Content-Type': 'application/json' },
+          }),
+        );
 
       let captured: ReturnType<typeof useAuth> | null = null;
       renderWithAuth((ctx) => {
         captured = ctx;
       });
 
+      await waitForAuthReady(() => captured);
       let result: { success: boolean; user?: unknown; error?: string };
       await act(async () => {
         result = await captured!.login('bad@example.com', 'wrong');
@@ -122,13 +143,16 @@ describe('AuthContext', () => {
     });
 
     it('returns network error when fetch throws', async () => {
-      vi.spyOn(globalThis, 'fetch').mockRejectedValueOnce(new Error('Failed to fetch'));
+      vi.spyOn(globalThis, 'fetch')
+        .mockResolvedValueOnce(refreshUnauthorizedResponse())
+        .mockRejectedValueOnce(new Error('Failed to fetch'));
 
       let captured: ReturnType<typeof useAuth> | null = null;
       renderWithAuth((ctx) => {
         captured = ctx;
       });
 
+      await waitForAuthReady(() => captured);
       let result: { success: boolean; user?: unknown; error?: string };
       await act(async () => {
         result = await captured!.login('test@example.com', 'password123');
@@ -142,14 +166,12 @@ describe('AuthContext', () => {
   describe('logout()', () => {
     it('clears all tokens and resets user to null', async () => {
       const fetchSpy = vi.spyOn(globalThis, 'fetch');
+      fetchSpy.mockResolvedValueOnce(refreshUnauthorizedResponse());
       fetchSpy.mockResolvedValueOnce(
-        new Response(
-          JSON.stringify({ token: 'jwt-abc', refresh_token: 'refresh-abc', user: mockUser }),
-          {
-            status: 200,
-            headers: { 'Content-Type': 'application/json' },
-          },
-        ),
+        new Response(JSON.stringify({ token: 'jwt-abc', user: mockUser }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        }),
       );
       // logout 은 Rails /api/v1/auth/logout 호출 (insights-admin-rails-auth) — 응답 mock.
       fetchSpy.mockResolvedValueOnce(
@@ -164,6 +186,7 @@ describe('AuthContext', () => {
         captured = ctx;
       });
 
+      await waitForAuthReady(() => captured);
       await act(async () => {
         await captured!.login('test@example.com', 'password123');
       });
@@ -179,7 +202,7 @@ describe('AuthContext', () => {
     });
   });
 
-  describe('session restore on mount (refresh token)', () => {
+  describe('session restore on mount (HttpOnly refresh cookie)', () => {
     it('restores session using refresh token on mount', async () => {
       localStorage.setItem(REFRESH_KEY, 'existing-refresh');
 
@@ -203,34 +226,13 @@ describe('AuthContext', () => {
         `${API_URL}/api/v1/auth/refresh`,
         expect.objectContaining({
           method: 'POST',
-          body: JSON.stringify({ refresh_token: 'existing-refresh' }),
+          credentials: 'include',
         }),
       );
     });
 
-    it('persists rotated refresh token on mount (refresh token rotation)', async () => {
-      localStorage.setItem(REFRESH_KEY, 'R1');
-
-      vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(
-        new Response(JSON.stringify({ token: 'new-access', refresh_token: 'R2', user: mockUser }), {
-          status: 200,
-          headers: { 'Content-Type': 'application/json' },
-        }),
-      );
-
-      await act(async () => {
-        renderWithAuth(() => {});
-      });
-
-      await waitFor(() => {
-        expect(screen.getByTestId('authenticated')).toHaveTextContent('true');
-      });
-
-      expect(localStorage.getItem(REFRESH_KEY)).toBe('R2');
-    });
-
-    it('keeps old refresh token if server does not rotate (backward compatibility)', async () => {
-      localStorage.setItem(REFRESH_KEY, 'R1');
+    it('removes legacy refresh token from localStorage while using cookie refresh', async () => {
+      localStorage.setItem(REFRESH_KEY, 'legacy-refresh');
 
       vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(
         new Response(JSON.stringify({ token: 'new-access', user: mockUser }), {
@@ -247,7 +249,11 @@ describe('AuthContext', () => {
         expect(screen.getByTestId('authenticated')).toHaveTextContent('true');
       });
 
-      expect(localStorage.getItem(REFRESH_KEY)).toBe('R1');
+      expect(localStorage.getItem(REFRESH_KEY)).toBeNull();
+      expect(fetch).toHaveBeenCalledWith(
+        `${API_URL}/api/v1/auth/refresh`,
+        expect.not.objectContaining({ body: expect.any(String) }),
+      );
     });
   });
 
@@ -292,22 +298,25 @@ describe('AuthContext', () => {
   });
 
   describe('signup() (register)', () => {
-    it('creates account, stores refresh token, and auto-logs in', async () => {
-      vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(
-        new Response(
-          JSON.stringify({ token: 'jwt-new', refresh_token: 'refresh-new', user: mockUser }),
-          {
-            status: 200,
-            headers: { 'Content-Type': 'application/json' },
-          },
-        ),
-      );
+    it('creates account using HttpOnly refresh cookie and auto-logs in', async () => {
+      vi.spyOn(globalThis, 'fetch')
+        .mockResolvedValueOnce(refreshUnauthorizedResponse())
+        .mockResolvedValueOnce(
+          new Response(
+            JSON.stringify({ token: 'jwt-new', refresh_token: 'refresh-new', user: mockUser }),
+            {
+              status: 200,
+              headers: { 'Content-Type': 'application/json' },
+            },
+          ),
+        );
 
       let captured: ReturnType<typeof useAuth> | null = null;
       renderWithAuth((ctx) => {
         captured = ctx;
       });
 
+      await waitForAuthReady(() => captured);
       let result: { success: boolean; user?: unknown; error?: string };
       await act(async () => {
         result = await captured!.signup(
@@ -321,7 +330,7 @@ describe('AuthContext', () => {
 
       expect(result!.success).toBe(true);
       expect(result!.user).toEqual(mockUser);
-      expect(localStorage.getItem(REFRESH_KEY)).toBe('refresh-new');
+      expect(localStorage.getItem(REFRESH_KEY)).toBeNull();
       expect(captured!.user).toEqual(mockUser);
       expect(captured!.isAuthenticated).toBe(true);
 
@@ -342,18 +351,21 @@ describe('AuthContext', () => {
     });
 
     it('returns error on registration failure', async () => {
-      vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(
-        new Response(JSON.stringify({ error: { message: 'Email already taken' } }), {
-          status: 422,
-          headers: { 'Content-Type': 'application/json' },
-        }),
-      );
+      vi.spyOn(globalThis, 'fetch')
+        .mockResolvedValueOnce(refreshUnauthorizedResponse())
+        .mockResolvedValueOnce(
+          new Response(JSON.stringify({ error: { message: 'Email already taken' } }), {
+            status: 422,
+            headers: { 'Content-Type': 'application/json' },
+          }),
+        );
 
       let captured: ReturnType<typeof useAuth> | null = null;
       renderWithAuth((ctx) => {
         captured = ctx;
       });
 
+      await waitForAuthReady(() => captured);
       let result: { success: boolean; user?: unknown; error?: string };
       await act(async () => {
         result = await captured!.signup('existing@example.com', 'password123');
@@ -368,14 +380,12 @@ describe('AuthContext', () => {
   describe('isAuthenticated reflects login state', () => {
     it('transitions from false -> true on login, then true -> false on logout', async () => {
       const fetchSpy = vi.spyOn(globalThis, 'fetch');
+      fetchSpy.mockResolvedValueOnce(refreshUnauthorizedResponse());
       fetchSpy.mockResolvedValueOnce(
-        new Response(
-          JSON.stringify({ token: 'jwt-abc', refresh_token: 'refresh-abc', user: mockUser }),
-          {
-            status: 200,
-            headers: { 'Content-Type': 'application/json' },
-          },
-        ),
+        new Response(JSON.stringify({ token: 'jwt-abc', user: mockUser }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        }),
       );
       // logout 은 Rails /api/v1/auth/logout 호출 — 응답 mock.
       fetchSpy.mockResolvedValueOnce(
@@ -390,6 +400,7 @@ describe('AuthContext', () => {
         captured = ctx;
       });
 
+      await waitForAuthReady(() => captured);
       expect(captured!.isAuthenticated).toBe(false);
 
       await act(async () => {

@@ -8,9 +8,10 @@ databases:
 services:
   - type: web
     name: smart-quote-api
-    runtime: docker
-    dockerContext: smart-quote-api
-    dockerfilePath: smart-quote-api/Dockerfile
+    runtime: ruby
+    rootDir: smart-quote-api
+    buildCommand: "bundle install && bundle exec rails db:prepare"
+    startCommand: "bundle exec puma -C config/puma.rb"
     plan: free
     region: singapore # Closest to KR/User
     envVars:
@@ -24,4 +25,10 @@ services:
         value: 'true'
       - key: SECRET_KEY_BASE
         generateValue: true
+      - key: CORS_ORIGINS
+        value: 'https://smart-quote-main.vercel.app,https://bridgelogis.com,https://www.bridgelogis.com'
+      - key: REFRESH_COOKIE_SECURE
+        value: 'true'
+      - key: REFRESH_COOKIE_SAME_SITE
+        value: 'None'
     healthCheckPath: /up

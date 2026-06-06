@@ -8,6 +8,10 @@ DEFAULT_CORS_ORIGINS = %w[
   https://www.bridgelogis.com
 ].join(",").freeze
 
+if ENV.fetch("CORS_ORIGINS", DEFAULT_CORS_ORIGINS).split(",").map(&:strip).include?("*")
+  raise "CORS_ORIGINS cannot include '*' when credentialed HttpOnly refresh cookies are enabled"
+end
+
 # smart-quote-main.vercel.app and smart-quote-main-*-*-….vercel.app (preview/prod aliases)
 SMART_QUOTE_VERCEL_ORIGIN = %r{\Ahttps://smart-quote-main(-[\w.-]+)?\.vercel\.app\z}i.freeze
 
@@ -34,9 +38,8 @@ Rails.application.config.middleware.insert_before 0, Rack::Cors do
       headers: :any,
       expose: [ "Authorization" ],
       methods: [ :get, :post, :put, :patch, :delete, :options, :head ],
-      # insights-admin-rails-auth: bl_session httpOnly cookie 가 cross-origin
-      # fetch 시에도 저장/전송되려면 credentials: true 가 필수. 메인 SPA fetch
-      # 도 `credentials: 'include'` 로 호출해야 한다.
-      credentials: true
+      # HttpOnly refresh cookies require credentialed CORS and explicit origins.
+      credentials: true,
+      max_age: 600
   end
 end
