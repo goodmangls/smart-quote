@@ -15,6 +15,7 @@ const mockSetDrawColor = vi.fn();
 const mockSetLineWidth = vi.fn();
 const mockSetFont = vi.fn();
 const mockAddImage = vi.fn();
+const mockAddPage = vi.fn();
 
 vi.mock('jspdf', () => {
   return {
@@ -31,6 +32,8 @@ vi.mock('jspdf', () => {
       setLineWidth = mockSetLineWidth;
       setFont = mockSetFont;
       addImage = mockAddImage;
+      addPage = mockAddPage;
+      splitTextToSize = (text: string) => (Array.isArray(text) ? text : [text]);
       internal = {
         pageSize: { height: 297, width: 210 },
       };
@@ -112,6 +115,13 @@ describe('pdfService', () => {
     it('renders text content', async () => {
       await generatePDF(mockInput, mockResult);
       expect(mockText).toHaveBeenCalled();
+    });
+
+    it('renders the customs & duties disclaimer', async () => {
+      await generatePDF(mockInput, mockResult);
+      const allText = mockText.mock.calls.map((c) => c[0]).join('\n');
+      expect(allText).toContain('Customs & Duties Disclaimer');
+      expect(allText).toContain('remain the sole responsibility of the recipient');
     });
   });
 
