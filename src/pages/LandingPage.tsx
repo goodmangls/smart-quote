@@ -116,9 +116,9 @@ export const LandingPage: React.FC = () => {
 
                     <div className="mt-5 space-y-3">
                       {[
-                        ['Freight + FSC', '$482.40'],
+                        [t('landing.mock.freight'), '$386.20'],
+                        [t('landing.mock.fsc'), '$96.20'],
                         ['Packing + handling', '$68.10'],
-                        [t('landing.mock.margin'), '12.5%'],
                       ].map(([label, value]) => (
                         <div key={label} className="flex items-center justify-between rounded-2xl bg-white/[0.06] px-4 py-3 text-sm ring-1 ring-white/10">
                           <span className="text-gray-300">{label}</span>

@@ -25,6 +25,8 @@
   "landing.stat.calculation": "平均报价时间",
   "landing.stat.available": "在线服务",
   "landing.mock.route": "ICN(首尔) → LAX(洛杉矶)",
+  "landing.mock.freight": "Freight",
+  "landing.mock.fsc": "FSC",
   "landing.mock.margin": "利润率",
   "landing.footer": "© 2026 BridgeLogis. Bridging Your Cargo to the World. All rights reserved.",
   "landing.badge.networks": "Global Freight Networks",
