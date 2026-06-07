@@ -1,1 +1,1 @@
-📁 chore(pdca): backend-test-infra-debt archive — plan+report를 docs/archive/2026-06/backend-test-infra-debt/ 이관, _INDEX.md 행 추가, .bkit-memory.json phase=archived (100%, PR #30 38d28bc). Design/Analysis 생략(스펙 한정). 후속 R-3 backend-ci-gate 미시작
+🔒 ci(backend): backend-rspec job을 전체 스위트로 확장 — auth_spec+auth_mailer_spec 2개만 실행하던 것을 bundle exec rspec(전체)로 변경. FSC/margin 등 미게이트 spec 드리프트 재발 차단(backend-test-infra-debt 후속 R-3). 로컬 243/0, 검증은 PR backend-rspec CI 실측 + fail-injection. 기능 코드 무변경
