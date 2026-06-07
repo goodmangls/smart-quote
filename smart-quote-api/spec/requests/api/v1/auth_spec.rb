@@ -117,37 +117,38 @@ RSpec.describe "Api::V1::Auth", type: :request do
 
     def login_and_get_refresh_token
       post "/api/v1/auth/login", params: { email: user.email, password: "password123" }, as: :json
-      JSON.parse(response.body)["refresh_token"]
+      response.cookies["refresh_token"]
     end
 
-    it "returns a new access token and a new refresh token (rotation)" do
+    it "returns a new access token and rotates the HttpOnly refresh cookie" do
       original_refresh = login_and_get_refresh_token
       expect(original_refresh).to be_present
 
-      post "/api/v1/auth/refresh", params: { refresh_token: original_refresh }, as: :json
+      post "/api/v1/auth/refresh", headers: { "Cookie" => "refresh_token=#{original_refresh}" }, as: :json
 
       expect(response).to have_http_status(:ok)
       body = JSON.parse(response.body)
       expect(body["token"]).to be_present
-      expect(body["refresh_token"]).to be_present
+      expect(body).not_to have_key("refresh_token")
       expect(body["user"]["email"]).to eq(user.email)
+      expect(response.cookies["refresh_token"]).to be_present
     end
 
-    it "issued refresh token is a valid JWT that can be used again (chained rotation)" do
+    it "issued refresh cookie is a valid JWT that can be used again (chained rotation)" do
       r1 = login_and_get_refresh_token
 
-      post "/api/v1/auth/refresh", params: { refresh_token: r1 }, as: :json
-      r2 = JSON.parse(response.body)["refresh_token"]
+      post "/api/v1/auth/refresh", headers: { "Cookie" => "refresh_token=#{r1}" }, as: :json
+      r2 = response.cookies["refresh_token"]
       expect(r2).to be_present
 
-      post "/api/v1/auth/refresh", params: { refresh_token: r2 }, as: :json
+      post "/api/v1/auth/refresh", headers: { "Cookie" => "refresh_token=#{r2}" }, as: :json
       expect(response).to have_http_status(:ok)
-      r3 = JSON.parse(response.body)["refresh_token"]
+      r3 = response.cookies["refresh_token"]
       expect(r3).to be_present
     end
 
     it "returns 401 for an invalid refresh token" do
-      post "/api/v1/auth/refresh", params: { refresh_token: "bogus.token.here" }, as: :json
+      post "/api/v1/auth/refresh", headers: { "Cookie" => "refresh_token=bogus.token.here" }, as: :json
 
       expect(response).to have_http_status(:unauthorized)
       body = JSON.parse(response.body)
@@ -161,7 +162,7 @@ RSpec.describe "Api::V1::Auth", type: :request do
         "HS256"
       )
 
-      post "/api/v1/auth/refresh", params: { refresh_token: expired }, as: :json
+      post "/api/v1/auth/refresh", headers: { "Cookie" => "refresh_token=#{expired}" }, as: :json
 
       expect(response).to have_http_status(:unauthorized)
     end
@@ -194,6 +195,23 @@ RSpec.describe "Api::V1::Auth", type: :request do
       expect(user.magic_link_token_digest.length).to eq(64) # SHA256 hex
       expect(user.magic_link_token).to be_nil
     end
+
+    it "rejects untrusted origins when origin checking is enabled" do
+      original_check = ENV["AUTH_ORIGIN_CHECK"]
+      original_origins = ENV["CORS_ORIGINS"]
+      ENV["AUTH_ORIGIN_CHECK"] = "true"
+      ENV["CORS_ORIGINS"] = "https://bridgelogis.com"
+
+      post "/api/v1/auth/magic_link",
+           params: { email: user.email },
+           headers: { "Origin" => "https://evil.example" }
+
+      expect(response).to have_http_status(:forbidden)
+      expect(ActionMailer::Base.deliveries).to be_empty
+    ensure
+      ENV["AUTH_ORIGIN_CHECK"] = original_check
+      ENV["CORS_ORIGINS"] = original_origins
+    end
   end
 
   describe "GET /api/v1/auth/magic_link/verify" do
@@ -206,7 +224,11 @@ RSpec.describe "Api::V1::Auth", type: :request do
       expect(response).to have_http_status(:ok)
       body = JSON.parse(response.body)
       expect(body["token"]).to be_present
-      expect(body["refresh_token"]).to be_present
+      expect(body).not_to have_key("refresh_token")
+      expect(response.cookies["refresh_token"]).to be_present
+      set_cookie = response.headers["Set-Cookie"]
+      expect(set_cookie).to include("refresh_token=")
+      expect(set_cookie).to match(/HttpOnly/i)
       expect(body["user"]["email"]).to eq(user.email)
     end
 
@@ -241,87 +263,87 @@ RSpec.describe "Api::V1::Auth", type: :request do
     end
   end
 
-  # insights-admin-rails-auth: bl_session httpOnly cookie 발급 (D2=A 결정)
+  # insights-admin-rails-auth: refresh_token httpOnly cookie 발급 (D2=A 결정)
   # cross-origin rewrite 시 .bridgelogis.com cookie 가 자동 부착되어 apps/insights
   # middleware 가 Rails JWT 를 검증할 수 있도록 한다.
-  describe "POST /api/v1/auth/login (bl_session cookie)" do
+  describe "POST /api/v1/auth/login (refresh_token cookie)" do
     let!(:user) { create(:user, email: "cookie@example.com", password: "password123") }
 
-    it "issues bl_session httpOnly cookie on successful login" do
+    it "issues refresh_token httpOnly cookie on successful login" do
       post "/api/v1/auth/login", params: { email: "cookie@example.com", password: "password123" }, as: :json
 
       expect(response).to have_http_status(:ok)
 
       set_cookie = response.headers["Set-Cookie"]
       expect(set_cookie).to be_present, "Expected Set-Cookie header to be present"
-      expect(set_cookie).to include("bl_session=")
+      expect(set_cookie).to include("refresh_token=")
       # Set-Cookie attribute names are case-insensitive (RFC 6265). Rack emits lowercase.
       expect(set_cookie).to match(/HttpOnly/i)
       expect(set_cookie).to match(/SameSite=Lax/i)
 
-      expect(response.cookies["bl_session"]).to be_present
+      expect(response.cookies["refresh_token"]).to be_present
     end
 
-    it "cookie value is the same JWT as the response body token" do
+    it "does not expose the refresh token in the JSON response body" do
       post "/api/v1/auth/login", params: { email: "cookie@example.com", password: "password123" }, as: :json
 
-      body_token = JSON.parse(response.body)["token"]
-      cookie_token = response.cookies["bl_session"]
-      expect(cookie_token).to eq(body_token)
+      body = JSON.parse(response.body)
+      expect(body["token"]).to be_present
+      expect(body).not_to have_key("refresh_token")
+      expect(response.cookies["refresh_token"]).to be_present
+      expect(response.cookies["refresh_token"]).not_to eq(body["token"])
     end
 
     it "does not issue cookie on failed login" do
       post "/api/v1/auth/login", params: { email: "cookie@example.com", password: "wrong" }, as: :json
 
       expect(response).to have_http_status(:unauthorized)
-      expect(response.cookies["bl_session"]).to be_nil
+      expect(response.cookies["refresh_token"]).to be_nil
     end
 
     it "does not issue cookie on nonexistent email" do
       post "/api/v1/auth/login", params: { email: "ghost@example.com", password: "password123" }, as: :json
 
       expect(response).to have_http_status(:unauthorized)
-      expect(response.cookies["bl_session"]).to be_nil
+      expect(response.cookies["refresh_token"]).to be_nil
     end
   end
 
-  describe "POST /api/v1/auth/refresh (bl_session cookie rotation)" do
+  describe "POST /api/v1/auth/refresh (refresh_token cookie rotation)" do
     let!(:user) { create(:user, email: "rotate@example.com", password: "password123") }
 
-    it "rotates bl_session cookie when refresh succeeds" do
+    it "rotates refresh_token cookie when refresh succeeds" do
       post "/api/v1/auth/login", params: { email: user.email, password: "password123" }, as: :json
-      first_cookie = response.cookies["bl_session"]
-      refresh_token = JSON.parse(response.body)["refresh_token"]
+      first_cookie = response.cookies["refresh_token"]
       expect(first_cookie).to be_present
-      expect(refresh_token).to be_present
 
       # JWT exp 는 초 단위. 동일 초에 재발급되면 같은 token 이 나올 수 있어 sleep.
       sleep 1.1
 
-      post "/api/v1/auth/refresh", params: { refresh_token: refresh_token }, as: :json
+      post "/api/v1/auth/refresh", headers: { "Cookie" => "refresh_token=#{first_cookie}" }, as: :json
 
       expect(response).to have_http_status(:ok)
-      second_cookie = response.cookies["bl_session"]
+      second_cookie = response.cookies["refresh_token"]
       expect(second_cookie).to be_present
       expect(second_cookie).not_to eq(first_cookie)
 
       set_cookie = response.headers["Set-Cookie"]
-      expect(set_cookie).to include("bl_session=")
+      expect(set_cookie).to include("refresh_token=")
       # Set-Cookie attribute names are case-insensitive (RFC 6265). Rack emits lowercase.
       expect(set_cookie).to match(/HttpOnly/i)
       expect(set_cookie).to match(/SameSite=Lax/i)
     end
 
     it "does not issue cookie when refresh token is invalid" do
-      post "/api/v1/auth/refresh", params: { refresh_token: "bogus.token.here" }, as: :json
+      post "/api/v1/auth/refresh", headers: { "Cookie" => "refresh_token=bogus.token.here" }, as: :json
 
       expect(response).to have_http_status(:unauthorized)
-      expect(response.cookies["bl_session"]).to be_nil
+      expect(response.cookies["refresh_token"]).to be_nil
     end
   end
 
-  describe "POST /api/v1/auth/register (bl_session cookie)" do
-    it "issues bl_session cookie on successful registration" do
+  describe "POST /api/v1/auth/register (refresh_token cookie)" do
+    it "issues refresh_token cookie on successful registration" do
       post "/api/v1/auth/register", params: {
         email: "newcookie@example.com",
         password: "password123",
@@ -332,7 +354,7 @@ RSpec.describe "Api::V1::Auth", type: :request do
       }, as: :json
 
       expect(response).to have_http_status(:created)
-      expect(response.cookies["bl_session"]).to be_present
+      expect(response.cookies["refresh_token"]).to be_present
 
       set_cookie = response.headers["Set-Cookie"]
       expect(set_cookie).to match(/HttpOnly/i)
@@ -340,13 +362,13 @@ RSpec.describe "Api::V1::Auth", type: :request do
     end
   end
 
-  describe "POST /api/v1/auth/logout (bl_session cookie clearance)" do
+  describe "POST /api/v1/auth/logout (refresh_token cookie clearance)" do
     let!(:user) { create(:user, email: "logout@example.com", password: "password123") }
 
-    it "clears bl_session cookie on logout" do
+    it "clears refresh_token cookie on logout" do
       # 먼저 로그인하여 cookie 발급
       post "/api/v1/auth/login", params: { email: user.email, password: "password123" }, as: :json
-      expect(response.cookies["bl_session"]).to be_present
+      expect(response.cookies["refresh_token"]).to be_present
 
       # 로그인 응답의 cookie 가 다음 요청에 자동 전달되도록 cookie jar 활용
       post "/api/v1/auth/logout"
@@ -354,7 +376,7 @@ RSpec.describe "Api::V1::Auth", type: :request do
       expect(response).to have_http_status(:ok)
       # 삭제된 cookie 는 빈 값 + 과거 expiry 로 응답
       set_cookie = response.headers["Set-Cookie"]
-      expect(set_cookie).to include("bl_session=")
+      expect(set_cookie).to include("refresh_token=")
       expect(set_cookie).to match(/expires=Thu, 01 Jan 1970/i).or match(/max-age=0/i)
     end
 
