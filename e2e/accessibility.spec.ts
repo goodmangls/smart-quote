@@ -9,11 +9,9 @@ test.describe('Accessibility', () => {
 
   test('login page form has proper labels', async ({ page }) => {
     await page.goto('/login');
-    // LoginPage renders two email forms (sign-in #email + magic-link #magic-email);
-    // assert by id to avoid strict-mode label collision.
-    await expect(page.locator('#email')).toBeVisible();
-    await expect(page.locator('#password')).toBeVisible();
+    // Password login has been removed; Magic Link is the primary accessible form.
     await expect(page.locator('#magic-email')).toBeVisible();
+    await expect(page.locator('#password')).toHaveCount(0);
   });
 
   test('language selector is keyboard accessible', async ({ page }) => {

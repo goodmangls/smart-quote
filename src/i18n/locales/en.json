@@ -312,5 +312,7 @@
   "badge.greenest": "Eco",
   "transit.days": "{min}-{max} days",
   "co2.label": "CO₂ Emissions",
-  "co2.disclaimer": "Estimate per IATA RP1678"
+  "co2.disclaimer": "Estimate per IATA RP1678",
+  "auth.magicLink.noticeTitle": "Password-free sign-in is now the default.",
+  "auth.magicLink.noticeBody": "Enter your company email and use the one-time secure link we send. It expires in 15 minutes and can only be used once."
 }
