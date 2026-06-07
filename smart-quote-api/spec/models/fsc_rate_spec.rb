@@ -8,13 +8,13 @@ RSpec.describe FscRate, type: :model do
       described_class.ensure_defaults!
 
       expect(described_class.find_by(carrier: "UPS")).to have_attributes(
-        international: 48.5,
-        domestic: 48.5,
+        international: Constants::Rates::DEFAULT_FSC_PERCENT,
+        domestic: Constants::Rates::DEFAULT_FSC_PERCENT,
         source: "seed"
       )
       expect(described_class.find_by(carrier: "DHL")).to have_attributes(
-        international: 46.0,
-        domestic: 46.0,
+        international: Constants::Rates::DEFAULT_FSC_PERCENT_DHL,
+        domestic: Constants::Rates::DEFAULT_FSC_PERCENT_DHL,
         source: "seed"
       )
     end
@@ -36,12 +36,12 @@ RSpec.describe FscRate, type: :model do
       described_class.ensure_defaults!
 
       expect(described_class.find_by(carrier: "UPS")).to have_attributes(
-        international: 48.5,
-        domestic: 48.5
+        international: Constants::Rates::DEFAULT_FSC_PERCENT,
+        domestic: Constants::Rates::DEFAULT_FSC_PERCENT
       )
       expect(described_class.find_by(carrier: "DHL")).to have_attributes(
-        international: 46.0,
-        domestic: 46.0
+        international: Constants::Rates::DEFAULT_FSC_PERCENT_DHL,
+        domestic: Constants::Rates::DEFAULT_FSC_PERCENT_DHL
       )
     end
 

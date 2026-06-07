@@ -82,7 +82,7 @@ RSpec.describe "Api::V1::MarginRules", type: :request do
 
     it "returns validation error for invalid margin" do
       post "/api/v1/margin_rules",
-           params: valid_params.merge(margin_percent: 3),
+           params: valid_params.merge(margin_percent: -1),
            headers: admin_headers, as: :json
 
       expect(response).to have_http_status(:unprocessable_entity)
