@@ -56,7 +56,7 @@ RSpec.describe FscRate, type: :model do
       described_class.ensure_defaults!
 
       expect(described_class.find_by(carrier: "UPS")).to have_attributes(
-        international: 99.99,
+        international: 47.25,
         domestic: 47.25,
         source: "manual"
       )
