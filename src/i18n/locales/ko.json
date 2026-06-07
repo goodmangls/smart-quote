@@ -25,6 +25,8 @@
   "landing.stat.calculation": "평균 견적 시간",
   "landing.stat.available": "온라인 접속",
   "landing.mock.route": "ICN(서울) → LAX(로스앤젤레스)",
+  "landing.mock.freight": "Freight",
+  "landing.mock.fsc": "FSC",
   "landing.mock.margin": "마진",
   "landing.footer": "© 2026 BridgeLogis. Bridging Your Cargo to the World. All rights reserved.",
   "landing.badge.networks": "Global Freight Networks",

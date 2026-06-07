@@ -25,6 +25,8 @@
   "landing.stat.calculation": "平均見積時間",
   "landing.stat.available": "オンライン対応",
   "landing.mock.route": "ICN(ソウル) → LAX(ロサンゼルス)",
+  "landing.mock.freight": "Freight",
+  "landing.mock.fsc": "FSC",
   "landing.mock.margin": "マージン",
   "landing.footer": "© 2026 BridgeLogis. Bridging Your Cargo to the World. All rights reserved.",
   "landing.badge.networks": "Global Freight Networks",
