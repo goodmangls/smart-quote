@@ -1,9 +1,23 @@
 {
-  "activeFeature": null,
-  "phase": "archived",
-  "matchRate": 100,
+  "activeFeature": "backend-ci-gate",
+  "phase": "do",
+  "matchRate": 0,
   "iteration": 0,
   "history": [
+    {
+      "feature": "backend-ci-gate",
+      "phase": "do",
+      "timestamp": "2026-06-07",
+      "action": "Do 시작(Design 생략) — ci.yml backend-rspec step(line 59) auth 2개→전체 bundle exec rspec 확장. 브랜치 ci/backend-ci-gate. 검증 전략: ①확장 push→backend-rspec GREEN(청정 CI에서 full 통과 확인) ②비-auth(fsc) fail-injection push→RED(게이트가 새 커버 spec 잡는지 증명) ③revert→GREEN→머지.",
+      "matchRate": 0
+    },
+    {
+      "feature": "backend-ci-gate",
+      "phase": "plan",
+      "timestamp": "2026-06-07",
+      "action": "Plan 생성 — docs/01-plan/features/backend-ci-gate.plan.md. backend-test-infra-debt 후속 R-3. ci.yml backend-rspec job(Postgres16+db:prepare 이미 존재)이 line 59에서 auth_spec+auth_mailer_spec 2개만 실행 → FSC/margin 미게이트라 드리프트 누적. 조치: 그 step을 전체 bundle exec rspec로 확장(1줄). 검증=PR의 backend-rspec CI 실측(로컬 243/0·chat_spec ANTHROPIC_API_KEY nil mock·secret 의존 spec 0건 확인했으나 청정 CI 환경 차이 가능). 위험: seed/시간/locale 의존 spec → PR CI red 시 원인별 최소 수정. 기능 코드 무변경. Design 생략(CI 1줄)→Do 직행 후보.",
+      "matchRate": 0
+    },
     {
       "feature": "backend-test-infra-debt",
       "phase": "archived",
