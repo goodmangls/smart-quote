@@ -31,6 +31,7 @@ RSpec.describe AuthMailer, type: :mailer do
       html = mail.html_part.body.decoded
 
       expect(html).to include("Your secure sign-in link is ready")
+      expect(html).to include("color:#ffffff; mso-line-height-rule:exactly;")
       expect(html).to include("BridgeLogis Smart Quote")
       expect(html).to include("Sign in securely")
       expect(html).to include("Security note")
