@@ -27,8 +27,10 @@ services:
         generateValue: true
       - key: FRONTEND_URL
         value: 'https://bridgelogis.com'
-      - key: SENDGRID_API_KEY
+      - key: RESEND_API_KEY
         sync: false
+      - key: MAILER_FROM
+        value: 'no-reply@bridgelogis.com'
       - key: CORS_ORIGINS
         value: 'https://smart-quote-main.vercel.app,https://bridgelogis.com,https://www.bridgelogis.com'
       - key: REFRESH_COOKIE_SECURE
