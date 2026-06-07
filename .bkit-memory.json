@@ -1,9 +1,23 @@
 {
-  "activeFeature": null,
-  "phase": "archived",
+  "activeFeature": "backend-test-infra-debt",
+  "phase": "do",
   "matchRate": 100,
   "iteration": 0,
   "history": [
+    {
+      "feature": "backend-test-infra-debt",
+      "phase": "do",
+      "timestamp": "2026-06-07",
+      "action": "Do 완료 + origin/main 재조정 ⚠️ — 로컬 main이 9커밋 behind였고, 그 중 #21/#24/#25/#29(magic_link·auth 하드닝)가 auth_spec를 이미 G3/G4 동등하게 수정(body[user][email] 중첩·deliveries.count)함을 git show로 발견. 따라서 G3/G4 폐기(중복), G1/G2만 origin/main 기반 신규 브랜치 fix/backend-test-infra-debt에 재적용. 모델/상수(margin>=0, FSC 50.25/48.75) origin 동일 확인→G1/G2 유효. 변경: fsc_rate_spec UPS/DHL→Constants::Rates 상수 바인딩, margin_rule_spec subject{build}+하한 5→0%(margin -1·0 경계), margin_rules_spec invalid 3→-1. 3 spec만(+15/-13), 프로덕션 코드 무변경. ✅ 검증: origin 기반 전체 rspec 243 examples 0 failures, 회귀 0, rubocop 0. 교훈: 측정 전 git fetch+behind 확인 필수(stale 트리에서 분석→중복작업). 커밋/PR 대기.",
+      "matchRate": 100
+    },
+    {
+      "feature": "backend-test-infra-debt",
+      "phase": "plan",
+      "timestamp": "2026-06-07",
+      "action": "Plan 생성 — docs/01-plan/features/backend-test-infra-debt.plan.md. /check(2026-06-07)에서 smart-quote-api rspec 235/7 failures(pre-existing, CI 미게이트) 확인. 소스 직접 검증 후 4그룹 분류: G1 FSC seed drift(스펙 48.5 하드코딩 vs 모델 상수 50.25, stale 테스트→상수 바인딩, 2건), G2 margin_percent 하한(모델>=0 vs 스펙>=5, R-1 결정=B 0%유지→스펙 3건 수정, 2026-06-07 사용자 확정), G3 /auth/me 응답 중첩(컨트롤러 {user:...} 정상, FE도 data.user 중첩 소비 확인→스펙 수정, 1건), G4 magic_link(deliver_now 유지가 더 안전=인-리퀘스트 raise→스펙을 deliveries.count 동기 검증으로 수정, 코드 무변경, 1건). 결론: 7건 전부 스펙 한정 수정, 프로덕션 코드 무변경. R-1=B 확정, R-2 제거(deliver_now 유지), R-3(백엔드 CI 편입) Design. rubocop 1054는 범위 밖. advisor 검토 반영(G4 방향 역전·G3 grep 확정).",
+      "matchRate": 0
+    },
     {
       "feature": "chat-security-hardening",
       "phase": "archived",

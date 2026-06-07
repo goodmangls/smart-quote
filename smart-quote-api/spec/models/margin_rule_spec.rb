@@ -2,6 +2,8 @@ require "rails_helper"
 
 RSpec.describe MarginRule, type: :model do
   describe "validations" do
+    subject { build(:margin_rule) }
+
     it { should validate_presence_of(:name) }
     it { should validate_length_of(:name).is_at_most(100) }
     it { should validate_presence_of(:rule_type) }
@@ -32,7 +34,7 @@ RSpec.describe MarginRule, type: :model do
       end
     end
     it { should validate_presence_of(:margin_percent) }
-    it { should validate_numericality_of(:margin_percent).is_greater_than_or_equal_to(5).is_less_than_or_equal_to(50) }
+    it { should validate_numericality_of(:margin_percent).is_greater_than_or_equal_to(0).is_less_than_or_equal_to(50) }
     it { should validate_numericality_of(:weight_min).is_greater_than_or_equal_to(0).allow_nil }
     it { should validate_numericality_of(:weight_max).is_greater_than(0).allow_nil }
 
@@ -60,8 +62,8 @@ RSpec.describe MarginRule, type: :model do
     end
 
     describe "margin_percent range" do
-      it "rejects margin below 5%" do
-        rule = build(:margin_rule, margin_percent: 4)
+      it "rejects margin below 0%" do
+        rule = build(:margin_rule, margin_percent: -1)
         expect(rule).not_to be_valid
       end
 
@@ -71,7 +73,7 @@ RSpec.describe MarginRule, type: :model do
       end
 
       it "accepts margin at boundaries" do
-        expect(build(:margin_rule, margin_percent: 5)).to be_valid
+        expect(build(:margin_rule, margin_percent: 0)).to be_valid
         expect(build(:margin_rule, margin_percent: 50)).to be_valid
       end
     end
