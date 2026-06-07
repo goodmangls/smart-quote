@@ -55,7 +55,10 @@ jobs:
           ruby-version: '3.4.5'
           bundler-cache: true
           working-directory: smart-quote-api
-      - run: bundle exec rails db:prepare
+      # db:test:prepare loads schema WITHOUT seeds. db:prepare seeds margin_rules
+      # (db/seeds/margin_rules.rb) which, committed outside transactional fixtures,
+      # pollutes margin/resolver specs (rules.length, matched rule names).
+      - run: bundle exec rails db:test:prepare
       - run: bundle exec rspec
 
   e2e:
