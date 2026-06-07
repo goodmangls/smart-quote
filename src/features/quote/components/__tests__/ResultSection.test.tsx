@@ -92,11 +92,11 @@ describe('ResultSection', () => {
     expect(screen.getByText('PDF')).toBeInTheDocument();
   });
 
-  it('renders the English customs & duties disclaimer in the breakdown footer', () => {
+  it('renders the localized customs & duties disclaimer keys in the breakdown footer', () => {
     render(<ResultSection {...defaultProps} />);
 
-    // Hardcoded English (config/disclaimers), so it renders even with t() mocked to echo keys
-    expect(screen.getByText(/remain the sole responsibility of the recipient/)).toBeInTheDocument();
+    expect(screen.getByText(/quote\.disclaimer\.customsTitle/)).toBeInTheDocument();
+    expect(screen.getByText('quote.disclaimer.customsBody')).toBeInTheDocument();
   });
 
   it('renders key metrics (Act. Weight, Bill. Weight, Margin)', () => {
