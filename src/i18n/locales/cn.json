@@ -290,5 +290,7 @@
   "badge.greenest": "环保",
   "transit.days": "{min}-{max}天",
   "co2.label": "CO₂排放",
-  "co2.disclaimer": "基于IATA RP1678的估算"
+  "co2.disclaimer": "基于IATA RP1678的估算",
+  "auth.magicLink.noticeTitle": "现在默认使用免密码登录。",
+  "auth.magicLink.noticeBody": "请输入公司邮箱，我们会发送一次性安全链接。链接将在15分钟后过期，且只能使用一次。"
 }

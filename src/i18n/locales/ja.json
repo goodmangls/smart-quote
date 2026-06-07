@@ -290,5 +290,7 @@
   "badge.greenest": "エコ",
   "transit.days": "{min}〜{max}日",
   "co2.label": "CO₂排出量",
-  "co2.disclaimer": "IATA RP1678準拠の推定値"
+  "co2.disclaimer": "IATA RP1678準拠の推定値",
+  "auth.magicLink.noticeTitle": "パスワード不要のログインが標準になりました。",
+  "auth.magicLink.noticeBody": "会社メールを入力すると、1回限りの安全なリンクをお送りします。リンクは15分で期限切れとなり、一度だけ使用できます。"
 }
