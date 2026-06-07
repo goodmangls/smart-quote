@@ -76,14 +76,25 @@ describe('MagicLinkVerifyPage', () => {
     });
   });
 
-  it('strips the token from the URL after verification', async () => {
-    loginWithMagicLink.mockResolvedValue({ success: true });
+  it('strips the token from the URL before verification resolves', async () => {
+    let resolveLogin!: (value: { success: boolean }) => void;
+    loginWithMagicLink.mockReturnValue(
+      new Promise((resolve) => {
+        resolveLogin = resolve;
+      }),
+    );
     const replaceStateSpy = vi.spyOn(window.history, 'replaceState');
 
     renderPage('/auth/verify?token=abc');
 
     await waitFor(() => {
-      expect(replaceStateSpy).toHaveBeenCalledWith(null, '', '/auth/verify');
+      expect(loginWithMagicLink).toHaveBeenCalledWith('abc');
+    });
+    expect(replaceStateSpy).toHaveBeenCalledWith(null, '', '/auth/verify');
+
+    resolveLogin({ success: true });
+    await waitFor(() => {
+      expect(screen.getByText('DASHBOARD')).toBeInTheDocument();
     });
     replaceStateSpy.mockRestore();
   });

@@ -21,11 +21,11 @@ export default function MagicLinkVerifyPage() {
       return;
     }
 
-    loginWithMagicLink(token).then((result) => {
-      // Strip the token from the browser URL / history to avoid leaking it
-      // via Referer headers, bfcache, or browser history inspection.
-      window.history.replaceState(null, '', '/auth/verify');
+    // Strip the token from the browser URL / history before the network call resolves.
+    // This reduces exposure through browser history, Referer headers, and bfcache.
+    window.history.replaceState(null, '', '/auth/verify');
 
+    loginWithMagicLink(token).then((result) => {
       if (result.success) {
         navigate('/dashboard', { replace: true });
       } else {

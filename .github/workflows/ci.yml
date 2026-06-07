@@ -20,9 +20,47 @@ jobs:
       - run: npm run lint
       - run: npx vitest run
 
+  backend-rspec:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: smart_quote_api_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    defaults:
+      run:
+        working-directory: smart-quote-api
+    env:
+      RAILS_ENV: test
+      PGPASSWORD: postgres
+      DATABASE_URL: postgresql:///smart_quote_api_test?host=localhost&user=postgres
+      FRONTEND_URL: http://localhost:5173
+      AUTH_ORIGIN_CHECK: 'true'
+      CORS_ORIGINS: http://localhost:5173,https://bridgelogis.com
+      REFRESH_COOKIE_SECURE: 'false'
+      REFRESH_COOKIE_SAME_SITE: Lax
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.4.5'
+          bundler-cache: true
+          working-directory: smart-quote-api
+      - run: bundle exec rails db:prepare
+      - run: bundle exec rspec spec/requests/api/v1/auth_spec.rb spec/mailers/auth_mailer_spec.rb
+
   e2e:
     runs-on: ubuntu-latest
-    needs: check
+    needs: [check, backend-rspec]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4

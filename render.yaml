@@ -10,8 +10,8 @@ services:
     name: smart-quote-api
     runtime: ruby
     rootDir: smart-quote-api
-    buildCommand: "bundle install && bundle exec rails db:prepare"
-    startCommand: "bundle exec puma -C config/puma.rb"
+    buildCommand: 'bundle install && bundle exec rails db:prepare'
+    startCommand: 'bundle exec puma -C config/puma.rb'
     plan: free
     region: singapore # Closest to KR/User
     envVars:
@@ -25,6 +25,10 @@ services:
         value: 'true'
       - key: SECRET_KEY_BASE
         generateValue: true
+      - key: FRONTEND_URL
+        value: 'https://bridgelogis.com'
+      - key: SENDGRID_API_KEY
+        sync: false
       - key: CORS_ORIGINS
         value: 'https://smart-quote-main.vercel.app,https://bridgelogis.com,https://www.bridgelogis.com'
       - key: REFRESH_COOKIE_SECURE

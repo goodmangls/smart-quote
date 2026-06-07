@@ -2,10 +2,10 @@ module Api
   module V1
     class AuthController < ApplicationController
       include JwtAuthenticatable
-      # ActionController::API 는 cookies helper 미포함 — bl_session 발급용으로 명시 include
+      # ActionController::API 는 cookies helper 미포함 — refresh_token HttpOnly cookie 발급용으로 명시 include
       include ActionController::Cookies
       before_action :authenticate_user!, only: [ :update_password, :me ]
-      before_action :verify_trusted_origin!, only: [ :register, :login, :refresh, :logout, :verify_magic_link ]
+      before_action :verify_trusted_origin!, only: [ :register, :login, :refresh, :logout, :request_magic_link, :verify_magic_link ]
 
       # POST /api/v1/auth/register
       def register
