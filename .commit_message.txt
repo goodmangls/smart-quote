@@ -1,1 +1,1 @@
-🔒 ci(backend): backend-rspec job을 전체 스위트로 확장 — auth_spec+auth_mailer_spec 2개만 실행하던 것을 bundle exec rspec(전체)로 변경. FSC/margin 등 미게이트 spec 드리프트 재발 차단(backend-test-infra-debt 후속 R-3). 로컬 243/0, 검증은 PR backend-rspec CI 실측 + fail-injection. 기능 코드 무변경
+📁 chore(pdca): backend-ci-gate archive (100%) — plan+report를 docs/archive/2026-06/backend-ci-gate/ 이관, _INDEX.md 행 추가, .bkit-memory.json phase=archived. PR #32 c6ffe4e (backend-test-infra-debt R-3 완료, ci.yml backend-rspec 전체 확장 + db:test:prepare 시드오염 수정). 시드 교훈 feedback 메모리 기록

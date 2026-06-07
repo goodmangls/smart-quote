@@ -1,15 +1,23 @@
 {
-  "activeFeature": "backend-ci-gate",
-  "phase": "do",
-  "matchRate": 0,
+  "activeFeature": null,
+  "phase": "archived",
+  "matchRate": 100,
   "iteration": 0,
   "history": [
     {
       "feature": "backend-ci-gate",
+      "phase": "archived",
+      "timestamp": "2026-06-07",
+      "action": "Report 생성 + Archive (100%). PR #32 c6ffe4e. plan+report → docs/archive/2026-06/backend-ci-gate/, _INDEX.md 행 추가. backend-test-infra-debt R-3 완료 — ci.yml backend-rspec를 전체 rspec로 확장. 핵심 학습: db:prepare 청정 CI 시드 오염→db:test:prepare, 로컬≠CI green, fail-injection 게이트 증명. 시드 교훈 별도 feedback 메모리 기록.",
+      "matchRate": 100,
+      "archivedTo": "docs/archive/2026-06/backend-ci-gate/"
+    },
+    {
+      "feature": "backend-ci-gate",
       "phase": "do",
       "timestamp": "2026-06-07",
-      "action": "Do 시작(Design 생략) — ci.yml backend-rspec step(line 59) auth 2개→전체 bundle exec rspec 확장. 브랜치 ci/backend-ci-gate. 검증 전략: ①확장 push→backend-rspec GREEN(청정 CI에서 full 통과 확인) ②비-auth(fsc) fail-injection push→RED(게이트가 새 커버 spec 잡는지 증명) ③revert→GREEN→머지.",
-      "matchRate": 0
+      "action": "Do 완료 ✅ PR #32 admin squash merge c6ffe4e(base main). ci.yml backend-rspec를 auth 2개→전체 bundle exec rspec 확장. ⚠️ 핵심 발견: 확장 push 시 CI 7 fail(로컬 0) — db:prepare가 청정 CI DB에 margin_rules 시드(db/seeds/margin_rules.rb 한국어 룰 14개)→transactional fixtures 밖 커밋으로 margin/resolver spec 오염. 수정: db:prepare→db:test:prepare(스키마만, 시드 없음; factory+maintain_test_schema! 설계 정합). 재push→backend-rspec 243/0 GREEN. fail-injection 1회(fsc_rate_spec 99.99→RED→revert→GREEN)로 게이트가 새 커버 spec 실패 잡음 실증. 머지 net diff=ci.yml+plan+meta(injection/revert 상쇄, fsc 누수 0). 기능 코드 무변경. 교훈: 로컬 green≠CI green(시드 차이)→CI 실측 필수. report/archive 대기.",
+      "matchRate": 100
     },
     {
       "feature": "backend-ci-gate",
