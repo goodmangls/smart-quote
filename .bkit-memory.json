@@ -1,9 +1,17 @@
 {
-  "activeFeature": "dep-upgrade",
-  "phase": "do",
+  "activeFeature": null,
+  "phase": "archived",
   "matchRate": 100,
   "iteration": 0,
   "history": [
+    {
+      "feature": "dep-upgrade",
+      "phase": "archived",
+      "timestamp": "2026-06-07",
+      "action": "Report 생성 + Archive (100%). PR #34 21c11b9. plan+report → docs/archive/2026-06/dep-upgrade/, _INDEX.md 행 추가. react-router 7.17+jspdf 4.2.1+autotable 5.0.8 → prod npm audit 0 vulns, 앱 코드 무변경. Do 중 flaky 발견(useExchangeRates teardown window 누수, Task #8/분석 M7, dep 무관). 잔여: 수동 PDF 육안·dashboard-test-flakiness. 분석 보고서(codebase-health-2026-06-07)는 사용자 지시로 미커밋.",
+      "matchRate": 100,
+      "archivedTo": "docs/archive/2026-06/dep-upgrade/"
+    },
     {
       "feature": "dep-upgrade",
       "phase": "do",
