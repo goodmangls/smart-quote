@@ -88,8 +88,8 @@ RSpec.describe "Api::V1::Auth", type: :request do
 
       expect(response).to have_http_status(:ok)
       body = JSON.parse(response.body)
-      expect(body["email"]).to eq(user.email)
-      expect(body["role"]).to eq(user.role)
+      expect(body["user"]["email"]).to eq(user.email)
+      expect(body["user"]["role"]).to eq(user.role)
     end
 
     it "returns 401 without token" do
@@ -173,10 +173,10 @@ RSpec.describe "Api::V1::Auth", type: :request do
 
     before { ActionMailer::Base.deliveries.clear }
 
-    it "returns 200 and enqueues a magic link email for an existing user" do
+    it "returns 200 and delivers a magic link email for an existing user" do
       expect {
         post "/api/v1/auth/magic_link", params: { email: user.email }
-      }.to have_enqueued_mail(AuthMailer, :magic_link)
+      }.to change { ActionMailer::Base.deliveries.count }.by(1)
       expect(response).to have_http_status(:ok)
     end
 
