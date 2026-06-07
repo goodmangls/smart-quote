@@ -18,12 +18,12 @@
     "@intercom/messenger-js-sdk": "^0.0.18",
     "@sentry/browser": "^10.43.0",
     "@sentry/react": "^10.43.0",
-    "jspdf": "2.5.1",
-    "jspdf-autotable": "^5.0.7",
+    "jspdf": "^4.2.1",
+    "jspdf-autotable": "^5.0.8",
     "lucide-react": "^0.563.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
-    "react-router-dom": "^7.13.1",
+    "react-router-dom": "^7.17.0",
     "zod": "^4.4.3"
   },
   "devDependencies": {

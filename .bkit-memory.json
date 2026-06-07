@@ -1,9 +1,23 @@
 {
-  "activeFeature": null,
-  "phase": "archived",
+  "activeFeature": "dep-upgrade",
+  "phase": "do",
   "matchRate": 100,
   "iteration": 0,
   "history": [
+    {
+      "feature": "dep-upgrade",
+      "phase": "do",
+      "timestamp": "2026-06-07",
+      "action": "Do 완료 ✅ 브랜치 chore/dep-upgrade. Part A react-router-dom 7.13.1→7.17.0(non-breaking 확정: tsc/lint/vitest 1447/build 전 green). Part B R-1 해소(jspdf-autotable 5.0.8 peer=^2||^3||^4) → jspdf 2.5.1→4.2.1 + autotable 5.0.7→5.0.8. PDF 테스트(실제 jsPDF: pdfLayout.test.ts+pdfService.test.ts 8개) GREEN → major breaking 없음. 전체 vitest 1447 pass·build 성공. ⭐ prod npm audit=0 vulnerabilities(react-router/jspdf/dompurify 전부 해소). diff=package.json/lock만(앱 코드 무변경). 잔여: 수동 PDF 육안(헤드리스 한계, 자동 안전망 강함). 커밋/PR 대기. 분석 보고서는 사용자 지시로 미커밋.",
+      "matchRate": 100
+    },
+    {
+      "feature": "dep-upgrade",
+      "phase": "plan",
+      "timestamp": "2026-06-07",
+      "action": "Plan 생성 — docs/01-plan/features/dep-upgrade.plan.md. 코드분석 2026-06-07 H1. prod npm audit 4건 해소. 검증으로 위험도 분리: Part A react-router-dom 7.13.1→7.17.0(minor, non-breaking, high RCE 해소, trivial) / Part B jspdf 2.5.1→4.2.1(npm isSemVerMajor=True, breaking 위험; jspdf-autotable 5.0.7 호환 R-1 확정 필요; critical ReDoS+moderate dompurify 해소). 안전망: pdfLayout.test.ts 실제 jsPDF+pdfService.test.ts. R-2: A 우선 단독 출하 권고, B는 PDF 회귀확인 후(breaking 크면 별사이클 강등). dev 전용 취약(vite/vitest/tar 등)은 범위 밖.",
+      "matchRate": 0
+    },
     {
       "feature": "backend-ci-gate",
       "phase": "archived",
