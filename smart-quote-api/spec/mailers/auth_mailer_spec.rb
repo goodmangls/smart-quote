@@ -20,7 +20,7 @@ RSpec.describe AuthMailer, type: :mailer do
 
     it "embeds the magic link URL with the raw token" do
       mail = described_class.magic_link(user, token)
-      expect(mail.body.encoded).to include(
+      expect(mail.body.decoded).to include(
         "https://smart-quote.test/auth/verify?token=#{token}"
       )
     end
