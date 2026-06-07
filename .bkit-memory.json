@@ -1,9 +1,17 @@
 {
-  "activeFeature": "backend-test-infra-debt",
-  "phase": "do",
+  "activeFeature": null,
+  "phase": "archived",
   "matchRate": 100,
   "iteration": 0,
   "history": [
+    {
+      "feature": "backend-test-infra-debt",
+      "phase": "archived",
+      "timestamp": "2026-06-07",
+      "action": "Report 생성 + Archive (matchRate 100). PR #30 admin squash merge 38d28bc(base main), CI 전 job green(check·backend-rspec·e2e·lighthouse), origin 기반 전체 rspec 243/0. Design/Analysis 생략(스펙 한정·Plan=spec). plan+report → docs/archive/2026-06/backend-test-infra-debt/ 이관, _INDEX.md 행 추가. 핵심: origin/main 9커밋 behind 재조정(G3/G4는 #24/#29가 이미 해결→폐기, G1/G2만 전달). 후속 R-3 backend-ci-gate(ci.yml backend-rspec job line59를 전체 rspec로 확장) 미시작.",
+      "matchRate": 100,
+      "archivedTo": "docs/archive/2026-06/backend-test-infra-debt/"
+    },
     {
       "feature": "backend-test-infra-debt",
       "phase": "do",
