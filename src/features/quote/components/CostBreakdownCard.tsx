@@ -14,7 +14,6 @@ import {
   AlertTriangle,
 } from 'lucide-react';
 import { formatKRW, formatUSD } from '@/lib/format';
-import { CUSTOMS_DUTIES_DISCLAIMER } from '@/config/disclaimers';
 import { resultStyles } from './result-styles';
 
 interface Props {
@@ -71,7 +70,7 @@ export const CostBreakdownCard: React.FC<Props> = ({
             <button
               onClick={() => setShowKRW((prev) => !prev)}
               className='flex items-center gap-1 text-[10px] font-semibold text-gray-500 hover:text-brand-blue-600 dark:text-gray-400 dark:hover:text-brand-blue-300 transition-colors'
-              title='Toggle currency'
+              title={t('quote.cost.toggleCurrency')}
             >
               <ArrowUpDown className='w-3 h-3' />
               {showKRW ? 'KRW' : 'USD'}
@@ -79,7 +78,7 @@ export const CostBreakdownCard: React.FC<Props> = ({
           )}
           {!hideMargin && (
             <span className='text-[10px] font-bold px-2 py-1 bg-gray-200 dark:bg-gray-600 rounded text-gray-600 dark:text-gray-300 uppercase tracking-wide'>
-              Internal
+              {t('quote.cost.internal')}
             </span>
           )}
         </div>
@@ -89,14 +88,14 @@ export const CostBreakdownCard: React.FC<Props> = ({
         {/* 1. Base Rate + Margin + FSC */}
         <div>
           <h4 className='text-xs font-bold text-gray-400 uppercase tracking-wider mb-3'>
-            Freight Cost
+            {t('quote.cost.freight')}
           </h4>
           <div className='space-y-3 pl-3 border-l-2 border-dashed border-gray-200 dark:border-gray-700'>
             {/* Base Rate — Member sees Base+Margin as "Base Rate" */}
             <div className='flex justify-between items-center text-gray-700 dark:text-gray-300'>
               <div className='flex items-center'>
                 <Plane className='w-4 h-4 mr-2 text-gray-400 flex-shrink-0' />
-                <span>Base Rate{!hideMargin ? ` (${result.carrier})` : ''}</span>
+                <span>{t('quote.cost.baseRate')}{!hideMargin ? ` (${result.carrier})` : ''}</span>
               </div>
               <span className='font-medium'>
                 {formatCurrency(hideMargin ? baseWithMargin : baseRate)}
@@ -131,7 +130,7 @@ export const CostBreakdownCard: React.FC<Props> = ({
             {/* Subtotal: Base + Margin */}
             {!hideMargin && (
               <div className='flex justify-between items-center text-xs text-gray-500 dark:text-gray-400 pl-6'>
-                <span>Subtotal (Base + Margin)</span>
+                <span>{t('quote.cost.subtotalBaseMargin')}</span>
                 <span>{formatCurrency(baseWithMargin)}</span>
               </div>
             )}
@@ -149,7 +148,7 @@ export const CostBreakdownCard: React.FC<Props> = ({
 
           {/* Freight Subtotal */}
           <div className='flex justify-between items-center mt-3 pt-2 border-t border-gray-100 dark:border-gray-700 font-bold text-gray-800 dark:text-white'>
-            <span className='pl-3'>Freight Total</span>
+            <span className='pl-3'>{t('quote.cost.freightTotal')}</span>
             <span>{formatCurrency(baseWithMargin + fscAmount)}</span>
           </div>
         </div>
@@ -162,7 +161,7 @@ export const CostBreakdownCard: React.FC<Props> = ({
           result.breakdown.destDuty > 0) && (
           <div>
             <h4 className='text-xs font-bold text-gray-400 uppercase tracking-wider mb-3'>
-              Add-ons
+              {t('quote.cost.addOns')}
             </h4>
             <div className='space-y-3 pl-3 border-l-2 border-dashed border-amber-200 dark:border-amber-700'>
               {/* Packing & Docs */}
@@ -170,7 +169,7 @@ export const CostBreakdownCard: React.FC<Props> = ({
                 <div className='flex justify-between items-center text-gray-700 dark:text-gray-300'>
                   <div className='flex items-center'>
                     <PackageCheck className='w-4 h-4 mr-2 text-gray-400 flex-shrink-0' />
-                    <span>Packing & Docs</span>
+                    <span>{t('quote.cost.packingDocs')}</span>
                   </div>
                   <span className='font-medium'>{formatCurrency(packingTotal)}</span>
                 </div>
@@ -181,7 +180,7 @@ export const CostBreakdownCard: React.FC<Props> = ({
                 <div className='flex justify-between items-center text-gray-700 dark:text-gray-300'>
                   <div className='flex items-center'>
                     <BoxSelect className='w-4 h-4 mr-2 text-gray-400 flex-shrink-0' />
-                    <span>Seoul Pickup</span>
+                    <span>{t('quote.cost.seoulPickup')}</span>
                   </div>
                   <span className='font-medium'>
                     {formatCurrency(result.breakdown.pickupInSeoul)}
@@ -210,7 +209,7 @@ export const CostBreakdownCard: React.FC<Props> = ({
                 <div className='flex justify-between items-center text-amber-600 dark:text-amber-500'>
                   <div className='flex items-center'>
                     <BoxSelect className='w-4 h-4 mr-2 flex-shrink-0' />
-                    <span>Manual Surge</span>
+                    <span>{t('quote.cost.manualSurge')}</span>
                   </div>
                   <span className='font-medium'>
                     {formatCurrency(result.breakdown.intlManualSurge!)}
@@ -227,7 +226,7 @@ export const CostBreakdownCard: React.FC<Props> = ({
                         <Package
                           className={`w-4 h-4 mr-2 flex-shrink-0 ${result.carrier === 'UPS' ? 'text-blue-500' : 'text-yellow-500'}`}
                         />
-                        <span>{result.carrier} Add-ons</span>
+                        <span>{t('quote.cost.carrierAddOns').replace('{carrier}', result.carrier)}</span>
                       </div>
                       <span className='font-medium'>
                         {formatCurrency(result.breakdown.carrierAddOnTotal || 0)}
@@ -244,7 +243,7 @@ export const CostBreakdownCard: React.FC<Props> = ({
                           </span>
                           <span>
                             {formatCurrency(d.amount + d.fscAmount)}
-                            {d.fscAmount > 0 ? ' +FSC' : ''}
+                            {d.fscAmount > 0 ? ` ${t('quote.cost.plusFsc')}` : ''}
                           </span>
                         </div>
                       ))}
@@ -256,7 +255,7 @@ export const CostBreakdownCard: React.FC<Props> = ({
               {result.breakdown.destDuty > 0 && (
                 <div className='flex justify-between items-center text-gray-700 dark:text-gray-300'>
                   <div className='flex items-center pl-6'>
-                    <span>Destination Duty</span>
+                    <span>{t('quote.cost.destinationDuty')}</span>
                   </div>
                   <span className='font-medium'>{formatCurrency(result.breakdown.destDuty)}</span>
                 </div>
@@ -296,15 +295,14 @@ export const CostBreakdownCard: React.FC<Props> = ({
           <Info className='w-4 h-4 mr-2 flex-shrink-0 mt-0.5 text-gray-400' />
           <p className='leading-relaxed'>{t('calc.costBasis.disclaimer')}</p>
         </div>
-        {/* Customs & duties disclaimer — intentionally English across all
-                 locales (see @/config/disclaimers), matching the English-only PDF. */}
+        {/* Customs & duties disclaimer is localized for the on-screen quote. */}
         <div className='flex items-start border-t border-gray-200 dark:border-gray-600 pt-2'>
           <AlertTriangle className='w-4 h-4 mr-2 flex-shrink-0 mt-0.5 text-gray-400' />
           <p className='leading-relaxed'>
             <span className='font-semibold text-gray-600 dark:text-gray-300'>
-              {CUSTOMS_DUTIES_DISCLAIMER.title}:{' '}
+              {t('quote.disclaimer.customsTitle')}:{' '}
             </span>
-            {CUSTOMS_DUTIES_DISCLAIMER.body}
+            {t('quote.disclaimer.customsBody')}
           </p>
         </div>
       </div>
