@@ -25,6 +25,27 @@ RSpec.describe AuthMailer, type: :mailer do
       )
     end
 
+    it "renders a polished professional English HTML email" do
+      mail = described_class.magic_link(user, token)
+      html = mail.html_part.body.decoded
+
+      expect(html).to include("Your secure sign-in link is ready")
+      expect(html).to include("BridgeLogis Smart Quote")
+      expect(html).to include("Sign in securely")
+      expect(html).to include("Security note")
+      expect(html).to include("Goodman GLS")
+      expect(html).not_to include("본부장")
+    end
+
+    it "renders a professional plain-text fallback" do
+      mail = described_class.magic_link(user, token)
+      text = mail.text_part.body.decoded
+
+      expect(text).to include("BridgeLogis Smart Quote — Secure sign-in")
+      expect(text).to include("Sign in securely:")
+      expect(text).to include("Goodman GLS · BridgeLogis Smart Quote")
+    end
+
     it "raises KeyError when FRONTEND_URL is unset" do
       ENV.delete("FRONTEND_URL")
       # ActionMailer lazily evaluates the action body; force it by touching .message
