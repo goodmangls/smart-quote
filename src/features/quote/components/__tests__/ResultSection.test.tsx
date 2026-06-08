@@ -116,19 +116,21 @@ describe('ResultSection', () => {
     expect(screen.queryByText('Margin')).not.toBeInTheDocument();
   });
 
-  it('allows Korean member quote totals to toggle between KRW and USD like admin', async () => {
+  it('defaults Korean member quote totals to USD and toggles to KRW on click', async () => {
     const user = userEvent.setup();
 
     render(<ResultSection {...defaultProps} hideMargin={true} isKorean={true} />);
 
     const currencyToggle = screen.getByRole('button', { name: 'Toggle currency display' });
-    expect(within(currencyToggle).getByText('₩1,500,000')).toBeInTheDocument();
     expect(within(currencyToggle).getByText('$1,071.43')).toBeInTheDocument();
+    expect(within(currencyToggle).getByText('₩1,500,000')).toBeInTheDocument();
+    expect(within(currencyToggle).getByText('KRW')).toBeInTheDocument();
 
     await user.click(currencyToggle);
 
-    expect(within(currencyToggle).getByText('$1,071.43')).toBeInTheDocument();
     expect(within(currencyToggle).getByText('₩1,500,000')).toBeInTheDocument();
+    expect(within(currencyToggle).getByText('$1,071.43')).toBeInTheDocument();
+    expect(within(currencyToggle).getByText('USD')).toBeInTheDocument();
   });
 
   it('renders warning alerts when warnings present', () => {

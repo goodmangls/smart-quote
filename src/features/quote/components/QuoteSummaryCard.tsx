@@ -13,10 +13,10 @@ interface Props {
 }
 
 export const QuoteSummaryCard: React.FC<Props> = ({ result, onDownloadPdf, isKorean = false, hideMargin }) => {
-  // Admin (!hideMargin): always start with KRW + toggle available
-  // Korean member: same toggle UX as admin, while non-Korean member remains USD-only
+  // Admin (!hideMargin): starts with KRW + toggle available
+  // Korean member: starts with USD + toggle available; non-Korean member remains USD-only
   const canToggleCurrency = !hideMargin || isKorean;
-  const [showKRW, setShowKRW] = useState(!hideMargin ? true : isKorean);
+  const [showKRW, setShowKRW] = useState(!hideMargin);
   const { t } = useLanguage();
 
   const primaryAmount = showKRW
