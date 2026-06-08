@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ResultSection } from '../ResultSection';
 import { QuoteInput, QuoteResult, Incoterm, PackingType } from '@/types';
@@ -114,6 +114,21 @@ describe('ResultSection', () => {
     expect(screen.getByText('Act. Weight')).toBeInTheDocument();
     expect(screen.getByText('Bill. Weight')).toBeInTheDocument();
     expect(screen.queryByText('Margin')).not.toBeInTheDocument();
+  });
+
+  it('allows Korean member quote totals to toggle between KRW and USD like admin', async () => {
+    const user = userEvent.setup();
+
+    render(<ResultSection {...defaultProps} hideMargin={true} isKorean={true} />);
+
+    const currencyToggle = screen.getByRole('button', { name: 'Toggle currency display' });
+    expect(within(currencyToggle).getByText('₩1,500,000')).toBeInTheDocument();
+    expect(within(currencyToggle).getByText('$1,071.43')).toBeInTheDocument();
+
+    await user.click(currencyToggle);
+
+    expect(within(currencyToggle).getByText('$1,071.43')).toBeInTheDocument();
+    expect(within(currencyToggle).getByText('₩1,500,000')).toBeInTheDocument();
   });
 
   it('renders warning alerts when warnings present', () => {
