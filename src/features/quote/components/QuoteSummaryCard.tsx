@@ -14,7 +14,8 @@ interface Props {
 
 export const QuoteSummaryCard: React.FC<Props> = ({ result, onDownloadPdf, isKorean = false, hideMargin }) => {
   // Admin (!hideMargin): always start with KRW + toggle available
-  // Member (hideMargin): fixed based on nationality (KR→KRW, else→USD)
+  // Korean member: same toggle UX as admin, while non-Korean member remains USD-only
+  const canToggleCurrency = !hideMargin || isKorean;
   const [showKRW, setShowKRW] = useState(!hideMargin ? true : isKorean);
   const { t } = useLanguage();
 
@@ -47,13 +48,7 @@ export const QuoteSummaryCard: React.FC<Props> = ({ result, onDownloadPdf, isKor
                 </div>
             </div>
 
-            {hideMargin ? (
-              <div className="flex flex-col mb-5 w-full">
-                <div className="text-4xl sm:text-5xl font-extrabold tracking-tight leading-tight">
-                  <span>{isKorean ? formatKRW(result.totalQuoteAmount) : formatUSD(result.totalQuoteAmountUSD)}</span>
-                </div>
-              </div>
-            ) : (
+            {canToggleCurrency ? (
               <button
                 type="button"
                 onClick={() => setShowKRW(prev => !prev)}
@@ -68,6 +63,12 @@ export const QuoteSummaryCard: React.FC<Props> = ({ result, onDownloadPdf, isKor
                       <span className="opacity-70 mr-2">&asymp;</span> {secondaryAmount} <span className="text-xs ml-1 opacity-50">{secondaryLabel}</span>
                   </div>
               </button>
+            ) : (
+              <div className="flex flex-col mb-5 w-full">
+                <div className="text-4xl sm:text-5xl font-extrabold tracking-tight leading-tight">
+                  <span>{formatUSD(result.totalQuoteAmountUSD)}</span>
+                </div>
+              </div>
             )}
 
             <div className="grid grid-cols-2 gap-3 text-sm bg-white/10 p-4 rounded-xl backdrop-blur-md border border-white/10">
