@@ -19,7 +19,8 @@ interface Props {
 
 export const CarrierComparisonCard: React.FC<Props> = ({ input, currentResult, isKorean = false, onSwitchCarrier, hideMargin }) => {
   const { t } = useLanguage();
-  const [showKRW, setShowKRW] = useState(!hideMargin ? true : isKorean);
+  const canToggleCurrency = !hideMargin || isKorean;
+  const [showKRW, setShowKRW] = useState(!hideMargin || isKorean);
   const altCarrier = input.overseasCarrier === 'DHL' ? 'UPS' : 'DHL';
 
   const altResult = useMemo<QuoteResult | null>(() => {
@@ -85,10 +86,11 @@ export const CarrierComparisonCard: React.FC<Props> = ({ input, currentResult, i
           </h4>
         </div>
         <div className="flex items-center gap-2">
-          {!hideMargin && (
+          {canToggleCurrency && (
             <button
               onClick={() => setShowKRW(prev => !prev)}
               className="flex items-center gap-1 text-[10px] font-semibold text-gray-500 hover:text-brand-blue-600 dark:text-gray-400 dark:hover:text-brand-blue-300 transition-colors"
+              aria-label="Toggle currency"
               title="Toggle currency"
             >
               <ArrowUpDown className="w-3 h-3" />

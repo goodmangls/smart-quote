@@ -28,9 +28,10 @@ export const generatePDF = async (
   input: QuoteInput,
   result: QuoteResult,
   referenceNo?: string,
-  options?: { isAdmin?: boolean; isKorean?: boolean },
+  options?: { isAdmin?: boolean; isKorean?: boolean; currency?: CurrencyMode },
 ) => {
-  const currency: CurrencyMode = options?.isAdmin ? 'both' : options?.isKorean ? 'krw' : 'usd';
+  const currency: CurrencyMode =
+    options?.currency ?? (options?.isAdmin ? 'both' : options?.isKorean ? 'krw' : 'usd');
   const { jsPDF: JsPDF } = await import('jspdf');
   const doc = new JsPDF();
 

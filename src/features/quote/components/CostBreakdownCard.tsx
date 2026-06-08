@@ -33,8 +33,10 @@ export const CostBreakdownCard: React.FC<Props> = ({
 }) => {
   const { cardClass } = resultStyles;
   const { t } = useLanguage();
-  // Admin (!hideMargin): KRW default + toggle; Member: nationality-based fixed
-  const [showKRW, setShowKRW] = useState(!hideMargin ? true : isKorean);
+  // Admin (!hideMargin) and Korean account owner/member: KRW default + toggle.
+  // Non-Korean account owner/member: USD-only.
+  const canToggleCurrency = !hideMargin || isKorean;
+  const [showKRW, setShowKRW] = useState(!hideMargin || isKorean);
 
   const exchangeRate =
     result.totalQuoteAmountUSD > 0 ? result.totalQuoteAmount / result.totalQuoteAmountUSD : 1400;
@@ -66,10 +68,11 @@ export const CostBreakdownCard: React.FC<Props> = ({
           {t('quote.logisticsCost')}
         </h3>
         <div className='flex items-center gap-2'>
-          {!hideMargin && (
+          {canToggleCurrency && (
             <button
               onClick={() => setShowKRW((prev) => !prev)}
               className='flex items-center gap-1 text-[10px] font-semibold text-gray-500 hover:text-brand-blue-600 dark:text-gray-400 dark:hover:text-brand-blue-300 transition-colors'
+              aria-label='Toggle currency'
               title={t('quote.cost.toggleCurrency')}
             >
               <ArrowUpDown className='w-3 h-3' />

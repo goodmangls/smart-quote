@@ -186,8 +186,8 @@ const QuoteCalculator: React.FC<{ isPublic?: boolean }> = ({ isPublic = false })
   };
 
   const handleReset = () => setShowResetConfirm(true);
-  const handleDownloadPdf = async () =>
-    result && (await generatePDF(input, result, undefined, { isAdmin, isKorean }));
+  const handleDownloadPdf = async (currency?: 'krw' | 'usd') =>
+    result && (await generatePDF(input, result, undefined, { isAdmin, isKorean, currency }));
   const handleQuoteSaved = () => setCurrentView('history');
   const scrollToResults = () =>
     document
