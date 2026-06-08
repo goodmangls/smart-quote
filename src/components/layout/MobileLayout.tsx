@@ -193,14 +193,9 @@ export const MobileLayout: React.FC<Props> = ({
                           </span>
                         </>
                       ) : (
-                        <>
-                          <p className="text-lg font-bold text-brand-blue-700 dark:text-brand-blue-400">
-                            {formatUSDInt(result.totalQuoteAmountUSD)}
-                          </p>
-                          <span className="text-[10px] text-gray-400">
-                            ({formatKRW(result.totalQuoteAmount)})
-                          </span>
-                        </>
+                        <p className="text-lg font-bold text-brand-blue-700 dark:text-brand-blue-400">
+                          {formatUSDInt(result.totalQuoteAmountUSD)}
+                        </p>
                       )}
                     </div>
                   </div>
