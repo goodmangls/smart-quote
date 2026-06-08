@@ -24,6 +24,7 @@ import { CalculatorActionBar } from './components/CalculatorActionBar';
 import { AdminWidgets } from './components/AdminWidgets';
 import { Footer } from '@/components/layout/Footer';
 import { MobileStickyBottomBar } from './components/MobileStickyBottomBar';
+import { getQuoteAccessFlags } from './quoteAccess';
 
 const INITIAL_INPUT: QuoteInput = {
   originCountry: 'KR',
@@ -49,10 +50,8 @@ const QuoteCalculator: React.FC<{ isPublic?: boolean }> = ({ isPublic = false })
   const { isDarkMode, toggleDarkMode } = useTheme();
   const { t } = useLanguage();
   const { user } = useAuth();
-  const isAdmin = user?.role === 'admin';
+  const { isAdmin, hideMargin, isKorean } = getQuoteAccessFlags(user, isPublic);
   const canSaveAndViewHistory = !!user;
-  const hideMargin = isPublic || user?.role === 'member';
-  const isKorean = user?.nationality === 'KR';
 
   // Phase 1.5 — apply /quote?origin=...&dest=...&weight=... deep-link prefill
   // exactly once on initial mount. UTM params (utm_source/medium/campaign) are
