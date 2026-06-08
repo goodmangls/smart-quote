@@ -24,7 +24,7 @@ interface Props {
   setInput: React.Dispatch<React.SetStateAction<QuoteInput>>;
   result: QuoteResult | null;
   onMarginChange: (val: number) => void;
-  onDownloadPdf: () => void;
+  onDownloadPdf: (currency?: 'krw' | 'usd') => void;
   onReset: () => void;
   scrollToResults: () => void;
   hideMargin?: boolean;
@@ -208,7 +208,7 @@ export const MobileLayout: React.FC<Props> = ({
                   <div className="flex items-center gap-1.5">
                     {/* PDF Download */}
                     <button
-                      onClick={onDownloadPdf}
+                      onClick={() => onDownloadPdf(isKorean ? 'krw' : 'usd')}
                       className="p-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700 transition-colors"
                       aria-label="Download PDF"
                     >

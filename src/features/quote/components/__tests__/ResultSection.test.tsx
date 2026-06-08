@@ -77,7 +77,7 @@ const mockInput: QuoteInput = {
 const defaultProps = {
   result: mockResult,
   onMarginChange: vi.fn(),
-  onDownloadPdf: vi.fn(),
+  onDownloadPdf: vi.fn<(currency?: 'krw' | 'usd') => void>(),
   marginPercent: 15,
 };
 
@@ -116,21 +116,79 @@ describe('ResultSection', () => {
     expect(screen.queryByText('Margin')).not.toBeInTheDocument();
   });
 
-  it('defaults Korean member quote totals to USD and toggles to KRW on click', async () => {
+  it('defaults Korean account-owner quote totals to KRW and toggles to USD on click', async () => {
     const user = userEvent.setup();
 
     render(<ResultSection {...defaultProps} hideMargin={true} isKorean={true} />);
 
     const currencyToggle = screen.getByRole('button', { name: 'Toggle currency display' });
-    expect(within(currencyToggle).getByText('$1,071.43')).toBeInTheDocument();
-    expect(within(currencyToggle).getByText('₩1,500,000')).toBeInTheDocument();
-    expect(within(currencyToggle).getByText('KRW')).toBeInTheDocument();
-
-    await user.click(currencyToggle);
-
     expect(within(currencyToggle).getByText('₩1,500,000')).toBeInTheDocument();
     expect(within(currencyToggle).getByText('$1,071.43')).toBeInTheDocument();
     expect(within(currencyToggle).getByText('USD')).toBeInTheDocument();
+
+    await user.click(currencyToggle);
+
+    expect(within(currencyToggle).getByText('$1,071.43')).toBeInTheDocument();
+    expect(within(currencyToggle).getByText('₩1,500,000')).toBeInTheDocument();
+    expect(within(currencyToggle).getByText('KRW')).toBeInTheDocument();
+  });
+
+  it('shows KRW-default currency toggles in carrier comparison and cost breakdown for Korean account owners', async () => {
+    const user = userEvent.setup();
+    mockCalculateQuote.mockReturnValue({
+      ...mockResult,
+      carrier: 'DHL',
+      totalQuoteAmount: 1600000,
+      totalQuoteAmountUSD: 1142.86,
+    });
+
+    render(
+      <ResultSection
+        {...defaultProps}
+        input={mockInput}
+        onSwitchCarrier={vi.fn()}
+        hideMargin={true}
+        isKorean={true}
+      />,
+    );
+
+    const comparison = screen.getByText('comparison.title').closest('div')!.parentElement!.parentElement!;
+    const breakdown = screen.getByText('quote.logisticsCost').closest('div')!.parentElement!;
+
+    expect(within(comparison).getByRole('button', { name: /toggle currency/i })).toHaveTextContent('KRW');
+    expect(within(comparison).getByText('₩1,500,000')).toBeInTheDocument();
+    expect(within(breakdown).getByRole('button', { name: /toggle currency/i })).toHaveTextContent('KRW');
+    expect(within(breakdown).getByText('₩1,500,000')).toBeInTheDocument();
+
+    await user.click(within(comparison).getByRole('button', { name: /toggle currency/i }));
+    await user.click(within(breakdown).getByRole('button', { name: /toggle currency/i }));
+
+    expect(within(comparison).getByText('$1,071')).toBeInTheDocument();
+    expect(within(breakdown).getByText('$1,071.43')).toBeInTheDocument();
+  });
+
+  it('keeps non-Korean account-owner widgets USD-only without KRW toggles', () => {
+    mockCalculateQuote.mockReturnValue({
+      ...mockResult,
+      carrier: 'DHL',
+      totalQuoteAmount: 1600000,
+      totalQuoteAmountUSD: 1142.86,
+    });
+
+    render(
+      <ResultSection
+        {...defaultProps}
+        input={mockInput}
+        onSwitchCarrier={vi.fn()}
+        hideMargin={true}
+        isKorean={false}
+      />,
+    );
+
+    expect(screen.queryByRole('button', { name: /toggle currency/i })).not.toBeInTheDocument();
+    expect(screen.getAllByText('$1,071.43').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('$1,071').length).toBeGreaterThan(0);
+    expect(screen.queryByText('₩1,500,000')).not.toBeInTheDocument();
   });
 
   it('renders warning alerts when warnings present', () => {
@@ -157,7 +215,48 @@ describe('ResultSection', () => {
     render(<ResultSection {...defaultProps} onDownloadPdf={onDownloadPdf} />);
 
     await user.click(screen.getByText('PDF'));
-    expect(onDownloadPdf).toHaveBeenCalledOnce();
+    expect(onDownloadPdf).toHaveBeenCalledWith(undefined);
+  });
+
+  it('lets Korean account owners choose KRW or USD PDF currency', async () => {
+    const onDownloadPdf = vi.fn();
+    const user = userEvent.setup();
+
+    render(
+      <ResultSection
+        {...defaultProps}
+        onDownloadPdf={onDownloadPdf}
+        hideMargin={true}
+        isKorean={true}
+      />,
+    );
+
+    await user.click(screen.getByRole('button', { name: /download pdf/i }));
+    await user.click(screen.getByRole('menuitem', { name: /krw currency/i }));
+    await user.click(screen.getByRole('button', { name: /download pdf/i }));
+    await user.click(screen.getByRole('menuitem', { name: /usd currency/i }));
+
+    expect(onDownloadPdf).toHaveBeenNthCalledWith(1, 'krw');
+    expect(onDownloadPdf).toHaveBeenNthCalledWith(2, 'usd');
+  });
+
+  it('keeps non-Korean account-owner PDF download USD-only', async () => {
+    const onDownloadPdf = vi.fn();
+    const user = userEvent.setup();
+
+    render(
+      <ResultSection
+        {...defaultProps}
+        onDownloadPdf={onDownloadPdf}
+        hideMargin={true}
+        isKorean={false}
+      />,
+    );
+
+    await user.click(screen.getByRole('button', { name: /download pdf/i }));
+
+    expect(screen.queryByRole('menuitem', { name: /krw currency/i })).not.toBeInTheDocument();
+    expect(onDownloadPdf).toHaveBeenCalledWith('usd');
   });
 
   it('renders carrier comparison when input and onSwitchCarrier provided', () => {

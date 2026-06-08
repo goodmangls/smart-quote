@@ -10,7 +10,7 @@ interface Props {
   result: QuoteResult;
   input?: QuoteInput;
   onMarginChange: (newMargin: number) => void;
-  onDownloadPdf: () => void;
+  onDownloadPdf: (currency?: 'krw' | 'usd') => void;
   onSwitchCarrier?: (carrier: 'UPS' | 'DHL') => void;
   marginPercent: number;
   hideMargin?: boolean;

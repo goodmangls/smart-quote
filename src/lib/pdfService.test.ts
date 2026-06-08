@@ -117,6 +117,22 @@ describe('pdfService', () => {
       expect(mockText).toHaveBeenCalled();
     });
 
+    it('honors explicit USD currency mode for Korean owner PDF downloads', async () => {
+      await generatePDF(mockInput, mockResult, undefined, { isKorean: true, currency: 'usd' });
+      const allText = mockText.mock.calls.map((c) => c[0]).join('\n');
+
+      expect(allText).toContain('Total Quote');
+      expect(allText).toContain('$70.00');
+    });
+
+    it('honors explicit KRW currency mode for Korean owner PDF downloads', async () => {
+      await generatePDF(mockInput, mockResult, undefined, { isKorean: true, currency: 'krw' });
+      const allText = mockText.mock.calls.map((c) => c[0]).join('\n');
+
+      expect(allText).toContain('Total Quote');
+      expect(allText).toContain('KRW 100,000');
+    });
+
     it('renders the customs & duties disclaimer', async () => {
       await generatePDF(mockInput, mockResult);
       const allText = mockText.mock.calls.map((c) => c[0]).join('\n');
