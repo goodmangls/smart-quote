@@ -1,6 +1,7 @@
 import React from 'react';
 import { CollapsibleSection } from '@/components/ui/CollapsibleSection';
 import { Building2, Percent, AlertTriangle, Table2, UserCog, ClipboardList } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 
 const CustomerManagement = React.lazy(() => import('@/features/admin/components/CustomerManagement').then(m => ({ default: m.CustomerManagement })));
@@ -11,7 +12,10 @@ const TargetMarginRulesWidget = React.lazy(() => import('@/features/admin/compon
 const SurchargeManagementWidget = React.lazy(() => import('@/features/admin/components/SurchargeManagementWidget').then(m => ({ default: m.SurchargeManagementWidget })));
 
 export const AdminWidgets: React.FC = () => {
+  const { user } = useAuth();
   const { t } = useLanguage();
+
+  if (user?.role !== 'admin') return null;
 
   return (
     <React.Suspense fallback={<div className="mt-8 space-y-6">{Array.from({ length: 4 }).map((_, i) => <div key={i} className="h-32 bg-gray-100 dark:bg-gray-800 rounded-xl animate-pulse" />)}</div>}>
