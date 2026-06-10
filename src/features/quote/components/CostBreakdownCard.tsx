@@ -32,7 +32,43 @@ export const CostBreakdownCard: React.FC<Props> = ({
   isKorean = false,
 }) => {
   const { cardClass } = resultStyles;
-  const { t } = useLanguage();
+  const { language, t } = useLanguage();
+
+  const localizeCarrierAddOnName = useCallback(
+    (detail: { code: string; nameKo: string; nameEn: string }) => {
+      if (language === 'ko') return detail.nameKo || detail.nameEn;
+
+      if (detail.code === 'IHF') return t('quote.cost.addon.ihf');
+      if (detail.code === 'SGF') {
+        const regionMatch = detail.nameEn.match(/\(([^)]+)\)/);
+        const region = regionMatch?.[1] ?? '';
+        const translatedRegion =
+          region === 'U.S. & Americas'
+            ? t('quote.cost.region.usAmericas')
+            : region === 'U.A.E. & Israel'
+              ? t('quote.cost.region.uaeIsrael')
+              : region === 'Middle East'
+                ? t('quote.cost.region.middleEast')
+                : region === 'Europe'
+                  ? t('quote.cost.region.europe')
+                  : region === 'Asia Pacific'
+                    ? t('quote.cost.region.asiaPacific')
+                    : region === 'Rest of World'
+                      ? t('quote.cost.region.restOfWorld')
+                      : region;
+        return t('quote.cost.addon.sgf').replace('{region}', translatedRegion);
+      }
+
+      return detail.nameEn || detail.nameKo;
+    },
+    [language, t],
+  );
+
+  const localizeSurchargeName = useCallback(
+    (surcharge: { name: string; nameKo?: string }) => (language === 'ko' ? surcharge.nameKo || surcharge.name : surcharge.name),
+    [language],
+  );
+
   // Admin (!hideMargin) and Korean account owner/member: KRW default + toggle.
   // Non-Korean account owner/member: USD-only.
   const canToggleCurrency = !hideMargin || isKorean;
@@ -202,7 +238,7 @@ export const CostBreakdownCard: React.FC<Props> = ({
                     <div className='flex items-center'>
                       <Shield className='w-4 h-4 mr-2 flex-shrink-0' />
                       <span>
-                        {s.nameKo || s.name} {s.chargeType === 'rate' ? `(${s.amount}%)` : ''}
+                        {localizeSurchargeName(s)} {s.chargeType === 'rate' ? `(${s.amount}%)` : ''}
                       </span>
                     </div>
                     <span className='font-medium'>{formatCurrency(s.appliedAmount)}</span>
@@ -242,7 +278,7 @@ export const CostBreakdownCard: React.FC<Props> = ({
                           className={`flex justify-between ${result.carrier === 'UPS' ? 'text-blue-700 dark:text-blue-400' : 'text-yellow-700 dark:text-yellow-400'}`}
                         >
                           <span>
-                            {d.nameKo} ({d.code})
+                            {localizeCarrierAddOnName(d)} ({d.code})
                           </span>
                           <span>
                             {formatCurrency(d.amount + d.fscAmount)}
