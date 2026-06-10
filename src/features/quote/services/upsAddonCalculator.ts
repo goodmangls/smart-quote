@@ -13,7 +13,6 @@ import {
   calculateUpsExtendedAreaFee,
   getUpsSurgeFeePerKg,
   UPS_INTERNATIONAL_PROCESSING_FEE_KRW,
-  calculateUpsSurgeEmergencyFee,
 } from "@/config/ups_addons";
 import { Incoterm } from "@/types";
 import { applyPackingDimensions } from "@/lib/packing-utils";
@@ -84,7 +83,7 @@ export const calculateUpsAddOnCosts = (
     }
   }
 
-  // 4. Auto-detected: UPS Surge Fee — Middle East / Israel destinations
+  // 4. Auto-detected: UPS Surge Emergency Fee — official destination-region table
   const surgeFeeInfo = getUpsSurgeFeePerKg(input.destinationCountry);
   if (surgeFeeInfo) {
     const surgeAmount = Math.ceil(billableWeight) * surgeFeeInfo.rate;
@@ -102,13 +101,13 @@ export const calculateUpsAddOnCosts = (
   // 5. User-selected add-ons
   const selectedCodes = input.upsAddOns || [];
   selectedCodes.forEach((code) => {
+    // SEF is auto-detected by destination region; ignore stale/manual selections to avoid double charging.
+    if (code === "SEF") return;
     const addon = findUpsRate(code);
     if (!addon) return;
 
     let amount: number;
-    if (code === "SEF") {
-      amount = calculateUpsSurgeEmergencyFee(billableWeight);
-    } else if (useDb) {
+    if (useDb) {
       amount = calcAddonFee(addon, billableWeight, 0);
       if (code === "ADC" && addon.chargeType === 'per_carton') {
         const totalCartons = input.items.reduce((s, i) => s + i.quantity, 0);

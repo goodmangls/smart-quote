@@ -106,14 +106,15 @@ export const UPS_ADDON_RATES: UpsAddOn[] = [
   },
   {
     code: 'SEF',
-    nameKo: '비상 상황 할증료',
+    nameKo: '급증 긴급 수수료',
     nameEn: 'Surge Emergency Fee',
     amount: 0,
     chargeType: 'calculated',
     unit: 'shipment',
-    fscApplicable: false,
-    selectable: true,
-    description: '일반 상황에는 미발생. UPS 특수 상황 발생 시 kg당 720 KRW / USD 적용 시 kg당 0.72 USD',
+    fscApplicable: true,
+    autoDetect: true,
+    selectable: false,
+    description: 'UPS 공식 2026-05-24 표 기준 목적지 권역별 kg당 자동 부과. U.S./Americas, Europe, Rest of World 720 KRW/kg',
   },
 ];
 
@@ -125,40 +126,77 @@ export const calculateUpsRemoteAreaFee = (billableWeight: number): number =>
 export const calculateUpsExtendedAreaFee = (billableWeight: number): number =>
   Math.max(34_200, Math.ceil(billableWeight) * 640);
 
-/** UPS Surge Emergency Fee: special-case only, 720 KRW/kg */
-export const calculateUpsSurgeEmergencyFee = (billableWeight: number): number =>
-  Math.ceil(billableWeight) * UPS_SURGE_EMERGENCY_FEE_PER_KG_KRW;
+/** UPS Surge Emergency Fee: destination-region based, KRW/kg */
+export const calculateUpsSurgeEmergencyFee = (billableWeight: number, perKgRate = UPS_SURGE_EMERGENCY_FEE_PER_KG_KRW): number =>
+  Math.ceil(billableWeight) * perKgRate;
 
 /**
- * UPS Surge Fee (급증 수수료) - 2026-03-15부터 별도 공지 시까지
- * Source: UPS Korea 급증 수수료 공지 (2026-03-14 업데이트)
- * 한국 출발 수출 화물 → Middle East / Israel 도착지
- * Billable weight(kg) 기준, FSC 적용됨, 중복 적용 가능
+ * UPS Surge Emergency Fee (급증 긴급 수수료) - 2026-05-24부터 추후 공지 시까지
+ * Source: UPS Korea Surge Emergency Fee PDF (2026-05-24 업데이트)
+ * 한국 출발 수출 화물 → 선택된 글로벌 도착지
+ * Billable weight(kg) 기준, FSC 적용됨, 국내 화물에는 미적용.
  */
 export const UPS_SURGE_FEE_COUNTRIES = {
-  /** Israel: KRW 4,722/kg */
-  ISRAEL: ['IL'] as string[],
-  /** Middle East: KRW 2,004/kg */
+  /** United Arab Emirates & Israel: KRW 4,722/kg */
+  UAE_ISRAEL: ['AE', 'IL'] as string[],
+  /** Middle East excluding U.A.E. & Israel: KRW 4,220/kg */
   MIDDLE_EAST: [
     'AF', 'BH', 'BD', 'EG', 'IQ', 'JO', 'KW', 'LB',
-    'NP', 'OM', 'PK', 'QA', 'SA', 'LK', 'AE',
+    'NP', 'OM', 'PK', 'QA', 'SA', 'LK',
+  ] as string[],
+  /** Europe: KRW 720/kg */
+  EUROPE: [
+    'AL', 'AD', 'AM', 'AT', 'BY', 'BE', 'BA', 'BG', 'HR', 'CY',
+    'CZ', 'DK', 'EE', 'FI', 'FR', 'GE', 'DE', 'GI', 'GR', 'GG',
+    'HU', 'IS', 'IE', 'IT', 'JE', 'XK', 'LV', 'LT', 'LU', 'MT',
+    'MD', 'ME', 'NL', 'MK', 'NO', 'PL', 'PT', 'RO', 'RU', 'SM',
+    'RS', 'SK', 'SI', 'ES', 'SE', 'CH', 'TR', 'UA', 'GB',
+  ] as string[],
+  /** U.S. and Americas: KRW 720/kg */
+  US_AMERICAS: [
+    'US', 'AI', 'AG', 'AR', 'AW', 'BS', 'BB', 'BZ', 'BM', 'BO',
+    'BQ', 'BR', 'VG', 'CA', 'KY', 'CL', 'CO', 'CR', 'CU', 'CW',
+    'DM', 'DO', 'EC', 'SV', 'GF', 'GD', 'GP', 'GT', 'GY', 'HT',
+    'HN', 'JM', 'MQ', 'MX', 'MS', 'NI', 'PA', 'PY', 'PE', 'PR',
+    'BL', 'KN', 'LC', 'MF', 'SX', 'VC', 'SR', 'TT', 'TC', 'VI',
+    'UY', 'VE',
+  ] as string[],
+  /** Asia Pacific: KRW 143/kg */
+  ASIA_PACIFIC: [
+    'AS', 'AU', 'BN', 'KH', 'CN', 'FJ', 'PF', 'GU', 'HK', 'IN',
+    'ID', 'JP', 'KR', 'LA', 'MY', 'MM', 'MN', 'MO', 'NC', 'NZ',
+    'MP', 'PH', 'SG', 'WS', 'TH', 'TW', 'VN',
   ] as string[],
 };
 
 export const UPS_SURGE_FEE_RATES: Record<string, number> = {
-  ISRAEL: 4_722,      // KRW per kg
-  MIDDLE_EAST: 2_004, // KRW per kg
+  UAE_ISRAEL: 4_722,
+  MIDDLE_EAST: 4_220,
+  EUROPE: 720,
+  US_AMERICAS: 720,
+  ASIA_PACIFIC: 143,
+  REST_OF_WORLD: 720,
 };
 
-/** 목적지 국가에 해당하는 UPS Surge Fee (KRW/kg) 반환. 해당 없으면 null */
+/** 목적지 국가에 해당하는 UPS Surge Emergency Fee (KRW/kg) 반환. 국내 KR→KR 화물은 미적용. */
 export const getUpsSurgeFeePerKg = (destinationCountry: string): { rate: number; region: string } | null => {
-  if (UPS_SURGE_FEE_COUNTRIES.ISRAEL.includes(destinationCountry)) {
-    return { rate: UPS_SURGE_FEE_RATES.ISRAEL, region: 'Israel' };
+  if (!destinationCountry || destinationCountry === 'KR') return null;
+  if (UPS_SURGE_FEE_COUNTRIES.UAE_ISRAEL.includes(destinationCountry)) {
+    return { rate: UPS_SURGE_FEE_RATES.UAE_ISRAEL, region: 'U.A.E. & Israel' };
   }
   if (UPS_SURGE_FEE_COUNTRIES.MIDDLE_EAST.includes(destinationCountry)) {
     return { rate: UPS_SURGE_FEE_RATES.MIDDLE_EAST, region: 'Middle East' };
   }
-  return null;
+  if (UPS_SURGE_FEE_COUNTRIES.EUROPE.includes(destinationCountry)) {
+    return { rate: UPS_SURGE_FEE_RATES.EUROPE, region: 'Europe' };
+  }
+  if (UPS_SURGE_FEE_COUNTRIES.US_AMERICAS.includes(destinationCountry)) {
+    return { rate: UPS_SURGE_FEE_RATES.US_AMERICAS, region: 'U.S. & Americas' };
+  }
+  if (UPS_SURGE_FEE_COUNTRIES.ASIA_PACIFIC.includes(destinationCountry)) {
+    return { rate: UPS_SURGE_FEE_RATES.ASIA_PACIFIC, region: 'Asia Pacific' };
+  }
+  return { rate: UPS_SURGE_FEE_RATES.REST_OF_WORLD, region: 'Rest of World' };
 };
 
 /** UPS AHS 감지: weight>25kg OR longest>122cm OR 2nd>76cm OR wood/skid packing */

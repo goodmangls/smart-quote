@@ -4,6 +4,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import {
   isUpsAdditionalHandling,
   UPS_INTERNATIONAL_PROCESSING_FEE_KRW,
+  getUpsSurgeFeePerKg,
 } from '@/config/ups_addons';
 import { normalizeUpsRates, calcAddonFee } from '@/config/addon-utils';
 import type { AddonRate } from '@/api/addonRateApi';
@@ -87,6 +88,7 @@ export const UpsAddOnPanel: React.FC<Props> = ({
   }, [items, packingType, rates]);
 
   const isDDP = incoterm === Incoterm.DDP;
+  const surgeFeeInfo = React.useMemo(() => getUpsSurgeFeePerKg(destinationCountry || ''), [destinationCountry]);
 
   const toggleAddOn = (code: string) => {
     if (selectedAddOns.includes(code)) {
@@ -112,6 +114,8 @@ export const UpsAddOnPanel: React.FC<Props> = ({
     let total = UPS_INTERNATIONAL_PROCESSING_FEE_KRW;
 
     selectedAddOns.forEach((code) => {
+      // SEF is auto-detected from destination; ignore stale/manual selections to avoid double charging.
+      if (code === 'SEF') return;
       const addon = rates.find((a) => a.code === code);
       if (!addon) return;
       let amount = addon.amount;
@@ -142,8 +146,14 @@ export const UpsAddOnPanel: React.FC<Props> = ({
       if (ddpRate) total += ddpRate.amount;
     }
 
+    // Auto UPS Surge Emergency Fee by destination region
+    if (surgeFeeInfo) {
+      const amount = Math.ceil(billableWeight) * surgeFeeInfo.rate;
+      total += amount + amount * fscRate;
+    }
+
     return total;
-  }, [selectedAddOns, ahsCount, isDDP, billableWeight, fscRate, items, rates]);
+  }, [selectedAddOns, ahsCount, isDDP, surgeFeeInfo, billableWeight, fscRate, items, rates]);
 
   const renderEasBanner = () => {
     if (!detectedEas) return null;
@@ -220,6 +230,20 @@ export const UpsAddOnPanel: React.FC<Props> = ({
     </div>
   );
 
+  const renderSurgeEmergencyNotice = () => {
+    if (!surgeFeeInfo) return null;
+    const amount = Math.ceil(billableWeight) * surgeFeeInfo.rate;
+    return (
+      <div className="flex items-center gap-1.5 text-xs text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-900/20 rounded-lg px-2.5 py-1.5">
+        <Info className="w-3.5 h-3.5 shrink-0" />
+        <span>
+          <b>{isEn ? `Surge Emergency Fee (${surgeFeeInfo.region})` : `급증 긴급 수수료 (${surgeFeeInfo.region})`}</b>{' '}
+          {isEn ? 'auto-applied from UPS official table' : 'UPS 공식 표 기준 자동 적용'}: {amount.toLocaleString()} KRW (+FSC)
+        </span>
+      </div>
+    );
+  };
+
   return (
     <div className="col-span-full">
       <div className="rounded-xl border border-blue-200 dark:border-blue-800 bg-blue-50/50 dark:bg-blue-900/10 p-3">
@@ -241,6 +265,7 @@ export const UpsAddOnPanel: React.FC<Props> = ({
         {/* Auto-detected warnings */}
         <div className="mb-3 space-y-1">
           {renderIhfNotice()}
+          {renderSurgeEmergencyNotice()}
           {renderEasBanner()}
           {renderAhsWarning()}
           {renderDdpWarning()}
