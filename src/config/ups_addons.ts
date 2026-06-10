@@ -19,6 +19,11 @@ export interface UpsAddOn {
   description?: string;
 }
 
+export const UPS_INTERNATIONAL_PROCESSING_FEE_KRW = 3_642;
+export const UPS_INTERNATIONAL_PROCESSING_FEE_USD = 3.642;
+export const UPS_SURGE_EMERGENCY_FEE_PER_KG_KRW = 720;
+export const UPS_SURGE_EMERGENCY_FEE_PER_KG_USD = 0.72;
+
 export const UPS_ADDON_RATES: UpsAddOn[] = [
   {
     code: 'RES',
@@ -87,6 +92,29 @@ export const UPS_ADDON_RATES: UpsAddOn[] = [
     condition: 'DDP',
     description: 'DDP incoterm 선택 시 자동 부과',
   },
+  {
+    code: 'IHF',
+    nameKo: '국제 처리 수수료',
+    nameEn: 'International Processing Fee',
+    amount: UPS_INTERNATIONAL_PROCESSING_FEE_KRW,
+    chargeType: 'fixed',
+    unit: 'shipment',
+    fscApplicable: false,
+    autoDetect: true,
+    selectable: false,
+    description: 'UPS AWB 건당 3,642 KRW / USD 적용 시 3.642 USD',
+  },
+  {
+    code: 'SEF',
+    nameKo: '비상 상황 할증료',
+    nameEn: 'Surge Emergency Fee',
+    amount: 0,
+    chargeType: 'calculated',
+    unit: 'shipment',
+    fscApplicable: false,
+    selectable: true,
+    description: '일반 상황에는 미발생. UPS 특수 상황 발생 시 kg당 720 KRW / USD 적용 시 kg당 0.72 USD',
+  },
 ];
 
 /** UPS Remote Area: max(31,400, billableWeight * 570) */
@@ -96,6 +124,10 @@ export const calculateUpsRemoteAreaFee = (billableWeight: number): number =>
 /** UPS Extended Area: max(34,200, billableWeight * 640) */
 export const calculateUpsExtendedAreaFee = (billableWeight: number): number =>
   Math.max(34_200, Math.ceil(billableWeight) * 640);
+
+/** UPS Surge Emergency Fee: special-case only, 720 KRW/kg */
+export const calculateUpsSurgeEmergencyFee = (billableWeight: number): number =>
+  Math.ceil(billableWeight) * UPS_SURGE_EMERGENCY_FEE_PER_KG_KRW;
 
 /**
  * UPS Surge Fee (급증 수수료) - 2026-03-15부터 별도 공지 시까지

@@ -57,6 +57,7 @@ const UPS_HARDCODED_DEFAULTS: Record<string, { perKgRate: number | null; minAmou
   RMT: { perKgRate: 570, minAmount: 31400, detectRules: null },
   EXT: { perKgRate: 640, minAmount: 34200, detectRules: null },
   AHS: { perKgRate: null, minAmount: null, detectRules: { weight_threshold: 25, max_longest: 122, max_second: 76, packing_types: ['WOODEN_BOX', 'SKID'] } },
+  SEF: { perKgRate: 720, minAmount: 0, detectRules: null },
 };
 
 // ── Shared normalizeRates function ──
@@ -100,25 +101,7 @@ export function normalizeDhlRates(dbRates?: AddonRate[]): NormalizedRate[] {
 }
 
 export function normalizeUpsRates(dbRates?: AddonRate[]): NormalizedRate[] {
-  if (dbRates && dbRates.length > 0) {
-    return dbRates.map(r => ({
-      code: r.code,
-      nameKo: r.nameKo,
-      nameEn: r.nameEn,
-      amount: r.amount,
-      chargeType: r.chargeType,
-      unit: r.unit,
-      fscApplicable: r.fscApplicable,
-      autoDetect: r.autoDetect,
-      selectable: r.selectable,
-      condition: r.condition,
-      perKgRate: r.perKgRate,
-      minAmount: r.minAmount,
-      ratePercent: null,
-      detectRules: r.detectRules,
-    }));
-  }
-  return UPS_ADDON_RATES.map(r => {
+  const hardcodedToNormalized = (r: (typeof UPS_ADDON_RATES)[number]): NormalizedRate => {
     const defaults = UPS_HARDCODED_DEFAULTS[r.code];
     return {
       code: r.code,
@@ -136,7 +119,34 @@ export function normalizeUpsRates(dbRates?: AddonRate[]): NormalizedRate[] {
       ratePercent: null,
       detectRules: defaults?.detectRules ?? null,
     };
-  });
+  };
+
+  if (dbRates && dbRates.length > 0) {
+    const normalized: NormalizedRate[] = dbRates.map(r => ({
+      code: r.code,
+      nameKo: r.nameKo,
+      nameEn: r.nameEn,
+      amount: r.amount,
+      chargeType: r.chargeType,
+      unit: r.unit,
+      fscApplicable: r.fscApplicable,
+      autoDetect: r.autoDetect,
+      selectable: r.selectable,
+      condition: r.condition,
+      perKgRate: r.perKgRate,
+      minAmount: r.minAmount,
+      ratePercent: null,
+      detectRules: r.detectRules,
+    }));
+
+    UPS_ADDON_RATES
+      .filter(r => ['IHF', 'SEF'].includes(r.code) && !normalized.some(n => n.code === r.code))
+      .forEach(r => normalized.push(hardcodedToNormalized(r)));
+
+    return normalized;
+  }
+
+  return UPS_ADDON_RATES.map(hardcodedToNormalized);
 }
 
 // ── Shared calcAddonFee function (CRITICAL 1 + 3) ──
