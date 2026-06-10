@@ -12,6 +12,7 @@ import {
   calculateUpsRemoteAreaFee,
   calculateUpsExtendedAreaFee,
   getUpsSurgeFeePerKg,
+  UPS_INTERNATIONAL_PROCESSING_FEE_KRW,
 } from "@/config/ups_addons";
 import { Incoterm } from "@/types";
 import { applyPackingDimensions } from "@/lib/packing-utils";
@@ -30,9 +31,20 @@ export const calculateUpsAddOnCosts = (
   const useDb = dbRates && dbRates.length > 0;
 
   const findUpsRate = (code: string): AddonRateLike | null =>
-    findRate(code, useDb ? dbRates : undefined, UPS_ADDON_RATES);
+    findRate(code, useDb ? dbRates : undefined, UPS_ADDON_RATES) ??
+    (['IHF', 'SEF'].includes(code) ? findRate(code, undefined, UPS_ADDON_RATES) : null);
 
-  // 1. Auto-detected: AHS (Additional Handling)
+  // 1. Auto-detected: International Processing Fee (AWB당 고정 수수료)
+  details.push({
+    code: "IHF",
+    nameKo: "국제 처리 수수료",
+    nameEn: "International Processing Fee",
+    amount: UPS_INTERNATIONAL_PROCESSING_FEE_KRW,
+    fscAmount: 0,
+  });
+  total += UPS_INTERNATIONAL_PROCESSING_FEE_KRW;
+
+  // 2. Auto-detected: AHS (Additional Handling)
   let ahsCount = 0;
   const ahsDef = findUpsRate("AHS");
 
@@ -62,7 +74,7 @@ export const calculateUpsAddOnCosts = (
     total += amount + fsc;
   }
 
-  // 2. Auto-detected: DDP Service Fee
+  // 3. Auto-detected: DDP Service Fee
   if (input.incoterm === Incoterm.DDP) {
     const ddpDef = findUpsRate("DDP");
     if (ddpDef) {
@@ -71,7 +83,7 @@ export const calculateUpsAddOnCosts = (
     }
   }
 
-  // 3. Auto-detected: UPS Surge Fee — Middle East / Israel destinations
+  // 4. Auto-detected: UPS Surge Emergency Fee — official destination-region table
   const surgeFeeInfo = getUpsSurgeFeePerKg(input.destinationCountry);
   if (surgeFeeInfo) {
     const surgeAmount = Math.ceil(billableWeight) * surgeFeeInfo.rate;
@@ -86,9 +98,11 @@ export const calculateUpsAddOnCosts = (
     total += surgeAmount + surgeFsc;
   }
 
-  // 4. User-selected add-ons
+  // 5. User-selected add-ons
   const selectedCodes = input.upsAddOns || [];
   selectedCodes.forEach((code) => {
+    // SEF is auto-detected by destination region; ignore stale/manual selections to avoid double charging.
+    if (code === "SEF") return;
     const addon = findUpsRate(code);
     if (!addon) return;
 
