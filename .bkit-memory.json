@@ -1,9 +1,17 @@
 {
-  "activeFeature": "dashboard-test-flakiness",
-  "phase": "do",
-  "matchRate": 0,
+  "activeFeature": null,
+  "phase": "archived",
+  "matchRate": 100,
   "iteration": 0,
   "history": [
+    {
+      "feature": "dashboard-test-flakiness",
+      "phase": "archived",
+      "timestamp": "2026-06-11",
+      "action": "Report + Archive (100%). PR #46(fix/dashboard-test-flakiness) admin squash 머지 890d783(base main), CI 전 job green(check 재실행 없이=SC-4, backend-rspec/e2e/lighthouse pass). plan+report → docs/archive/2026-06/dashboard-test-flakiness/, _INDEX 행 추가. 핵심: CustomerDashboard 미mock 5훅 stub로 jsdom teardown 'window is not defined' flaky 결정적 제거(기능 코드 무변경). Reconcile: 로컬 10커밋 behind→clean FF→재검증(56f/1464t, AdminWidgets.test 누수 무관). 후속 dashboard-hooks-abort-guard(훅 unmount 가드) 미시작. codebase-health-2026-06-07.analysis.md는 사용자 지시로 미커밋 유지.",
+      "matchRate": 100,
+      "archivedTo": "docs/archive/2026-06/dashboard-test-flakiness/"
+    },
     {
       "feature": "dashboard-test-flakiness",
       "phase": "do",
