@@ -1,9 +1,23 @@
 {
-  "activeFeature": null,
-  "phase": "archived",
-  "matchRate": 100,
+  "activeFeature": "dashboard-test-flakiness",
+  "phase": "do",
+  "matchRate": 0,
   "iteration": 0,
   "history": [
+    {
+      "feature": "dashboard-test-flakiness",
+      "phase": "do",
+      "timestamp": "2026-06-11",
+      "action": "Do 완료 ✅ (Design 생략, 플랜 권고). R-1=(a) test-side: src/pages/__tests__/CustomerDashboard.test.tsx에 미mock 5훅 stub 추가(useFscRates 중첩 rates 기본값/useMarginRules rules:[]/useSurcharges calculateApplied()=[]+totalAmount()=0/useAddonRates rates:[]/useResolvedMargin data:null) → 대시보드 훅 8/8 mock, 실제 async fetch 0. SC-1 CustomerDashboard 로컬 10/10 clean(unhandled error 0), SC-2 미mock 0, SC-3 전체 vitest 52f/1447t green(회귀 0), lint --max-warnings 0 PASS, build(tsc+vite) OK. 동종 누수 점검: ExchangeRateWidget.test(useFscRates)·TargetMarginRulesWidget.test(useMarginRules)는 이미 mock, ServiceSection/SurchargePanel/QuoteCalculator 렌더테스트 부재 → CustomerDashboard 단일 leaky 확정. 기능 코드 무변경(테스트 파일 1개만). 훅-side AbortGuard는 별도 follow-up(dashboard-hooks-abort-guard). SC-4 CI green은 PR 후 실측. Reconcile: 로컬 main이 origin/main 10커밋 BEHIND였음(#36~#45 currency UX·FSC·role gating, 처음 'ahead' 오판→fetch 후 정정)→clean FF(origin이 내 수정 파일 0건 변경)→새 브랜치 fix/dashboard-test-flakiness 분기. 새 base 재검증: 전체 vitest 56f/1464t green, CustomerDashboard 5/5 clean, 신규 AdminWidgets.test(#43)는 admin 위젯을 컴포넌트레벨 stub라 5훅 누수 무관. 커밋/PR/CI 대기.",
+      "matchRate": 0
+    },
+    {
+      "feature": "dashboard-test-flakiness",
+      "phase": "plan",
+      "timestamp": "2026-06-07",
+      "action": "Plan 생성 — docs/01-plan/features/dashboard-test-flakiness.plan.md. Task #8/M7. 근본원인 확정: CustomerDashboard는 8개 대시보드 훅 사용하나 test는 3개만 vi.mock(useExchangeRates/usePortWeather/useLogisticsNews) → 미mock 5개(useFscRates/useMarginRules/useSurcharges/useAddonRates/useResolvedMargin)가 실제 async fetch(getFscRates 등→apiClient→window/localStorage)→jsdom teardown 후 resolve→'window is not defined' unhandled→vitest exit1→CI check 랜덤 차단. useExchangeRates listener cleanup은 완비(누수는 in-flight fetch). Fix R-1=(a) test-side 나머지 5훅 mock 완성(최소·기존패턴). (b) 훅 unmount 가드는 별도 follow-up. 검증=로컬 10x 결정성. Design 생략 후보.",
+      "matchRate": 0
+    },
     {
       "feature": "dep-upgrade",
       "phase": "archived",
