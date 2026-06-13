@@ -120,9 +120,9 @@ When a **Member** saves a quote, a Slack notification is automatically sent to t
 | ------------ | ---------------------------------------------------------------------------- |
 | **Frontend** | React 19, TypeScript 5.8, Vite 6, Tailwind CSS                               |
 | **Backend**  | Rails 8 API-only, Ruby 3.4, PostgreSQL                                       |
-| **Testing**  | Vitest + Testing Library (32 files, 1,188 tests), RSpec + FactoryBot (backend) |
-| **Deploy**   | Vercel (frontend), Render.com (backend, Docker, Singapore)                   |
-| **APIs**     | open.er-api.com (exchange rates), Open-Meteo (weather), Supabase (auth)      |
+| **Testing**  | Vitest + Testing Library (56 files, 1,464 tests), RSpec + FactoryBot (backend) |
+| **Deploy**   | Vercel (frontend, auto-deploy on push to `main`), Render.com (backend, Docker, Singapore) |
+| **APIs**     | open.er-api.com (exchange rates), Open-Meteo (weather), Rails JWT (auth)     |
 | **Other**    | jsPDF, Sentry, Lucide React, React Router v7, ChannelTalk                    |
 
 ## Project Structure
@@ -180,7 +180,7 @@ npm install
 npm run dev          # Dev server on http://localhost:5173
 npm run build        # Production build (tsc + vite)
 npm run lint         # ESLint (--max-warnings 0)
-npx vitest run       # Run tests once (32 files, 1,188 tests)
+npx vitest run       # Run tests once (56 files, 1,464 tests)
 ```
 
 ### Backend (from `smart-quote-api/`)
@@ -242,8 +242,8 @@ POST   /api/v1/notifications/slack  # Slack webhook proxy
 | Variable                 | Purpose              | Default                 |
 | ------------------------ | -------------------- | ----------------------- |
 | `VITE_API_URL`           | Backend API base URL | `http://localhost:3000` |
-| `VITE_SUPABASE_URL`      | Supabase project URL | -                       |
-| `VITE_SUPABASE_ANON_KEY` | Supabase anon key    | -                       |
+| `VITE_SUPABASE_URL`      | Legacy (unused — auth is Rails JWT) | -        |
+| `VITE_SUPABASE_ANON_KEY` | Legacy (unused — auth is Rails JWT) | -        |
 | `VITE_EIA_API_KEY`       | US EIA API key       | -                       |
 
 ## Documentation

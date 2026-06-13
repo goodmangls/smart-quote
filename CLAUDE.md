@@ -15,7 +15,7 @@ npm run dev          # Dev server on http://localhost:5173
 npm run build        # tsc + vite build
 npm run lint         # ESLint (--max-warnings 0)
 npm run test         # Vitest in watch mode
-npx vitest run       # Run tests once (51 files, 1443 tests)
+npx vitest run       # Run tests once (56 files, 1464 tests)
 npx tsc --noEmit     # Type check only
 ```
 
@@ -325,12 +325,14 @@ POST   /api/v1/notifications/slack   # Slack webhook proxy
 
 - **Frontend**: Vitest + @testing-library/react, jsdom environment, setup in `src/test/setup.ts`
   - Tests use `vitest/globals` (no imports needed for `describe`, `it`, `expect`)
-  - 51 test files, 1443 tests
+  - 56 test files, 1464 tests
 - **Backend**: RSpec + FactoryBot + Shoulda Matchers, factories in `spec/factories/`
 
 ## Deployment
 
-- **Frontend**: Vercel (production: `bridgelogis.com` / `smart-quote-main.vercel.app`) — auto-deploy on push to `origin/main`
+- **Frontend**: Vercel **goodman-jways** 팀 (production: `bridgelogis.com` / `smart-quote-main.vercel.app`) — `origin/main` push 시 **자동배포** (2026-06-13 Git Disconnect→Reconnect 로 webhook 복구; org 이전 jlinsights→goodmangls 때 끊겼었음)
+  - 수동 배포(필요 시): `vercel --prod --scope goodman-jways --yes` (repo 루트). `.vercel` 링크 stale 시 `vercel link --yes --scope goodman-jways --project smart-quote-main`
+  - ⚠️ Vercel **MCP(jlinsights 토큰)는 이 프로젝트 접근 불가** — `vercel` CLI(jlinsights 계정, goodman-jways 스코프)로만. GitHub Deployments API도 이 팀 배포를 못 봄 → 배포 상태는 `vercel ls smart-quote-main --scope goodman-jways --prod` 로 확인
 - **Backend**: Render.com (Singapore region, PostgreSQL) — auto-redeploys from `origin/main` when `smart-quote-api/` changes (monorepo mode via `render.yaml` `dockerContext: smart-quote-api`, migrated 2026-05-04)
 - **Config**: `render.yaml` (repo root) for backend infrastructure; `healthCheckPath: /up` for zero-downtime deploys
 - **Seed**: After backend deploy, run `rails runner db/seeds/addon_rates.rb` in Render Shell for new add-on rates
