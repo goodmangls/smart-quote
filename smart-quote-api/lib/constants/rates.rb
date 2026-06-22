@@ -17,8 +17,8 @@ module Constants
     # DHL FSC : 매월 1일 업데이트
     #   출처: https://mydhl.express.dhl/kr/ko/ship/surcharges.html#/fuel_surcharge
     # ============================================================
-    DEFAULT_FSC_PERCENT = 43.75 # UPS FSC, effective 2026-06-15
-    DEFAULT_FSC_PERCENT_DHL = 47.00 # DHL FSC, effective 2026-06-15
+    DEFAULT_FSC_PERCENT = 42.25 # UPS FSC, effective 2026-06-22
+    DEFAULT_FSC_PERCENT_DHL = 45.25 # DHL FSC, effective 2026-06-22
     MAX_MARGIN_PERCENT = 80 # Maximum margin rate (%)
     UPS_FSC_URL = "https://www.ups.com/kr/ko/support/shipping-support/shipping-costs-rates/fuel-surcharges.page"
     UPS_RATES_HUB_URL = "https://www.ups.com/kr/ko/support/shipping-support/shipping-costs-rates"
