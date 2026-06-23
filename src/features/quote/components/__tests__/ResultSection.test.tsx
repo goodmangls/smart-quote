@@ -1,4 +1,4 @@
-import { render, screen, within } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ResultSection } from '../ResultSection';
 import { QuoteInput, QuoteResult, Incoterm, PackingType } from '@/types';
@@ -116,25 +116,16 @@ describe('ResultSection', () => {
     expect(screen.queryByText('Margin')).not.toBeInTheDocument();
   });
 
-  it('defaults Korean account-owner quote totals to KRW and toggles to USD on click', async () => {
-    const user = userEvent.setup();
-
+  it('keeps Korean account-owner quote totals USD-only without KRW toggles', () => {
     render(<ResultSection {...defaultProps} hideMargin={true} isKorean={true} />);
 
-    const currencyToggle = screen.getByRole('button', { name: 'Toggle currency display' });
-    expect(within(currencyToggle).getByText('₩1,500,000')).toBeInTheDocument();
-    expect(within(currencyToggle).getByText('$1,071.43')).toBeInTheDocument();
-    expect(within(currencyToggle).getByText('USD')).toBeInTheDocument();
-
-    await user.click(currencyToggle);
-
-    expect(within(currencyToggle).getByText('$1,071.43')).toBeInTheDocument();
-    expect(within(currencyToggle).getByText('₩1,500,000')).toBeInTheDocument();
-    expect(within(currencyToggle).getByText('KRW')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Toggle currency display' })).not.toBeInTheDocument();
+    expect(screen.getAllByText('$1,071.43').length).toBeGreaterThan(0);
+    expect(screen.queryByText('₩1,500,000')).not.toBeInTheDocument();
+    expect(screen.queryByText('KRW')).not.toBeInTheDocument();
   });
 
-  it('shows KRW-default currency toggles in carrier comparison and cost breakdown for Korean account owners', async () => {
-    const user = userEvent.setup();
+  it('keeps Korean account-owner carrier comparison and cost breakdown USD-only', () => {
     mockCalculateQuote.mockReturnValue({
       ...mockResult,
       carrier: 'DHL',
@@ -152,19 +143,11 @@ describe('ResultSection', () => {
       />,
     );
 
-    const comparison = screen.getByText('comparison.title').closest('div')!.parentElement!.parentElement!;
-    const breakdown = screen.getByText('quote.logisticsCost').closest('div')!.parentElement!;
-
-    expect(within(comparison).getByRole('button', { name: /toggle currency/i })).toHaveTextContent('KRW');
-    expect(within(comparison).getByText('₩1,500,000')).toBeInTheDocument();
-    expect(within(breakdown).getByRole('button', { name: /toggle currency/i })).toHaveTextContent('KRW');
-    expect(within(breakdown).getByText('₩1,500,000')).toBeInTheDocument();
-
-    await user.click(within(comparison).getByRole('button', { name: /toggle currency/i }));
-    await user.click(within(breakdown).getByRole('button', { name: /toggle currency/i }));
-
-    expect(within(comparison).getByText('$1,071')).toBeInTheDocument();
-    expect(within(breakdown).getByText('$1,071.43')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /toggle currency/i })).not.toBeInTheDocument();
+    expect(screen.getAllByText('$1,071.43').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('$1,071').length).toBeGreaterThan(0);
+    expect(screen.queryByText('₩1,500,000')).not.toBeInTheDocument();
+    expect(screen.queryByText('KRW')).not.toBeInTheDocument();
   });
 
   it('keeps non-Korean account-owner widgets USD-only without KRW toggles', () => {
@@ -218,7 +201,7 @@ describe('ResultSection', () => {
     expect(onDownloadPdf).toHaveBeenCalledWith(undefined);
   });
 
-  it('lets Korean account owners choose KRW or USD PDF currency', async () => {
+  it('keeps Korean account-owner PDF download USD-only', async () => {
     const onDownloadPdf = vi.fn();
     const user = userEvent.setup();
 
@@ -232,12 +215,9 @@ describe('ResultSection', () => {
     );
 
     await user.click(screen.getByRole('button', { name: /download pdf/i }));
-    await user.click(screen.getByRole('menuitem', { name: /krw currency/i }));
-    await user.click(screen.getByRole('button', { name: /download pdf/i }));
-    await user.click(screen.getByRole('menuitem', { name: /usd currency/i }));
 
-    expect(onDownloadPdf).toHaveBeenNthCalledWith(1, 'krw');
-    expect(onDownloadPdf).toHaveBeenNthCalledWith(2, 'usd');
+    expect(screen.queryByRole('menuitem', { name: /krw currency/i })).not.toBeInTheDocument();
+    expect(onDownloadPdf).toHaveBeenCalledWith('usd');
   });
 
   it('keeps non-Korean account-owner PDF download USD-only', async () => {

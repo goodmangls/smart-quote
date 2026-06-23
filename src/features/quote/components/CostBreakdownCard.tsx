@@ -29,7 +29,6 @@ export const CostBreakdownCard: React.FC<Props> = ({
   onMarginChange,
   marginPercent,
   hideMargin,
-  isKorean = false,
 }) => {
   const { cardClass } = resultStyles;
   const { language, t } = useLanguage();
@@ -69,10 +68,10 @@ export const CostBreakdownCard: React.FC<Props> = ({
     [language],
   );
 
-  // Admin (!hideMargin) and Korean account owner/member: KRW default + toggle.
-  // Non-Korean account owner/member: USD-only.
-  const canToggleCurrency = !hideMargin || isKorean;
-  const [showKRW, setShowKRW] = useState(!hideMargin || isKorean);
+  // Admin (!hideMargin): KRW default + toggle.
+  // Account owner/member/public (hideMargin): USD-only; KRW is hidden.
+  const canToggleCurrency = !hideMargin;
+  const [showKRW, setShowKRW] = useState(!hideMargin);
 
   const exchangeRate =
     result.totalQuoteAmountUSD > 0 ? result.totalQuoteAmount / result.totalQuoteAmountUSD : 1400;
