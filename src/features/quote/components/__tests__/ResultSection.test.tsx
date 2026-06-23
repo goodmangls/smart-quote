@@ -116,16 +116,24 @@ describe('ResultSection', () => {
     expect(screen.queryByText('Margin')).not.toBeInTheDocument();
   });
 
-  it('keeps Korean account-owner quote totals USD-only without KRW toggles', () => {
+  it('starts Korean account-owner quote totals in KRW with USD/KRW toggle', async () => {
+    const user = userEvent.setup();
     render(<ResultSection {...defaultProps} hideMargin={true} isKorean={true} />);
 
-    expect(screen.queryByRole('button', { name: 'Toggle currency display' })).not.toBeInTheDocument();
+    const toggle = screen.getByRole('button', { name: 'Toggle currency display' });
+    expect(toggle).toBeInTheDocument();
+    expect(screen.getAllByText('₩1,500,000').length).toBeGreaterThan(0);
+    expect(screen.getByText('$1,071.43')).toBeInTheDocument();
+    expect(screen.getByText('USD')).toBeInTheDocument();
+
+    await user.click(toggle);
+
     expect(screen.getAllByText('$1,071.43').length).toBeGreaterThan(0);
-    expect(screen.queryByText('₩1,500,000')).not.toBeInTheDocument();
-    expect(screen.queryByText('KRW')).not.toBeInTheDocument();
+    expect(screen.getAllByText('₩1,500,000').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('KRW').length).toBeGreaterThan(0);
   });
 
-  it('keeps Korean account-owner carrier comparison and cost breakdown USD-only', () => {
+  it('starts Korean account-owner carrier comparison and cost breakdown in KRW with toggles', () => {
     mockCalculateQuote.mockReturnValue({
       ...mockResult,
       carrier: 'DHL',
@@ -143,11 +151,9 @@ describe('ResultSection', () => {
       />,
     );
 
-    expect(screen.queryByRole('button', { name: /toggle currency/i })).not.toBeInTheDocument();
-    expect(screen.getAllByText('$1,071.43').length).toBeGreaterThan(0);
-    expect(screen.getAllByText('$1,071').length).toBeGreaterThan(0);
-    expect(screen.queryByText('₩1,500,000')).not.toBeInTheDocument();
-    expect(screen.queryByText('KRW')).not.toBeInTheDocument();
+    expect(screen.getAllByRole('button', { name: /toggle currency/i }).length).toBeGreaterThanOrEqual(2);
+    expect(screen.getAllByText('₩1,500,000').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('KRW').length).toBeGreaterThan(0);
   });
 
   it('keeps non-Korean account-owner widgets USD-only without KRW toggles', () => {
@@ -201,7 +207,7 @@ describe('ResultSection', () => {
     expect(onDownloadPdf).toHaveBeenCalledWith(undefined);
   });
 
-  it('keeps Korean account-owner PDF download USD-only', async () => {
+  it('lets Korean account-owner choose KRW or USD PDF currency', async () => {
     const onDownloadPdf = vi.fn();
     const user = userEvent.setup();
 
@@ -216,8 +222,12 @@ describe('ResultSection', () => {
 
     await user.click(screen.getByRole('button', { name: /download pdf/i }));
 
-    expect(screen.queryByRole('menuitem', { name: /krw currency/i })).not.toBeInTheDocument();
-    expect(onDownloadPdf).toHaveBeenCalledWith('usd');
+    const krwOption = screen.getByRole('menuitem', { name: /krw currency/i });
+    expect(krwOption).toBeInTheDocument();
+    expect(screen.getByRole('menuitem', { name: /usd currency/i })).toBeInTheDocument();
+
+    await user.click(krwOption);
+    expect(onDownloadPdf).toHaveBeenCalledWith('krw');
   });
 
   it('keeps non-Korean account-owner PDF download USD-only', async () => {

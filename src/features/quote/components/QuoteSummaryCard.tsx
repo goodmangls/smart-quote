@@ -12,12 +12,14 @@ interface Props {
   hideMargin?: boolean;
 }
 
-export const QuoteSummaryCard: React.FC<Props> = ({ result, onDownloadPdf, hideMargin }) => {
-  // Admin (!hideMargin): starts with KRW + toggle available.
-  // Account owner/member/public (hideMargin): USD-only; KRW is hidden.
-  const canToggleCurrency = !hideMargin;
-  const [showKRW, setShowKRW] = useState(!hideMargin);
+export const QuoteSummaryCard: React.FC<Props> = ({ result, onDownloadPdf, hideMargin, isKorean = false }) => {
+  // Admin (!hideMargin) and Korean account owner/member: KRW default + toggle.
+  // Non-Korean account owner/member/public (hideMargin): USD-only; KRW is hidden.
+  const canToggleCurrency = !hideMargin || isKorean;
+  const [showKRW, setShowKRW] = useState(!hideMargin || isKorean);
+  const [showPdfCurrencyMenu, setShowPdfCurrencyMenu] = useState(false);
   const { t } = useLanguage();
+  const canSelectPdfCurrency = Boolean(hideMargin && isKorean);
 
   const primaryAmount = showKRW
     ? formatKRW(result.totalQuoteAmount)
@@ -40,15 +42,50 @@ export const QuoteSummaryCard: React.FC<Props> = ({ result, onDownloadPdf, hideM
                     <button
                         type="button"
                         onClick={() => {
+                          if (canSelectPdfCurrency) {
+                            setShowPdfCurrencyMenu((prev) => !prev);
+                            return;
+                          }
                           onDownloadPdf(hideMargin ? 'usd' : undefined);
                         }}
                         className="flex items-center space-x-1 bg-white/90 hover:bg-white text-brand-blue-800 text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors shadow-sm"
                         aria-label="Download PDF"
+                        aria-haspopup={canSelectPdfCurrency ? 'menu' : undefined}
+                        aria-expanded={canSelectPdfCurrency ? showPdfCurrencyMenu : undefined}
                         title={t('quote.downloadPdf')}
                     >
                         <FileDown className="w-3.5 h-3.5" />
                         <span>PDF</span>
                     </button>
+                    {showPdfCurrencyMenu && (
+                      <div
+                        role="menu"
+                        className="absolute right-0 top-9 z-20 min-w-28 rounded-lg bg-white py-1 text-brand-blue-900 shadow-lg ring-1 ring-black/10"
+                      >
+                        <button
+                          type="button"
+                          role="menuitem"
+                          className="block w-full px-3 py-2 text-left text-xs font-semibold hover:bg-brand-blue-50"
+                          onClick={() => {
+                            setShowPdfCurrencyMenu(false);
+                            onDownloadPdf('krw');
+                          }}
+                        >
+                          KRW Currency
+                        </button>
+                        <button
+                          type="button"
+                          role="menuitem"
+                          className="block w-full px-3 py-2 text-left text-xs font-semibold hover:bg-brand-blue-50"
+                          onClick={() => {
+                            setShowPdfCurrencyMenu(false);
+                            onDownloadPdf('usd');
+                          }}
+                        >
+                          USD Currency
+                        </button>
+                      </div>
+                    )}
                 </div>
             </div>
 
