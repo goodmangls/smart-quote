@@ -70,7 +70,7 @@ export const CostBreakdownCard: React.FC<Props> = ({
   );
 
   // Admin (!hideMargin) and Korean account owner/member: KRW default + toggle.
-  // Non-Korean account owner/member: USD-only.
+  // Non-Korean account owner/member/public (hideMargin): USD-only; KRW is hidden.
   const canToggleCurrency = !hideMargin || isKorean;
   const [showKRW, setShowKRW] = useState(!hideMargin || isKorean);
 

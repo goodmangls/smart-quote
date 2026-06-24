@@ -17,8 +17,10 @@ interface Props {
   hideMargin?: boolean;
 }
 
-export const CarrierComparisonCard: React.FC<Props> = ({ input, currentResult, isKorean = false, onSwitchCarrier, hideMargin }) => {
+export const CarrierComparisonCard: React.FC<Props> = ({ input, currentResult, onSwitchCarrier, hideMargin, isKorean = false }) => {
   const { t } = useLanguage();
+  // Admin (!hideMargin) and Korean account owner/member: KRW default + toggle.
+  // Non-Korean account owner/member/public (hideMargin): USD-only; KRW is hidden.
   const canToggleCurrency = !hideMargin || isKorean;
   const [showKRW, setShowKRW] = useState(!hideMargin || isKorean);
   const altCarrier = input.overseasCarrier === 'DHL' ? 'UPS' : 'DHL';
