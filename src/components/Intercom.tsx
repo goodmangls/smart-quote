@@ -76,6 +76,7 @@ export function Intercom() {
   const { user } = useAuth();
   const { language } = useLanguage();
   const location = useLocation();
+  const hasBootedRef = useRef(false);
   const prevUserIdRef = useRef<string | null>(null);
   const prevLangRef = useRef<Language | null>(null);
 
@@ -123,24 +124,31 @@ export function Intercom() {
     };
 
     const currentUserId = user ? String(user.id) : null;
+    let script: HTMLElement | null = null;
 
-    // User changed (login/logout/switch) → shutdown then reboot
-    if (prevUserIdRef.current !== currentUserId) {
-      if (prevUserIdRef.current !== null) {
+    const runBoot = () => {
+      boot();
+      hasBootedRef.current = true;
+      prevUserIdRef.current = currentUserId;
+      prevLangRef.current = language;
+    };
+
+    // First visit must boot anonymous users too. A null previous/current user id
+    // used to skip this branch, so the Messenger script loaded without a boot call.
+    if (!hasBootedRef.current || prevUserIdRef.current !== currentUserId) {
+      if (hasBootedRef.current) {
         ic('shutdown');
       }
       // Wait for script to load if first boot
       if (typeof window.Intercom === 'function') {
-        boot();
+        runBoot();
       } else {
         // Script still loading — wait for it
-        const script = document.getElementById('intercom-script');
+        script = document.getElementById('intercom-script');
         if (script) {
-          script.addEventListener('load', boot, { once: true });
+          script.addEventListener('load', runBoot, { once: true });
         }
       }
-      prevUserIdRef.current = currentUserId;
-      prevLangRef.current = language;
     } else if (user) {
       // Same user, profile may have updated (e.g. intercom_hash arrived via refresh)
       ic('update', {
@@ -151,7 +159,9 @@ export function Intercom() {
       });
     }
 
-    return () => {};
+    return () => {
+      script?.removeEventListener('load', runBoot);
+    };
   }, [user, intercomLang, language, timezone]);
 
   // React to language change without a full reboot.
