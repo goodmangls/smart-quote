@@ -102,7 +102,7 @@ describe('fsc-history', () => {
       expect(result.dhl).toEqual(DEFAULT_FSC_HISTORY.dhl);
     });
 
-    it('loads valid data from localStorage', () => {
+    it('loads valid data from localStorage and merges newly shipped default entries', () => {
       const custom: FscHistoryData = {
         ups: [{ date: '2026-05-01', rate: 40 }],
         dhl: [{ date: '2026-05', rate: 35 }],
@@ -110,7 +110,25 @@ describe('fsc-history', () => {
       localStorage.setItem('fsc_history', JSON.stringify(custom));
 
       const result = loadFscHistory();
-      expect(result).toEqual(custom);
+      expect(result.ups).toEqual(expect.arrayContaining(custom.ups));
+      expect(result.dhl).toEqual(expect.arrayContaining(custom.dhl));
+      expect(result.ups.at(-1)).toEqual({ date: '2026-07-06', rate: 39.0 });
+      expect(result.dhl.at(-1)).toEqual({ date: '2026-07-06', rate: 40.75 });
+    });
+
+    it('merges 2026-07-06 defaults into existing browser history pinned at 2026-06-29', () => {
+      localStorage.setItem(
+        'fsc_history',
+        JSON.stringify({
+          ups: [{ date: '2026-06-29', rate: 39.25 }],
+          dhl: [{ date: '2026-06-29', rate: 42.75 }],
+        }),
+      );
+
+      const result = loadFscHistory();
+
+      expect(result.ups.at(-1)).toEqual({ date: '2026-07-06', rate: 39.0 });
+      expect(result.dhl.at(-1)).toEqual({ date: '2026-07-06', rate: 40.75 });
     });
 
     it('returns default data when localStorage contains corrupted JSON', () => {
@@ -132,9 +150,9 @@ describe('fsc-history', () => {
   /* ───────── DEFAULT_FSC_HISTORY seed ───────── */
 
   describe('DEFAULT_FSC_HISTORY', () => {
-    it('includes the 2026-06-29 FSC update for UPS and DHL', () => {
-      expect(DEFAULT_FSC_HISTORY.ups.at(-1)).toEqual({ date: '2026-06-29', rate: 39.25 });
-      expect(DEFAULT_FSC_HISTORY.dhl.at(-1)).toEqual({ date: '2026-06-29', rate: 42.75 });
+    it('includes the 2026-07-06 FSC update for UPS and DHL', () => {
+      expect(DEFAULT_FSC_HISTORY.ups.at(-1)).toEqual({ date: '2026-07-06', rate: 39.0 });
+      expect(DEFAULT_FSC_HISTORY.dhl.at(-1)).toEqual({ date: '2026-07-06', rate: 40.75 });
     });
   });
 });

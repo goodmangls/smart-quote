@@ -46,6 +46,7 @@ export const DEFAULT_FSC_HISTORY: FscHistoryData = {
     { date: '2026-06-15', rate: 43.75 },
     { date: '2026-06-22', rate: 42.25 },
     { date: '2026-06-29', rate: 39.25 },
+    { date: '2026-07-06', rate: 39.0 },
   ],
   dhl: [
     { date: '2026-01', rate: 30.0 },
@@ -64,6 +65,7 @@ export const DEFAULT_FSC_HISTORY: FscHistoryData = {
     { date: '2026-06-15', rate: 47.0 },
     { date: '2026-06-22', rate: 45.25 },
     { date: '2026-06-29', rate: 42.75 },
+    { date: '2026-07-06', rate: 40.75 },
   ],
 };
 
@@ -79,6 +81,19 @@ function isValidEntry(e: unknown): e is FscHistoryEntry {
   );
 }
 
+type FscCarrier = keyof FscHistoryData;
+
+function mergeWithDefaultHistory(carrier: FscCarrier, entries: unknown[]): FscHistoryEntry[] {
+  const byDate = new Map<string, FscHistoryEntry>();
+  for (const entry of DEFAULT_FSC_HISTORY[carrier]) {
+    byDate.set(entry.date, structuredClone(entry));
+  }
+  for (const entry of entries.filter(isValidEntry)) {
+    byDate.set(entry.date, entry);
+  }
+  return Array.from(byDate.values()).sort((a, b) => a.date.localeCompare(b.date));
+}
+
 /** Load FSC history from localStorage, falling back to default seed data. */
 export function loadFscHistory(): FscHistoryData {
   try {
@@ -87,8 +102,8 @@ export function loadFscHistory(): FscHistoryData {
       const parsed = JSON.parse(raw) as FscHistoryData;
       if (Array.isArray(parsed.ups) && Array.isArray(parsed.dhl)) {
         return {
-          ups: parsed.ups.filter(isValidEntry),
-          dhl: parsed.dhl.filter(isValidEntry),
+          ups: mergeWithDefaultHistory('ups', parsed.ups),
+          dhl: mergeWithDefaultHistory('dhl', parsed.dhl),
         };
       }
     }
