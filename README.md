@@ -239,12 +239,10 @@ POST   /api/v1/notifications/slack  # Slack webhook proxy
 
 ## Environment Variables
 
-| Variable                 | Purpose              | Default                 |
-| ------------------------ | -------------------- | ----------------------- |
-| `VITE_API_URL`           | Backend API base URL | `http://localhost:3000` |
-| `VITE_SUPABASE_URL`      | Legacy (unused — auth is Rails JWT) | -        |
-| `VITE_SUPABASE_ANON_KEY` | Legacy (unused — auth is Rails JWT) | -        |
-| `VITE_EIA_API_KEY`       | US EIA API key       | -                       |
+| Variable           | Purpose              | Default                 |
+| ------------------ | -------------------- | ----------------------- |
+| `VITE_API_URL`     | Backend API base URL | `http://localhost:3000` |
+| `VITE_EIA_API_KEY` | US EIA API key       | -                       |
 
 ## Documentation
 

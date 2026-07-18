@@ -1,1 +1,1 @@
-📝 docs: README·CLAUDE.md 최신화 — 테스트 수 51/1443→56/1464(양 파일), auth 표기 Supabase→Rails JWT(README, 실제 단일 진실)·VITE_SUPABASE_* legacy/unused 주석, 배포 섹션 보강(CLAUDE.md: Vercel goodman-jways 팀·origin/main push 자동배포 2026-06-13 Git 재연결로 복구·수동 `vercel --prod --scope goodman-jways`·MCP 접근불가 CLI only). 코드 무변경
+✨ feat: health P0–P3 정리 + 로그인 UX(비밀번호 기본·매직링크 보조)

@@ -20,6 +20,21 @@ jobs:
       - run: npm run lint
       - run: npx vitest run
 
+  backend-rubocop:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: smart-quote-api
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.4.5'
+          bundler-cache: true
+          working-directory: smart-quote-api
+      # Fail on any offense (Convention+) so style debt cannot re-accumulate.
+      - run: bundle exec rubocop --format github
+
   backend-rspec:
     runs-on: ubuntu-latest
     services:
@@ -63,7 +78,7 @@ jobs:
 
   e2e:
     runs-on: ubuntu-latest
-    needs: [check, backend-rspec]
+    needs: [check, backend-rspec, backend-rubocop]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4

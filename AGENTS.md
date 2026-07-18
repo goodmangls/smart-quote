@@ -267,7 +267,7 @@ UPS/DHL express shipments → **DAP only** (no exceptions). AI chatbot enforces 
 | US EIA API      | `api.eia.gov/v2/petroleum/pri/spt/data` | USGC Jet Fuel prices                             |
 | Slack Webhook   | `/api/v1/notifications/slack`           | Member quote save alerts                         |
 
-> 인증은 **Rails JWT** 가 단일 진실. `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY` 환경 변수가 남아있을 수 있으나 `src/` 에 Supabase 클라이언트 import 0건 — dead config. 정리 후보 (`supabase-config-cleanup` 사이클).
+> 인증은 **Rails JWT** 가 단일 진실. dead `VITE_SUPABASE_*` 는 `supabase-config-cleanup` 사이클에서 제거됨 (`.env.example` / `vite-env.d.ts` / README).
 
 ## i18n System
 
@@ -314,7 +314,7 @@ POST   /api/v1/notifications/slack   # Slack webhook proxy
 
 - **Path alias**: `@/` -> `src/` (both vite.config.ts and tsconfig.json)
 - **Tailwind**: BridgeLogis brand palette (`brand-blue-*`, `cyan-*`, `navy`, `deep-blue`, `gold`) + Semantic (`success/warning/destructive/info`), class-based dark mode. Phase 2 완료 후 레거시 `jways-*`/`accent-*` 제거.
-- **Environment**: `VITE_API_URL`, `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_EIA_API_KEY`
+- **Environment**: `VITE_API_URL`, `VITE_EIA_API_KEY`, `VITE_SENTRY_DSN`, `VITE_INTERCOM_APP_ID`, `VITE_GOOGLE_MAPS_API_KEY`
 - **Tariff sync**: Frontend tariff files in `src/config/` must stay in sync with backend `lib/constants/`
 - **Market defaults**: `DEFAULT_EXCHANGE_RATE=1450` (하나은행 월요일 09시 송금환율, 2026-05-20), `DEFAULT_FSC_PERCENT=45.50` (UPS 2026-04-27), `DEFAULT_FSC_PERCENT_DHL=48.00` (DHL 2026-04-27) in `src/config/rates.ts`
 - **FSC 업데이트 주기**: UPS/DHL 모두 매주 월요일. `src/config/rates.ts` + `smart-quote-api/lib/constants/rates.rb` 동시 수정 후 Vercel+Render 배포.

@@ -12,7 +12,7 @@ module Calculators
     def call
       zone_info = Calculators::DhlZone.call(@country)
       zone_key = zone_info[:rate_key]
-      
+
       dhl_base = calculate_base_rate(zone_key)
       dhl_war_risk = dhl_base * Constants::Rates::WAR_RISK_SURCHARGE_RATE
 
@@ -20,7 +20,7 @@ module Calculators
         intl_base: dhl_base,
         intl_war_risk: dhl_war_risk,
         applied_zone: zone_info[:label],
-        transit_time: 'DHL Express 3-7 Days'
+        transit_time: "DHL Express 3-7 Days"
       }
     end
 
@@ -47,7 +47,7 @@ module Calculators
       if zone_rates
         found_weight = zone_rates.keys.sort.find { |w| w >= lookup_weight }
         return zone_rates[found_weight] if found_weight
-        
+
          next_range = Constants::DhlTariff::DHL_RANGE_RATES.find { |r| r[:min] <= @billable_weight.ceil }
          if next_range && next_range[:rates][zone_key]
            return @billable_weight.ceil * next_range[:rates][zone_key]

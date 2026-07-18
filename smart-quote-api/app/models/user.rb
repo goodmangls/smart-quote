@@ -22,8 +22,6 @@ class User < ApplicationRecord
     raw = SecureRandom.urlsafe_base64(32)
     self.magic_link_token_digest = Digest::SHA256.hexdigest(raw)
     self.magic_link_token_expires_at = MAGIC_LINK_TTL.from_now
-    # Clear the legacy plaintext column during the 2-step migration window.
-    self.magic_link_token = nil
     save!
     raw
   end
@@ -41,7 +39,6 @@ class User < ApplicationRecord
   def consume_magic_link_token!
     update!(
       magic_link_token_digest: nil,
-      magic_link_token: nil,
       magic_link_token_expires_at: nil,
     )
   end

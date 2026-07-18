@@ -25,7 +25,7 @@ class FscRate < ApplicationRecord
         next
       end
 
-      next unless record.source == "seed" && [record.international.to_f, record.domestic.to_f] != [rate, rate]
+      next unless record.source == "seed" && [ record.international.to_f, record.domestic.to_f ] != [ rate, rate ]
 
       record.update!(
         international: rate,

@@ -40,12 +40,13 @@ module Api
 
       # POST /api/v1/auth/refresh — issue new access token + rotated refresh token
       # Security: refresh token rotation (OAuth 2.0 Security BCP, RFC 9700).
-      # 매 refresh 호출마다 새 refresh token 발급. 이전 token 은 expiry 까지 유효.
-      # Level 2 (jti denylist 로 즉시 무효화)는 후속 작업.
+      # 매 refresh 호출마다 새 refresh token 발급 + 이전 refresh jti 즉시 denylist.
       def refresh
-        user = decode_refresh_token(refresh_token_from_cookie)
+        old_refresh = refresh_token_from_cookie
+        user = decode_refresh_token(old_refresh)
 
         if user
+          revoke_token!(old_refresh)
           render_auth_response(user)
         else
           clear_refresh_cookie
@@ -53,11 +54,12 @@ module Api
         end
       end
 
-      # POST /api/v1/auth/logout — clear bl_session httpOnly cookie
+      # POST /api/v1/auth/logout — clear cookie + jti-denylist access/refresh until expiry.
       # 클라이언트는 httpOnly cookie 를 직접 못 지우므로 서버가 만료 cookie 로 덮어씀.
-      # access/refresh JWT 자체의 즉시 무효화는 별도 사이클(jti denylist).
       # 항상 200 — 비로그인 상태에서도 idempotent.
       def logout
+        revoke_token!(extract_token)
+        revoke_token!(refresh_token_from_cookie)
         clear_refresh_cookie
         render json: { message: "Logged out" }
       end

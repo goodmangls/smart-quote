@@ -6,11 +6,13 @@ import {
   UPS_INTERNATIONAL_PROCESSING_FEE_KRW,
   getUpsSurgeFeePerKg,
 } from '@/config/ups_addons';
-import { normalizeUpsRates, calcAddonFee } from '@/config/addon-utils';
+import { normalizeUpsRates, calcAddonFee, type NormalizedRate } from '@/config/addon-utils';
 import type { AddonRate } from '@/api/addonRateApi';
-import { AlertTriangle, Package, Info, MapPin } from 'lucide-react';
+import { AlertTriangle, Info, MapPin } from 'lucide-react';
 import { lookupEasSurcharge, preloadEasData, type EasSurchargeType } from '@/config/ups_eas_lookup';
 import { applyPackingDimensions } from '@/lib/packing-utils';
+import { AddOnPanelShell } from './addon/AddOnPanelShell';
+import { formatAddonUnitLabel, toggleAddonCode, totalCargoPieces } from './addon/addOnPanelHelpers';
 
 interface Props {
   selectedAddOns: string[];
@@ -26,6 +28,7 @@ interface Props {
   destinationZip?: string;
 }
 
+/** UPS add-on UI — rates exclusively from normalizeUpsRates / ups_addons (never DHL tables). */
 export const UpsAddOnPanel: React.FC<Props> = ({
   selectedAddOns,
   onAddOnsChange,
@@ -42,9 +45,9 @@ export const UpsAddOnPanel: React.FC<Props> = ({
   const { language } = useLanguage();
   const isEn = language === 'en';
 
+  // Carrier-specific rate table (UPS only)
   const rates = React.useMemo(() => normalizeUpsRates(dbRates), [dbRates]);
 
-  // EAS/RAS auto-detect from destination postal code
   const [detectedEas, setDetectedEas] = React.useState<EasSurchargeType>(null);
 
   React.useEffect(() => {
@@ -60,15 +63,22 @@ export const UpsAddOnPanel: React.FC<Props> = ({
     lookupEasSurcharge(destinationCountry, destinationZip).then((result) => {
       if (!cancelled) setDetectedEas(result);
     });
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [destinationCountry, destinationZip]);
 
-  // Auto-detect AHS from cargo
   const ahsCount = React.useMemo(() => {
-    const ahsRate = rates.find(r => r.code === 'AHS');
+    const ahsRate = rates.find((r) => r.code === 'AHS');
     let count = 0;
     items.forEach((item) => {
-      const packed = applyPackingDimensions(item.length, item.width, item.height, item.weight, packingType);
+      const packed = applyPackingDimensions(
+        item.length,
+        item.width,
+        item.height,
+        item.weight,
+        packingType,
+      );
       const { l, w, h, weight } = packed;
 
       if (ahsRate?.autoDetect && ahsRate.detectRules) {
@@ -88,23 +98,20 @@ export const UpsAddOnPanel: React.FC<Props> = ({
   }, [items, packingType, rates]);
 
   const isDDP = incoterm === Incoterm.DDP;
-  const surgeFeeInfo = React.useMemo(() => getUpsSurgeFeePerKg(destinationCountry || ''), [destinationCountry]);
-
-  const toggleAddOn = (code: string) => {
-    if (selectedAddOns.includes(code)) {
-      onAddOnsChange(selectedAddOns.filter((c) => c !== code));
-    } else {
-      onAddOnsChange([...selectedAddOns, code]);
-    }
-  };
+  const surgeFeeInfo = React.useMemo(
+    () => getUpsSurgeFeePerKg(destinationCountry || ''),
+    [destinationCountry],
+  );
 
   const selectableAddOns = rates.filter((a) => a.selectable);
   const fscRate = (fscPercent || 0) / 100;
 
-  const getDisplayAmount = (code: string, rate: { chargeType: string; amount: number; perKgRate?: number | null; ratePercent?: number | null; minAmount?: number | null }): string => {
-    if (code === 'RMT' || code === 'EXT' || code === 'SEF') return `${calcAddonFee(rate, billableWeight, 0).toLocaleString()}`;
+  const getDisplayAmount = (code: string, rate: NormalizedRate): string => {
+    if (code === 'RMT' || code === 'EXT' || code === 'SEF') {
+      return `${calcAddonFee(rate, billableWeight, 0).toLocaleString()}`;
+    }
     if (code === 'ADC') {
-      const totalCartons = items.reduce((s, i) => s + i.quantity, 0);
+      const totalCartons = totalCargoPieces(items);
       return `${(rate.amount * totalCartons).toLocaleString()} (${totalCartons}${isEn ? 'pcs' : '카톤'})`;
     }
     return rate.amount.toLocaleString();
@@ -123,15 +130,13 @@ export const UpsAddOnPanel: React.FC<Props> = ({
       if (addon.chargeType === 'calculated') {
         amount = calcAddonFee(addon, billableWeight, 0);
       } else if (code === 'ADC') {
-        const totalCartons = items.reduce((s, i) => s + i.quantity, 0);
-        amount = addon.amount * totalCartons;
+        amount = addon.amount * totalCargoPieces(items);
       }
 
       const fsc = addon.fscApplicable ? amount * fscRate : 0;
       total += amount + fsc;
     });
 
-    // Auto-detected AHS
     if (ahsCount > 0) {
       const ahsRate = rates.find((a) => a.code === 'AHS');
       if (ahsRate) {
@@ -140,13 +145,11 @@ export const UpsAddOnPanel: React.FC<Props> = ({
       }
     }
 
-    // Auto DDP fee
     if (isDDP) {
       const ddpRate = rates.find((a) => a.code === 'DDP');
       if (ddpRate) total += ddpRate.amount;
     }
 
-    // Auto UPS Surge Emergency Fee by destination region
     if (surgeFeeInfo) {
       const amount = Math.ceil(billableWeight) * surgeFeeInfo.rate;
       total += amount + amount * fscRate;
@@ -155,163 +158,142 @@ export const UpsAddOnPanel: React.FC<Props> = ({
     return total;
   }, [selectedAddOns, ahsCount, isDDP, surgeFeeInfo, billableWeight, fscRate, items, rates]);
 
-  const renderEasBanner = () => {
-    if (!detectedEas) return null;
-    const isRemote = detectedEas === 'RAS';
-    const code = isRemote ? 'RMT' : 'EXT';
-    const rate = rates.find(r => r.code === code);
-    const fee = rate ? calcAddonFee(rate, billableWeight, 0) : 0;
-    const labelMap: Record<string, { ko: string; en: string }> = {
-      EAS: { ko: '외곽 지역', en: 'Extended Area' },
-      RAS: { ko: '원거리 지역', en: 'Remote Area' },
-      DAS: { ko: '배송 지역', en: 'Delivery Area' },
-    };
-    const label = labelMap[detectedEas] || labelMap.EAS;
-    return (
-      <div className="flex items-start gap-1.5 text-xs text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/20 rounded-lg px-2.5 py-1.5">
-        <MapPin className="w-3.5 h-3.5 shrink-0 mt-0.5" />
-        <div>
+  const notices = (
+    <>
+      <div className='flex items-center gap-1.5 text-xs text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 rounded-lg px-2.5 py-1.5'>
+        <Info className='w-3.5 h-3.5 shrink-0' />
+        <span>
+          <b>{isEn ? 'International Processing Fee' : '국제 처리 수수료'}</b>{' '}
+          {isEn ? 'auto-applied per UPS AWB' : 'UPS AWB 건당 자동 적용'}:{' '}
+          {UPS_INTERNATIONAL_PROCESSING_FEE_KRW.toLocaleString()} KRW
+        </span>
+      </div>
+
+      {surgeFeeInfo && (
+        <div className='flex items-center gap-1.5 text-xs text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-900/20 rounded-lg px-2.5 py-1.5'>
+          <Info className='w-3.5 h-3.5 shrink-0' />
           <span>
-            <b>{isEn ? label.en : label.ko} Surcharge ({detectedEas})</b>{' '}
-            {isEn ? 'auto-detected for' : '자동 감지'}: {destinationCountry} {destinationZip}
-            {fee > 0 && <>{' '}&mdash; {fee.toLocaleString()} KRW (+FSC)</>}
+            <b>
+              {isEn
+                ? `Surge Emergency Fee (${surgeFeeInfo.region})`
+                : `급증 긴급 수수료 (${surgeFeeInfo.region})`}
+            </b>{' '}
+            {isEn ? 'auto-applied from UPS official table' : 'UPS 공식 표 기준 자동 적용'}:{' '}
+            {(Math.ceil(billableWeight) * surgeFeeInfo.rate).toLocaleString()} KRW (+FSC)
           </span>
-          {!selectedAddOns.includes(code) && (
-            <button
-              type="button"
-              onClick={() => onAddOnsChange([...selectedAddOns, code])}
-              className="ml-2 inline-flex items-center gap-0.5 text-[10px] font-bold text-orange-700 dark:text-orange-300 bg-orange-100 dark:bg-orange-900/40 px-1.5 py-0.5 rounded hover:bg-orange-200 dark:hover:bg-orange-900/60 transition-colors"
-            >
-              + {isEn ? 'Apply' : '적용'}
-            </button>
-          )}
-          {selectedAddOns.includes(code) && (
-            <span className="ml-2 text-[10px] font-bold text-green-600 dark:text-green-400">✓ {isEn ? 'Applied' : '적용됨'}</span>
-          )}
         </div>
-      </div>
-    );
-  };
+      )}
 
-  const renderAhsWarning = () => {
-    if (ahsCount <= 0) return null;
-    const ahsRate = rates.find(r => r.code === 'AHS');
-    return (
-      <div className="flex items-center gap-1.5 text-xs text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 rounded-lg px-2.5 py-1.5">
-        <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
-        <span>
-          <b>Additional Handling (AHS)</b> {isEn ? 'auto-detected' : '자동 감지'}: {ahsCount}{isEn ? ' cartons' : '카톤'}
-          {' '}&mdash; {((ahsRate?.amount ?? 21_400) * ahsCount).toLocaleString()} KRW (+FSC)
-        </span>
-      </div>
-    );
-  };
+      {detectedEas && (
+        <UpsEasBanner
+          detectedEas={detectedEas}
+          rates={rates}
+          billableWeight={billableWeight}
+          destinationCountry={destinationCountry}
+          destinationZip={destinationZip}
+          selectedAddOns={selectedAddOns}
+          onAddOnsChange={onAddOnsChange}
+          isEn={isEn}
+        />
+      )}
 
-  const renderDdpWarning = () => {
-    if (!isDDP) return null;
-    const ddpRate = rates.find(r => r.code === 'DDP');
-    return (
-      <div className="flex items-center gap-1.5 text-xs text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 rounded-lg px-2.5 py-1.5">
-        <Info className="w-3.5 h-3.5 shrink-0" />
-        <span>
-          <b>DDP Service Fee</b> {isEn ? 'auto-applied' : '자동 적용'}: {(ddpRate?.amount ?? 28_500).toLocaleString()} KRW
-        </span>
-      </div>
-    );
-  };
+      {ahsCount > 0 && (
+        <div className='flex items-center gap-1.5 text-xs text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 rounded-lg px-2.5 py-1.5'>
+          <AlertTriangle className='w-3.5 h-3.5 shrink-0' />
+          <span>
+            <b>Additional Handling (AHS)</b> {isEn ? 'auto-detected' : '자동 감지'}: {ahsCount}
+            {isEn ? ' cartons' : '카톤'} &mdash;{' '}
+            {((rates.find((r) => r.code === 'AHS')?.amount ?? 21_400) * ahsCount).toLocaleString()}{' '}
+            KRW (+FSC)
+          </span>
+        </div>
+      )}
 
-  const renderIhfNotice = () => (
-    <div className="flex items-center gap-1.5 text-xs text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 rounded-lg px-2.5 py-1.5">
-      <Info className="w-3.5 h-3.5 shrink-0" />
-      <span>
-        <b>{isEn ? 'International Processing Fee' : '국제 처리 수수료'}</b>{' '}
-        {isEn ? 'auto-applied per UPS AWB' : 'UPS AWB 건당 자동 적용'}: {UPS_INTERNATIONAL_PROCESSING_FEE_KRW.toLocaleString()} KRW
-      </span>
-    </div>
+      {isDDP && (
+        <div className='flex items-center gap-1.5 text-xs text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 rounded-lg px-2.5 py-1.5'>
+          <Info className='w-3.5 h-3.5 shrink-0' />
+          <span>
+            <b>DDP Service Fee</b> {isEn ? 'auto-applied' : '자동 적용'}:{' '}
+            {(rates.find((r) => r.code === 'DDP')?.amount ?? 28_500).toLocaleString()} KRW
+          </span>
+        </div>
+      )}
+    </>
   );
 
-  const renderSurgeEmergencyNotice = () => {
-    if (!surgeFeeInfo) return null;
-    const amount = Math.ceil(billableWeight) * surgeFeeInfo.rate;
-    return (
-      <div className="flex items-center gap-1.5 text-xs text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-900/20 rounded-lg px-2.5 py-1.5">
-        <Info className="w-3.5 h-3.5 shrink-0" />
-        <span>
-          <b>{isEn ? `Surge Emergency Fee (${surgeFeeInfo.region})` : `급증 긴급 수수료 (${surgeFeeInfo.region})`}</b>{' '}
-          {isEn ? 'auto-applied from UPS official table' : 'UPS 공식 표 기준 자동 적용'}: {amount.toLocaleString()} KRW (+FSC)
-        </span>
-      </div>
-    );
-  };
+  return (
+    <AddOnPanelShell
+      theme='ups'
+      title={`UPS ${isEn ? 'Add-on Services' : '부가서비스'}`}
+      isMobileView={isMobileView}
+      showDbBadge={Boolean(dbRates && dbRates.length > 0)}
+      totalSelected={totalSelected}
+      selectableAddOns={selectableAddOns}
+      selectedAddOns={selectedAddOns}
+      isEn={isEn}
+      onToggle={(code) => onAddOnsChange(toggleAddonCode(selectedAddOns, code))}
+      getDisplayAmount={getDisplayAmount}
+      formatUnit={(unit) => formatAddonUnitLabel(unit, isEn)}
+      notices={notices}
+    />
+  );
+};
+
+const EAS_LABELS: Record<string, { ko: string; en: string }> = {
+  EAS: { ko: '외곽 지역', en: 'Extended Area' },
+  RAS: { ko: '원거리 지역', en: 'Remote Area' },
+  DAS: { ko: '배송 지역', en: 'Delivery Area' },
+};
+
+const UpsEasBanner: React.FC<{
+  detectedEas: NonNullable<EasSurchargeType>;
+  rates: NormalizedRate[];
+  billableWeight: number;
+  destinationCountry?: string;
+  destinationZip?: string;
+  selectedAddOns: string[];
+  onAddOnsChange: (codes: string[]) => void;
+  isEn: boolean;
+}> = ({
+  detectedEas,
+  rates,
+  billableWeight,
+  destinationCountry,
+  destinationZip,
+  selectedAddOns,
+  onAddOnsChange,
+  isEn,
+}) => {
+  const code = detectedEas === 'RAS' ? 'RMT' : 'EXT';
+  const rate = rates.find((r) => r.code === code);
+  const fee = rate ? calcAddonFee(rate, billableWeight, 0) : 0;
+  const label = EAS_LABELS[detectedEas] || EAS_LABELS.EAS;
 
   return (
-    <div className="col-span-full">
-      <div className="rounded-xl border border-blue-200 dark:border-blue-800 bg-blue-50/50 dark:bg-blue-900/10 p-3">
-        <div className="flex items-center gap-2 mb-3">
-          <Package className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-          <span className={`font-semibold text-blue-700 dark:text-blue-300 ${isMobileView ? 'text-base' : 'text-sm'}`}>
-            UPS {isEn ? 'Add-on Services' : '부가서비스'}
+    <div className='flex items-start gap-1.5 text-xs text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/20 rounded-lg px-2.5 py-1.5'>
+      <MapPin className='w-3.5 h-3.5 shrink-0 mt-0.5' />
+      <div>
+        <span>
+          <b>
+            {isEn ? label.en : label.ko} Surcharge ({detectedEas})
+          </b>{' '}
+          {isEn ? 'auto-detected for' : '자동 감지'}: {destinationCountry} {destinationZip}
+          {fee > 0 && <> &mdash; {fee.toLocaleString()} KRW (+FSC)</>}
+        </span>
+        {!selectedAddOns.includes(code) && (
+          <button
+            type='button'
+            onClick={() => onAddOnsChange([...selectedAddOns, code])}
+            className='ml-2 inline-flex items-center gap-0.5 text-[10px] font-bold text-orange-700 dark:text-orange-300 bg-orange-100 dark:bg-orange-900/40 px-1.5 py-0.5 rounded hover:bg-orange-200 dark:hover:bg-orange-900/60 transition-colors'
+          >
+            + {isEn ? 'Apply' : '적용'}
+          </button>
+        )}
+        {selectedAddOns.includes(code) && (
+          <span className='ml-2 text-[10px] font-bold text-green-600 dark:text-green-400'>
+            ✓ {isEn ? 'Applied' : '적용됨'}
           </span>
-          {dbRates && dbRates.length > 0 && (
-            <span className="text-[9px] text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/30 px-1.5 py-0.5 rounded">DB</span>
-          )}
-          {totalSelected > 0 && (
-            <span className="ml-auto text-xs font-bold text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-900/40 px-2 py-0.5 rounded-full">
-              +{totalSelected.toLocaleString()} KRW
-            </span>
-          )}
-        </div>
-
-        {/* Auto-detected warnings */}
-        <div className="mb-3 space-y-1">
-          {renderIhfNotice()}
-          {renderSurgeEmergencyNotice()}
-          {renderEasBanner()}
-          {renderAhsWarning()}
-          {renderDdpWarning()}
-        </div>
-
-        {/* Selectable add-ons */}
-        <div className={`grid ${isMobileView ? 'grid-cols-1' : 'grid-cols-2'} gap-1.5`}>
-          {selectableAddOns.map((addon) => {
-            const isSelected = selectedAddOns.includes(addon.code);
-            return (
-              <label
-                key={addon.code}
-                className={`flex items-center gap-2 px-2.5 py-2 rounded-lg cursor-pointer transition-all text-xs ${
-                  isSelected
-                    ? 'bg-blue-100 dark:bg-blue-900/30 border border-blue-300 dark:border-blue-700'
-                    : 'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-700'
-                }`}
-              >
-                <input
-                  type="checkbox"
-                  checked={isSelected}
-                  onChange={() => toggleAddOn(addon.code)}
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 w-3.5 h-3.5"
-                />
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between gap-1">
-                    <span className={`font-medium truncate ${isSelected ? 'text-blue-800 dark:text-blue-200' : 'text-gray-700 dark:text-gray-300'}`}>
-                      {isEn ? addon.nameEn : addon.nameKo}
-                    </span>
-                    <span className={`shrink-0 tabular-nums ${isSelected ? 'text-blue-700 dark:text-blue-300 font-semibold' : 'text-gray-500 dark:text-gray-400'}`}>
-                      {getDisplayAmount(addon.code, addon)}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-1 mt-0.5">
-                    <span className="text-[10px] text-gray-400">
-                      /{isEn ? addon.unit : addon.unit === 'shipment' ? '발송건' : '카톤'}
-                    </span>
-                    {addon.fscApplicable && (
-                      <span className="text-[10px] text-orange-500 dark:text-orange-400 font-medium">+FSC</span>
-                    )}
-                  </div>
-                </div>
-              </label>
-            );
-          })}
-        </div>
+        )}
       </div>
     </div>
   );

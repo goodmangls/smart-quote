@@ -2,7 +2,7 @@ module Calculators
   class UpsCost
     # Using Lib::Constants because the file is in app/lib/constants expecting module Lib::Constants or we need to fix loading.
     # For now assuming we will fix namespaces. Using Constants::... assuming they are loaded.
-    
+
     def self.call(billable_weight:, country:)
       new(billable_weight, country).call
     end
@@ -15,7 +15,7 @@ module Calculators
     def call
       zone_info = Calculators::UpsZone.call(@country)
       zone_key = zone_info[:rate_key]
-      
+
       ups_base = calculate_base_rate(zone_key)
       ups_war_risk = ups_base * Constants::Rates::WAR_RISK_SURCHARGE_RATE
 
@@ -23,7 +23,7 @@ module Calculators
         intl_base: ups_base,
         intl_war_risk: ups_war_risk,
         applied_zone: zone_info[:label],
-        transit_time: 'UPS 2-4 Business Days'
+        transit_time: "UPS 2-4 Business Days"
       }
     end
 
@@ -51,7 +51,7 @@ module Calculators
         # Find closest weight >= lookup_weight in keys
         found_weight = zone_rates.keys.sort.find { |w| w >= lookup_weight }
         return zone_rates[found_weight] if found_weight
-        
+
          # Check next range
          next_range = Constants::UpsTariff::UPS_RANGE_RATES.find { |r| r[:min] <= @billable_weight.ceil }
          if next_range && next_range[:rates][zone_key]

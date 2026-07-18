@@ -11,7 +11,7 @@ class QuoteCalculator
   end
 
   def call
-    @carrier = @input[:overseasCarrier] || 'UPS'
+    @carrier = @input[:overseasCarrier] || "UPS"
     @user_warnings = []
 
     calculate_items
@@ -28,14 +28,14 @@ class QuoteCalculator
     volumetric_divisor = 5000
     @item_result = Calculators::ItemCost.call(
       items: @input[:items],
-      packing_type: @input[:packingType] || 'NONE',
+      packing_type: @input[:packingType] || "NONE",
       manual_packing_cost: @input[:manualPackingCost],
       volumetric_divisor: volumetric_divisor,
       carrier: @carrier
     )
 
     @packing_fumigation_cost = 0
-    if (@input[:packingType] || 'NONE') != 'NONE'
+    if (@input[:packingType] || "NONE") != "NONE"
       @packing_fumigation_cost = FUMIGATION_FEE
     end
     if @input[:manualPackingCost] && @input[:manualPackingCost] >= 0
@@ -59,22 +59,21 @@ class QuoteCalculator
     if @item_result[:total_packed_volumetric_weight] > @item_result[:total_actual_weight] * 1.2
       @user_warnings << "High Volumetric Weight Detected (>20% over actual). Consider Repacking."
     end
-
   end
 
   def calculate_overseas
     @overseas_result = case @carrier
-                       when 'DHL'
+    when "DHL"
                          Calculators::DhlCost.call(
                            billable_weight: @billable_weight,
                            country: @input[:destinationCountry]
                          )
-                       else
+    else
                          Calculators::UpsCost.call(
                            billable_weight: @billable_weight,
                            country: @input[:destinationCountry]
                          )
-                       end
+    end
   end
 
   def calculate_surcharges
@@ -91,9 +90,9 @@ class QuoteCalculator
 
     # UPS Surge Fee (급증수수료) — auto-detect for Middle East / Israel
     @ups_surge_total = 0
-    if @carrier == 'UPS'
+    if @carrier == "UPS"
       fsc_for_surge = @input[:fscPercent].nil? ?
-        (@db_fsc_rates.dig('UPS', 'international') || DEFAULT_FSC_PERCENT) :
+        (@db_fsc_rates.dig("UPS", "international") || DEFAULT_FSC_PERCENT) :
         @input[:fscPercent].to_f
       ups_surge_fee_result = Calculators::UpsSurgeFee.call(
         country: @input[:destinationCountry],
@@ -106,13 +105,13 @@ class QuoteCalculator
     @manual_surge_cost = @input[:manualSurgeCost] || 0
     @surge_cost = @system_surcharge_total + @manual_surge_cost + @ups_surge_total
 
-    @dest_duty = @input[:incoterm] == 'DDP' ? (@input[:dutyTaxEstimate] || 0) : 0
+    @dest_duty = @input[:incoterm] == "DDP" ? (@input[:dutyTaxEstimate] || 0) : 0
     @pickup_in_seoul = @input[:pickupInSeoulCost] || 0
   end
 
   def calculate_totals
     exchange_rate = @input[:exchangeRate] || DEFAULT_EXCHANGE_RATE
-    @safe_margin_percent = [(@input[:marginPercent] || 15).to_f, 0].max.clamp(0, MAX_MARGIN_PERCENT)
+    @safe_margin_percent = [ (@input[:marginPercent] || 15).to_f, 0 ].max.clamp(0, MAX_MARGIN_PERCENT)
     base_rate = @overseas_result[:intl_base]
 
     # Markup on Base Rate (cost × (1 + margin%))
@@ -121,8 +120,8 @@ class QuoteCalculator
 
     # FSC on (Base Rate + Margin)
     if @input[:fscPercent].nil?
-      default_fsc = @db_fsc_rates.dig(@carrier, 'international') ||
-                    (@carrier == 'DHL' ? DEFAULT_FSC_PERCENT_DHL : DEFAULT_FSC_PERCENT)
+      default_fsc = @db_fsc_rates.dig(@carrier, "international") ||
+                    (@carrier == "DHL" ? DEFAULT_FSC_PERCENT_DHL : DEFAULT_FSC_PERCENT)
       fsc_percent = default_fsc
     else
       fsc_percent = @input[:fscPercent].to_f
@@ -134,7 +133,7 @@ class QuoteCalculator
     # Note: carrierAddOnTotal (DHL 19 + UPS 6 add-ons) is frontend-only
     add_on_total = @packing_total + @pickup_in_seoul + @surge_cost + @dest_duty + @overseas_result[:intl_war_risk]
 
-    if ['EXW', 'FOB'].include?(@input[:incoterm])
+    if [ "EXW", "FOB" ].include?(@input[:incoterm])
       @user_warnings << "Collect Term: International Freight calculated for reference but may be billed to Consignee/Partner."
     end
 
@@ -156,7 +155,7 @@ class QuoteCalculator
       totalCostAmount: @total_cost_amount,
       profitAmount: @margin_amount,
       profitMargin: @safe_margin_percent.round(2),
-      currency: 'KRW',
+      currency: "KRW",
       totalActualWeight: @item_result[:total_actual_weight],
       totalVolumetricWeight: @item_result[:total_packed_volumetric_weight],
       billableWeight: @billable_weight,

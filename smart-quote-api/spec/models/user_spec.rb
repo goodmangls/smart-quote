@@ -55,7 +55,6 @@ RSpec.describe User, type: :model do
         user.reload
         expect(user.magic_link_token_digest).to eq(Digest::SHA256.hexdigest(raw))
         expect(user.magic_link_token_digest).not_to eq(raw)
-        expect(user.magic_link_token).to be_nil
         expect(user.magic_link_token_expires_at).to be_within(5.seconds).of(15.minutes.from_now)
       end
 
@@ -94,7 +93,6 @@ RSpec.describe User, type: :model do
         user.consume_magic_link_token!
         user.reload
         expect(user.magic_link_token_digest).to be_nil
-        expect(user.magic_link_token).to be_nil
         expect(user.magic_link_token_expires_at).to be_nil
       end
     end

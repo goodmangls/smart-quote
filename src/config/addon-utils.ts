@@ -1,7 +1,7 @@
 /**
  * Shared addon rate utilities for DHL/UPS add-on cost calculations.
- * Consolidates duplicated types, interfaces, and functions from
- * calculationService.ts, DhlAddOnPanel.tsx, and UpsAddOnPanel.tsx.
+ * normalizeDhlRates / normalizeUpsRates stay separate so each carrier keeps
+ * its own price table (hardcoded + DB). UI chrome is shared via AddOnPanelShell.
  */
 
 import { DHL_ADDON_RATES } from '@/config/dhl_addons';
@@ -44,19 +44,53 @@ export interface NormalizedRate {
 
 // ── DHL rate defaults for hardcoded fallback ──
 
-const DHL_HARDCODED_DEFAULTS: Record<string, { perKgRate: number | null; ratePercent: number | null; minAmount: number | null; detectRules: Record<string, number | string[]> | null }> = {
+const DHL_HARDCODED_DEFAULTS: Record<
+  string,
+  {
+    perKgRate: number | null;
+    ratePercent: number | null;
+    minAmount: number | null;
+    detectRules: Record<string, number | string[]> | null;
+  }
+> = {
   RMT: { perKgRate: 750, ratePercent: null, minAmount: 35000, detectRules: null },
   INS: { perKgRate: null, ratePercent: 1.0, minAmount: 17000, detectRules: null },
-  OSP: { perKgRate: null, ratePercent: null, minAmount: null, detectRules: { max_longest: 100, max_second: 80 } },
-  OWT: { perKgRate: null, ratePercent: null, minAmount: null, detectRules: { weight_threshold: 70 } },
+  OSP: {
+    perKgRate: null,
+    ratePercent: null,
+    minAmount: null,
+    detectRules: { max_longest: 100, max_second: 80 },
+  },
+  OWT: {
+    perKgRate: null,
+    ratePercent: null,
+    minAmount: null,
+    detectRules: { weight_threshold: 70 },
+  },
 };
 
 // ── UPS rate defaults for hardcoded fallback ──
 
-const UPS_HARDCODED_DEFAULTS: Record<string, { perKgRate: number | null; minAmount: number | null; detectRules: Record<string, number | string[]> | null }> = {
+const UPS_HARDCODED_DEFAULTS: Record<
+  string,
+  {
+    perKgRate: number | null;
+    minAmount: number | null;
+    detectRules: Record<string, number | string[]> | null;
+  }
+> = {
   RMT: { perKgRate: 570, minAmount: 31400, detectRules: null },
   EXT: { perKgRate: 640, minAmount: 34200, detectRules: null },
-  AHS: { perKgRate: null, minAmount: null, detectRules: { weight_threshold: 25, max_longest: 122, max_second: 76, packing_types: ['WOODEN_BOX', 'SKID'] } },
+  AHS: {
+    perKgRate: null,
+    minAmount: null,
+    detectRules: {
+      weight_threshold: 25,
+      max_longest: 122,
+      max_second: 76,
+      packing_types: ['WOODEN_BOX', 'SKID'],
+    },
+  },
   SEF: { perKgRate: 720, minAmount: 0, detectRules: null },
 };
 
@@ -64,7 +98,7 @@ const UPS_HARDCODED_DEFAULTS: Record<string, { perKgRate: number | null; minAmou
 
 export function normalizeDhlRates(dbRates?: AddonRate[]): NormalizedRate[] {
   if (dbRates && dbRates.length > 0) {
-    return dbRates.map(r => ({
+    return dbRates.map((r) => ({
       code: r.code,
       nameKo: r.nameKo,
       nameEn: r.nameEn,
@@ -80,7 +114,7 @@ export function normalizeDhlRates(dbRates?: AddonRate[]): NormalizedRate[] {
       detectRules: r.detectRules,
     }));
   }
-  return DHL_ADDON_RATES.map(r => {
+  return DHL_ADDON_RATES.map((r) => {
     const defaults = DHL_HARDCODED_DEFAULTS[r.code];
     return {
       code: r.code,
@@ -122,7 +156,7 @@ export function normalizeUpsRates(dbRates?: AddonRate[]): NormalizedRate[] {
   };
 
   if (dbRates && dbRates.length > 0) {
-    const normalized: NormalizedRate[] = dbRates.map(r => ({
+    const normalized: NormalizedRate[] = dbRates.map((r) => ({
       code: r.code,
       nameKo: r.nameKo,
       nameEn: r.nameEn,
@@ -139,9 +173,9 @@ export function normalizeUpsRates(dbRates?: AddonRate[]): NormalizedRate[] {
       detectRules: r.detectRules,
     }));
 
-    UPS_ADDON_RATES
-      .filter(r => ['IHF', 'SEF'].includes(r.code) && !normalized.some(n => n.code === r.code))
-      .forEach(r => normalized.push(hardcodedToNormalized(r)));
+    UPS_ADDON_RATES.filter(
+      (r) => ['IHF', 'SEF'].includes(r.code) && !normalized.some((n) => n.code === r.code),
+    ).forEach((r) => normalized.push(hardcodedToNormalized(r)));
 
     return normalized;
   }
@@ -152,9 +186,15 @@ export function normalizeUpsRates(dbRates?: AddonRate[]): NormalizedRate[] {
 // ── Shared calcAddonFee function (CRITICAL 1 + 3) ──
 
 export const calcAddonFee = (
-  rate: { chargeType: string; amount: number; perKgRate?: number | null; ratePercent?: number | null; minAmount?: number | null },
+  rate: {
+    chargeType: string;
+    amount: number;
+    perKgRate?: number | null;
+    ratePercent?: number | null;
+    minAmount?: number | null;
+  },
   billableWeight: number,
-  declaredValue: number
+  declaredValue: number,
 ): number => {
   if (rate.chargeType === 'calculated') {
     if (rate.perKgRate) {
@@ -163,7 +203,7 @@ export const calcAddonFee = (
     }
     if (rate.ratePercent) {
       const min = rate.minAmount ?? rate.amount;
-      return Math.max(declaredValue * rate.ratePercent / 100, min);
+      return Math.max((declaredValue * rate.ratePercent) / 100, min);
     }
   }
   return rate.amount;
@@ -174,12 +214,28 @@ export const calcAddonFee = (
 export const findRate = (
   code: string,
   dbRates: AddonRateLike[] | undefined,
-  hardcodedRates: readonly { code: string; nameKo: string; nameEn: string; amount: number; chargeType: string; fscApplicable: boolean }[],
+  hardcodedRates: readonly {
+    code: string;
+    nameKo: string;
+    nameEn: string;
+    amount: number;
+    chargeType: string;
+    fscApplicable: boolean;
+  }[],
 ): AddonRateLike | null => {
   if (dbRates && dbRates.length > 0) {
-    const r = dbRates.find(a => a.code === code);
+    const r = dbRates.find((a) => a.code === code);
     return r ? { ...r } : null;
   }
-  const h = hardcodedRates.find(a => a.code === code);
-  return h ? { code: h.code, nameKo: h.nameKo, nameEn: h.nameEn, amount: h.amount, chargeType: h.chargeType, fscApplicable: h.fscApplicable } : null;
+  const h = hardcodedRates.find((a) => a.code === code);
+  return h
+    ? {
+        code: h.code,
+        nameKo: h.nameKo,
+        nameEn: h.nameEn,
+        amount: h.amount,
+        chargeType: h.chargeType,
+        fscApplicable: h.fscApplicable,
+      }
+    : null;
 };

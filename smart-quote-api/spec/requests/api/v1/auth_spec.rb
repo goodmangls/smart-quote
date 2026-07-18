@@ -193,7 +193,6 @@ RSpec.describe "Api::V1::Auth", type: :request do
       user.reload
       expect(user.magic_link_token_digest).to be_present
       expect(user.magic_link_token_digest.length).to eq(64) # SHA256 hex
-      expect(user.magic_link_token).to be_nil
     end
 
     it "rejects untrusted origins when origin checking is enabled" do
@@ -383,6 +382,50 @@ RSpec.describe "Api::V1::Auth", type: :request do
     it "succeeds even when no session cookie present (idempotent)" do
       post "/api/v1/auth/logout"
       expect(response).to have_http_status(:ok)
+    end
+
+    it "revokes access token via jti denylist" do
+      post "/api/v1/auth/login", params: { email: user.email, password: "password123" }, as: :json
+      access = JSON.parse(response.body)["token"]
+      expect(access).to be_present
+
+      post "/api/v1/auth/logout", headers: { "Authorization" => "Bearer #{access}" }
+      expect(response).to have_http_status(:ok)
+
+      get "/api/v1/auth/me", headers: { "Authorization" => "Bearer #{access}" }
+      expect(response).to have_http_status(:unauthorized)
+    end
+
+    it "revokes refresh token via jti denylist" do
+      post "/api/v1/auth/login", params: { email: user.email, password: "password123" }, as: :json
+      expect(response.cookies["refresh_token"]).to be_present
+
+      post "/api/v1/auth/logout"
+      expect(response).to have_http_status(:ok)
+
+      post "/api/v1/auth/refresh"
+      expect(response).to have_http_status(:unauthorized)
+    end
+  end
+
+  describe "POST /api/v1/auth/refresh (jti rotation)" do
+    let!(:user) { create(:user, email: "refresh-jti@example.com", password: "password123") }
+
+    it "invalidates the previous refresh token after rotation" do
+      post "/api/v1/auth/login", params: { email: user.email, password: "password123" }, as: :json
+      old_refresh = response.cookies["refresh_token"]
+      expect(old_refresh).to be_present
+
+      post "/api/v1/auth/refresh"
+      expect(response).to have_http_status(:ok)
+      new_refresh = response.cookies["refresh_token"]
+      expect(new_refresh).to be_present
+      expect(new_refresh).not_to eq(old_refresh)
+
+      # Replay the old refresh cookie — should fail after denylist.
+      cookies[:refresh_token] = old_refresh
+      post "/api/v1/auth/refresh"
+      expect(response).to have_http_status(:unauthorized)
     end
   end
 end

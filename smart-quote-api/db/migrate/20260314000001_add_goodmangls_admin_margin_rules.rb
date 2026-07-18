@@ -16,7 +16,7 @@ class AddGoodmanglsAdminMarginRules < ActiveRecord::Migration[7.1]
       { name: "굿맨GLS 이창희 ≥20kg", rule_type: "weight_based", priority: 100,
         match_email: "charlie@goodmangls.com", weight_min: 20, weight_max: nil, margin_percent: 19, created_by: "system" },
       { name: "굿맨GLS 이창희 <20kg", rule_type: "weight_based", priority: 100,
-        match_email: "charlie@goodmangls.com", weight_min: 0, weight_max: 19.99, margin_percent: 24, created_by: "system" },
+        match_email: "charlie@goodmangls.com", weight_min: 0, weight_max: 19.99, margin_percent: 24, created_by: "system" }
     ]
 
     now = Time.current

@@ -11,7 +11,7 @@ module Api
 
       # POST /api/v1/chat
       def create
-        messages = params.permit(messages: [:role, :content]).fetch(:messages, []).map(&:to_h)
+        messages = params.permit(messages: [ :role, :content ]).fetch(:messages, []).map(&:to_h)
 
         return render json: { error: { message: "Messages required" } }, status: :unprocessable_entity if messages.empty?
 

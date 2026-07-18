@@ -203,17 +203,16 @@ No hardcoded secrets or tokens were found in `src/`.
 ### Client-exposed env keys observed
 From `src/vite-env.d.ts`:
 - `VITE_API_URL`
-- `VITE_SUPABASE_URL`
-- `VITE_SUPABASE_ANON_KEY`
 - `VITE_GOOGLE_MAPS_API_KEY`
 - `VITE_SENTRY_DSN`
-- `VITE_CHANNEL_TALK_PLUGIN_KEY`
+- `VITE_INTERCOM_APP_ID`
 - `VITE_ENABLE_SENTRY`
 - `VITE_EIA_API_KEY`
 
 ### Assessment
-- `VITE_SUPABASE_ANON_KEY`, browser Google Maps keys, Sentry DSN, and ChannelTalk plugin keys may be intentionally public client identifiers.
+- Browser Google Maps keys, Sentry DSN, and Intercom app id may be intentionally public client identifiers.
 - `VITE_EIA_API_KEY` is the one that should not remain in frontend code.
+- Dead `VITE_SUPABASE_*` keys were removed (`supabase-config-cleanup`).
 
 ## Affected Code References
 

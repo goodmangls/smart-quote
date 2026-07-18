@@ -37,7 +37,7 @@ MarginRule.create!([
   { name: "기본 ≥20kg", rule_type: "weight_based", priority: 0,
     weight_min: 20, margin_percent: 24 },
   { name: "기본 <20kg", rule_type: "weight_based", priority: 0,
-    weight_min: 0, weight_max: 19.99, margin_percent: 32 },
+    weight_min: 0, weight_max: 19.99, margin_percent: 32 }
 ])
 
 Rails.logger.info "[SEED] Created #{MarginRule.count} margin rules"
