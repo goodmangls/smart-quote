@@ -1,6 +1,6 @@
 # Smart Quote System - Admin User Guide
 
-> **Goodman GLS & J-Ways** Internal Logistics Quoting System
+> **KS Ways** Internal Logistics Quoting System
 >
 > Version 3.2 | Last Updated: 2026-04-27
 
@@ -391,4 +391,4 @@ A: Surcharge rates have changed since the quote was saved. The customer should r
 
 ---
 
-*Goodman GLS & J-Ways - Smart Quote System v3.2 (Admin)*
+*KS Ways - Smart Quote System v3.2 (Admin)*

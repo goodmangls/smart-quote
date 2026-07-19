@@ -15,7 +15,7 @@ end
     u.password_confirmation = admin_password
     u.role = "admin"
     u.name = attrs[:name]
-    u.company = attrs[:email].include?("jways") ? "J-Ways" : "Goodman GLS"
+    u.company = "KS Ways"
   end
 end
 

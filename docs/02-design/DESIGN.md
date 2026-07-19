@@ -2,7 +2,7 @@
 name: BridgeLogis Design System (smart-quote-main)
 version: 1.1.0
 description: >-
-  BridgeLogis by Goodman GLS 웹 애플리케이션의 디자인 시스템 명세.
+  BridgeLogis by KS Ways 웹 애플리케이션의 디자인 시스템 명세.
   외부 운영 중인 SaaS(bridgelogis.com)의 단일 진실 공급원(SSOT).
   Phase 2 완료 (2026-04-24) — 레거시 jways-*/accent-* 전면 제거, brand-blue-*/cyan-* 로 통합.
 references:
@@ -94,8 +94,8 @@ charts:
 
 ## 1. Overview
 
-BridgeLogis는 **Goodman GLS & J-Ways 의 국제 특송(Express) SaaS 플랫폼**이다.
-- 정식명: BridgeLogis by Goodman GLS
+BridgeLogis는 **KS Ways 의 국제 특송(Express) SaaS 플랫폼**이다.
+- 정식명: BridgeLogis by KS Ways
 - 태그라인: *"Bridging Your Cargo to the World."*
 - Values: Trust · Speed · Connection · Intelligence
 - 도메인: bridgelogis.com (글로벌), app.bridgelogis.com (SaaS 본체)
@@ -302,7 +302,7 @@ import { CHART_COLORS } from '@/lib/chartColors';
 ## 13. Maintenance
 
 - **오너**: @jhlim725
-- **소유 브랜드**: BridgeLogis by Goodman GLS
+- **소유 브랜드**: BridgeLogis by KS Ways
 - **변경 주기**: 토큰 변경 시 `.commit_message.txt` + Git 커밋 필수
 - **검증**: 토큰 추가·변경 시 `npm run build` + `npx tsc --noEmit` + `npx vitest run` 통과 필수
 

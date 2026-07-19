@@ -88,4 +88,4 @@ npm run insights:type-check            # TS 타입 체크
 
 ## 라이선스
 
-내부 사용 (Goodman GLS / J-Ways / BridgeLogis)
+내부 사용 (KS Ways / BridgeLogis)

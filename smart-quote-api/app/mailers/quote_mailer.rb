@@ -8,7 +8,7 @@ class QuoteMailer < ApplicationMailer
 
     mail(
       to: recipient_email,
-      subject: "Quote #{quote.reference_no} - Goodman GLS & J-Ways"
+      subject: "Quote #{quote.reference_no} - KS Ways"
     )
   end
 end

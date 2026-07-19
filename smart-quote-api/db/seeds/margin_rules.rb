@@ -1,7 +1,7 @@
 return if MarginRule.exists?
 
 MarginRule.create!([
-  # Priority 0 (code P100): Goodman GLS admin per-user weight-based
+  # Priority 0 (code P100): KS Ways admin per-user weight-based
   { name: "굿맨GLS 신현억 ≥20kg", rule_type: "weight_based", priority: 100,
     match_email: "ceo@goodmangls.com", weight_min: 20, margin_percent: 19 },
   { name: "굿맨GLS 신현억 <20kg", rule_type: "weight_based", priority: 100,

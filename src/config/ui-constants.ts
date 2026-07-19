@@ -4,7 +4,7 @@ export const PDF_LAYOUT = {
   PAGE_WIDTH: 210, // A4
   LINE_HEIGHT: 7,
   COLORS: {
-    PRIMARY: [2, 132, 199] as [number, number, number], // J-Ways Blue
+    PRIMARY: [2, 132, 199] as [number, number, number], // KS Ways Blue
     PRIMARY_LIGHT: [240, 249, 255] as [number, number, number],
     TEXT: [0, 0, 0] as [number, number, number],
     TEXT_LIGHT: [100, 100, 100] as [number, number, number],

@@ -1,6 +1,6 @@
 # Smart Quote System - Member User Guide
 
-> **Goodman GLS & J-Ways** International Logistics Quoting System
+> **KS Ways** International Logistics Quoting System
 >
 > Version 3.4 | Last Updated: 2026-07-19
 
@@ -246,4 +246,4 @@ A: Click the language selector (globe icon) in the header.
 
 ---
 
-*Goodman GLS & J-Ways - Smart Quote System v3.2*
+*KS Ways - Smart Quote System v3.2*

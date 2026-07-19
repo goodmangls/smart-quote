@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   description:
     '한국발 국제 특송(UPS/DHL Express)과 GSSA 항공 화물 운송에 대한 실무 인사이트. 인코텀즈 2020, FSC, 콜드체인, 위험물(DG), 해상운임 지수까지 — 화주·물류 담당자를 위한 실용 가이드.',
   applicationName: 'BridgeLogis Insights',
-  authors: [{ name: 'Goodman GLS / J-Ways' }],
+  authors: [{ name: 'KS Ways' }],
   generator: 'Next.js',
   keywords: [
     '항공 화물',

@@ -1,6 +1,6 @@
 # bridgelogis.com — robots.txt
 # Last updated: 2026-05-10
-# Powered by: Goodman GLS
+# Powered by: KS Ways
 
 # Default rule — applies to all crawlers (incl. AI bots like GPTBot,
 # PerplexityBot, ClaudeBot, Google-Extended, Bingbot) unless they have

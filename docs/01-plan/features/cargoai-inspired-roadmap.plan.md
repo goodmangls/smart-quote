@@ -136,7 +136,7 @@ API Tier 3: Tracking API    — 실시간 추적 웹훅
 | 영역 | CargoAI | Smart Quote |
 |------|---------|-------------|
 | 대상 | 항공화물 (Air Cargo) | **특송(Express)** — UPS/DHL/FedEx |
-| 고객 | 대형 포워더 | **중소 물류사** (Goodman GLS, J-Ways) |
+| 고객 | 대형 포워더 | **중소 물류사** (KS Ways, KS Ways) |
 | 강점 | 104개 항공사 네트워크 | 한국 발송 특화, KRW 정산, 한국어 우선 |
 | AI | AgenticAI (워크플로우) | Claude 기반 견적 어시스턴트 (심화 예정) |
 | 가격 | SaaS 구독 | 내부 도구 → SaaS 전환 예정 |

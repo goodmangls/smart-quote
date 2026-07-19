@@ -35,7 +35,7 @@ RSpec.describe AuthMailer, type: :mailer do
       expect(html).to include("BridgeLogis Smart Quote")
       expect(html).to include("Sign in securely")
       expect(html).to include("Security note")
-      expect(html).to include("Goodman GLS")
+      expect(html).to include("KS Ways")
       expect(html).not_to include("본부장")
     end
 
@@ -45,7 +45,7 @@ RSpec.describe AuthMailer, type: :mailer do
 
       expect(text).to include("BridgeLogis Smart Quote — Secure sign-in")
       expect(text).to include("Sign in securely:")
-      expect(text).to include("Goodman GLS · BridgeLogis Smart Quote")
+      expect(text).to include("KS Ways · BridgeLogis Smart Quote")
     end
 
     it "raises KeyError when FRONTEND_URL is unset" do

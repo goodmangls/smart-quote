@@ -281,7 +281,7 @@
 
 | Group | English | Korean | Badge Color |
 |-------|---------|--------|-------------|
-| goodman | Goodman GLS | Goodman GLS | Blue (jways) |
+| goodman | KS Ways | KS Ways | Blue (jways) |
 | gac | Globe Air Cargo (ECS) | Globe Air Cargo (ECS) | Purple |
 | extrans | Extrans Air | Extrans Air | Orange |
 | daejoo | Daejoo Air Agencies | 대주항공 | Indigo |

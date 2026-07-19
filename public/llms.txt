@@ -1,8 +1,8 @@
 # BridgeLogis — Smart Quote
 
-> 190개국 UPS / DHL Express 견적을 1초 만에 산출하는 글로벌 항공 익스프레스 견적·관리 플랫폼. Goodman GLS GSSA 운영 노하우를 BridgeLogis 자체 브랜드로 셀프서비스화.
+> 190개국 UPS / DHL Express 견적을 1초 만에 산출하는 글로벌 항공 익스프레스 견적·관리 플랫폼. KS Ways GSSA 운영 노하우를 BridgeLogis 자체 브랜드로 셀프서비스화.
 
-BridgeLogis runs Smart Quote, a B2B express-shipping quoting SaaS for shippers, e-commerce sellers, and forwarders moving cargo from Korea via UPS or DHL Express. The system mirrors Goodman GLS' (a General Sales & Service Agent / GSSA) operational rules — zone-based rates, FSC, EAS/RAS auto-detection, surge fees, margin policy — into a self-service tool with a 4-language UI (English / Korean / Chinese / Japanese).
+BridgeLogis runs Smart Quote, a B2B express-shipping quoting SaaS for shippers, e-commerce sellers, and forwarders moving cargo from Korea via UPS or DHL Express. The system mirrors KS Ways' (a General Sales & Service Agent / GSSA) operational rules — zone-based rates, FSC, EAS/RAS auto-detection, surge fees, margin policy — into a self-service tool with a 4-language UI (English / Korean / Chinese / Japanese).
 
 ## Product
 
@@ -30,7 +30,7 @@ BridgeLogis runs Smart Quote, a B2B express-shipping quoting SaaS for shippers, 
 
 ## Operator & background
 
-- **Operator**: Goodman GLS (GSSA, EAN / MPL 회원사) + J-Ways. 한국발 UPS / DHL Express 운영.
+- **Operator**: KS Ways (GSSA, EAN / MPL 회원사). 한국발 UPS / DHL Express 운영.
 - **Brand**: BridgeLogis — "Bridging Your Cargo to the World"
 - **Tech**: React 19 + Vite 6 frontend, Rails 8 API + PostgreSQL backend. Vercel + Render Singapore.
 - **Anti-personas**: Sea freight, general air cargo, FedEx-only shippers, super-large enterprise (자체 TMS 보유).
@@ -50,4 +50,4 @@ BridgeLogis runs Smart Quote, a B2B express-shipping quoting SaaS for shippers, 
 - **EAS / RAS / DAS**: Extended / Remote / Delivery Area Surcharge
 - **DAP**: Delivered at Place — 본 제품의 유일한 인코텀
 - **Markup margin**: `revenue = cost × (1 + margin%)`, KRW 100 단위 올림
-- **EAN / MPL**: Goodman GLS 가 회원인 글로벌 GSSA 네트워크
+- **EAN / MPL**: KS Ways 가 회원인 글로벌 GSSA 네트워크

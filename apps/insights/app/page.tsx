@@ -230,7 +230,7 @@ export default function InsightsHome() {
           교차 확인하시기 바랍니다.
         </p>
         <p style={{ marginTop: '0.5rem' }}>
-          © {new Date().getFullYear()} Goodman GLS / J-Ways. All rights reserved.
+          © {new Date().getFullYear()} KS Ways. All rights reserved.
         </p>
       </footer>
     </main>

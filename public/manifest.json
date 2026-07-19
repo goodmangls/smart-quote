@@ -1,7 +1,7 @@
 {
   "name": "Smart Quote System",
   "short_name": "SmartQuote",
-  "description": "International shipping cost calculator for Goodman GLS & J-Ways",
+  "description": "International shipping cost calculator for KS Ways",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#f9fafb",

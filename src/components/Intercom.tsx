@@ -12,7 +12,7 @@ const WIDGET_URL = `https://widget.intercom.io/widget/${APP_ID}`;
  * Force Intercom Messenger UI to a single locale regardless of in-app language.
  * Set to `null` to fall back to `INTERCOM_LANG_MAP` and translate per user preference.
  *
- * Current policy (2026-04-11): English-only. Goodman GLS operators reply in English
+ * Current policy (2026-04-11): English-only. KS Ways operators reply in English
  * and multi-language saved replies/auto-messages are not yet prepared on the
  * Intercom dashboard, so we keep the messenger UI in a single, consistent locale.
  */

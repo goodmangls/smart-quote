@@ -1,12 +1,12 @@
 # Smart Quote System
 
 <div align="center">
-  <img src="/public/goodman-gls-logo.png" alt="Goodman GLS Logo" height="60" />
+  <img src="/public/goodman-gls-logo.png" alt="KS Ways Logo" height="60" />
 </div>
 
 <br />
 
-The **Smart Quote System** is a full-stack logistics quoting application for **Goodman GLS** and **J-Ways**. It calculates international shipping costs across multiple carriers (UPS, DHL), including export packing, surcharges, and margin analysis. React frontend with a Rails API backend and mirrored calculation logic.
+The **Smart Quote System** is a full-stack logistics quoting application for **KS Ways** (BridgeLogis by KS Ways). It calculates international shipping costs across multiple carriers (UPS, DHL), including export packing, surcharges, and margin analysis. React frontend with a Rails API backend and mirrored calculation logic.
 
 **Live URL**: [https://bridgelogis.com](https://bridgelogis.com) / [https://smart-quote-main.vercel.app](https://smart-quote-main.vercel.app)
 

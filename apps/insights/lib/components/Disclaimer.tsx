@@ -39,7 +39,7 @@ interface DisclaimerCopy {
 const COPY_KO: Record<DisclaimerVariant, DisclaimerCopy> = {
   general: {
     heading: '안내',
-    body: '본 콘텐츠는 BridgeLogis(Goodman GLS / J-Ways)가 일반 정보 제공 목적으로 작성한 자료이며, 발행 시점 기준 자료를 토대로 합니다. 운임·환율·관세·요율은 실시간 변동 가능합니다.',
+    body: '본 콘텐츠는 BridgeLogis(KS Ways)가 일반 정보 제공 목적으로 작성한 자료이며, 발행 시점 기준 자료를 토대로 합니다. 운임·환율·관세·요율은 실시간 변동 가능합니다.',
     aiNotice: '본 콘텐츠는 일부 AI 도구를 활용해 작성된 뒤 운영팀이 검수했습니다.',
     reviewedLabel: '검수일',
   },
@@ -66,7 +66,7 @@ const COPY_KO: Record<DisclaimerVariant, DisclaimerCopy> = {
 const COPY_EN: Record<DisclaimerVariant, DisclaimerCopy> = {
   general: {
     heading: 'Notice',
-    body: 'This article is published by BridgeLogis (Goodman GLS / J-Ways) for general information purposes based on data available at publication time. Rates, FX, duties, and surcharges may change in real time.',
+    body: 'This article is published by BridgeLogis (KS Ways) for general information purposes based on data available at publication time. Rates, FX, duties, and surcharges may change in real time.',
     aiNotice: 'This content was drafted with the assistance of AI tools and reviewed by the BridgeLogis operations team.',
     reviewedLabel: 'Reviewed',
   },

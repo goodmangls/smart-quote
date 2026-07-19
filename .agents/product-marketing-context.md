@@ -5,10 +5,10 @@
 
 ## Product Overview
 **One-liner:** 190개국 UPS/DHL Express 견적을 1초 만에 산출하는 글로벌 항공 익스프레스 견적·관리 플랫폼.
-**What it does:** GSSA(General Sales & Service Agent) Goodman GLS 가 운영하는 UPS·DHL Express 실시간 견적 도구. 출발지·도착지·화물 정보를 입력하면 zone 기반 운임 + FSC + add-on(EAS/RAS/Surge) + 자동 마진 계산을 1초 안에 산출하고, 견적 저장(`SQ-YYYY-NNNN`)·PDF·관리자 마진/FSC/요율 운영까지 통합.
+**What it does:** GSSA(General Sales & Service Agent) KS Ways 가 운영하는 UPS·DHL Express 실시간 견적 도구. 출발지·도착지·화물 정보를 입력하면 zone 기반 운임 + FSC + add-on(EAS/RAS/Surge) + 자동 마진 계산을 1초 안에 산출하고, 견적 저장(`SQ-YYYY-NNNN`)·PDF·관리자 마진/FSC/요율 운영까지 통합.
 **Product category:** B2B 익스프레스 화물 견적 SaaS / GSSA 운영 자동화 플랫폼.
 **Product type:** SaaS — Frontend(React 19 + Vite 6) + Rails 8 API. JWT 인증, 역할 기반(Admin/Member) 접근.
-**Business model:** B2B SaaS — BridgeLogis 자체 브랜드로 한국발 UPS/DHL Express 화주에게 셀프서비스 견적·마진 자동화 제공. Goodman GLS 의 GSSA 운영 노하우를 외부 화주가 직접 활용할 수 있게 개방. (가격 정책은 미정 — Member 무료 견적 + 정밀 견적/계약 인입 모델 또는 회사별 구독제 가능성.)
+**Business model:** B2B SaaS — BridgeLogis 자체 브랜드로 한국발 UPS/DHL Express 화주에게 셀프서비스 견적·마진 자동화 제공. KS Ways 의 GSSA 운영 노하우를 외부 화주가 직접 활용할 수 있게 개방. (가격 정책은 미정 — Member 무료 견적 + 정밀 견적/계약 인입 모델 또는 회사별 구독제 가능성.)
 
 ## Target Audience
 **Target companies:** 한국에서 UPS/DHL Express 로 해외 발송하는 중소·중견 화주, 한국발 글로벌 e-commerce 셀러, 무역회사, GSSA 파트너 네트워크(EAN/MPL) 회원사, 포워더(자체 견적 비교용).
@@ -52,7 +52,7 @@
 
 ## Differentiation
 **Key differentiators:**
-- 한국 GSSA 운영 현실에 100% 맞춤 (Goodman GLS / J-Ways 실 운영 기반)
+- 한국 GSSA 운영 현실에 100% 맞춤 (KS Ways 실 운영 기반)
 - Frontend·Backend 동일 계산 로직 미러링 → 즉시 UI 반응 + 영구 저장 일치
 - 공식 UPS 2026 Service Guide 기반 Z1~Z10 zone, EAS/RAS 86개국 39,876 zip 자동 감지
 - 마진 룰 우선순위 엔진(P100/P90/P50/P0), audit log, 5분 캐시
@@ -60,7 +60,7 @@
 - BridgeLogis 디자인 시스템(DESIGN.md v1.1.0) — Tailwind 토큰 SSOT, 차트 컬러 통합
 **How we do it differently:** 캐리어 가격표를 코드가 아닌 운영 데이터로 다룸 → 비개발자 운영팀이 직접 정책 변경 가능.
 **Why that's better:** FSC 매주 변동, surcharge 분기 변동, EAS/RAS 추가 발표 → 코드 배포 없이 즉시 반영.
-**Why customers choose us:** GSSA 가격 구조에 정통한 한국 파트너(Goodman GLS 운영 기반)가 만든 셀프서비스 견적 → 24/7 즉시 응답, 4개국어 대응, 화주가 직접 단가·시나리오를 비교하고 의사결정.
+**Why customers choose us:** GSSA 가격 구조에 정통한 한국 파트너(KS Ways 운영 기반)가 만든 셀프서비스 견적 → 24/7 즉시 응답, 4개국어 대응, 화주가 직접 단가·시나리오를 비교하고 의사결정.
 
 ## Objections
 | Objection | Response |
@@ -90,7 +90,7 @@
 - "Bridging Your Cargo to the World" (Tagline)
 
 **Words to use:** GSSA, UPS Express Saver, DHL Express Worldwide, FSC, zone, EAS, RAS, Surge Fee, Margin Rule, DAP, Incoterm, BridgeLogis, Smart Quote.
-**Words to avoid:** "Forwarder/포워더" — Goodman GLS 는 GSSA 이지 forwarder 가 아님. "FedEx" — 미지원. "Sea freight"·"air cargo (general)" — 본 제품은 익스프레스 전용. "EMS" — 별개.
+**Words to avoid:** "Forwarder/포워더" — KS Ways 는 GSSA 이지 forwarder 가 아님. "FedEx" — 미지원. "Sea freight"·"air cargo (general)" — 본 제품은 익스프레스 전용. "EMS" — 별개.
 **Glossary:**
 | Term | Meaning |
 |---|---|
@@ -99,7 +99,7 @@
 | EAS / RAS / DAS | Extended / Remote / Delivery Area Surcharge |
 | DAP | Delivered at Place — UPS/DHL 익스프레스 본 제품의 유일한 인코텀즈 |
 | Markup margin | `revenue = cost × (1 + margin%)`, KRW 100 단위 올림 |
-| EAN / MPL | Goodman GLS 가 회원인 글로벌 GSSA 네트워크 |
+| EAN / MPL | KS Ways 가 회원인 글로벌 GSSA 네트워크 |
 
 ## Brand Voice
 **Tone:** 전문적, 정확, 신속. 익스프레스 화물 산업 답게 시간·정확성 강조.
@@ -115,7 +115,7 @@
 - 32 test files, 1,188 tests (Vitest), RSpec backend
 - 4개 언어 i18n, 390+ translation keys
 - Vercel + Render(Singapore) 자동 배포
-**Customers / Operators:** Goodman GLS, J-Ways (operator). GSSA 파트너 그룹: Goodman GLS · Globe Air Cargo (ECS) · Extrans Air · Daejoo Air · Apex Logistics.
+**Customers / Operators:** KS Ways (operator). GSSA 파트너 그룹: KS Ways · Globe Air Cargo (ECS) · Extrans Air · Daejoo Air · Apex Logistics.
 **Testimonials:** *(미수집 — 외부 SaaS 시나리오 전환 시 1순위)*
 **Value themes:**
 | Theme | Proof |

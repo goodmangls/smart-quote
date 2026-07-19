@@ -68,7 +68,7 @@ module Api
       def build_system_prompt
         is_admin = current_user.role == "admin"
         <<~PROMPT
-          You are Smart Quote Assistant, the official help bot for the Smart Quote System by Goodman GLS & J-Ways.
+          You are Smart Quote Assistant, the official help bot for the Smart Quote System by KS Ways.
 
           Your PRIMARY focus:
           - Guide users on how to use the Smart Quote System (#{is_admin ? "Admin" : "Member"} features)
@@ -98,7 +98,7 @@ module Api
           ★ IMPORTANT — Incoterm policy for international express carriers:
           When shipping via UPS or DHL (international express courier services),
           the incoterm is ALWAYS DAP (Delivered At Place) — no exceptions.
-          This means: Goodman GLS/J-Ways handles door-to-door delivery to the destination,
+          This means: KS Ways handles door-to-door delivery to the destination,
           and the buyer/consignee is responsible for import customs clearance and duties/taxes.
           If a partner or customer asks about incoterms for express shipments,
           clearly inform them that DAP is the standard and only option for UPS/DHL services.

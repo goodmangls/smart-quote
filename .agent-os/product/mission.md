@@ -2,19 +2,19 @@
 
 ## Pitch
 
-Smart Quote System is an international logistics quoting platform for **Goodman GLS & J-Ways** that enables operations staff and external customers to instantly calculate accurate shipping costs across UPS, DHL, and EMAX carriers, with real-time cost breakdowns, margin analysis, and quote persistence. The customer dashboard provides logistics intelligence including live exchange rates, port weather conditions, and industry news.
+Smart Quote System is an international logistics quoting platform for **KS Ways** that enables operations staff and external customers to instantly calculate accurate shipping costs across UPS, DHL, and EMAX carriers, with real-time cost breakdowns, margin analysis, and quote persistence. The customer dashboard provides logistics intelligence including live exchange rates, port weather conditions, and industry news.
 
 ## Users
 
 ### Primary Customers
 
-- **Internal Operations Staff (via /admin)**: Goodman GLS / J-Ways logistics coordinators who generate, manage, and analyze quotes daily
+- **Internal Operations Staff (via /admin)**: KS Ways logistics coordinators who generate, manage, and analyze quotes daily
 - **External Customers (via /dashboard)**: Clients who need self-service quote generation, live exchange rates, port weather, and logistics intelligence
 
 ### User Personas
 
 **Operations Coordinator** (25-45)
-- **Role:** Logistics Coordinator at Goodman GLS
+- **Role:** Logistics Coordinator at KS Ways
 - **Context:** Handles 20-50 quote requests daily across multiple carriers and destinations
 - **Pain Points:** Manual rate table lookups, error-prone spreadsheet calculations, slow turnaround
 - **Goals:** Generate accurate quotes in under 30 seconds, maintain healthy margins (>10%), track quote history
@@ -26,7 +26,7 @@ Smart Quote System is an international logistics quoting platform for **Goodman 
 - **Goals:** Self-service instant quotes, understand cost components, stay informed on port conditions and exchange rates
 
 **Sales Manager** (35-50)
-- **Role:** Business Development at J-Ways
+- **Role:** Business Development at KS Ways
 - **Context:** Reviews pricing competitiveness and margin performance across quotes
 - **Pain Points:** No centralized view of quoting activity, difficulty spotting margin erosion
 - **Goals:** Monitor quote volume, analyze margin trends, ensure pricing consistency

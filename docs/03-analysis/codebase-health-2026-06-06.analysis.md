@@ -13,7 +13,7 @@ scope: monorepo — React 19/TS frontend (~20k LOC) + Rails 8 backend (~4k LOC)
 > **Overall Health: 6.7 / 10** 🟡
 > Date: 2026-06-06 · Method: 3 parallel subagents + direct verification (6 security claims corrected)
 
-Sibling codebase to smart-quote-emax (shared calc-logic lineage; Goodman GLS / J-Ways → bridgelogis.com). Solid foundation (type-safe `any`=0, no SQLi/hardcoded secrets, proper CORS, 1443 FE tests). Main weaknesses vs emax: **security gaps in the new AI chat feature + larger backend rubocop debt (1054)**.
+Sibling codebase to smart-quote-emax (shared calc-logic lineage; KS Ways → bridgelogis.com). Solid foundation (type-safe `any`=0, no SQLi/hardcoded secrets, proper CORS, 1443 FE tests). Main weaknesses vs emax: **security gaps in the new AI chat feature + larger backend rubocop debt (1054)**.
 
 | Area | Score | One-liner |
 |------|:-----:|-----------|

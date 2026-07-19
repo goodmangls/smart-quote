@@ -13,7 +13,7 @@
 
 ### Decision
 
-Build an international logistics quoting platform for Goodman GLS & J-Ways that automates multi-carrier shipping cost calculations (UPS, DHL, EMAX) with real-time computation, quote persistence, and branded PDF export.
+Build an international logistics quoting platform for KS Ways that automates multi-carrier shipping cost calculations (UPS, DHL, EMAX) with real-time computation, quote persistence, and branded PDF export.
 
 ### Context
 
