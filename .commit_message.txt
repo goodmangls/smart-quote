@@ -1,1 +1,1 @@
-✨ feat(signup): Nationality 필수화 및 Freight Network Membership 제거
+💄 ui(fsc): FSC Rates UPS/DHL 2단 가로 배치로 레이아웃 개선
