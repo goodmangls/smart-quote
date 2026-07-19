@@ -37,6 +37,7 @@
   "auth.company": "Company Name",
   "auth.name": "Name",
   "auth.nationality": "Nationality",
+  "auth.selectNationality": "Select nationality",
   "auth.signin": "Sign In",
   "auth.signup": "Sign Up",
   "auth.systemName": "Smart Quote System",

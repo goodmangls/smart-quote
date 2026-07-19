@@ -44,6 +44,14 @@ RSpec.describe "Api::V1::Auth", type: :request do
 
       expect(response).to have_http_status(:unprocessable_entity)
     end
+
+    it "rejects missing nationality" do
+      post "/api/v1/auth/register", params: valid_params.merge(nationality: ""), as: :json
+
+      expect(response).to have_http_status(:unprocessable_entity)
+      body = JSON.parse(response.body)
+      expect(body["error"]["message"]).to match(/nationality/i)
+    end
   end
 
   describe "POST /api/v1/auth/login" do

@@ -36,6 +36,7 @@
   "auth.company": "公司名称",
   "auth.name": "姓名",
   "auth.nationality": "国籍",
+  "auth.selectNationality": "请选择国籍",
   "auth.signin": "登录",
   "auth.signup": "注册",
   "auth.systemName": "Smart Quote System",

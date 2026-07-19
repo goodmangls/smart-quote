@@ -8,6 +8,8 @@ class User < ApplicationRecord
                     uniqueness: { case_sensitive: false },
                     format: { with: URI::MailTo::EMAIL_REGEXP }
   validates :role, presence: true, inclusion: { in: %w[admin user member] }
+  # Sign-up only — seed/admin updates may leave nationality blank for legacy rows
+  validates :nationality, presence: true, on: :registration
   validate :networks_must_be_valid
 
   VALID_NETWORKS = %w[WCA MPL EAN JCtrans].freeze

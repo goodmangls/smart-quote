@@ -33,7 +33,7 @@ Forgot your password? On the login screen you can:
 
 We'll email a one-time secure link (expires in 15 minutes). After you open it, you're signed in without a password.
 
-> First time? Click **Sign Up** at `/signup` to create an account with your company info and nationality.
+> First time? Click **Sign Up** at `/signup` to create an account with your company info and **required** nationality.
 
 ### Supported Languages
 

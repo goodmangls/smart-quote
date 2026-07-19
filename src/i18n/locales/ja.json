@@ -36,6 +36,7 @@
   "auth.company": "会社名",
   "auth.name": "氏名",
   "auth.nationality": "国籍",
+  "auth.selectNationality": "国籍を選択してください",
   "auth.signin": "ログイン",
   "auth.signup": "登録",
   "auth.systemName": "Smart Quote System",

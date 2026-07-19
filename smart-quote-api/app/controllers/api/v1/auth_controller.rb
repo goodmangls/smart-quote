@@ -11,7 +11,7 @@ module Api
       def register
         user = User.new(register_params)
 
-        if user.save
+        if user.save(context: :registration)
           render_auth_response(user, status: :created)
         else
           render json: {

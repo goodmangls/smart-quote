@@ -1,1 +1,1 @@
-🗑️ ui(dashboard): Account Manager 위젯 및 FSC 급등 경고 배너 제거
+✨ feat(signup): Nationality 필수화 및 Freight Network Membership 제거

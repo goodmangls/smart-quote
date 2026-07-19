@@ -36,6 +36,7 @@
   "auth.company": "회사명 (Company Name)",
   "auth.name": "이름 (Name)",
   "auth.nationality": "국적 (Nationality)",
+  "auth.selectNationality": "국적을 선택하세요",
   "auth.signin": "로그인",
   "auth.signup": "가입하기",
   "auth.systemName": "Smart Quote System",
