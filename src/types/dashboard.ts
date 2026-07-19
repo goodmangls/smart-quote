@@ -64,16 +64,3 @@ export interface ExchangeRateResponse {
   time_last_update_utc: string;
   rates: Record<string, number>;
 }
-
-// Account Manager types
-export interface AccountManager {
-  name: string;
-  nameKo: string;
-  role: string;
-  department: string;
-  phone: string;
-  mobile: string;
-  email: string;
-  available: boolean;
-  workingHours: string;
-}

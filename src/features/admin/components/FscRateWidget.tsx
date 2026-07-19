@@ -5,7 +5,6 @@ import {
   useFscRateEdit,
   useFscHistory,
   FscRateDisplay,
-  FscAlertBanner,
   FscHistoryPanel,
 } from './fsc';
 
@@ -106,8 +105,6 @@ export const FscRateWidget: React.FC<FscRateWidgetProps> = ({ readOnly = false }
         editRates={editRates}
         onEditRatesChange={setEditRates}
       />
-
-      <FscAlertBanner />
 
       <FscHistoryPanel
         showHistory={showHistory}

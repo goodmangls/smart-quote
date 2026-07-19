@@ -1,1 +1,1 @@
-✨ feat: health P0–P3 정리 + 로그인 UX(비밀번호 기본·매직링크 보조)
+🗑️ ui(dashboard): Account Manager 위젯 및 FSC 급등 경고 배너 제거

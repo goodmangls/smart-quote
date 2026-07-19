@@ -11,7 +11,6 @@ import { WeatherWidget } from '@/features/quote/components/widgets/WeatherWidget
 import { ExchangeRateWidget } from '@/features/quote/components/widgets/ExchangeRateWidget';
 import { ExchangeRateCalculatorWidget } from '@/features/quote/components/widgets/ExchangeRateCalculatorWidget';
 import { JetFuelWidget } from '@/features/quote/components/widgets/JetFuelWidget';
-import { AccountManagerWidget } from '@/features/quote/components/widgets/AccountManagerWidget';
 
 const CustomerDashboard: React.FC = () => {
   const { t } = useLanguage();
@@ -56,10 +55,6 @@ const CustomerDashboard: React.FC = () => {
             {/* JetFuelWidget first, then admin-only widgets */}
             <div className={isAdmin ? 'flex-shrink-0' : 'flex-1 min-h-[300px]'}>
               <JetFuelWidget />
-            </div>
-
-            <div className="flex-shrink-0">
-              <AccountManagerWidget />
             </div>
 
             {isAdmin && (
