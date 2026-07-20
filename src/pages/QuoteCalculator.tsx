@@ -34,7 +34,7 @@ const INITIAL_INPUT: QuoteInput = {
   incoterm: Incoterm.DAP,
   packingType: PackingType.NONE,
   shippingItemType: ShippingItemType.NON_DOCUMENT,
-  items: [{ id: '1', width: 10, length: 10, height: 10, weight: 1, quantity: 1 }],
+  items: [{ id: '1', width: 10, length: 10, height: 10, weight: 0.5, quantity: 1 }],
   marginPercent: 15,
   dutyTaxEstimate: 0,
   exchangeRate: DEFAULT_EXCHANGE_RATE,

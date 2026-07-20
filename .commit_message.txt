@@ -1,1 +1,1 @@
-🐛 fix(quote): Document 토글 상태 덮어쓰기 수정 + Envelope는 Qty/Weight만 입력
+🔧 fix(quote): 기본 Weight(kg) 1 → 0.5 (요율표 최소 단위)
