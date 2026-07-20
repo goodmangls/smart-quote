@@ -87,11 +87,11 @@ Access via `/quote` from the dashboard or header navigation.
 ### Step 2: Cargo Details
 
 Select **Shipping Item**:
-- **Non-Document** (default) — parcel / merchandise rates (Qty, Weight, L/W/H)
-- **Document** — envelope / document rates (UPS up to 5.0kg, DHL up to 2.0kg). Heavier shipments automatically use Non-Document rates. Document mode shows **Qty + Weight only** (envelope dimensions are standardized) and forces Packing Type to NONE.
+- **Parcel** (default) — merchandise / parcel rates (Qty, Weight, L/W/H)
+- **Document** — envelope / document rates (UPS up to 5.0kg, DHL up to 2.0kg). Heavier shipments automatically use Parcel rates. Document mode shows **Qty + Weight only** (envelope dimensions are standardized) and forces Packing Type to NONE.
 
 For each item, enter:
-- **Width / Length / Height** (cm) — Non-Document only
+- **Width / Length / Height** (cm) — Parcel only
 - **Weight** (kg)
 - **Quantity**
 

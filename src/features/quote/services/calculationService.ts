@@ -70,8 +70,8 @@ export const calculateQuote = (input: QuoteInput): QuoteResult => {
   ) {
     userWarnings.push(
       carrier === 'DHL'
-        ? 'Document rates apply up to 2.0kg on DHL; Non-Document tariff used for this weight.'
-        : 'Document rates apply up to 5.0kg on UPS; Non-Document tariff used for this weight.',
+        ? 'Document rates apply up to 2.0kg on DHL; Parcel tariff used for this weight.'
+        : 'Document rates apply up to 5.0kg on UPS; Parcel tariff used for this weight.',
     );
   }
 

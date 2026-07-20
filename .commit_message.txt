@@ -1,1 +1,1 @@
-💄 ui(quote): Document 모드에서 Box → Envelope 용어로 전환
+💄 ui(quote): Non-Document→Parcel 표기 + Parcel L/W/H 한 줄 레이아웃

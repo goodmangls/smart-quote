@@ -138,7 +138,7 @@ export const CargoSection: React.FC<Props> = ({
     onChange(newItems);
   };
 
-  const cargoGrid = `grid grid-cols-12 gap-x-3 gap-y-3 ${!isMobileView ? 'sm:gap-2' : ''} items-end p-4 bg-gray-50 dark:bg-gray-700/30 rounded-xl transition-colors border border-gray-200 dark:border-gray-600/50 relative`;
+  const cargoGrid = `grid grid-cols-12 gap-x-2 gap-y-3 ${!isMobileView ? 'sm:gap-x-2' : ''} items-end p-4 bg-gray-50 dark:bg-gray-700/30 rounded-xl transition-colors border border-gray-200 dark:border-gray-600/50 relative`;
   const cargoLabelClass = `block font-medium text-gray-500 dark:text-gray-400 mb-1 ${isMobileView ? 'text-sm' : 'text-xs'}`;
 
   const addBoxBtnClass = isMobileView
@@ -256,7 +256,7 @@ export const CargoSection: React.FC<Props> = ({
                  </div>
 
                  {/* Weight */}
-                 <div className={`col-span-6 ${!isMobileView ? (isDocument ? 'sm:col-span-7' : 'sm:col-span-3 sm:order-last md:order-none') : ''}`}>
+                 <div className={`col-span-6 ${!isMobileView ? (isDocument ? 'sm:col-span-7' : 'sm:col-span-3') : ''}`}>
                    <label className={cargoLabelClass}>Weight ({wtLabel})</label>
                    <input
                      type="number" step="0.1" min="0.1"
@@ -269,7 +269,7 @@ export const CargoSection: React.FC<Props> = ({
                  </div>
 
                  {/* Actions — Duplicate + Trash */}
-                 <div className={`col-span-2 ${!isMobileView ? 'sm:col-span-2' : ''} flex justify-end items-end gap-0.5 pb-1`}>
+                 <div className={`col-span-2 ${!isMobileView ? 'sm:col-span-1' : ''} flex justify-end items-end gap-0.5 pb-1`}>
                    <button
                       type="button"
                       onClick={() => duplicateItem(idx)}
@@ -289,7 +289,7 @@ export const CargoSection: React.FC<Props> = ({
                    </button>
                  </div>
 
-                 {/* Dimensions — Non-Document only (Envelope 치수는 규격 고정) */}
+                 {/* Dimensions — Parcel only (Envelope 치수는 규격 고정) */}
                  {!isDocument && (
                    <>
                  <div className={`col-span-4 ${!isMobileView ? 'sm:col-span-2' : ''}`}>

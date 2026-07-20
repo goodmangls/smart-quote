@@ -81,9 +81,9 @@ class QuoteCalculator
 
     if shipping_item_type == "DOCUMENT"
       if @carrier == "DHL" && @billable_weight > Constants::DhlTariff::DHL_DOC_MAX_KG
-        @user_warnings << "Document rates apply up to 2.0kg on DHL; Non-Document tariff used for this weight."
+        @user_warnings << "Document rates apply up to 2.0kg on DHL; Parcel tariff used for this weight."
       elsif @carrier != "DHL" && @billable_weight > Constants::UpsTariff::UPS_DOC_MAX_KG
-        @user_warnings << "Document rates apply up to 5.0kg on UPS; Non-Document tariff used for this weight."
+        @user_warnings << "Document rates apply up to 5.0kg on UPS; Parcel tariff used for this weight."
       end
     end
   end
