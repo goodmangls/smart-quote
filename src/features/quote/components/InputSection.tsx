@@ -1,5 +1,5 @@
 import React from 'react';
-import { QuoteInput, CargoItem } from '@/types';
+import { QuoteInput, CargoItem, ShippingItemType } from '@/types';
 import { RouteSection } from './RouteSection';
 import { FinancialSection } from './FinancialSection';
 import { CargoSection } from './CargoSection';
@@ -32,7 +32,15 @@ export const InputSection: React.FC<Props> = ({ input, onChange, isMobileView = 
   return (
     <div className="space-y-8">
       <RouteSection input={input} onFieldChange={updateField} isMobileView={isMobileView} />
-      <CargoSection items={input.items} onChange={handleCargoChange} isMobileView={isMobileView} />
+      <CargoSection
+        items={input.items}
+        onChange={handleCargoChange}
+        shippingItemType={input.shippingItemType ?? ShippingItemType.NON_DOCUMENT}
+        onShippingItemTypeChange={(value) => updateField('shippingItemType', value)}
+        onPackingTypeChange={(value) => updateField('packingType', value)}
+        isMobileView={isMobileView}
+        overseasCarrier={input.overseasCarrier}
+      />
       <FscRateWidget readOnly={hideMargin} />
       {!hideMargin && (
         <FinancialSection input={input} onFieldChange={updateField} isMobileView={isMobileView} effectiveMarginPercent={effectiveMarginPercent} hideMargin={hideMargin} resolvedMargin={resolvedMargin} />

@@ -62,17 +62,29 @@ class QuoteCalculator
   end
 
   def calculate_overseas
+    shipping_item_type = @input[:shippingItemType] || "NON_DOCUMENT"
+
     @overseas_result = case @carrier
     when "DHL"
                          Calculators::DhlCost.call(
                            billable_weight: @billable_weight,
-                           country: @input[:destinationCountry]
+                           country: @input[:destinationCountry],
+                           shipping_item_type: shipping_item_type
                          )
     else
                          Calculators::UpsCost.call(
                            billable_weight: @billable_weight,
-                           country: @input[:destinationCountry]
+                           country: @input[:destinationCountry],
+                           shipping_item_type: shipping_item_type
                          )
+    end
+
+    if shipping_item_type == "DOCUMENT"
+      if @carrier == "DHL" && @billable_weight > Constants::DhlTariff::DHL_DOC_MAX_KG
+        @user_warnings << "Document rates apply up to 2.0kg on DHL; Non-Document tariff used for this weight."
+      elsif @carrier != "DHL" && @billable_weight > Constants::UpsTariff::UPS_DOC_MAX_KG
+        @user_warnings << "Document rates apply up to 5.0kg on UPS; Non-Document tariff used for this weight."
+      end
     end
   end
 

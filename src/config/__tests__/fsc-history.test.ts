@@ -112,11 +112,11 @@ describe('fsc-history', () => {
       const result = loadFscHistory();
       expect(result.ups).toEqual(expect.arrayContaining(custom.ups));
       expect(result.dhl).toEqual(expect.arrayContaining(custom.dhl));
-      expect(result.ups.at(-1)).toEqual({ date: '2026-07-13', rate: 39.25 });
-      expect(result.dhl.at(-1)).toEqual({ date: '2026-07-13', rate: 39.75 });
+      expect(result.ups.at(-1)).toEqual({ date: '2026-07-20', rate: 40.5 });
+      expect(result.dhl.at(-1)).toEqual({ date: '2026-07-20', rate: 38.5 });
     });
 
-    it('merges 2026-07-13 defaults into existing browser history pinned at 2026-06-29', () => {
+    it('merges 2026-07-20 defaults into existing browser history pinned at 2026-06-29', () => {
       localStorage.setItem(
         'fsc_history',
         JSON.stringify({
@@ -127,8 +127,8 @@ describe('fsc-history', () => {
 
       const result = loadFscHistory();
 
-      expect(result.ups.at(-1)).toEqual({ date: '2026-07-13', rate: 39.25 });
-      expect(result.dhl.at(-1)).toEqual({ date: '2026-07-13', rate: 39.75 });
+      expect(result.ups.at(-1)).toEqual({ date: '2026-07-20', rate: 40.5 });
+      expect(result.dhl.at(-1)).toEqual({ date: '2026-07-20', rate: 38.5 });
     });
 
     it('returns default data when localStorage contains corrupted JSON', () => {
@@ -150,9 +150,9 @@ describe('fsc-history', () => {
   /* ───────── DEFAULT_FSC_HISTORY seed ───────── */
 
   describe('DEFAULT_FSC_HISTORY', () => {
-    it('includes the 2026-07-13 FSC update for UPS and DHL', () => {
-      expect(DEFAULT_FSC_HISTORY.ups.at(-1)).toEqual({ date: '2026-07-13', rate: 39.25 });
-      expect(DEFAULT_FSC_HISTORY.dhl.at(-1)).toEqual({ date: '2026-07-13', rate: 39.75 });
+    it('includes the 2026-07-20 FSC update for UPS and DHL', () => {
+      expect(DEFAULT_FSC_HISTORY.ups.at(-1)).toEqual({ date: '2026-07-20', rate: 40.5 });
+      expect(DEFAULT_FSC_HISTORY.dhl.at(-1)).toEqual({ date: '2026-07-20', rate: 38.5 });
     });
   });
 });

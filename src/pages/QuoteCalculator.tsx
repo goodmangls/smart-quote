@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { QuoteInput, QuoteResult, QuoteDetail, Incoterm, PackingType } from '../types';
+import { QuoteInput, QuoteResult, QuoteDetail, Incoterm, PackingType, ShippingItemType } from '../types';
 import { generatePDF } from '@/lib/pdfService';
 import { calculateQuote } from '@/features/quote/services/calculationService';
 import { trackEvent, IntercomEvents } from '@/lib/intercom';
@@ -33,6 +33,7 @@ const INITIAL_INPUT: QuoteInput = {
   shippingMode: 'Door-to-Door',
   incoterm: Incoterm.DAP,
   packingType: PackingType.NONE,
+  shippingItemType: ShippingItemType.NON_DOCUMENT,
   items: [{ id: '1', width: 10, length: 10, height: 10, weight: 1, quantity: 1 }],
   marginPercent: 15,
   dutyTaxEstimate: 0,
@@ -171,6 +172,8 @@ const QuoteCalculator: React.FC<{ isPublic?: boolean }> = ({ isPublic = false })
       destinationZip: quote.destinationZip || '',
       incoterm: (quote.incoterm as Incoterm) || Incoterm.DAP,
       packingType: (quote.packingType as PackingType) || PackingType.NONE,
+      shippingItemType:
+        (quote.shippingItemType as ShippingItemType) || ShippingItemType.NON_DOCUMENT,
       items: quote.items.map((item, i) => ({ ...item, id: String(i + 1) })),
       marginPercent: quote.marginPercent,
       dutyTaxEstimate: quote.dutyTaxEstimate,

@@ -1,1 +1,1 @@
-🔄 FSC 요율 업데이트: UPS 40.50% / DHL 38.50% (2026-07-20 기준)
+🧪 test(e2e): 로그인 필드 id를 login-email/password로 수정

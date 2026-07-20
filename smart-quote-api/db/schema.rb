@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_07_19_000001) do
+ActiveRecord::Schema[8.0].define(version: 2026_07_20_000001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -114,6 +114,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_19_000001) do
     t.boolean "is_jeju_pickup", default: false
     t.string "incoterm", limit: 5, null: false
     t.string "packing_type", limit: 20, default: "NONE", null: false
+    t.string "shipping_item_type", limit: 20, default: "NON_DOCUMENT", null: false
     t.decimal "margin_percent", precision: 5, scale: 2, null: false
     t.decimal "duty_tax_estimate", precision: 12, default: "0"
     t.decimal "exchange_rate", precision: 10, scale: 2, null: false
