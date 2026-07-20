@@ -3,6 +3,9 @@ import { User, Globe, Weight } from 'lucide-react';
 import type { MarginRule } from '@/api/marginRuleApi';
 import { getCountryDisplayName } from '@/config/options';
 
+// Utility helpers + one small icon component share this module (not a React Fast Refresh boundary).
+/* eslint-disable react-refresh/only-export-components */
+
 export const EMPTY_FORM: Partial<MarginRule> = {
   name: '',
   ruleType: 'weight_based',
