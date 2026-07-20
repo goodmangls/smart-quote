@@ -1,1 +1,1 @@
-🔧 fix(ci): Document tariff rubocop trailing comma + margin eslint warning
+🧪 test: FSC history 기대값을 2026-07-20 요율로 갱신
