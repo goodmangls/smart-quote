@@ -1,1 +1,1 @@
-🧪 test(e2e): 로그인 UX를 password-primary 기준으로 맞춤
+🧪 test(e2e): 로그인 필드 id를 login-email/password로 수정

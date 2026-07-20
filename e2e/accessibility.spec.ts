@@ -10,8 +10,10 @@ test.describe('Accessibility', () => {
   test('login page form has proper labels', async ({ page }) => {
     await page.goto('/login');
     // Password is the primary form; magic-link fields appear after switching modes.
-    await expect(page.locator('#email')).toBeVisible();
-    await expect(page.locator('#password')).toBeVisible();
+    await expect(page.locator('#login-email')).toBeVisible();
+    await expect(page.locator('#login-password')).toBeVisible();
+    await expect(page.locator('label[for="login-email"]')).toBeVisible();
+    await expect(page.locator('label[for="login-password"]')).toBeVisible();
     await expect(page.locator('#magic-email')).toHaveCount(0);
   });
 
@@ -19,7 +21,7 @@ test.describe('Accessibility', () => {
     await page.goto('/');
     // Tab to language button and verify it's focusable
     const langButton = page.locator('button[aria-haspopup="listbox"]');
-    if (await langButton.count() > 0) {
+    if ((await langButton.count()) > 0) {
       await langButton.focus();
       await expect(langButton).toBeFocused();
     }
