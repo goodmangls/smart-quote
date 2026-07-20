@@ -1,15 +1,13 @@
 module Calculators
   class UpsCost
-    # Using Lib::Constants because the file is in app/lib/constants expecting module Lib::Constants or we need to fix loading.
-    # For now assuming we will fix namespaces. Using Constants::... assuming they are loaded.
-
-    def self.call(billable_weight:, country:)
-      new(billable_weight, country).call
+    def self.call(billable_weight:, country:, shipping_item_type: "NON_DOCUMENT")
+      new(billable_weight, country, shipping_item_type).call
     end
 
-    def initialize(billable_weight, country)
+    def initialize(billable_weight, country, shipping_item_type = "NON_DOCUMENT")
       @billable_weight = billable_weight
       @country = country
+      @shipping_item_type = shipping_item_type
     end
 
     def call
@@ -30,15 +28,20 @@ module Calculators
     private
 
     def calculate_base_rate(zone_key)
+      tables = Calculators::RateTableResolver.call(
+        carrier: "UPS",
+        shipping_item_type: @shipping_item_type,
+        billable_weight: @billable_weight
+      )
       lookup_weight = round_to_half(@billable_weight)
-      zone_rates = Constants::UpsTariff::UPS_EXACT_RATES[zone_key]
+      zone_rates = tables[:exact][zone_key]
 
       if zone_rates && zone_rates[lookup_weight]
         return zone_rates[lookup_weight]
       end
 
       # Range Rates
-      range = Constants::UpsTariff::UPS_RANGE_RATES.find { |r| @billable_weight >= r[:min] && @billable_weight <= r[:max] }
+      range = tables[:range].find { |r| @billable_weight >= r[:min] && @billable_weight <= r[:max] }
 
       if range && range[:rates][zone_key]
         per_kg_rate = range[:rates][zone_key]
@@ -48,15 +51,13 @@ module Calculators
 
       # Fallback logic mirroring TS
       if zone_rates
-        # Find closest weight >= lookup_weight in keys
         found_weight = zone_rates.keys.sort.find { |w| w >= lookup_weight }
         return zone_rates[found_weight] if found_weight
 
-         # Check next range
-         next_range = Constants::UpsTariff::UPS_RANGE_RATES.find { |r| r[:min] <= @billable_weight.ceil }
-         if next_range && next_range[:rates][zone_key]
-           return @billable_weight.ceil * next_range[:rates][zone_key]
-         end
+        next_range = tables[:range].find { |r| r[:min] <= @billable_weight.ceil }
+        if next_range && next_range[:rates][zone_key]
+          return @billable_weight.ceil * next_range[:rates][zone_key]
+        end
       end
 
       0

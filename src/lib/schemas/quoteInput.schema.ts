@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { Incoterm, PackingType } from '@/types';
+import { Incoterm, PackingType, ShippingItemType } from '@/types';
 
 export const cargoItemSchema = z.object({
   id: z.string().min(1, 'id is required'),
@@ -13,6 +13,7 @@ export const cargoItemSchema = z.object({
 // Bound to the runtime TS enums (@/types) so the schema cannot drift from them.
 export const incotermSchema = z.enum(Incoterm);
 export const packingTypeSchema = z.enum(PackingType);
+export const shippingItemTypeSchema = z.enum(ShippingItemType);
 export const shippingModeSchema = z.enum(['Door-to-Door', 'Door-to-Airport']);
 export const carrierSchema = z.enum(['UPS', 'DHL']);
 
@@ -49,6 +50,7 @@ export const quoteInputSchema = z.object({
   destinationZip: z.string().max(20).optional().default(''),
   incoterm: incotermSchema,
   packingType: packingTypeSchema,
+  shippingItemType: shippingItemTypeSchema.optional().default(ShippingItemType.NON_DOCUMENT),
   items: z.array(cargoItemSchema).min(1, 'at least 1 item required').max(100),
   marginPercent: z.number().min(0).max(100),
   dutyTaxEstimate: z.number().min(0).max(1e9).default(0),

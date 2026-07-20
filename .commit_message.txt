@@ -1,1 +1,1 @@
-🔄 FSC 요율 업데이트: UPS 40.50% / DHL 38.50% (2026-07-20 기준)
+✨ feat(quote): Shipping Item(Non-Document/Document) + UPS/DHL Document tariff

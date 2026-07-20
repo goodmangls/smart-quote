@@ -2,7 +2,7 @@
 
 > **KS Ways** International Logistics Quoting System
 >
-> Version 3.4 | Last Updated: 2026-07-19
+> Version 3.5 | Last Updated: 2026-07-20
 
 ---
 
@@ -86,6 +86,10 @@ Access via `/quote` from the dashboard or header navigation.
 
 ### Step 2: Cargo Details
 
+Select **Shipping Item**:
+- **Non-Document** (default) — parcel / merchandise rates
+- **Document** — envelope / document rates (UPS up to 5.0kg, DHL up to 2.0kg). Heavier shipments automatically use Non-Document rates. Document mode forces Packing Type to NONE.
+
 For each item, enter:
 - **Width / Length / Height** (cm)
 - **Weight** (kg)
@@ -100,7 +104,7 @@ Click **+ Add Item** for multi-piece shipments. The system automatically:
 
 | Field | Description |
 |-------|-------------|
-| Packing Type | None, Wooden Box, Skid, or Vacuum |
+| Packing Type | None, Wooden Box, Skid, or Vacuum (disabled for Document) |
 | Manual Packing Cost | Override auto-calculated packing cost |
 | Manual Surge Cost | Additional surcharge (applied to all carriers) |
 | Exchange Rate | Auto-fetched live USD/KRW rate (editable) |

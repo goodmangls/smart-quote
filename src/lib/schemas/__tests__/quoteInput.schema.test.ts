@@ -1,5 +1,5 @@
 import { quoteInputSchema, cargoItemSchema } from '../quoteInput.schema';
-import { Incoterm, PackingType } from '@/types';
+import { Incoterm, PackingType, ShippingItemType } from '@/types';
 
 const validItem = {
   id: 'item-1',
@@ -98,6 +98,10 @@ describe('quoteInputSchema — enum binding (regression: PR #16 drift)', () => {
   it.each(Object.values(PackingType))('accepts PackingType.%s', (packingType) => {
     expect(quoteInputSchema.safeParse({ ...validInput, packingType }).success).toBe(true);
   });
+
+  it.each(Object.values(ShippingItemType))('accepts ShippingItemType.%s', (shippingItemType) => {
+    expect(quoteInputSchema.safeParse({ ...validInput, shippingItemType }).success).toBe(true);
+  });
 });
 
 describe('quoteInputSchema — boundary', () => {
@@ -135,6 +139,12 @@ describe('quoteInputSchema — enum failures', () => {
     expect(quoteInputSchema.safeParse({ ...validInput, packingType: 'Glass Box' }).success).toBe(
       false,
     );
+  });
+
+  it('rejects invalid shippingItemType', () => {
+    expect(
+      quoteInputSchema.safeParse({ ...validInput, shippingItemType: 'ENVELOPE' }).success,
+    ).toBe(false);
   });
 
   it('rejects invalid overseasCarrier', () => {

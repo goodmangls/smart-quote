@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { ChevronDown, ChevronRight } from 'lucide-react';
-import { QuoteInput, PackingType, Incoterm } from '@/types';
+import { QuoteInput, PackingType, Incoterm, ShippingItemType } from '@/types';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { inputStyles } from './input-styles';
 import { SurchargePanel } from './SurchargePanel';
@@ -104,7 +104,8 @@ export const ServiceSection: React.FC<Props> = ({ input, onFieldChange, isMobile
                   <select
                   value={input.packingType}
                   onChange={(e) => onFieldChange('packingType', e.target.value as PackingType)}
-                  className={`${ic} appearance-none`}
+                  disabled={input.shippingItemType === ShippingItemType.DOCUMENT}
+                  className={`${ic} appearance-none ${input.shippingItemType === ShippingItemType.DOCUMENT ? 'opacity-60 cursor-not-allowed' : ''}`}
                   >
                   {Object.values(PackingType).map(pt => <option key={pt} value={pt}>{pt}</option>)}
                   </select>
@@ -112,6 +113,9 @@ export const ServiceSection: React.FC<Props> = ({ input, onFieldChange, isMobile
                       <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
                   </div>
               </div>
+              {input.shippingItemType === ShippingItemType.DOCUMENT && (
+                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">{t('calc.hint.documentNoPacking')}</p>
+              )}
               <PackingTypeInfo packingType={input.packingType} items={input.items} isMobileView={isMobileView} />
             </div>
 

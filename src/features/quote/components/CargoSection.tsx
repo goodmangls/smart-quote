@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { CargoItem } from '@/types';
+import { CargoItem, PackingType, QuoteInput, ShippingItemType } from '@/types';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Package, Plus, Box, Trash2, Copy } from 'lucide-react';
 import { SURGE_THRESHOLDS } from '@/config/business-rules';
@@ -29,7 +29,11 @@ const roundDisplay = (value: number): string => {
 interface Props {
   items: CargoItem[];
   onChange: (items: CargoItem[]) => void;
+  shippingItemType: ShippingItemType;
+  onShippingItemTypeChange: (value: ShippingItemType) => void;
+  onPackingTypeChange?: (value: PackingType) => void;
   isMobileView: boolean;
+  overseasCarrier?: QuoteInput['overseasCarrier'];
 }
 
 const getItemWarnings = (item: CargoItem, unit: UnitSystem): string[] => {
@@ -40,8 +44,8 @@ const getItemWarnings = (item: CargoItem, unit: UnitSystem): string[] => {
 
   const dimUnit = unit === 'metric' ? 'cm' : 'in';
   const wtUnit = unit === 'metric' ? 'kg' : 'lb';
-  const fmtDim = (cm: number) => unit === 'metric' ? cm : Math.round(cm / CM_PER_IN * 10) / 10;
-  const fmtWt = (kg: number) => unit === 'metric' ? kg : Math.round(kg / KG_PER_LB * 10) / 10;
+  const fmtDim = (cm: number) => (unit === 'metric' ? cm : Math.round((cm / CM_PER_IN) * 10) / 10);
+  const fmtWt = (kg: number) => (unit === 'metric' ? kg : Math.round((kg / KG_PER_LB) * 10) / 10);
 
   if (item.weight > SURGE_THRESHOLDS.AHS_WEIGHT_KG) {
     warnings.push(`Weight > ${fmtWt(SURGE_THRESHOLDS.AHS_WEIGHT_KG)}${wtUnit} — may need surge fee`);
@@ -57,14 +61,31 @@ const getItemWarnings = (item: CargoItem, unit: UnitSystem): string[] => {
   return warnings;
 };
 
-export const CargoSection: React.FC<Props> = ({ items, onChange, isMobileView }) => {
+export const CargoSection: React.FC<Props> = ({
+  items,
+  onChange,
+  shippingItemType,
+  onShippingItemTypeChange,
+  onPackingTypeChange,
+  isMobileView,
+  overseasCarrier = 'UPS',
+}) => {
   const [unitSystem, setUnitSystem] = useState<UnitSystem>('metric');
-  const { inputClass, cardClass } = inputStyles;
+  const { inputClass, cardClass, labelClass } = inputStyles;
   const ic = inputClass(isMobileView);
+  const lc = labelClass(isMobileView);
   const { t } = useLanguage();
 
   const dimLabel = unitSystem === 'metric' ? 'cm' : 'in';
   const wtLabel = unitSystem === 'metric' ? 'kg' : 'lb';
+  const docCapKg = overseasCarrier === 'DHL' ? 2 : 5;
+
+  const handleShippingItemTypeChange = (value: ShippingItemType) => {
+    onShippingItemTypeChange(value);
+    if (value === ShippingItemType.DOCUMENT && onPackingTypeChange) {
+      onPackingTypeChange(PackingType.NONE);
+    }
+  };
 
   const addItem = () => {
     const lastItem = items[items.length - 1];
@@ -157,6 +178,47 @@ export const CargoSection: React.FC<Props> = ({ items, onChange, isMobileView })
                   <Plus className="w-3 h-3 mr-1" /> Add Box
               </button>
           </div>
+      </div>
+
+      <div className="mb-4 space-y-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className={`${lc} mb-0`}>{t('calc.label.shippingItem')}</span>
+          <div
+            className="inline-flex rounded-lg border border-gray-200 dark:border-gray-600 overflow-hidden text-xs"
+            role="group"
+            aria-label={t('calc.label.shippingItem')}
+          >
+            <button
+              type="button"
+              onClick={() => handleShippingItemTypeChange(ShippingItemType.NON_DOCUMENT)}
+              aria-pressed={shippingItemType === ShippingItemType.NON_DOCUMENT}
+              className={`px-2.5 py-1 font-medium transition-colors ${
+                shippingItemType === ShippingItemType.NON_DOCUMENT
+                  ? 'bg-brand-blue-600 text-white'
+                  : 'bg-white dark:bg-gray-700 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-600'
+              }`}
+            >
+              {t('calc.option.nonDocument')}
+            </button>
+            <button
+              type="button"
+              onClick={() => handleShippingItemTypeChange(ShippingItemType.DOCUMENT)}
+              aria-pressed={shippingItemType === ShippingItemType.DOCUMENT}
+              className={`px-2.5 py-1 font-medium transition-colors ${
+                shippingItemType === ShippingItemType.DOCUMENT
+                  ? 'bg-brand-blue-600 text-white'
+                  : 'bg-white dark:bg-gray-700 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-600'
+              }`}
+            >
+              {t('calc.option.document')}
+            </button>
+          </div>
+        </div>
+        {shippingItemType === ShippingItemType.DOCUMENT && (
+          <p className="text-xs text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-md px-3 py-2">
+            {t('calc.hint.documentWeightCap').replace('{kg}', String(docCapKg))}
+          </p>
+        )}
       </div>
 
       <div className="space-y-4">

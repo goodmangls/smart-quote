@@ -1,4 +1,4 @@
-import { QuoteInput, QuoteResult, Incoterm } from '@/types';
+import { QuoteInput, QuoteResult, Incoterm, ShippingItemType } from '@/types';
 import {
   DEFAULT_EXCHANGE_RATE,
   DEFAULT_FSC_PERCENT,
@@ -53,14 +53,26 @@ export const calculateQuote = (input: QuoteInput): QuoteResult => {
   }
 
   // 3. Carrier Costs (routing by carrier)
+  const shippingItemType = input.shippingItemType ?? ShippingItemType.NON_DOCUMENT;
   let carrierResult: CarrierCostResult;
   switch (carrier) {
     case 'DHL':
-      carrierResult = calculateDhlCosts(billableWeight, input.destinationCountry);
+      carrierResult = calculateDhlCosts(billableWeight, input.destinationCountry, shippingItemType);
       break;
     default:
-      carrierResult = calculateUpsCosts(billableWeight, input.destinationCountry);
+      carrierResult = calculateUpsCosts(billableWeight, input.destinationCountry, shippingItemType);
       break;
+  }
+
+  if (
+    shippingItemType === ShippingItemType.DOCUMENT &&
+    ((carrier === 'DHL' && billableWeight > 2) || (carrier !== 'DHL' && billableWeight > 5))
+  ) {
+    userWarnings.push(
+      carrier === 'DHL'
+        ? 'Document rates apply up to 2.0kg on DHL; Non-Document tariff used for this weight.'
+        : 'Document rates apply up to 5.0kg on UPS; Non-Document tariff used for this weight.',
+    );
   }
 
   // System surcharges from DB (War Risk, PSS, EBS, etc.)
