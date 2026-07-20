@@ -98,6 +98,7 @@
   "calc.option.nonDocument": "Non-Document",
   "calc.option.document": "Document",
   "calc.hint.documentWeightCap": "Document rates apply up to {kg}kg. Heavier shipments use the Non-Document tariff.",
+  "calc.hint.documentDimsFixed": "Envelope dimensions are standardized — enter Qty and Weight only.",
   "calc.hint.documentNoPacking": "Document shipments use packing type NONE (no wooden/skid packing).",
   "calc.section.service": "Additional Service Options",
   "calc.section.financial": "Financial & Exchange Rate Application",

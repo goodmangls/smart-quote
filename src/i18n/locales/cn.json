@@ -97,6 +97,7 @@
   "calc.option.nonDocument": "Non-Document",
   "calc.option.document": "Document",
   "calc.hint.documentWeightCap": "Document 费率适用于最多 {kg}kg。超重将使用 Non-Document 费率。",
+  "calc.hint.documentDimsFixed": "信封尺寸已标准化 — 只需输入 Qty 和 Weight。",
   "calc.hint.documentNoPacking": "Document 货物固定为 Packing Type NONE（无木箱/托盘包装）。",
   "calc.section.service": "增值服务",
   "calc.section.financial": "财务因素",

@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { CargoItem, PackingType, QuoteInput, ShippingItemType } from '@/types';
+import { CargoItem, QuoteInput, ShippingItemType } from '@/types';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Package, Plus, Box, Trash2, Copy } from 'lucide-react';
 import { SURGE_THRESHOLDS } from '@/config/business-rules';
 import { inputStyles } from './input-styles';
+import { DOCUMENT_ENVELOPE_DIMS_CM } from './documentEnvelope';
 
 type UnitSystem = 'metric' | 'imperial';
 
@@ -31,25 +32,32 @@ interface Props {
   onChange: (items: CargoItem[]) => void;
   shippingItemType: ShippingItemType;
   onShippingItemTypeChange: (value: ShippingItemType) => void;
-  onPackingTypeChange?: (value: PackingType) => void;
   isMobileView: boolean;
   overseasCarrier?: QuoteInput['overseasCarrier'];
 }
 
-const getItemWarnings = (item: CargoItem, unit: UnitSystem): string[] => {
+const getItemWarnings = (
+  item: CargoItem,
+  unit: UnitSystem,
+  isDocument: boolean,
+): string[] => {
   const warnings: string[] = [];
-  const dims = [item.length, item.width, item.height].sort((a, b) => b - a);
-  const longest = dims[0];
-  const girth = longest + 2 * dims[1] + 2 * dims[2];
-
-  const dimUnit = unit === 'metric' ? 'cm' : 'in';
   const wtUnit = unit === 'metric' ? 'kg' : 'lb';
-  const fmtDim = (cm: number) => (unit === 'metric' ? cm : Math.round((cm / CM_PER_IN) * 10) / 10);
   const fmtWt = (kg: number) => (unit === 'metric' ? kg : Math.round((kg / KG_PER_LB) * 10) / 10);
 
   if (item.weight > SURGE_THRESHOLDS.AHS_WEIGHT_KG) {
     warnings.push(`Weight > ${fmtWt(SURGE_THRESHOLDS.AHS_WEIGHT_KG)}${wtUnit} — may need surge fee`);
   }
+
+  // Document/Envelope: 치수 고정 → 치수·둘레 기반 surge 경고 생략
+  if (isDocument) return warnings;
+
+  const dims = [item.length, item.width, item.height].sort((a, b) => b - a);
+  const longest = dims[0];
+  const girth = longest + 2 * dims[1] + 2 * dims[2];
+  const dimUnit = unit === 'metric' ? 'cm' : 'in';
+  const fmtDim = (cm: number) => (unit === 'metric' ? cm : Math.round((cm / CM_PER_IN) * 10) / 10);
+
   if (longest > SURGE_THRESHOLDS.AHS_DIM_LONG_SIDE_CM) {
     warnings.push(`Length > ${fmtDim(SURGE_THRESHOLDS.AHS_DIM_LONG_SIDE_CM)}${dimUnit} — check AHS Dim`);
   }
@@ -66,7 +74,6 @@ export const CargoSection: React.FC<Props> = ({
   onChange,
   shippingItemType,
   onShippingItemTypeChange,
-  onPackingTypeChange,
   isMobileView,
   overseasCarrier = 'UPS',
 }) => {
@@ -79,21 +86,15 @@ export const CargoSection: React.FC<Props> = ({
   const dimLabel = unitSystem === 'metric' ? 'cm' : 'in';
   const wtLabel = unitSystem === 'metric' ? 'kg' : 'lb';
   const docCapKg = overseasCarrier === 'DHL' ? 2 : 5;
-
-  const handleShippingItemTypeChange = (value: ShippingItemType) => {
-    onShippingItemTypeChange(value);
-    if (value === ShippingItemType.DOCUMENT && onPackingTypeChange) {
-      onPackingTypeChange(PackingType.NONE);
-    }
-  };
+  const isDocument = shippingItemType === ShippingItemType.DOCUMENT;
 
   const addItem = () => {
     const lastItem = items[items.length - 1];
     const newItem: CargoItem = {
       id: crypto.randomUUID(),
-      width: lastItem?.width || 0,
-      length: lastItem?.length || 0,
-      height: lastItem?.height || 0,
+      width: isDocument ? DOCUMENT_ENVELOPE_DIMS_CM.width : lastItem?.width || 0,
+      length: isDocument ? DOCUMENT_ENVELOPE_DIMS_CM.length : lastItem?.length || 0,
+      height: isDocument ? DOCUMENT_ENVELOPE_DIMS_CM.height : lastItem?.height || 0,
       weight: lastItem?.weight || 0,
       quantity: 1,
     };
@@ -146,8 +147,10 @@ export const CargoSection: React.FC<Props> = ({
               {t('calc.section.cargo')}
           </h3>
           <div className="flex items-center gap-2">
+              {!isDocument && (
               <div className="inline-flex rounded-lg border border-gray-200 dark:border-gray-600 overflow-hidden text-xs" role="group" aria-label="Unit system">
                 <button
+                  type="button"
                   onClick={() => setUnitSystem('metric')}
                   aria-pressed={unitSystem === 'metric'}
                   className={`px-2.5 py-1 font-medium transition-colors ${
@@ -159,6 +162,7 @@ export const CargoSection: React.FC<Props> = ({
                   cm / kg
                 </button>
                 <button
+                  type="button"
                   onClick={() => setUnitSystem('imperial')}
                   aria-pressed={unitSystem === 'imperial'}
                   className={`px-2.5 py-1 font-medium transition-colors ${
@@ -170,7 +174,9 @@ export const CargoSection: React.FC<Props> = ({
                   in / lb
                 </button>
               </div>
+              )}
               <button
+                  type="button"
                   onClick={addItem}
                   aria-label="Add cargo box"
                   className={addBoxBtnClass}
@@ -190,10 +196,10 @@ export const CargoSection: React.FC<Props> = ({
           >
             <button
               type="button"
-              onClick={() => handleShippingItemTypeChange(ShippingItemType.NON_DOCUMENT)}
-              aria-pressed={shippingItemType === ShippingItemType.NON_DOCUMENT}
+              onClick={() => onShippingItemTypeChange(ShippingItemType.NON_DOCUMENT)}
+              aria-pressed={!isDocument}
               className={`px-2.5 py-1 font-medium transition-colors ${
-                shippingItemType === ShippingItemType.NON_DOCUMENT
+                !isDocument
                   ? 'bg-brand-blue-600 text-white'
                   : 'bg-white dark:bg-gray-700 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-600'
               }`}
@@ -202,10 +208,10 @@ export const CargoSection: React.FC<Props> = ({
             </button>
             <button
               type="button"
-              onClick={() => handleShippingItemTypeChange(ShippingItemType.DOCUMENT)}
-              aria-pressed={shippingItemType === ShippingItemType.DOCUMENT}
+              onClick={() => onShippingItemTypeChange(ShippingItemType.DOCUMENT)}
+              aria-pressed={isDocument}
               className={`px-2.5 py-1 font-medium transition-colors ${
-                shippingItemType === ShippingItemType.DOCUMENT
+                isDocument
                   ? 'bg-brand-blue-600 text-white'
                   : 'bg-white dark:bg-gray-700 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-600'
               }`}
@@ -214,17 +220,20 @@ export const CargoSection: React.FC<Props> = ({
             </button>
           </div>
         </div>
-        {shippingItemType === ShippingItemType.DOCUMENT && (
+        {isDocument && (
           <p className="text-xs text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-md px-3 py-2">
-            {t('calc.hint.documentWeightCap').replace('{kg}', String(docCapKg))}
+            {t('calc.hint.documentWeightCap').replace('{kg}', String(docCapKg))}{' '}
+            {t('calc.hint.documentDimsFixed')}
           </p>
         )}
       </div>
 
       <div className="space-y-4">
         {items.map((item, idx) => {
-          const warnings = getItemWarnings(item, unitSystem);
-          const hasZeroDims = item.length === 0 || item.width === 0 || item.height === 0 || item.weight === 0;
+          const warnings = getItemWarnings(item, unitSystem, isDocument);
+          const hasZeroDims = isDocument
+            ? item.weight === 0
+            : item.length === 0 || item.width === 0 || item.height === 0 || item.weight === 0;
 
           return (
             <div key={item.id}>
@@ -235,13 +244,13 @@ export const CargoSection: React.FC<Props> = ({
                  </div>
 
                  {/* Quantity */}
-                 <div className={`col-span-4 ${!isMobileView ? 'sm:col-span-2' : ''}`}>
+                 <div className={`col-span-4 ${!isMobileView ? (isDocument ? 'sm:col-span-3' : 'sm:col-span-2') : ''}`}>
                    <label className={cargoLabelClass}>Qty</label>
                    <input type="number" min="1" step="1" value={item.quantity} onChange={(e) => updateItem(idx, 'quantity', Math.max(1, Math.round(Number(e.target.value))))} className={`${ic} text-center`} inputMode="numeric" />
                  </div>
 
                  {/* Weight */}
-                 <div className={`col-span-6 ${!isMobileView ? 'sm:col-span-3 sm:order-last md:order-none' : ''}`}>
+                 <div className={`col-span-6 ${!isMobileView ? (isDocument ? 'sm:col-span-7' : 'sm:col-span-3 sm:order-last md:order-none') : ''}`}>
                    <label className={cargoLabelClass}>Weight ({wtLabel})</label>
                    <input
                      type="number" step="0.1" min="0.1"
@@ -254,8 +263,9 @@ export const CargoSection: React.FC<Props> = ({
                  </div>
 
                  {/* Actions — Duplicate + Trash */}
-                 <div className={`col-span-2 ${!isMobileView ? 'sm:col-span-1' : ''} flex justify-end items-end gap-0.5 pb-1`}>
+                 <div className={`col-span-2 ${!isMobileView ? 'sm:col-span-2' : ''} flex justify-end items-end gap-0.5 pb-1`}>
                    <button
+                      type="button"
                       onClick={() => duplicateItem(idx)}
                       className={`text-gray-400 hover:text-brand-blue-600 dark:hover:text-brand-blue-400 rounded-full hover:bg-gray-100 dark:hover:bg-gray-600/30 transition-colors ${isMobileView ? 'p-2.5' : 'p-1.5'}`}
                       aria-label="Duplicate this box"
@@ -263,6 +273,7 @@ export const CargoSection: React.FC<Props> = ({
                       <Copy className={`${isMobileView ? 'w-5 h-5' : 'w-4 h-4'}`} />
                    </button>
                    <button
+                      type="button"
                       onClick={() => removeItem(idx)}
                       className={`text-red-400 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300 rounded-full hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors ${isMobileView ? 'p-2.5' : 'p-1.5'} ${items.length === 1 ? 'opacity-30 cursor-not-allowed' : ''}`}
                       disabled={items.length === 1}
@@ -272,7 +283,9 @@ export const CargoSection: React.FC<Props> = ({
                    </button>
                  </div>
 
-                 {/* Dimensions */}
+                 {/* Dimensions — Non-Document only (Envelope 치수는 규격 고정) */}
+                 {!isDocument && (
+                   <>
                  <div className={`col-span-4 ${!isMobileView ? 'sm:col-span-2' : ''}`}>
                    <label className={cargoLabelClass}>L ({dimLabel})</label>
                    <input
@@ -306,6 +319,8 @@ export const CargoSection: React.FC<Props> = ({
                      placeholder={dimLabel}
                    />
                  </div>
+                   </>
+                 )}
 
               </div>
 
@@ -314,7 +329,9 @@ export const CargoSection: React.FC<Props> = ({
                 <div className="mt-1.5 space-y-0.5">
                   {hasZeroDims && (
                     <p className="text-xs text-gray-400 dark:text-gray-400 pl-1">
-                      Fill in all dimensions and weight to calculate
+                      {isDocument
+                        ? 'Enter weight to calculate'
+                        : 'Fill in all dimensions and weight to calculate'}
                     </p>
                   )}
                   {warnings.map((w, i) => (

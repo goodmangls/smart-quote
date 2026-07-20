@@ -2,7 +2,7 @@
 
 > **KS Ways** International Logistics Quoting System
 >
-> Version 3.5 | Last Updated: 2026-07-20
+> Version 3.5.1 | Last Updated: 2026-07-20
 
 ---
 
@@ -87,11 +87,11 @@ Access via `/quote` from the dashboard or header navigation.
 ### Step 2: Cargo Details
 
 Select **Shipping Item**:
-- **Non-Document** (default) — parcel / merchandise rates
-- **Document** — envelope / document rates (UPS up to 5.0kg, DHL up to 2.0kg). Heavier shipments automatically use Non-Document rates. Document mode forces Packing Type to NONE.
+- **Non-Document** (default) — parcel / merchandise rates (Qty, Weight, L/W/H)
+- **Document** — envelope / document rates (UPS up to 5.0kg, DHL up to 2.0kg). Heavier shipments automatically use Non-Document rates. Document mode shows **Qty + Weight only** (envelope dimensions are standardized) and forces Packing Type to NONE.
 
 For each item, enter:
-- **Width / Length / Height** (cm)
+- **Width / Length / Height** (cm) — Non-Document only
 - **Weight** (kg)
 - **Quantity**
 

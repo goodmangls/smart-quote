@@ -97,6 +97,7 @@
   "calc.option.nonDocument": "Non-Document",
   "calc.option.document": "Document",
   "calc.hint.documentWeightCap": "Document 요율은 {kg}kg까지 적용됩니다. 초과 시 Non-Document 요율이 사용됩니다.",
+  "calc.hint.documentDimsFixed": "Envelope 치수는 규격 고정입니다 — Qty와 Weight만 입력하세요.",
   "calc.hint.documentNoPacking": "Document 화물은 Packing Type NONE으로 고정됩니다 (목포장/스키드 불가).",
   "calc.section.service": "부가 서비스 옵션",
   "calc.section.financial": "재무 및 환율 적용",

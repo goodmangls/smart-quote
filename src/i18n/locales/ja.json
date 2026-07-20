@@ -97,6 +97,7 @@
   "calc.option.nonDocument": "Non-Document",
   "calc.option.document": "Document",
   "calc.hint.documentWeightCap": "Document 料金は {kg}kg まで適用されます。超過時は Non-Document 料金を使用します。",
+  "calc.hint.documentDimsFixed": "封筒サイズは規格固定です — Qty と Weight のみ入力してください。",
   "calc.hint.documentNoPacking": "Document 貨物は Packing Type NONE に固定されます（木箱・スキッド不可）。",
   "calc.section.service": "付加サービス",
   "calc.section.financial": "財務要素",
