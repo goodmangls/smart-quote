@@ -1,1 +1,1 @@
-🔧 fix(quote): 기본 Weight(kg) 1 → 0.5 (요율표 최소 단위)
+💄 ui(quote): Document 모드에서 Box → Envelope 용어로 전환

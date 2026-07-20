@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { CargoItem, QuoteInput, ShippingItemType } from '@/types';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { Package, Plus, Box, Trash2, Copy } from 'lucide-react';
+import { Package, Plus, Box, Trash2, Copy, Mail } from 'lucide-react';
 import { SURGE_THRESHOLDS } from '@/config/business-rules';
 import { inputStyles } from './input-styles';
 import { DOCUMENT_ENVELOPE_DIMS_CM } from './documentEnvelope';
@@ -87,6 +87,12 @@ export const CargoSection: React.FC<Props> = ({
   const wtLabel = unitSystem === 'metric' ? 'kg' : 'lb';
   const docCapKg = overseasCarrier === 'DHL' ? 2 : 5;
   const isDocument = shippingItemType === ShippingItemType.DOCUMENT;
+  const addItemLabel = isDocument ? t('calc.cargo.addEnvelope') : t('calc.cargo.addItem');
+  const itemLabel = (n: number) =>
+    (isDocument ? t('calc.cargo.envelopeLabel') : t('calc.cargo.itemLabel')).replace('{n}', String(n));
+  const duplicateLabel = isDocument ? t('calc.cargo.duplicateEnvelope') : t('calc.cargo.duplicateItem');
+  const removeLabel = isDocument ? t('calc.cargo.removeEnvelope') : t('calc.cargo.removeItem');
+  const minOneLabel = isDocument ? t('calc.cargo.minOneEnvelope') : t('calc.cargo.minOneItem');
 
   const addItem = () => {
     const lastItem = items[items.length - 1];
@@ -178,10 +184,10 @@ export const CargoSection: React.FC<Props> = ({
               <button
                   type="button"
                   onClick={addItem}
-                  aria-label="Add cargo box"
+                  aria-label={addItemLabel}
                   className={addBoxBtnClass}
               >
-                  <Plus className="w-3 h-3 mr-1" /> Add Box
+                  <Plus className="w-3 h-3 mr-1" /> {addItemLabel}
               </button>
           </div>
       </div>
@@ -239,8 +245,8 @@ export const CargoSection: React.FC<Props> = ({
             <div key={item.id}>
               <div className={cargoGrid}>
                  <div className="absolute -top-3 left-3 bg-gray-50 dark:bg-gray-700 px-2 text-xs font-bold text-gray-400 flex items-center">
-                      <Box className="w-3 h-3 mr-1" />
-                      Box #{idx + 1}
+                      {isDocument ? <Mail className="w-3 h-3 mr-1" /> : <Box className="w-3 h-3 mr-1" />}
+                      {itemLabel(idx + 1)}
                  </div>
 
                  {/* Quantity */}
@@ -268,7 +274,7 @@ export const CargoSection: React.FC<Props> = ({
                       type="button"
                       onClick={() => duplicateItem(idx)}
                       className={`text-gray-400 hover:text-brand-blue-600 dark:hover:text-brand-blue-400 rounded-full hover:bg-gray-100 dark:hover:bg-gray-600/30 transition-colors ${isMobileView ? 'p-2.5' : 'p-1.5'}`}
-                      aria-label="Duplicate this box"
+                      aria-label={duplicateLabel}
                    >
                       <Copy className={`${isMobileView ? 'w-5 h-5' : 'w-4 h-4'}`} />
                    </button>
@@ -277,7 +283,7 @@ export const CargoSection: React.FC<Props> = ({
                       onClick={() => removeItem(idx)}
                       className={`text-red-400 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300 rounded-full hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors ${isMobileView ? 'p-2.5' : 'p-1.5'} ${items.length === 1 ? 'opacity-30 cursor-not-allowed' : ''}`}
                       disabled={items.length === 1}
-                      aria-label={items.length === 1 ? 'At least one box required' : 'Remove this box'}
+                      aria-label={items.length === 1 ? minOneLabel : removeLabel}
                    >
                       <Trash2 className={`${isMobileView ? 'w-5 h-5' : 'w-4 h-4'}`} />
                    </button>
