@@ -54,9 +54,9 @@ export function priorityColor(p: number) {
 }
 
 export function PriorityIcon({ priority }: { priority: number }) {
-  if (priority >= 100) return <User className="w-3.5 h-3.5" />;
-  if (priority >= 50) return <Globe className="w-3.5 h-3.5" />;
-  return <Weight className="w-3.5 h-3.5" />;
+  if (priority >= 100) return <User className='w-3.5 h-3.5' />;
+  if (priority >= 50) return <Globe className='w-3.5 h-3.5' />;
+  return <Weight className='w-3.5 h-3.5' />;
 }
 
 export function conditionLabel(rule: MarginRule): string {

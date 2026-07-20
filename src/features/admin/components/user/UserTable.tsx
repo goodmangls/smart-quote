@@ -45,53 +45,53 @@ export const UserTable: React.FC<Props> = ({
   onEdit,
   onDelete,
 }) => (
-  <div className="p-0 overflow-x-auto">
-    <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-      <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-300">
+  <div className='p-0 overflow-x-auto'>
+    <table className='w-full text-sm text-left text-gray-500 dark:text-gray-400'>
+      <thead className='text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-300'>
         <tr>
-          <th scope="col" className="px-6 py-4 font-semibold">
-            <div className="flex items-center gap-2">
-              <Building2 className="w-4 h-4 text-gray-400" />
+          <th scope='col' className='px-6 py-4 font-semibold'>
+            <div className='flex items-center gap-2'>
+              <Building2 className='w-4 h-4 text-gray-400' />
               {columnLabels.company}
             </div>
           </th>
-          <th scope="col" className="px-6 py-4 font-semibold">
-            <div className="flex items-center gap-2">
-              <UserCircle className="w-4 h-4 text-gray-400" />
+          <th scope='col' className='px-6 py-4 font-semibold'>
+            <div className='flex items-center gap-2'>
+              <UserCircle className='w-4 h-4 text-gray-400' />
               {columnLabels.name}
             </div>
           </th>
-          <th scope="col" className="px-6 py-4 font-semibold">
-            <div className="flex items-center gap-2">
-              <Globe2 className="w-4 h-4 text-gray-400" />
+          <th scope='col' className='px-6 py-4 font-semibold'>
+            <div className='flex items-center gap-2'>
+              <Globe2 className='w-4 h-4 text-gray-400' />
               {columnLabels.nationality}
             </div>
           </th>
-          <th scope="col" className="px-6 py-4 font-semibold">
-            <div className="flex items-center gap-2">
-              <Globe2 className="w-4 h-4 text-gray-400" />
+          <th scope='col' className='px-6 py-4 font-semibold'>
+            <div className='flex items-center gap-2'>
+              <Globe2 className='w-4 h-4 text-gray-400' />
               {columnLabels.networks}
             </div>
           </th>
-          <th scope="col" className="px-6 py-4 font-semibold">
-            <div className="flex items-center gap-2">
-              <Mail className="w-4 h-4 text-gray-400" />
+          <th scope='col' className='px-6 py-4 font-semibold'>
+            <div className='flex items-center gap-2'>
+              <Mail className='w-4 h-4 text-gray-400' />
               {columnLabels.email}
             </div>
           </th>
-          <th scope="col" className="px-6 py-4 font-semibold">
-            <div className="flex items-center gap-2">
-              <Shield className="w-4 h-4 text-gray-400" />
+          <th scope='col' className='px-6 py-4 font-semibold'>
+            <div className='flex items-center gap-2'>
+              <Shield className='w-4 h-4 text-gray-400' />
               {columnLabels.role}
             </div>
           </th>
-          <th scope="col" className="px-6 py-4 font-semibold">
-            <div className="flex items-center gap-2">
-              <Hash className="w-4 h-4 text-gray-400" />
+          <th scope='col' className='px-6 py-4 font-semibold'>
+            <div className='flex items-center gap-2'>
+              <Hash className='w-4 h-4 text-gray-400' />
               Quotes
             </div>
           </th>
-          <th scope="col" className="px-6 py-4 font-semibold text-right">
+          <th scope='col' className='px-6 py-4 font-semibold text-right'>
             {columnLabels.actions}
           </th>
         </tr>
@@ -117,7 +117,7 @@ export const UserTable: React.FC<Props> = ({
         ))}
         {users.length === 0 && (
           <tr>
-            <td colSpan={8} className="px-6 py-8 text-center text-gray-500">
+            <td colSpan={8} className='px-6 py-8 text-center text-gray-500'>
               No registered users found.
             </td>
           </tr>

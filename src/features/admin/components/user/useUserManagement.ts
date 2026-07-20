@@ -1,7 +1,13 @@
 import { useState, useEffect, useCallback } from 'react';
 import * as Sentry from '@sentry/browser';
 import type { FreightNetwork } from '@/contexts/AuthContext';
-import { listUsers, updateUser, deleteUser, type AdminUser, type UpdateUserParams } from '@/api/userApi';
+import {
+  listUsers,
+  updateUser,
+  deleteUser,
+  type AdminUser,
+  type UpdateUserParams,
+} from '@/api/userApi';
 import { useToast } from '@/components/ui/Toast';
 
 export function useUserManagement() {
@@ -85,9 +91,7 @@ export function useUserManagement() {
   const toggleNetwork = (net: FreightNetwork) => {
     setEditForm((prev) => {
       const current = (prev.networks || []) as string[];
-      const updated = current.includes(net)
-        ? current.filter((n) => n !== net)
-        : [...current, net];
+      const updated = current.includes(net) ? current.filter((n) => n !== net) : [...current, net];
       return { ...prev, networks: updated };
     });
   };

@@ -17,7 +17,10 @@ test.describe('Login Page', () => {
 
   test('has link to signup page', async ({ page }) => {
     await page.goto('/login');
-    await page.getByRole('link', { name: /sign up/i }).last().click();
+    await page
+      .getByRole('link', { name: /sign up/i })
+      .last()
+      .click();
     await expect(page).toHaveURL('/signup');
   });
 });
