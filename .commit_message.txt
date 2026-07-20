@@ -1,1 +1,1 @@
-🧪 test: FSC history 기대값을 2026-07-20 요율로 갱신
+🧪 test(e2e): 로그인 UX를 password-primary 기준으로 맞춤

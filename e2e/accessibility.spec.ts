@@ -9,9 +9,10 @@ test.describe('Accessibility', () => {
 
   test('login page form has proper labels', async ({ page }) => {
     await page.goto('/login');
-    // Password login has been removed; Magic Link is the primary accessible form.
-    await expect(page.locator('#magic-email')).toBeVisible();
-    await expect(page.locator('#password')).toHaveCount(0);
+    // Password is the primary form; magic-link fields appear after switching modes.
+    await expect(page.locator('#email')).toBeVisible();
+    await expect(page.locator('#password')).toBeVisible();
+    await expect(page.locator('#magic-email')).toHaveCount(0);
   });
 
   test('language selector is keyboard accessible', async ({ page }) => {
