@@ -2,7 +2,7 @@
 
 > **KS Ways** International Logistics Quoting System
 >
-> Version 3.5.1 | Last Updated: 2026-07-20
+> Version 3.6.0 | Last Updated: 2026-07-21
 
 ---
 
@@ -82,13 +82,13 @@ Access via `/quote` from the dashboard or header navigation.
 | Destination ZIP | Optional ZIP/postal code |
 | Shipping Mode | Door-to-Door |
 | Incoterm | EXW, FOB, CNF, CIF, DAP, DDP |
-| Carrier | UPS or DHL |
+| Carrier | UPS, DHL, or FedEx |
 
 ### Step 2: Cargo Details
 
 Select **Shipping Item**:
 - **Parcel** (default) — merchandise / parcel rates (Qty, Weight, L/W/H)
-- **Document** — envelope / document rates (UPS up to 5.0kg, DHL up to 2.0kg). Heavier shipments automatically use Parcel rates. Document mode shows **Qty + Weight only** (envelope dimensions are standardized) and forces Packing Type to NONE.
+- **Document** — envelope / document rates (UPS up to 5.0kg, DHL up to 2.0kg, FedEx Envelope ≤0.5kg / Pak ≤2.5kg). Heavier shipments automatically use Parcel rates. Document mode shows **Qty + Weight only** (envelope dimensions are standardized) and forces Packing Type to NONE.
 
 For each item, enter:
 - **Width / Length / Height** (cm) — Parcel only
@@ -136,11 +136,11 @@ When entering a destination ZIP code, the system automatically checks against 86
 
 ### Incoterm Policy
 
-> **Note**: UPS/DHL express shipments use **DAP only** — no exceptions.
+> **Note**: UPS/DHL/FedEx express shipments use **DAP only** — no exceptions.
 
 ### Carrier Comparison
 
-A comparison card shows estimated costs for UPS and DHL side-by-side. Each carrier uses its own FSC% for accurate comparison. Click **Switch** to change the active carrier.
+A comparison card shows estimated costs for UPS, DHL, and FedEx side-by-side. Each carrier uses its own FSC% for accurate comparison. Click **Switch** to change the active carrier.
 
 > **Note**: As a Member, the margin breakdown is hidden. You see the final quoted price only.
 

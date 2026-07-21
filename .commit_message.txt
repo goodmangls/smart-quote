@@ -1,1 +1,1 @@
-💄 ui(quote): Non-Document→Parcel 표기 + Parcel L/W/H 한 줄 레이아웃
+✈️ feat(fedex): FedEx IP/Envelope/Pak 요금표·존·FSC 39.75% 3캐리어 통합

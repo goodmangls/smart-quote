@@ -85,7 +85,8 @@ export const CargoSection: React.FC<Props> = ({
 
   const dimLabel = unitSystem === 'metric' ? 'cm' : 'in';
   const wtLabel = unitSystem === 'metric' ? 'kg' : 'lb';
-  const docCapKg = overseasCarrier === 'DHL' ? 2 : 5;
+  const docCapKg =
+    overseasCarrier === 'DHL' ? 2 : overseasCarrier === 'FEDEX' ? 2.5 : 5;
   const isDocument = shippingItemType === ShippingItemType.DOCUMENT;
   const addItemLabel = isDocument ? t('calc.cargo.addEnvelope') : t('calc.cargo.addItem');
   const itemLabel = (n: number) =>

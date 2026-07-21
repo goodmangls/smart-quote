@@ -20,8 +20,8 @@ module Api
       def update_rates
         carrier = params[:carrier]&.upcase
 
-        unless %w[UPS DHL].include?(carrier)
-          return render json: { error: { code: "INVALID_CARRIER", message: "Carrier must be UPS or DHL" } }, status: :unprocessable_entity
+        unless %w[UPS DHL FEDEX].include?(carrier)
+          return render json: { error: { code: "INVALID_CARRIER", message: "Carrier must be UPS, DHL, or FEDEX" } }, status: :unprocessable_entity
         end
 
         international = parse_rate(params[:international])

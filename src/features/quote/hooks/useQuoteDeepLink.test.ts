@@ -79,13 +79,16 @@ describe('parseQuoteDeepLink — pure parser', () => {
   });
 
   describe('carrier', () => {
-    it('accepts UPS / DHL', () => {
+    it('accepts UPS / DHL / FEDEX', () => {
       expect(parseQuoteDeepLink(new URLSearchParams('carrier=UPS')).partial.overseasCarrier).toBe('UPS');
       expect(parseQuoteDeepLink(new URLSearchParams('carrier=DHL')).partial.overseasCarrier).toBe('DHL');
+      expect(parseQuoteDeepLink(new URLSearchParams('carrier=FEDEX')).partial.overseasCarrier).toBe(
+        'FEDEX',
+      );
     });
 
-    it('rejects unknown carriers (FedEx etc.)', () => {
-      const r = parseQuoteDeepLink(new URLSearchParams('carrier=FEDEX'));
+    it('rejects unknown carriers', () => {
+      const r = parseQuoteDeepLink(new URLSearchParams('carrier=TNT'));
       expect(r.partial.overseasCarrier).toBeUndefined();
     });
   });

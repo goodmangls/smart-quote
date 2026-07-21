@@ -5,7 +5,7 @@ import { WidgetSkeleton } from '@/features/dashboard/components/WidgetSkeleton';
 import { WidgetError } from '@/features/dashboard/components/WidgetError';
 import { useExchangeRates } from '@/features/dashboard/hooks/useExchangeRates';
 import { useFscRates } from '@/features/dashboard/hooks/useFscRates';
-import { UPS_FSC_URL, DHL_FSC_URL } from '@/config/rates';
+import { UPS_FSC_URL, DHL_FSC_URL, FEDEX_FSC_URL } from '@/config/rates';
 
 export const ExchangeRateWidget: React.FC = () => {
   const { t } = useLanguage();
@@ -158,9 +158,10 @@ export const ExchangeRateWidget: React.FC = () => {
               <div className="space-y-2">
                 {[
                   { name: 'UPS', link: UPS_FSC_URL, logo: '📦' },
-                  { name: 'DHL', link: DHL_FSC_URL, logo: '🚚' }
+                  { name: 'DHL', link: DHL_FSC_URL, logo: '🚚' },
+                  { name: 'FEDEX', link: FEDEX_FSC_URL, logo: '✈️' },
                 ].map((carrier) => {
-                  const rates = fscData?.rates?.[carrier.name as 'UPS' | 'DHL'];
+                  const rates = fscData?.rates?.[carrier.name as 'UPS' | 'DHL' | 'FEDEX'];
                   return (
                     <div
                       key={carrier.name}

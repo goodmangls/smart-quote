@@ -9,10 +9,12 @@ import {
   removeFscEntry,
 } from '@/config/fsc-history';
 
+type HistoryCarrier = 'ups' | 'dhl' | 'fedex';
+
 export function useFscHistory() {
   const [history, setHistory] = useState<FscHistoryData>(() => loadFscHistory());
   const [showHistory, setShowHistory] = useState(false);
-  const [addCarrier, setAddCarrier] = useState<'ups' | 'dhl'>('ups');
+  const [addCarrier, setAddCarrier] = useState<HistoryCarrier>('ups');
   const [addDate, setAddDate] = useState('');
   const [addRate, setAddRate] = useState('');
 
@@ -32,7 +34,7 @@ export function useFscHistory() {
     setAddRate('');
   };
 
-  const handleRemoveEntry = (carrier: 'ups' | 'dhl', date: string) => {
+  const handleRemoveEntry = (carrier: HistoryCarrier, date: string) => {
     persistHistory(removeFscEntry(history, carrier, date));
   };
 
@@ -40,12 +42,15 @@ export function useFscHistory() {
     () => [
       { entries: history.ups, color: CHART_COLORS.brandBlue, label: 'UPS' },
       { entries: history.dhl, color: CHART_COLORS.gold, label: 'DHL' },
+      { entries: history.fedex, color: CHART_COLORS.success, label: 'FEDEX' },
     ],
     [history],
   );
 
   const latestUps = history.ups.length > 0 ? history.ups[history.ups.length - 1].rate : null;
   const latestDhl = history.dhl.length > 0 ? history.dhl[history.dhl.length - 1].rate : null;
+  const latestFedex =
+    history.fedex.length > 0 ? history.fedex[history.fedex.length - 1].rate : null;
 
   return {
     history,
@@ -62,5 +67,6 @@ export function useFscHistory() {
     chartLines,
     latestUps,
     latestDhl,
+    latestFedex,
   };
 }

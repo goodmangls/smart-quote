@@ -11,7 +11,7 @@ interface Props {
   input?: QuoteInput;
   onMarginChange: (newMargin: number) => void;
   onDownloadPdf: (currency?: 'krw' | 'usd') => void;
-  onSwitchCarrier?: (carrier: 'UPS' | 'DHL') => void;
+  onSwitchCarrier?: (carrier: 'UPS' | 'DHL' | 'FEDEX') => void;
   marginPercent: number;
   hideMargin?: boolean;
   isKorean?: boolean;

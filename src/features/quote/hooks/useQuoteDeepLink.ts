@@ -15,7 +15,7 @@
 import { useMemo } from 'react';
 import { Incoterm, type QuoteInput, type CargoItem } from '@/types';
 
-type Carrier = 'UPS' | 'DHL';
+type Carrier = 'UPS' | 'DHL' | 'FEDEX';
 
 interface DeepLinkResult {
   /** Partial input suitable for `setInput((prev) => ({ ...prev, ...partial }))` */
@@ -56,7 +56,7 @@ function clampNumber(raw: string | null | undefined, min: number, max: number): 
 function normalizeCarrier(raw: string | null | undefined): Carrier | undefined {
   if (!raw) return undefined;
   const v = raw.trim().toUpperCase();
-  if (v === 'UPS' || v === 'DHL') return v;
+  if (v === 'UPS' || v === 'DHL' || v === 'FEDEX') return v;
   return undefined;
 }
 

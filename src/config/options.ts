@@ -280,6 +280,32 @@ export const DHL_ZONE_COUNTRIES: Record<string, string[]> = {
   ],
 };
 
+// Source: FDX IP Export 2026 Special Rates (letter zones A–Y)
+export const FEDEX_ZONE_COUNTRIES: Record<string, string[]> = {
+  A: ['MO'],
+  D: ['GU', 'MP', 'LA', 'MN', 'BN'],
+  E: [], // US West — requires ZIP; unused in country-only lookup
+  F: ['US', 'CA', 'NZ', 'MX'],
+  G: ['AT', 'DK', 'HU', 'BE', 'CZ', 'GR', 'NL', 'PL', 'IL'],
+  H: ['RU', 'RO', 'TR', 'BG', 'UA', 'BY', 'MD'],
+  I: ['AR', 'BR', 'CL', 'PY', 'PE', 'CO', 'EC', 'VE', 'UY', 'BO'],
+  J: ['AE', 'BH', 'KW', 'OM', 'QA', 'SA', 'JO', 'LB', 'EG', 'IQ'],
+  K: ['CN-S'],
+  M: ['IT', 'ES', 'GB', 'DE', 'FR', 'CH', 'PT', 'IE', 'LU', 'AD', 'MC', 'SM', 'VA', 'LI'],
+  N: ['VN'],
+  O: ['IN'],
+  P: ['JP'],
+  Q: ['MY'],
+  R: ['TH'],
+  S: ['PH'],
+  T: ['ID'],
+  U: ['AU'],
+  V: ['HK'],
+  W: ['CN'],
+  X: ['TW'],
+  Y: ['SG'],
+};
+
 // ─── Nationality options for signup / admin ─────────────────────────
 // Top 7 pinned (frequent B2B partners), rest alphabetical from COUNTRY_OPTIONS
 const PINNED_NATIONALITY_CODES = ['KR', 'US', 'CN', 'JP', 'VN', 'TW', 'SG'];

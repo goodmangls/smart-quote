@@ -5,12 +5,13 @@ import type { FscRates } from '@/api/fscApi';
 export function useFscRateEdit(data: FscRates | null, fetchRates: () => Promise<void> | void) {
   const [isEditing, setIsEditing] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [editRates, setEditRates] = useState({ UPS: '', DHL: '' });
+  const [editRates, setEditRates] = useState({ UPS: '', DHL: '', FEDEX: '' });
 
   const handleEditStart = () => {
     setEditRates({
       UPS: String(data?.rates.UPS.international ?? ''),
       DHL: String(data?.rates.DHL.international ?? ''),
+      FEDEX: String(data?.rates.FEDEX?.international ?? ''),
     });
     setIsEditing(true);
   };
@@ -20,8 +21,10 @@ export function useFscRateEdit(data: FscRates | null, fetchRates: () => Promise<
     try {
       const upsRate = parseFloat(editRates.UPS);
       const dhlRate = parseFloat(editRates.DHL);
+      const fedexRate = parseFloat(editRates.FEDEX);
       if (!isNaN(upsRate)) await updateFscRate('UPS', upsRate, upsRate);
       if (!isNaN(dhlRate)) await updateFscRate('DHL', dhlRate, dhlRate);
+      if (!isNaN(fedexRate)) await updateFscRate('FEDEX', fedexRate, fedexRate);
       await fetchRates();
       setIsEditing(false);
     } catch {

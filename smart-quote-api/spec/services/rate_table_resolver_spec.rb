@@ -32,6 +32,36 @@ RSpec.describe Calculators::RateTableResolver do
     expect(result[:used_document]).to eq(true)
     expect(result[:exact]).to eq(Constants::DhlTariff::DHL_DOC_EXACT_RATES)
   end
+
+  it "uses FedEx Envelope for Document ≤0.5kg" do
+    result = described_class.call(
+      carrier: "FEDEX",
+      shipping_item_type: "DOCUMENT",
+      billable_weight: 0.5
+    )
+    expect(result[:used_document]).to eq(true)
+    expect(result[:exact]).to eq(Constants::FedexTariff::FEDEX_ENVELOPE_EXACT_RATES)
+  end
+
+  it "uses FedEx Pak for Document ≤2.5kg" do
+    result = described_class.call(
+      carrier: "FEDEX",
+      shipping_item_type: "DOCUMENT",
+      billable_weight: 1.5
+    )
+    expect(result[:used_document]).to eq(true)
+    expect(result[:exact]).to eq(Constants::FedexTariff::FEDEX_PAK_EXACT_RATES)
+  end
+
+  it "falls back to FedEx IP above 2.5kg Document" do
+    result = described_class.call(
+      carrier: "FEDEX",
+      shipping_item_type: "DOCUMENT",
+      billable_weight: 3
+    )
+    expect(result[:used_document]).to eq(false)
+    expect(result[:exact]).to eq(Constants::FedexTariff::FEDEX_EXACT_RATES)
+  end
 end
 
 RSpec.describe Calculators::UpsCost, "document rates" do
@@ -47,5 +77,37 @@ RSpec.describe Calculators::UpsCost, "document rates" do
   it "returns Non-Document rate when type omitted" do
     result = described_class.call(billable_weight: 1, country: "JP")
     expect(result[:intl_base]).to eq(55_784)
+  end
+end
+
+RSpec.describe Calculators::FedexCost do
+  it "returns Envelope rate for SG Document 0.5kg" do
+    result = described_class.call(
+      billable_weight: 0.5,
+      country: "SG",
+      shipping_item_type: "DOCUMENT"
+    )
+    expect(result[:intl_base]).to eq(24_060)
+    expect(result[:applied_zone]).to include("Y")
+  end
+
+  it "returns IP rate for JP Parcel 1.0kg" do
+    result = described_class.call(
+      billable_weight: 1.0,
+      country: "JP",
+      shipping_item_type: "NON_DOCUMENT"
+    )
+    expect(result[:intl_base]).to eq(76_900)
+    expect(result[:applied_zone]).to include("P")
+  end
+end
+
+RSpec.describe Calculators::FedexZone do
+  it "maps JP to zone P" do
+    expect(described_class.call("JP")).to eq(rate_key: "P", label: "P/Japan")
+  end
+
+  it "defaults unknown countries to Y" do
+    expect(described_class.call("ZZ")).to eq(rate_key: "Y", label: "Y/Singapore (default)")
   end
 end
