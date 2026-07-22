@@ -1,1 +1,1 @@
-🔗 chore(fsc): FSC 위젯 DHL 링크에 #/fuel_surcharge 앵커 추가
+📝 docs: CLAUDE.md·README.md FedEx 3캐리어 통합 반영 (요금표·존·FSC 39.75%·테스트 수)
