@@ -8,7 +8,14 @@ vi.mock('@/contexts/LanguageContext', () => ({
 }));
 
 vi.mock('@/features/dashboard/hooks/useExchangeRates', () => ({
-  useExchangeRates: () => ({ data: [], loading: false, error: null, lastUpdated: null, isStale: false, retry: vi.fn() }),
+  useExchangeRates: () => ({
+    data: [],
+    loading: false,
+    error: null,
+    lastUpdated: null,
+    isStale: false,
+    retry: vi.fn(),
+  }),
 }));
 
 const mockInput: QuoteInput = {
@@ -47,9 +54,7 @@ describe('InputSection', () => {
     expect(screen.getByText('calc.label.destination')).toBeInTheDocument();
     // The select should have US selected
     const selects = screen.getAllByRole('combobox');
-    const destSelect = selects.find(
-      (s) => (s as HTMLSelectElement).value === 'US',
-    );
+    const destSelect = selects.find((s) => (s as HTMLSelectElement).value === 'US');
     expect(destSelect).toBeDefined();
   });
 
@@ -85,23 +90,23 @@ describe('InputSection', () => {
 
     // Reset zone filter to show all countries
     const selects = screen.getAllByRole('combobox');
-    const zoneSelectEl = selects.find(
-      (s) => Array.from((s as HTMLSelectElement).options).some(o => o.value === '' && o.text.includes('calc.label.zoneAll'))
+    const zoneSelectEl = selects.find((s) =>
+      Array.from((s as HTMLSelectElement).options).some(
+        (o) => o.value === '' && o.text.includes('calc.label.zoneAll'),
+      ),
     ) as HTMLSelectElement;
     if (zoneSelectEl) {
       await user.selectOptions(zoneSelectEl, '');
     }
 
     // Find the destination country select (has value 'US')
-    const destSelect = screen.getAllByRole('combobox').find(
-      (s) => (s as HTMLSelectElement).value === 'US',
-    ) as HTMLSelectElement;
+    const destSelect = screen
+      .getAllByRole('combobox')
+      .find((s) => (s as HTMLSelectElement).value === 'US') as HTMLSelectElement;
 
     await user.selectOptions(destSelect, 'CA');
 
-    expect(onChange).toHaveBeenCalledWith(
-      expect.objectContaining({ destinationCountry: 'CA' }),
-    );
+    expect(onChange).toHaveBeenCalledWith(expect.objectContaining({ destinationCountry: 'CA' }));
   });
 
   it('does not render Target Margin input when hideMargin=true', () => {

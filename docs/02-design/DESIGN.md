@@ -1,6 +1,6 @@
 ---
 name: BridgeLogis Design System (smart-quote-main)
-version: 1.1.0
+version: 1.2.0
 description: >-
   BridgeLogis by KS Ways 웹 애플리케이션의 디자인 시스템 명세.
   외부 운영 중인 SaaS(bridgelogis.com)의 단일 진실 공급원(SSOT).
@@ -244,7 +244,22 @@ Tailwind 기본 shadow scale 사용 (`shadow-sm` · `shadow-md` · `shadow-lg` �
 </span>
 ```
 
-### 8.4 미구현 컴포넌트 작성 시
+### 8.5 Carrier 구분 색 (CarrierComparisonCard)
+
+3사 비교 UI 에서 캐리어별 카드 배경/보더는 다음 매핑을 고정 사용한다
+(`src/features/quote/components/CarrierComparisonCard.tsx` `carrierColors`):
+
+| Carrier | Light | Dark |
+|---|---|---|
+| UPS | `bg-amber-50 border-amber-200` | `dark:bg-amber-900/20 dark:border-amber-800` |
+| DHL | `bg-yellow-50 border-yellow-200` | `dark:bg-yellow-900/20 dark:border-yellow-800` |
+| FEDEX | `bg-cyan-50 border-cyan-200` | `dark:bg-cyan-900/20 dark:border-cyan-800` |
+
+- FedEx 는 브랜드 `cyan-*` 커스텀 스케일을 사용한다 (Tailwind 기본 `blue-*`/`sky-*` 금지 원칙 준수).
+- 배지 행은 배지가 없는 캐리어도 `min-h-[20px]` 로 높이를 맞춰 3장 카드의 수직 정렬을 유지한다.
+- Zone / Transit / CO₂ 정보는 2-col grid 가 아닌 **세로 스택** (`space-y-1` + `flex justify-between`) 으로 배치한다 (가독성 이슈로 2026-07-22 변경).
+
+### 8.6 미구현 컴포넌트 작성 시
 
 1. 기존 Brand/Semantic 토큰만으로 구현
 2. 토큰이 부족하면 이 문서를 먼저 수정 후 구현
@@ -308,6 +323,9 @@ import { CHART_COLORS } from '@/lib/chartColors';
 
 ### Changelog
 
+- **1.2.0** (2026-07-22) — FedEx 3캐리어 통합 반영. §8.5 Carrier 구분 색 추가
+  (UPS `amber-*` / DHL `yellow-*` / FEDEX `cyan-*`), CarrierComparisonCard 배지
+  `min-h-[20px]` 정렬 및 Zone/Transit/CO₂ 세로 스택 패턴 문서화.
 - **1.1.0** (2026-04-24) — Phase 2 완료. 레거시 `jways-*` (207건) / `accent-*` (55건) 전면
   제거, `brand-blue-*` / `cyan-*` 로 통합. `tailwind.config.cjs` Legacy 블록 삭제,
   §2.3 Legacy 섹션 제거 (3 레이어 구조: Brand / Semantic / Neutral). `accent-950`

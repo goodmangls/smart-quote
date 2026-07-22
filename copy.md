@@ -2,7 +2,7 @@
 
 > BridgeLogis 카피라이팅 가이드 및 텍스트 인벤토리
 
-**Last Updated**: 2026-03-30
+**Last Updated**: 2026-07-22
 
 ---
 
@@ -33,18 +33,18 @@
 | Key | Korean | English |
 |-----|--------|---------|
 | `landing.badge.networks` | Global Freight Networks | Global Freight Networks |
-| `landing.title.main` | 190개국 국제 운임, | International freight to 190 countries, |
-| `landing.title.sub` | 1초 만에 견적 완료. | quoted in 1 second. |
-| `landing.subtitle` | UPS, DHL 2사 캐리어 실시간 비교... | Compare UPS, DHL carriers in real-time... |
+| `landing.title.main` | 190개국 국제 운임, | Freight Quotes for |
+| `landing.title.sub` | 1초 만에 견적 완료. | 190+ Countries, Instantly. |
+| `landing.subtitle` | 포워딩 파트너를 위한 국제 특송 견적 시스템. Door-to-Door 운임을 실시간 환율과 FSC를 반영하여 즉시 산출합니다. | The express freight quoting engine built for forwarding partners. Calculate Door-to-Door costs with real-time exchange rates and FSC — instantly. |
 
 ### Stats
 
-| Key | Korean | English |
-|-----|--------|---------|
-| `landing.stat.carriers` | 3개 캐리어 | 3 Carriers |
-| `landing.stat.countries` | 190개국 | 190 Countries |
-| `landing.stat.calculation` | 즉시 계산 | Instant Calc |
-| `landing.stat.available` | 24/7 | 24/7 |
+| Key | Value (LandingPage.tsx) | Korean Label | English Label |
+|-----|------|--------|---------|
+| `landing.stat.carriers` | `3` (UPS·DHL·FedEx) | 특송 캐리어 | Express Carriers |
+| `landing.stat.countries` | `190+` | 목적지 국가 | Destinations |
+| `landing.stat.calculation` | `~3s` | 평균 견적 시간 | Avg. Quote Time |
+| `landing.stat.available` | `24/7` | 온라인 접속 | Always Online |
 
 ### Feature Cards
 
@@ -246,7 +246,15 @@
 | SignUpPage placeholders | "Optional", "Select" hardcoded | 번역 키로 변경 |
 | Header aria-label | "Select language" EN only | 번역 키로 변경 |
 
-### Issue 4: 톤앤매너 가이드
+### Issue 4: FedEx 미반영 카피 (MEDIUM, 2026-07-22 FedEx 통합 이후)
+
+| Location | Current | Should Be |
+|----------|---------|-----------|
+| `guide/locales/ko.ts:270` | "UPS와 DHL 공식 할증료 공지 페이지..." | UPS·DHL·FedEx 3사로 갱신 |
+| `calc.service.surcharge.notice.body` | "UPS/DHL 공식 공지를 기반으로..." | UPS/DHL/FedEx |
+| `calc.financial.fscHint` | "UPS: 매주 변경 · DHL: 매월 변경" | 3사 모두 매주 월요일 갱신 (현행 정책) |
+
+### Issue 5: 톤앤매너 가이드
 
 | Context | Tone | Example |
 |---------|------|---------|
@@ -295,3 +303,7 @@
 |------|---------|--------|-------|
 | UPS | UPS Express Saver | UPS 익스프레스 세이버 | Calculator, Rate Tables |
 | DHL | DHL Express Worldwide | DHL 익스프레스 월드와이드 | Calculator, Rate Tables |
+| FEDEX | FedEx International Priority (IP) | FedEx 인터내셔널 프라이어리티 | Calculator, Rate Tables (2026-07 추가) |
+
+**FedEx 표기 규칙**: 브랜드 표기는 "FedEx" (E 대문자, x 소문자). 코드/enum 값은 `FEDEX`.
+Document 요금은 Envelope(≤0.5kg)/Pak(≤2.5kg), 그 외는 IP 테이블 사용.
