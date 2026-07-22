@@ -6,7 +6,7 @@
 
 <br />
 
-The **Smart Quote System** is a full-stack logistics quoting application for **KS Ways** (BridgeLogis by KS Ways). It calculates international shipping costs across multiple carriers (UPS, DHL), including export packing, surcharges, and margin analysis. React frontend with a Rails API backend and mirrored calculation logic.
+The **Smart Quote System** is a full-stack logistics quoting application for **KS Ways** (BridgeLogis by KS Ways). It calculates international shipping costs across multiple carriers (UPS, DHL, FedEx), including export packing, surcharges, and margin analysis. React frontend with a Rails API backend and mirrored calculation logic.
 
 **Live URL**: [https://bridgelogis.com](https://bridgelogis.com) / [https://smart-quote-main.vercel.app](https://smart-quote-main.vercel.app)
 
@@ -14,15 +14,16 @@ The **Smart Quote System** is a full-stack logistics quoting application for **K
 
 ## Key Features
 
-### Multi-Carrier Quoting (UPS, DHL)
+### Multi-Carrier Quoting (UPS, DHL, FedEx)
 
-- **Zone-based pricing**: Config-driven country-to-zone mapping (Z1-Z10 for UPS, Z1-Z8 for DHL) with exact rate tables (0.5-20kg in 0.5kg steps) and range rates (>20kg per-kg)
-- **Shared rate lookup**: Common `lookupCarrierRate()` engine for UPS/DHL (exact table -> range table -> fallback)
+- **Zone-based pricing**: Config-driven country-to-zone mapping (Z1-Z10 for UPS, Z1-Z8 for DHL, letter zones A-Y for FedEx) with exact rate tables (0.5-20kg in 0.5kg steps) and range rates (>20kg per-kg)
+- **Shared rate lookup**: Common `lookupCarrierRate()` engine for all carriers (exact table -> range table -> fallback), carrier/document-aware table selection via `rateTableResolver`
+- **FedEx Document rates**: Envelope (rated ≤0.5kg) / Pak (≤2.5kg) tables for Document shipments, International Priority (IP) fallback with warning above the cap
 - **UPS Surge Fee**: Auto-detected for Middle East (KRW 2,004/kg) and Israel (KRW 4,722/kg) destinations, FSC applicable
 - **EAS/RAS Auto-Detection**: Postal code-based Extended/Remote Area Surcharge lookup (86 countries, 39,876 zip ranges, binary search O(log n), lazy-loaded)
-- **Surcharges**: FSC% fuel surcharge, DB-driven surcharges, manual surge fees, carrier-specific add-ons (UPS: 6 types, DHL: 19 types)
-- **Carrier comparison**: Side-by-side cost comparison across all carriers
-- **Incoterm Policy**: UPS/DHL express shipments use DAP exclusively
+- **Surcharges**: FSC% fuel surcharge, DB-driven surcharges, manual surge fees, carrier-specific add-ons (UPS: 6 types, DHL: 19 types; FedEx add-ons not yet available)
+- **Carrier comparison**: 3-way side-by-side cost comparison with Fastest/Cheapest/Eco badges
+- **Incoterm Policy**: Express shipments (UPS/DHL/FedEx) use DAP exclusively
 
 ### Calculation Pipeline
 
@@ -69,7 +70,7 @@ The **Smart Quote System** is a full-stack logistics quoting application for **K
 | Widget | Purpose |
 |--------|---------|
 | **Target Margin Rules** | DB-driven margin rule CRUD with priority tiers (P100/P90/P50/P0) |
-| **FSC Rate Management** | Track/update DHL & UPS fuel surcharge percentages |
+| **FSC Rate Management** | Track/update UPS, DHL & FedEx fuel surcharge percentages |
 | **Surcharge Management** | Carrier-specific surcharge CRUD |
 | **Customer Management** | Customer records with quote count badges |
 | **User Management** | Role assignment, company, nationality, network access |
@@ -120,7 +121,7 @@ When a **Member** saves a quote, a Slack notification is automatically sent to t
 | ------------ | ---------------------------------------------------------------------------- |
 | **Frontend** | React 19, TypeScript 5.8, Vite 6, Tailwind CSS                               |
 | **Backend**  | Rails 8 API-only, Ruby 3.4, PostgreSQL                                       |
-| **Testing**  | Vitest + Testing Library (56 files, 1,464 tests), RSpec + FactoryBot (backend) |
+| **Testing**  | Vitest + Testing Library (58 files, 1,480 tests), RSpec + FactoryBot (backend) |
 | **Deploy**   | Vercel (frontend, auto-deploy on push to `main`), Render.com (backend, Docker, Singapore) |
 | **APIs**     | open.er-api.com (exchange rates), Open-Meteo (weather), Rails JWT (auth)     |
 | **Other**    | jsPDF, Sentry, Lucide React, React Router v7, ChannelTalk                    |
@@ -134,7 +135,8 @@ When a **Member** saves a quote, a Slack notification is automatically sent to t
     types.ts                   # Core TypeScript types & enums
     i18n/translations.ts       # 4-language translation dictionary (en/ko/cn/ja)
     config/                    # Rate tables, business rules, shared utilities
-      ups_zones.ts / dhl_zones.ts  # Config-driven zone mappings
+      ups_zones.ts / dhl_zones.ts / fedex_zones.ts  # Config-driven zone mappings (FedEx: letter zones A-Y)
+      ups_tariff.ts / dhl_tariff.ts / fedex_tariff.ts  # Rate tables (FedEx: IP + Envelope + Pak)
       addon-utils.ts             # Shared add-on types, normalizers, fee calculators
       ups_addons.ts / dhl_addons.ts  # Carrier add-on rates + surge fee config
       ups_eas_lookup.ts          # EAS/RAS postal code lookup (binary search, lazy-load)
@@ -143,7 +145,7 @@ When a **Member** saves a quote, a Slack notification is automatically sent to t
       quote/
         components/            # InputSection, ResultSection, SaveQuoteButton, CarrierComparisonCard
         components/widgets/    # ExchangeRateWidget, WeatherWidget, NoticeWidget, AccountManagerWidget, ExchangeRateCalculatorWidget
-        services/              # calculationService.ts, dhlAddonCalculator.ts, upsAddonCalculator.ts
+        services/              # calculationService.ts, rateTableResolver.ts, fedexCalculation.ts, dhlAddonCalculator.ts, upsAddonCalculator.ts
         hooks/                 # useSyncToInput (generic data sync hook)
       history/
         components/            # QuoteHistoryPage, QuoteHistoryTable, QuoteSearchBar, QuotePagination, QuoteDetailModal
@@ -161,7 +163,7 @@ When a **Member** saves a quote, a Slack notification is automatically sent to t
 smart-quote-api/               # Backend (Rails 8 API)
   app/models/                  # MarginRule, AuditLog, Quote, User, Customer, Surcharge, AddonRate
   app/services/                # QuoteCalculator, QuoteSearcher, QuoteExporter, QuoteSerializer, MarginRuleResolver
-    calculators/               # ItemCost, SurgeCost, UpsCost, DhlCost, DomesticCost, UpsSurgeFee
+    calculators/               # ItemCost, SurgeCost, UpsCost, DhlCost, FedexCost, DomesticCost, UpsSurgeFee, RateTableResolver
   app/controllers/api/v1/      # Quotes, MarginRules, Surcharges, AddonRates, Customers, Users, Auth, Fsc, AuditLogs, Notifications, Chat
   lib/constants/               # Tariff tables (synced with frontend)
 ```
@@ -180,7 +182,7 @@ npm install
 npm run dev          # Dev server on http://localhost:5173
 npm run build        # Production build (tsc + vite)
 npm run lint         # ESLint (--max-warnings 0)
-npx vitest run       # Run tests once (56 files, 1,464 tests)
+npx vitest run       # Run tests once (58 files, 1,480 tests)
 ```
 
 ### Backend (from `smart-quote-api/`)
