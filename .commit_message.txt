@@ -1,1 +1,1 @@
-🔗 chore(fsc): FedEx FSC 링크 ko-kr 서차지 페이지로 교체 + 폴백에 FEDEX 39.75% 추가
+💄 ui(comparison): 배지 행 높이 고정으로 3캐리어 정렬 + Zone/Transit/CO₂ 세로 배치 가독성 개선
