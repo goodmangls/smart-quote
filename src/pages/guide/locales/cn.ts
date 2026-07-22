@@ -88,13 +88,13 @@ export const cn = {
         {
           title: '④ 财务设置',
           description:
-            '查看应用的汇率和FSC百分比。系统使用实时汇率，但允许管理员手动覆盖。快递（UPS/DHL）仅适用DAP贸易术语。',
+            '查看应用的汇率和FSC百分比。系统使用实时汇率，但允许管理员手动覆盖。快递（UPS/DHL/FedEx）仅适用DAP贸易术语。',
           adminOnly: true,
         },
         {
           title: '结果与比较',
           description:
-            '查看UPS、DHL费率的并排比较卡片。每张卡片显示始发费用、运费、目的地费用和最终价格明细。',
+            '查看UPS、DHL、FedEx三家承运商费率的并排比较卡片。每张卡片显示始发费用、运费、目的地费用和最终价格明细。',
         },
       ],
     },
@@ -230,7 +230,7 @@ export const cn = {
         {
           title: '查看当前费率',
           description:
-            'FSC插件显示DHL和UPS当前的燃油附加费百分比（国际/国内）。每个费率显示最后更新日期。',
+            'FSC插件显示UPS、DHL、FedEx当前的燃油附加费百分比（国际/国内）。每个费率显示最后更新日期。',
         },
         {
           title: '更新费率',
@@ -258,7 +258,7 @@ export const cn = {
         },
         {
           title: '承运商链接',
-          description: '提供UPS和DHL官方附加费公告页面的快速链接供核实。',
+          description: '提供UPS、DHL、FedEx官方附加费公告页面的快速链接供核实。',
         },
         {
           title: '重要通知',
@@ -310,7 +310,7 @@ export const cn = {
         {
           title: '查看费率表',
           description:
-            '以只读格式浏览承运商特定费率表（UPS、DHL）。表格显示所有运输区域的基于重量的定价。',
+            '以只读格式浏览承运商特定费率表（UPS、DHL、FedEx）。表格显示所有运输区域的基于重量的定价。',
         },
         {
           title: '区域参考',

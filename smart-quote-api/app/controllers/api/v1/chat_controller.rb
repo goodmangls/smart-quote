@@ -96,12 +96,12 @@ module Api
           - DDP: Seller bears all costs including import duties/taxes (max seller obligation)
 
           ★ IMPORTANT — Incoterm policy for international express carriers:
-          When shipping via UPS or DHL (international express courier services),
+          When shipping via UPS, DHL, or FedEx (international express courier services),
           the incoterm is ALWAYS DAP (Delivered At Place) — no exceptions.
           This means: KS Ways handles door-to-door delivery to the destination,
           and the buyer/consignee is responsible for import customs clearance and duties/taxes.
           If a partner or customer asks about incoterms for express shipments,
-          clearly inform them that DAP is the standard and only option for UPS/DHL services.
+          clearly inform them that DAP is the standard and only option for UPS/DHL/FedEx services.
           Other incoterms (EXW, FOB, CIF, DDP) are available only for sea/air freight forwarding, not express courier.
 
           Customs & HS Code:
@@ -122,7 +122,7 @@ module Api
           - FSC: Fuel Surcharge (% added to base freight rate)
           - AHS: Additional Handling Surcharge (overweight/oversized packages)
           - CBM: Cubic Meter (volume measurement)
-          - Volumetric Weight: L×W×H / 5000 (UPS/DHL)
+          - Volumetric Weight: L×W×H / 5000 (UPS/DHL/FedEx)
           - Billable Weight: Greater of actual weight vs volumetric weight
           - B/L: Bill of Lading (shipping document)
           - AWB: Air Waybill (air cargo shipping document)
@@ -168,7 +168,7 @@ module Api
           - Currency Calculator: Quick conversion tool
 
           Quote Calculator (/quote):
-          1. Route: Select destination country, ZIP code, carrier (UPS/DHL), incoterm, delivery mode
+          1. Route: Select destination country, ZIP code, carrier (UPS/DHL/FedEx), incoterm, delivery mode
           2. Cargo: Enter dimensions (W×L×H cm), weight (kg), quantity per box. Click "+ Add Box" for multi-piece
           3. Options: Packing type, manual packing cost override, manual surge cost, exchange rate, FSC%
           4. Results update instantly as you change inputs (no submit button needed)
@@ -191,7 +191,7 @@ module Api
           - CSV export available
           - Status tracking: Draft → Sent → Accepted → Expired
 
-          Carrier Comparison: Side-by-side cost/zone/transit comparison card below results
+          Carrier Comparison: Side-by-side UPS/DHL/FedEx cost/zone/transit comparison card below results
 
           Account Settings: Click gear icon → change password (min 6 chars)
 
@@ -226,12 +226,12 @@ module Api
              - Click Refresh to clear cache
 
           2. FSC Rate Management:
-             - View current UPS/DHL fuel surcharge percentages
+             - View current UPS/DHL/FedEx fuel surcharge percentages
              - Click Edit to update, values saved to DB permanently
-             - External links to official UPS/DHL pages for verification
+             - External links to official UPS/DHL/FedEx pages for verification
 
           3. Surcharge Management:
-             - CRUD for carrier-specific surcharges (UPS/DHL/ALL)
+             - CRUD for carrier-specific surcharges (UPS/DHL/FedEx/ALL)
              - Fields: code, name, carrier, charge type, amount, active toggle
 
           4. Customer Management:
@@ -242,7 +242,7 @@ module Api
              - View all users, edit role (admin/member), company, nationality, networks
 
           6. Rate Table Viewer:
-             - Read-only view of UPS/DHL rate tables for verification
+             - Read-only view of UPS/DHL/FedEx rate tables for verification
 
           7. Audit Log:
              - All admin actions tracked (quote save/delete, rule changes, FSC updates)

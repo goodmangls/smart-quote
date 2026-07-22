@@ -246,13 +246,10 @@
 | SignUpPage placeholders | "Optional", "Select" hardcoded | 번역 키로 변경 |
 | Header aria-label | "Select language" EN only | 번역 키로 변경 |
 
-### Issue 4: FedEx 미반영 카피 (MEDIUM, 2026-07-22 FedEx 통합 이후)
+### Issue 4: FedEx 미반영 카피 — ✅ RESOLVED (2026-07-22)
 
-| Location | Current | Should Be |
-|----------|---------|-----------|
-| `guide/locales/ko.ts:270` | "UPS와 DHL 공식 할증료 공지 페이지..." | UPS·DHL·FedEx 3사로 갱신 |
-| `calc.service.surcharge.notice.body` | "UPS/DHL 공식 공지를 기반으로..." | UPS/DHL/FedEx |
-| `calc.financial.fscHint` | "UPS: 매주 변경 · DHL: 매월 변경" | 3사 모두 매주 월요일 갱신 (현행 정책) |
+가이드 4언어, `calc.financial.fscHint`, `calc.service.surcharge.notice.body`,
+USER_GUIDE_ADMIN, AI chatbot 시스템 프롬프트를 UPS/DHL/FedEx 3사 기준으로 동기화 완료.
 
 ### Issue 5: 톤앤매너 가이드
 

@@ -92,13 +92,13 @@ export const en = {
         {
           title: '④ Financial Settings',
           description:
-            'Review applied exchange rates and FSC percentages. The system uses live rates but allows admin overrides. Express shipments (UPS/DHL) use DAP incoterm only.',
+            'Review applied exchange rates and FSC percentages. The system uses live rates but allows admin overrides. Express shipments (UPS/DHL/FedEx) use DAP incoterm only.',
           adminOnly: true,
         },
         {
           title: 'Results & Comparison',
           description:
-            'View side-by-side carrier comparison cards showing UPS and DHL rates. Each card breaks down origin costs, freight, destination charges, and final price.',
+            'View side-by-side carrier comparison cards showing UPS, DHL, and FedEx rates. Each card breaks down origin costs, freight, destination charges, and final price.',
         },
       ],
     },
@@ -238,7 +238,7 @@ export const en = {
         {
           title: 'Viewing Current Rates',
           description:
-            'The FSC widget displays current fuel surcharge percentages for DHL and UPS, both international and domestic. Each rate shows its last update date.',
+            'The FSC widget displays current fuel surcharge percentages for UPS, DHL, and FedEx, both international and domestic. Each rate shows its last update date.',
         },
         {
           title: 'Updating Rates',
@@ -268,7 +268,7 @@ export const en = {
         {
           title: 'Carrier Links',
           description:
-            'Quick links to official UPS and DHL surcharge announcement pages for verification.',
+            'Quick links to official UPS, DHL, and FedEx surcharge announcement pages for verification.',
         },
         {
           title: 'Important Notice',
@@ -322,7 +322,7 @@ export const en = {
         {
           title: 'Viewing Rate Tables',
           description:
-            'Browse carrier-specific rate tables (UPS, DHL) in a read-only format. Tables show weight-based pricing across all shipping zones.',
+            'Browse carrier-specific rate tables (UPS, DHL, FedEx) in a read-only format. Tables show weight-based pricing across all shipping zones.',
         },
         {
           title: 'Zone Reference',
