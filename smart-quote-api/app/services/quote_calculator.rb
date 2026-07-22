@@ -71,6 +71,12 @@ class QuoteCalculator
                            country: @input[:destinationCountry],
                            shipping_item_type: shipping_item_type
                          )
+    when "FEDEX"
+                         Calculators::FedexCost.call(
+                           billable_weight: @billable_weight,
+                           country: @input[:destinationCountry],
+                           shipping_item_type: shipping_item_type
+                         )
     else
                          Calculators::UpsCost.call(
                            billable_weight: @billable_weight,
@@ -82,7 +88,9 @@ class QuoteCalculator
     if shipping_item_type == "DOCUMENT"
       if @carrier == "DHL" && @billable_weight > Constants::DhlTariff::DHL_DOC_MAX_KG
         @user_warnings << "Document rates apply up to 2.0kg on DHL; Parcel tariff used for this weight."
-      elsif @carrier != "DHL" && @billable_weight > Constants::UpsTariff::UPS_DOC_MAX_KG
+      elsif @carrier == "FEDEX" && @billable_weight > Constants::FedexTariff::FEDEX_DOC_MAX_KG
+        @user_warnings << "Document rates apply up to 2.5kg on FedEx (Envelope/Pak); IP Parcel tariff used for this weight."
+      elsif @carrier == "UPS" && @billable_weight > Constants::UpsTariff::UPS_DOC_MAX_KG
         @user_warnings << "Document rates apply up to 5.0kg on UPS; Parcel tariff used for this weight."
       end
     end
@@ -133,7 +141,11 @@ class QuoteCalculator
     # FSC on (Base Rate + Margin)
     if @input[:fscPercent].nil?
       default_fsc = @db_fsc_rates.dig(@carrier, "international") ||
-                    (@carrier == "DHL" ? DEFAULT_FSC_PERCENT_DHL : DEFAULT_FSC_PERCENT)
+                    case @carrier
+                    when "DHL" then DEFAULT_FSC_PERCENT_DHL
+                    when "FEDEX" then DEFAULT_FSC_PERCENT_FEDEX
+                    else DEFAULT_FSC_PERCENT
+                    end
       fsc_percent = default_fsc
     else
       fsc_percent = @input[:fscPercent].to_f

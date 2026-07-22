@@ -1,9 +1,12 @@
 import { request } from './apiClient';
 
+export type FscCarrier = 'UPS' | 'DHL' | 'FEDEX';
+
 export interface FscRates {
   rates: {
     UPS: { international: number; domestic: number };
     DHL: { international: number; domestic: number };
+    FEDEX: { international: number; domestic: number };
   };
   updatedAt: string;
 }
@@ -13,9 +16,9 @@ export const getFscRates = async (): Promise<FscRates> => {
 };
 
 export const updateFscRate = async (
-  carrier: 'UPS' | 'DHL',
+  carrier: FscCarrier,
   international: number,
-  domestic: number
+  domestic: number,
 ): Promise<{ success: boolean }> => {
   return request<{ success: boolean }>('/api/v1/fsc/update', {
     method: 'POST',

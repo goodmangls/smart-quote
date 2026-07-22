@@ -1,1 +1,1 @@
-💄 ui(quote): Non-Document→Parcel 표기 + Parcel L/W/H 한 줄 레이아웃
+✅ test/style(fedex): InputSection i18n 라벨 테스트 수정 + rubocop/prettier 정리

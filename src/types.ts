@@ -45,7 +45,7 @@ export interface QuoteInput {
   // Market Variables
   exchangeRate: number; // KRW per USD
   fscPercent: number; // Fuel Surcharge %
-  overseasCarrier?: 'UPS' | 'DHL';
+  overseasCarrier?: 'UPS' | 'DHL' | 'FEDEX';
 
   // Manual Overrides
   manualPackingCost?: number; // Optional manual override for packing & docs
@@ -75,7 +75,7 @@ export interface QuoteInput {
   // DB-driven add-on rates (resolved from API, replaces hardcoded dhl_addons/ups_addons)
   resolvedAddonRates?: Array<{
     code: string;
-    carrier: 'DHL' | 'UPS';
+    carrier: 'DHL' | 'UPS'; // FedEx add-ons deferred
     nameEn: string;
     nameKo: string;
     chargeType: 'fixed' | 'per_piece' | 'per_carton' | 'calculated';
@@ -139,7 +139,7 @@ export interface QuoteResult {
   billableWeight: number;
   appliedZone: string;
   transitTime: string;
-  carrier: string; // 'UPS' | 'DHL'
+  carrier: string; // 'UPS' | 'DHL' | 'FEDEX'
   warnings: string[];
 
   breakdown: CostBreakdown;

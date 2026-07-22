@@ -15,7 +15,7 @@
 import { useMemo } from 'react';
 import { Incoterm, type QuoteInput, type CargoItem } from '@/types';
 
-type Carrier = 'UPS' | 'DHL';
+type Carrier = 'UPS' | 'DHL' | 'FEDEX';
 
 interface DeepLinkResult {
   /** Partial input suitable for `setInput((prev) => ({ ...prev, ...partial }))` */
@@ -26,14 +26,31 @@ interface DeepLinkResult {
 
 const AIRPORT_TO_COUNTRY: Readonly<Record<string, string>> = {
   // Origin codes (handful supported — most users expect KR)
-  ICN: 'KR', GMP: 'KR', PUS: 'KR',
+  ICN: 'KR',
+  GMP: 'KR',
+  PUS: 'KR',
   // Destination codes — best-effort mapping for top routes
-  LAX: 'US', JFK: 'US', ORD: 'US', IAH: 'US', ATL: 'US', SEA: 'US',
-  NRT: 'JP', HND: 'JP', KIX: 'JP',
-  PVG: 'CN', PEK: 'CN',
-  HKG: 'HK', TPE: 'TW',
-  FRA: 'DE', AMS: 'NL', CDG: 'FR', LHR: 'GB', MUC: 'DE',
-  DXB: 'AE', DOH: 'QA', IST: 'TR',
+  LAX: 'US',
+  JFK: 'US',
+  ORD: 'US',
+  IAH: 'US',
+  ATL: 'US',
+  SEA: 'US',
+  NRT: 'JP',
+  HND: 'JP',
+  KIX: 'JP',
+  PVG: 'CN',
+  PEK: 'CN',
+  HKG: 'HK',
+  TPE: 'TW',
+  FRA: 'DE',
+  AMS: 'NL',
+  CDG: 'FR',
+  LHR: 'GB',
+  MUC: 'DE',
+  DXB: 'AE',
+  DOH: 'QA',
+  IST: 'TR',
   SIN: 'SG',
 };
 
@@ -56,7 +73,7 @@ function clampNumber(raw: string | null | undefined, min: number, max: number): 
 function normalizeCarrier(raw: string | null | undefined): Carrier | undefined {
   if (!raw) return undefined;
   const v = raw.trim().toUpperCase();
-  if (v === 'UPS' || v === 'DHL') return v;
+  if (v === 'UPS' || v === 'DHL' || v === 'FEDEX') return v;
   return undefined;
 }
 
@@ -66,8 +83,13 @@ function normalizeIncoterm(raw: string | null | undefined): Incoterm | undefined
   // Only DAP is supported for express in BridgeLogis policy (CLAUDE.md), but we
   // accept others for completeness and let the form's downstream logic flag.
   const map: Readonly<Record<string, Incoterm>> = {
-    EXW: Incoterm.EXW, FOB: Incoterm.FOB, CNF: Incoterm.CNF,
-    'C&F': Incoterm.CNF, CIF: Incoterm.CIF, DAP: Incoterm.DAP, DDP: Incoterm.DDP,
+    EXW: Incoterm.EXW,
+    FOB: Incoterm.FOB,
+    CNF: Incoterm.CNF,
+    'C&F': Incoterm.CNF,
+    CIF: Incoterm.CIF,
+    DAP: Incoterm.DAP,
+    DDP: Incoterm.DDP,
   };
   return map[v];
 }
@@ -81,29 +103,49 @@ export function parseQuoteDeepLink(params: URLSearchParams): DeepLinkResult {
   let touched = false;
 
   const origin = normalizeCountry(params.get('origin'));
-  if (origin) { partial.originCountry = origin; touched = true; }
+  if (origin) {
+    partial.originCountry = origin;
+    touched = true;
+  }
 
   const dest = normalizeCountry(params.get('dest') ?? params.get('destination'));
-  if (dest) { partial.destinationCountry = dest; touched = true; }
+  if (dest) {
+    partial.destinationCountry = dest;
+    touched = true;
+  }
 
   const zip = (params.get('zip') ?? params.get('postcode'))?.trim();
-  if (zip && zip.length <= 12) { partial.destinationZip = zip; touched = true; }
+  if (zip && zip.length <= 12) {
+    partial.destinationZip = zip;
+    touched = true;
+  }
 
   const carrier = normalizeCarrier(params.get('carrier'));
-  if (carrier) { partial.overseasCarrier = carrier; touched = true; }
+  if (carrier) {
+    partial.overseasCarrier = carrier;
+    touched = true;
+  }
 
   const incoterm = normalizeIncoterm(params.get('incoterm'));
-  if (incoterm) { partial.incoterm = incoterm; touched = true; }
+  if (incoterm) {
+    partial.incoterm = incoterm;
+    touched = true;
+  }
 
   // Cargo dimensions — single item override
   const weight = clampNumber(params.get('weight') ?? params.get('wt'), 0.1, 5000);
   const length = clampNumber(params.get('L') ?? params.get('length'), 1, 500);
-  const width  = clampNumber(params.get('W') ?? params.get('width'),  1, 500);
+  const width = clampNumber(params.get('W') ?? params.get('width'), 1, 500);
   const height = clampNumber(params.get('H') ?? params.get('height'), 1, 500);
-  const qty    = clampNumber(params.get('qty') ?? params.get('quantity'), 1, 1000);
+  const qty = clampNumber(params.get('qty') ?? params.get('quantity'), 1, 1000);
 
-  if (weight !== undefined || length !== undefined || width !== undefined ||
-      height !== undefined || qty !== undefined) {
+  if (
+    weight !== undefined ||
+    length !== undefined ||
+    width !== undefined ||
+    height !== undefined ||
+    qty !== undefined
+  ) {
     const item: CargoItem = {
       id: '1',
       weight: weight ?? 1,

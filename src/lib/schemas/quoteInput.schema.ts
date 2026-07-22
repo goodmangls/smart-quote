@@ -15,7 +15,9 @@ export const incotermSchema = z.enum(Incoterm);
 export const packingTypeSchema = z.enum(PackingType);
 export const shippingItemTypeSchema = z.enum(ShippingItemType);
 export const shippingModeSchema = z.enum(['Door-to-Door', 'Door-to-Airport']);
-export const carrierSchema = z.enum(['UPS', 'DHL']);
+export const carrierSchema = z.enum(['UPS', 'DHL', 'FEDEX']);
+/** Addon rates remain UPS/DHL until FedEx add-on data arrives. */
+export const addonCarrierSchema = z.enum(['UPS', 'DHL']);
 
 const resolvedSurchargeSchema = z.object({
   code: z.string().min(1).max(50),
@@ -28,7 +30,7 @@ const resolvedSurchargeSchema = z.object({
 
 const resolvedAddonRateSchema = z.object({
   code: z.string().min(1).max(50),
-  carrier: carrierSchema,
+  carrier: addonCarrierSchema,
   nameEn: z.string().max(200),
   nameKo: z.string().max(200),
   chargeType: z.enum(['fixed', 'per_piece', 'per_carton', 'calculated']),

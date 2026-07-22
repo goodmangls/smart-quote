@@ -3,6 +3,8 @@ import { ChevronDown, ChevronUp, Plus, Trash2 } from 'lucide-react';
 import type { FscHistoryData } from '@/config/fsc-history';
 import { FscChart } from '../FscChart';
 
+type HistoryCarrier = 'ups' | 'dhl' | 'fedex';
+
 interface ChartLine {
   entries: { date: string; rate: number }[];
   color: string;
@@ -16,15 +18,16 @@ interface Props {
   chartLines: ChartLine[];
   latestUps: number | null;
   latestDhl: number | null;
+  latestFedex: number | null;
   readOnly: boolean;
-  addCarrier: 'ups' | 'dhl';
+  addCarrier: HistoryCarrier;
   addDate: string;
   addRate: string;
-  onAddCarrierChange: (v: 'ups' | 'dhl') => void;
+  onAddCarrierChange: (v: HistoryCarrier) => void;
   onAddDateChange: (v: string) => void;
   onAddRateChange: (v: string) => void;
   onAddEntry: () => void;
-  onRemoveEntry: (carrier: 'ups' | 'dhl', date: string) => void;
+  onRemoveEntry: (carrier: HistoryCarrier, date: string) => void;
 }
 
 export const FscHistoryPanel: React.FC<Props> = ({
@@ -34,6 +37,7 @@ export const FscHistoryPanel: React.FC<Props> = ({
   chartLines,
   latestUps,
   latestDhl,
+  latestFedex,
   readOnly,
   addCarrier,
   addDate,
@@ -63,20 +67,23 @@ export const FscHistoryPanel: React.FC<Props> = ({
           <FscChart lines={chartLines} />
         </div>
 
-        <div className='flex items-center gap-4 text-[10px] text-gray-500 dark:text-gray-400'>
+        <div className='flex flex-wrap items-center gap-4 text-[10px] text-gray-500 dark:text-gray-400'>
           <div className='flex items-center gap-1.5'>
             <span className='inline-block w-2.5 h-2.5 rounded-full bg-blue-500' />
-            <span>UPS (Weekly){latestUps !== null ? ` — ${latestUps}%` : ''}</span>
+            <span>UPS{latestUps !== null ? ` — ${latestUps}%` : ''}</span>
           </div>
           <div className='flex items-center gap-1.5'>
             <span className='inline-block w-2.5 h-2.5 rounded-full bg-amber-500' />
-            <span>DHL (Weekly){latestDhl !== null ? ` — ${latestDhl}%` : ''}</span>
+            <span>DHL{latestDhl !== null ? ` — ${latestDhl}%` : ''}</span>
+          </div>
+          <div className='flex items-center gap-1.5'>
+            <span className='inline-block w-2.5 h-2.5 rounded-full bg-emerald-500' />
+            <span>FEDEX{latestFedex !== null ? ` — ${latestFedex}%` : ''}</span>
           </div>
         </div>
 
         <div className='text-[10px] text-gray-400 dark:text-gray-500 space-y-0.5'>
-          <p>UPS: 매주 월요일 갱신 (Weekly, every Monday)</p>
-          <p>DHL: 매주 월요일 갱신 (Weekly, every Monday)</p>
+          <p>UPS / DHL / FedEx: 매주 월요일 갱신 (Weekly, every Monday)</p>
         </div>
 
         {!readOnly && (
@@ -89,11 +96,12 @@ export const FscHistoryPanel: React.FC<Props> = ({
                 <label className='block text-[10px] text-gray-400 mb-0.5'>Carrier</label>
                 <select
                   value={addCarrier}
-                  onChange={(e) => onAddCarrierChange(e.target.value as 'ups' | 'dhl')}
+                  onChange={(e) => onAddCarrierChange(e.target.value as HistoryCarrier)}
                   className='px-2 py-1 text-xs rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white'
                 >
                   <option value='ups'>UPS</option>
                   <option value='dhl'>DHL</option>
+                  <option value='fedex'>FEDEX</option>
                 </select>
               </div>
               <div>
@@ -131,12 +139,12 @@ export const FscHistoryPanel: React.FC<Props> = ({
         )}
 
         <div className='max-h-40 overflow-y-auto space-y-1'>
-          {(['ups', 'dhl'] as const).map((carrier) => (
+          {(['ups', 'dhl', 'fedex'] as const).map((carrier) => (
             <div key={carrier}>
               <p className='text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase mb-0.5'>
                 {carrier}
               </p>
-              {history[carrier].map((entry) => (
+              {(history[carrier] ?? []).map((entry) => (
                 <div
                   key={`${carrier}-${entry.date}`}
                   className='flex items-center justify-between py-0.5 px-1 text-[10px] text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/30 rounded'

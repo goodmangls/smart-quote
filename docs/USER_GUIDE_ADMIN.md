@@ -2,7 +2,7 @@
 
 > **KS Ways** Internal Logistics Quoting System
 >
-> Version 3.2 | Last Updated: 2026-04-27
+> Version 3.3 | Last Updated: 2026-07-21
 
 ---
 
@@ -174,13 +174,14 @@ Even with auto-resolved margins, you can always adjust the margin slider manuall
 
 ### FSC Rate Widget
 
-Displays current fuel surcharge percentages tracked for UPS and DHL.
+Displays current fuel surcharge percentages tracked for UPS, DHL, and FedEx.
 
 | Field | Description |
 |-------|-------------|
 | UPS International FSC | Current UPS fuel surcharge % |
 | DHL International FSC | Current DHL fuel surcharge % |
-| External Links | Direct links to UPS/DHL official surcharge pages for verification |
+| FedEx International FSC | Current FedEx fuel surcharge % (default 39.75% from 2026-07-20) |
+| External Links | Direct links to UPS/DHL/FedEx official surcharge pages for verification |
 
 ### Update FSC
 
@@ -263,6 +264,7 @@ Read-only viewer for carrier rate tables.
 |-------|-------------|
 | UPS Tariff | Z1-Z10 zone rates, weight tiers 0.5-70kg |
 | DHL Tariff | Z1-Z8 zone rates, weight tiers 0.5-70kg |
+| FedEx Tariff | Letter zones A–Y; Envelope / Pak / IP exact + per-kg ranges |
 
 Use this to verify rate accuracy and compare carrier pricing.
 
@@ -343,7 +345,7 @@ When a **Member** saves a quote, a Slack notification is automatically sent to t
 |-------|---------|
 | Reference No | SQ-YYYY-NNNN |
 | Member | Company / Name / Email |
-| Carrier | UPS or DHL |
+| Carrier | UPS, DHL, or FedEx |
 | Destination | Country name |
 | Billable Weight | Applied weight |
 | Total Quote | KRW and USD amounts |

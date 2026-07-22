@@ -13,6 +13,7 @@ export interface FscHistoryEntry {
 export interface FscHistoryData {
   ups: FscHistoryEntry[];
   dhl: FscHistoryEntry[];
+  fedex: FscHistoryEntry[];
 }
 
 const STORAGE_KEY = 'fsc_history';
@@ -71,6 +72,7 @@ export const DEFAULT_FSC_HISTORY: FscHistoryData = {
     { date: '2026-07-13', rate: 39.75 },
     { date: '2026-07-20', rate: 38.5 },
   ],
+  fedex: [{ date: '2026-07-20', rate: 39.75 }],
 };
 
 function isValidEntry(e: unknown): e is FscHistoryEntry {
@@ -108,6 +110,7 @@ export function loadFscHistory(): FscHistoryData {
         return {
           ups: mergeWithDefaultHistory('ups', parsed.ups),
           dhl: mergeWithDefaultHistory('dhl', parsed.dhl),
+          fedex: mergeWithDefaultHistory('fedex', Array.isArray(parsed.fedex) ? parsed.fedex : []),
         };
       }
     }
@@ -125,7 +128,7 @@ export function saveFscHistory(data: FscHistoryData): void {
 /** Add a new entry to the given carrier's history (sorted by date). */
 export function addFscEntry(
   data: FscHistoryData,
-  carrier: 'ups' | 'dhl',
+  carrier: 'ups' | 'dhl' | 'fedex',
   entry: FscHistoryEntry,
 ): FscHistoryData {
   const updated = structuredClone(data);
@@ -139,7 +142,7 @@ export function addFscEntry(
 /** Remove an entry by date from the given carrier's history. */
 export function removeFscEntry(
   data: FscHistoryData,
-  carrier: 'ups' | 'dhl',
+  carrier: 'ups' | 'dhl' | 'fedex',
   date: string,
 ): FscHistoryData {
   const updated = structuredClone(data);

@@ -17,6 +17,10 @@ module Calculators
       rated = round_to_half(@billable_weight)
       is_document = @shipping_item_type == "DOCUMENT"
 
+      if @carrier == "FEDEX"
+        return resolve_fedex(is_document, rated)
+      end
+
       if @carrier == "DHL"
         if is_document && rated <= Constants::DhlTariff::DHL_DOC_MAX_KG
           return {
@@ -48,6 +52,28 @@ module Calculators
     end
 
     private
+
+    def resolve_fedex(is_document, rated)
+      if is_document && rated <= Constants::FedexTariff::FEDEX_ENVELOPE_MAX_KG
+        return {
+          exact: Constants::FedexTariff::FEDEX_ENVELOPE_EXACT_RATES,
+          range: Constants::FedexTariff::FEDEX_RANGE_RATES,
+          used_document: true
+        }
+      end
+      if is_document && rated <= Constants::FedexTariff::FEDEX_DOC_MAX_KG
+        return {
+          exact: Constants::FedexTariff::FEDEX_PAK_EXACT_RATES,
+          range: Constants::FedexTariff::FEDEX_RANGE_RATES,
+          used_document: true
+        }
+      end
+      {
+        exact: Constants::FedexTariff::FEDEX_EXACT_RATES,
+        range: Constants::FedexTariff::FEDEX_RANGE_RATES,
+        used_document: false
+      }
+    end
 
     def round_to_half(num)
       (num * 2).ceil / 2.0

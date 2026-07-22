@@ -1,5 +1,12 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { QuoteInput, QuoteResult, QuoteDetail, Incoterm, PackingType, ShippingItemType } from '../types';
+import {
+  QuoteInput,
+  QuoteResult,
+  QuoteDetail,
+  Incoterm,
+  PackingType,
+  ShippingItemType,
+} from '../types';
 import { generatePDF } from '@/lib/pdfService';
 import { calculateQuote } from '@/features/quote/services/calculationService';
 import { trackEvent, IntercomEvents } from '@/lib/intercom';
@@ -16,6 +23,7 @@ import {
   DEFAULT_EXCHANGE_RATE,
   DEFAULT_FSC_PERCENT,
   DEFAULT_FSC_PERCENT_DHL,
+  DEFAULT_FSC_PERCENT_FEDEX,
 } from '@/config/rates';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { useResolvedMargin } from '@/features/dashboard/hooks/useResolvedMargin';
@@ -67,7 +75,12 @@ const QuoteCalculator: React.FC<{ isPublic?: boolean }> = ({ isPublic = false })
   React.useEffect(() => {
     const carrier = input.overseasCarrier || 'UPS';
     if (lastFscCarrier !== carrier) {
-      const carrierDefault = carrier === 'DHL' ? DEFAULT_FSC_PERCENT_DHL : DEFAULT_FSC_PERCENT;
+      const carrierDefault =
+        carrier === 'DHL'
+          ? DEFAULT_FSC_PERCENT_DHL
+          : carrier === 'FEDEX'
+            ? DEFAULT_FSC_PERCENT_FEDEX
+            : DEFAULT_FSC_PERCENT;
       setInput((prev) => ({ ...prev, fscPercent: carrierDefault }));
       setLastFscCarrier(carrier);
     }

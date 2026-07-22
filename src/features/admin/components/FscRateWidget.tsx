@@ -26,6 +26,7 @@ export const FscRateWidget: React.FC<FscRateWidgetProps> = ({ readOnly = false }
     chartLines,
     latestUps,
     latestDhl,
+    latestFedex,
   } = useFscHistory();
 
   return (
@@ -101,6 +102,7 @@ export const FscRateWidget: React.FC<FscRateWidgetProps> = ({ readOnly = false }
         chartLines={chartLines}
         latestUps={latestUps}
         latestDhl={latestDhl}
+        latestFedex={latestFedex}
         readOnly={readOnly}
         addCarrier={addCarrier}
         addDate={addDate}

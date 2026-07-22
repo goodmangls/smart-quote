@@ -79,13 +79,20 @@ describe('parseQuoteDeepLink — pure parser', () => {
   });
 
   describe('carrier', () => {
-    it('accepts UPS / DHL', () => {
-      expect(parseQuoteDeepLink(new URLSearchParams('carrier=UPS')).partial.overseasCarrier).toBe('UPS');
-      expect(parseQuoteDeepLink(new URLSearchParams('carrier=DHL')).partial.overseasCarrier).toBe('DHL');
+    it('accepts UPS / DHL / FEDEX', () => {
+      expect(parseQuoteDeepLink(new URLSearchParams('carrier=UPS')).partial.overseasCarrier).toBe(
+        'UPS',
+      );
+      expect(parseQuoteDeepLink(new URLSearchParams('carrier=DHL')).partial.overseasCarrier).toBe(
+        'DHL',
+      );
+      expect(parseQuoteDeepLink(new URLSearchParams('carrier=FEDEX')).partial.overseasCarrier).toBe(
+        'FEDEX',
+      );
     });
 
-    it('rejects unknown carriers (FedEx etc.)', () => {
-      const r = parseQuoteDeepLink(new URLSearchParams('carrier=FEDEX'));
+    it('rejects unknown carriers', () => {
+      const r = parseQuoteDeepLink(new URLSearchParams('carrier=TNT'));
       expect(r.partial.overseasCarrier).toBeUndefined();
     });
   });
@@ -115,20 +122,23 @@ describe('parseQuoteDeepLink — pure parser', () => {
     });
 
     it('parses L/W/H + qty', () => {
-      const r = parseQuoteDeepLink(
-        new URLSearchParams('weight=5&L=50&W=40&H=30&qty=2'),
-      );
+      const r = parseQuoteDeepLink(new URLSearchParams('weight=5&L=50&W=40&H=30&qty=2'));
       expect(r.partial.items?.[0]).toMatchObject({
-        weight: 5, length: 50, width: 40, height: 30, quantity: 2,
+        weight: 5,
+        length: 50,
+        width: 40,
+        height: 30,
+        quantity: 2,
       });
     });
 
     it('accepts long-form aliases length/width/height/quantity', () => {
-      const r = parseQuoteDeepLink(
-        new URLSearchParams('length=100&width=80&height=50&quantity=3'),
-      );
+      const r = parseQuoteDeepLink(new URLSearchParams('length=100&width=80&height=50&quantity=3'));
       expect(r.partial.items?.[0]).toMatchObject({
-        length: 100, width: 80, height: 50, quantity: 3,
+        length: 100,
+        width: 80,
+        height: 50,
+        quantity: 3,
       });
     });
 
@@ -157,31 +167,32 @@ describe('parseQuoteDeepLink — pure parser', () => {
     it('uses fallback defaults when only some dims provided', () => {
       const r = parseQuoteDeepLink(new URLSearchParams('weight=10'));
       expect(r.partial.items?.[0]).toMatchObject({
-        weight: 10, length: 10, width: 10, height: 10, quantity: 1,
+        weight: 10,
+        length: 10,
+        width: 10,
+        height: 10,
+        quantity: 1,
       });
     });
   });
 
   describe('hasPrefill flag', () => {
     it('false for irrelevant query (UTM only)', () => {
-      const r = parseQuoteDeepLink(
-        new URLSearchParams('utm_source=insights&utm_medium=cta'),
-      );
+      const r = parseQuoteDeepLink(new URLSearchParams('utm_source=insights&utm_medium=cta'));
       expect(r.hasPrefill).toBe(false);
     });
 
     it('true when at least one prefill key present', () => {
-      const r = parseQuoteDeepLink(
-        new URLSearchParams('origin=KR&utm_source=insights'),
-      );
+      const r = parseQuoteDeepLink(new URLSearchParams('origin=KR&utm_source=insights'));
       expect(r.hasPrefill).toBe(true);
     });
   });
 
   describe('full integration — Phase 2 deep-link example', () => {
     it('handles the canonical Insights CTA URL', () => {
-      const url = 'origin=ICN&dest=LAX&zip=90001&weight=5&L=50&W=40&H=30&carrier=UPS&qty=1' +
-                  '&utm_source=insights&utm_medium=inline-cta&utm_campaign=daily-brief-2026-05-01';
+      const url =
+        'origin=ICN&dest=LAX&zip=90001&weight=5&L=50&W=40&H=30&carrier=UPS&qty=1' +
+        '&utm_source=insights&utm_medium=inline-cta&utm_campaign=daily-brief-2026-05-01';
       const r = parseQuoteDeepLink(new URLSearchParams(url));
       expect(r.hasPrefill).toBe(true);
       expect(r.partial).toMatchObject({
@@ -189,9 +200,16 @@ describe('parseQuoteDeepLink — pure parser', () => {
         destinationCountry: 'US',
         destinationZip: '90001',
         overseasCarrier: 'UPS',
-        items: [{
-          id: '1', weight: 5, length: 50, width: 40, height: 30, quantity: 1,
-        }],
+        items: [
+          {
+            id: '1',
+            weight: 5,
+            length: 50,
+            width: 40,
+            height: 30,
+            quantity: 1,
+          },
+        ],
       });
     });
   });

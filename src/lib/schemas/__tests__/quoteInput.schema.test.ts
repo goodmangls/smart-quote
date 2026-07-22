@@ -147,8 +147,14 @@ describe('quoteInputSchema — enum failures', () => {
     ).toBe(false);
   });
 
-  it('rejects invalid overseasCarrier', () => {
+  it('accepts FEDEX overseasCarrier', () => {
     expect(quoteInputSchema.safeParse({ ...validInput, overseasCarrier: 'FEDEX' }).success).toBe(
+      true,
+    );
+  });
+
+  it('rejects invalid overseasCarrier', () => {
+    expect(quoteInputSchema.safeParse({ ...validInput, overseasCarrier: 'TNT' }).success).toBe(
       false,
     );
   });

@@ -3,19 +3,23 @@ import {
   DEFAULT_EXCHANGE_RATE,
   DEFAULT_FSC_PERCENT,
   DEFAULT_FSC_PERCENT_DHL,
+  DEFAULT_FSC_PERCENT_FEDEX,
 } from '@/config/rates';
 import { MAX_MARGIN_PERCENT } from '@/config/business-rules';
+import { FEDEX_DOC_MAX_KG } from '@/config/fedex_tariff';
 import { calculateDhlAddOnCosts } from './dhlAddonCalculator';
 import { calculateUpsAddOnCosts } from './upsAddonCalculator';
 import { calculateItemCosts, computePackingTotal } from './itemCalculation';
 import { calculateUpsCosts } from './upsCalculation';
 import { calculateDhlCosts } from './dhlCalculation';
+import { calculateFedexCosts } from './fedexCalculation';
 import { CarrierCostResult } from './carrierRateEngine';
 
 // Re-exports for backward compatibility (tests and other consumers import from here)
 export { calculateVolumetricWeight, calculateItemCosts } from './itemCalculation';
 export { calculateUpsCosts, determineUpsZone } from './upsCalculation';
 export { calculateDhlCosts, determineDhlZone } from './dhlCalculation';
+export { calculateFedexCosts, determineFedexZone } from './fedexCalculation';
 
 export const calculateQuote = (input: QuoteInput): QuoteResult => {
   const carrier = input.overseasCarrier || 'UPS';
@@ -59,20 +63,32 @@ export const calculateQuote = (input: QuoteInput): QuoteResult => {
     case 'DHL':
       carrierResult = calculateDhlCosts(billableWeight, input.destinationCountry, shippingItemType);
       break;
+    case 'FEDEX':
+      carrierResult = calculateFedexCosts(
+        billableWeight,
+        input.destinationCountry,
+        shippingItemType,
+      );
+      break;
     default:
       carrierResult = calculateUpsCosts(billableWeight, input.destinationCountry, shippingItemType);
       break;
   }
 
-  if (
-    shippingItemType === ShippingItemType.DOCUMENT &&
-    ((carrier === 'DHL' && billableWeight > 2) || (carrier !== 'DHL' && billableWeight > 5))
-  ) {
-    userWarnings.push(
-      carrier === 'DHL'
-        ? 'Document rates apply up to 2.0kg on DHL; Parcel tariff used for this weight.'
-        : 'Document rates apply up to 5.0kg on UPS; Parcel tariff used for this weight.',
-    );
+  if (shippingItemType === ShippingItemType.DOCUMENT) {
+    if (carrier === 'DHL' && billableWeight > 2) {
+      userWarnings.push(
+        'Document rates apply up to 2.0kg on DHL; Parcel tariff used for this weight.',
+      );
+    } else if (carrier === 'FEDEX' && billableWeight > FEDEX_DOC_MAX_KG) {
+      userWarnings.push(
+        'Document rates apply up to 2.5kg on FedEx (Envelope/Pak); IP Parcel tariff used for this weight.',
+      );
+    } else if (carrier === 'UPS' && billableWeight > 5) {
+      userWarnings.push(
+        'Document rates apply up to 5.0kg on UPS; Parcel tariff used for this weight.',
+      );
+    }
   }
 
   // System surcharges from DB (War Risk, PSS, EBS, etc.)
@@ -144,7 +160,12 @@ export const calculateQuote = (input: QuoteInput): QuoteResult => {
   const marginAmount = baseWithMargin - baseRate;
 
   // Step 3: FSC on (Base Rate + Margin)
-  const defaultFsc = carrier === 'DHL' ? DEFAULT_FSC_PERCENT_DHL : DEFAULT_FSC_PERCENT;
+  const defaultFsc =
+    carrier === 'DHL'
+      ? DEFAULT_FSC_PERCENT_DHL
+      : carrier === 'FEDEX'
+        ? DEFAULT_FSC_PERCENT_FEDEX
+        : DEFAULT_FSC_PERCENT;
   const fscRate = (input.fscPercent || defaultFsc) / 100;
   const intlFscNew = Math.round(baseWithMargin * fscRate);
 
