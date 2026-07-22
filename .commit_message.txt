@@ -1,1 +1,1 @@
-💄 ui(comparison): 배지 행 높이 고정으로 3캐리어 정렬 + Zone/Transit/CO₂ 세로 배치 가독성 개선
+🔗 chore(fsc): FSC 위젯 DHL 링크에 #/fuel_surcharge 앵커 추가
