@@ -32,4 +32,4 @@ export const UPS_FSC_URL =
 export const UPS_RATES_HUB_URL =
   'https://www.ups.com/kr/ko/support/shipping-support/shipping-costs-rates';
 export const DHL_FSC_URL = 'https://mydhl.express.dhl/kr/ko/ship/surcharges.html#/fuel_surcharge';
-export const FEDEX_FSC_URL = 'https://www.fedex.com/en-us/shipping/fuel-surcharge.html';
+export const FEDEX_FSC_URL = 'https://www.fedex.com/ko-kr/shipping/surcharges.html';

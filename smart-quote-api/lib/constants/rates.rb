@@ -24,6 +24,6 @@ module Constants
     MAX_MARGIN_PERCENT = 80 # Maximum margin rate (%)
     UPS_FSC_URL = "https://www.ups.com/kr/ko/support/shipping-support/shipping-costs-rates/fuel-surcharges.page"
     UPS_RATES_HUB_URL = "https://www.ups.com/kr/ko/support/shipping-support/shipping-costs-rates"
-    FEDEX_FSC_URL = "https://www.fedex.com/en-us/shipping/fuel-surcharge.html"
+    FEDEX_FSC_URL = "https://www.fedex.com/ko-kr/shipping/surcharges.html"
   end
 end
