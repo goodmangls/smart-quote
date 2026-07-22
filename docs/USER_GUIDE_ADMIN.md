@@ -2,7 +2,7 @@
 
 > **KS Ways** Internal Logistics Quoting System
 >
-> Version 3.3 | Last Updated: 2026-07-21
+> Version 3.4 | Last Updated: 2026-07-22
 
 ---
 
@@ -136,7 +136,7 @@ Six new selectable DHL add-ons are available:
 
 ### Incoterm Policy
 
-> **Note**: UPS/DHL express shipments use **DAP only** — no exceptions.
+> **Note**: UPS/DHL/FedEx express shipments use **DAP only** — no exceptions.
 
 ---
 
@@ -205,7 +205,7 @@ Full CRUD for carrier-specific surcharges.
 |-------|-------------|
 | Code | Unique surcharge code (e.g., `UPS_AHS`) |
 | Name / Name (KO) | English and Korean surcharge names |
-| Carrier | UPS, DHL, or ALL |
+| Carrier | UPS, DHL, FedEx, or ALL |
 | Charge Type | Per-shipment, per-piece, or percentage |
 | Amount | Surcharge amount in KRW or % |
 | Active | Enable/disable toggle |
@@ -214,7 +214,7 @@ Full CRUD for carrier-specific surcharges.
 
 - **Surcharge Table**: View all surcharges with edit/delete actions
 - **Surcharge Form**: Add or edit surcharge details
-- **Carrier Links**: Quick links to official UPS/DHL surcharge reference pages
+- **Carrier Links**: Quick links to official UPS/DHL/FedEx surcharge reference pages
 - **Notice**: Warning about manual surcharge update requirements
 
 ---
