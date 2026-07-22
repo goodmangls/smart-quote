@@ -215,24 +215,23 @@ const CarrierColumn: React.FC<CarrierColumnProps> = ({
       : result.transitTime;
   return (
     <div className={`p-4 ${isCurrent ? 'bg-brand-blue-50/50 dark:bg-brand-blue-900/10' : ''}`}>
-      {badges.length > 0 && (
-        <div className='flex flex-wrap gap-1 mb-2'>
-          {badges.map((b) => {
-            const cfg = BADGE_STYLE[b];
-            const label = t(cfg.i18nKey);
-            return (
-              <span
-                key={b}
-                className={`inline-flex items-center gap-0.5 text-[9px] font-semibold px-1.5 py-0.5 rounded-full ${cfg.className}`}
-                title={label}
-              >
-                <span>{cfg.icon}</span>
-                <span>{label}</span>
-              </span>
-            );
-          })}
-        </div>
-      )}
+      {/* min-h keeps the three columns vertically aligned even when a carrier wins no badge */}
+      <div className='flex flex-wrap gap-1 mb-2 min-h-[20px]'>
+        {badges.map((b) => {
+          const cfg = BADGE_STYLE[b];
+          const label = t(cfg.i18nKey);
+          return (
+            <span
+              key={b}
+              className={`inline-flex items-center gap-0.5 text-[9px] font-semibold px-1.5 py-0.5 rounded-full ${cfg.className}`}
+              title={label}
+            >
+              <span>{cfg.icon}</span>
+              <span>{label}</span>
+            </span>
+          );
+        })}
+      </div>
       <div className='flex items-center justify-between mb-3'>
         <span className='text-sm font-bold text-gray-900 dark:text-white'>{carrier}</span>
         {isCurrent ? (
@@ -257,24 +256,29 @@ const CarrierColumn: React.FC<CarrierColumnProps> = ({
               : formatUSDInt(result.totalQuoteAmountUSD)}
           </p>
         </div>
-        <div className='grid grid-cols-2 gap-2 text-xs'>
-          <div>
-            <span className='text-gray-500 dark:text-gray-400'>Zone</span>
-            <p className='font-semibold text-gray-800 dark:text-gray-200'>{result.appliedZone}</p>
-          </div>
-          <div>
-            <span className='text-gray-500 dark:text-gray-400'>Transit</span>
-            <p className='font-semibold text-gray-800 dark:text-gray-200'>{transitLabel}</p>
-          </div>
-        </div>
-        {co2Kg !== null && co2Kg !== undefined && (
-          <div className='text-xs'>
-            <span className='text-gray-500 dark:text-gray-400'>{t('co2.label')}</span>
-            <p className='font-semibold text-gray-800 dark:text-gray-200'>
-              {co2Kg.toFixed(1)} kg CO₂
+        {/* Zone / Transit / CO₂ stacked as label–value rows to avoid long zone labels colliding with transit text */}
+        <div className='text-xs space-y-1'>
+          <div className='flex items-baseline justify-between gap-2'>
+            <span className='text-gray-500 dark:text-gray-400 shrink-0'>Zone</span>
+            <p className='font-semibold text-gray-800 dark:text-gray-200 text-right'>
+              {result.appliedZone}
             </p>
           </div>
-        )}
+          <div className='flex items-baseline justify-between gap-2'>
+            <span className='text-gray-500 dark:text-gray-400 shrink-0'>Transit</span>
+            <p className='font-semibold text-gray-800 dark:text-gray-200 text-right'>
+              {transitLabel}
+            </p>
+          </div>
+          {co2Kg !== null && co2Kg !== undefined && (
+            <div className='flex items-baseline justify-between gap-2'>
+              <span className='text-gray-500 dark:text-gray-400 shrink-0'>{t('co2.label')}</span>
+              <p className='font-semibold text-gray-800 dark:text-gray-200 text-right'>
+                {co2Kg.toFixed(1)} kg CO₂
+              </p>
+            </div>
+          )}
+        </div>
         {!isCurrent && diff !== undefined && diffPercent !== undefined && (
           <div
             className={`text-xs font-semibold px-2 py-1 rounded-md text-center ${
