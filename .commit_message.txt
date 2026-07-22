@@ -1,1 +1,1 @@
-📝 docs: CLAUDE.md·README.md FedEx 3캐리어 통합 반영 (요금표·존·FSC 39.75%·테스트 수)
+📝 docs: AGENTS.md·copy.md·DESIGN.md FedEx 3캐리어 반영 + 랜딩 캐리어 수 2→3 수정
