@@ -5,7 +5,8 @@ class FscFetcher
   # quote calculator defaults so widgets and calculations show the same FSC.
   DEFAULT_RATES = {
     "UPS" => { "international" => DEFAULT_FSC_PERCENT.to_f, "domestic" => DEFAULT_FSC_PERCENT.to_f },
-    "DHL" => { "international" => DEFAULT_FSC_PERCENT_DHL.to_f, "domestic" => DEFAULT_FSC_PERCENT_DHL.to_f }
+    "DHL" => { "international" => DEFAULT_FSC_PERCENT_DHL.to_f, "domestic" => DEFAULT_FSC_PERCENT_DHL.to_f },
+    "FEDEX" => { "international" => DEFAULT_FSC_PERCENT_FEDEX.to_f, "domestic" => DEFAULT_FSC_PERCENT_FEDEX.to_f }
   }.freeze
 
   class << self

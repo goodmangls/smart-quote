@@ -1,1 +1,1 @@
-✅ test/style(fedex): InputSection i18n 라벨 테스트 수정 + rubocop/prettier 정리
+🔗 chore(fsc): FedEx FSC 링크 ko-kr 서차지 페이지로 교체 + 폴백에 FEDEX 39.75% 추가
