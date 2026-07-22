@@ -19,41 +19,25 @@ describe('rateTableResolver', () => {
   });
 
   it('UPS Document within 5kg uses Document table', () => {
-    const { exact, usedDocument } = resolveCarrierRateTables(
-      'UPS',
-      ShippingItemType.DOCUMENT,
-      1,
-    );
+    const { exact, usedDocument } = resolveCarrierRateTables('UPS', ShippingItemType.DOCUMENT, 1);
     expect(usedDocument).toBe(true);
     expect(exact).toBe(UPS_DOC_EXACT_RATES);
   });
 
   it('UPS Document above 5kg falls back to Non-Document', () => {
-    const { exact, usedDocument } = resolveCarrierRateTables(
-      'UPS',
-      ShippingItemType.DOCUMENT,
-      5.1,
-    );
+    const { exact, usedDocument } = resolveCarrierRateTables('UPS', ShippingItemType.DOCUMENT, 5.1);
     expect(usedDocument).toBe(false);
     expect(exact).toBe(UPS_EXACT_RATES);
   });
 
   it('DHL Document within 2kg uses Document table', () => {
-    const { exact, usedDocument } = resolveCarrierRateTables(
-      'DHL',
-      ShippingItemType.DOCUMENT,
-      2,
-    );
+    const { exact, usedDocument } = resolveCarrierRateTables('DHL', ShippingItemType.DOCUMENT, 2);
     expect(usedDocument).toBe(true);
     expect(exact).toBe(DHL_DOC_EXACT_RATES);
   });
 
   it('DHL Document above 2kg falls back to Non-Document', () => {
-    const { exact, usedDocument } = resolveCarrierRateTables(
-      'DHL',
-      ShippingItemType.DOCUMENT,
-      2.1,
-    );
+    const { exact, usedDocument } = resolveCarrierRateTables('DHL', ShippingItemType.DOCUMENT, 2.1);
     expect(usedDocument).toBe(false);
     expect(exact).toBe(DHL_EXACT_RATES);
   });
@@ -79,11 +63,7 @@ describe('rateTableResolver', () => {
   });
 
   it('FedEx Document above 2.5kg falls back to IP', () => {
-    const { exact, usedDocument } = resolveCarrierRateTables(
-      'FEDEX',
-      ShippingItemType.DOCUMENT,
-      3,
-    );
+    const { exact, usedDocument } = resolveCarrierRateTables('FEDEX', ShippingItemType.DOCUMENT, 3);
     expect(usedDocument).toBe(false);
     expect(exact).toBe(FEDEX_EXACT_RATES);
   });

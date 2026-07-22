@@ -57,8 +57,9 @@ describe('InputSection', () => {
     render(<InputSection {...defaultProps} />);
 
     expect(screen.getByText('calc.section.cargo')).toBeInTheDocument();
-    expect(screen.getByText(/Box #1/)).toBeInTheDocument();
-    expect(screen.getByText('Add Box')).toBeInTheDocument();
+    // t is mocked to return the key — itemLabel key has {n} replaced ({n} not in key itself)
+    expect(screen.getByText('calc.cargo.itemLabel')).toBeInTheDocument();
+    expect(screen.getByText('calc.cargo.addItem')).toBeInTheDocument();
   });
 
   it('renders service section (collapsed by default)', () => {

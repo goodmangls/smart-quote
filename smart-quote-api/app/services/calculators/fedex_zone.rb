@@ -67,9 +67,9 @@ module Calculators
       zone = ZONE_MAP[country] || DEFAULT_ZONE
       label = if zone == DEFAULT_ZONE && !ZONE_MAP.key?(country)
                 DEFAULT_LABEL
-              else
+      else
                 ZONE_LABELS[zone]
-              end
+      end
       { rate_key: zone, label: label }
     end
   end

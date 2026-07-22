@@ -1,6 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getFscRates, type FscRates } from '@/api/fscApi';
-import { DEFAULT_FSC_PERCENT, DEFAULT_FSC_PERCENT_DHL, DEFAULT_FSC_PERCENT_FEDEX } from '@/config/rates';
+import {
+  DEFAULT_FSC_PERCENT,
+  DEFAULT_FSC_PERCENT_DHL,
+  DEFAULT_FSC_PERCENT_FEDEX,
+} from '@/config/rates';
 
 const DEFAULT_FSC_RATES: FscRates = {
   rates: {

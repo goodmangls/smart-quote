@@ -123,9 +123,7 @@ export const CarrierComparisonCard: React.FC<Props> = ({
           const isCurrent = carrier === currentCarrier;
           const diff = result.totalQuoteAmount - currentResult.totalQuoteAmount;
           const diffPercent =
-            currentResult.totalQuoteAmount > 0
-              ? (diff / currentResult.totalQuoteAmount) * 100
-              : 0;
+            currentResult.totalQuoteAmount > 0 ? (diff / currentResult.totalQuoteAmount) * 100 : 0;
           return (
             <CarrierColumn
               key={carrier}
@@ -170,7 +168,11 @@ interface CarrierColumnProps {
 
 const BADGE_STYLE: Record<
   CarrierBadge,
-  { icon: string; className: string; i18nKey: 'badge.cheapest' | 'badge.fastest' | 'badge.greenest' }
+  {
+    icon: string;
+    className: string;
+    i18nKey: 'badge.cheapest' | 'badge.fastest' | 'badge.greenest';
+  }
 > = {
   cheapest: {
     icon: '💰',
@@ -250,7 +252,9 @@ const CarrierColumn: React.FC<CarrierColumnProps> = ({
         <div>
           <p className='text-xs text-gray-500 dark:text-gray-400'>Total Quote</p>
           <p className='text-lg font-bold text-gray-900 dark:text-white'>
-            {showKRW ? formatKRW(result.totalQuoteAmount) : formatUSDInt(result.totalQuoteAmountUSD)}
+            {showKRW
+              ? formatKRW(result.totalQuoteAmount)
+              : formatUSDInt(result.totalQuoteAmountUSD)}
           </p>
         </div>
         <div className='grid grid-cols-2 gap-2 text-xs'>

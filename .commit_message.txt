@@ -1,1 +1,1 @@
-✈️ feat(fedex): FedEx IP/Envelope/Pak 요금표·존·FSC 39.75% 3캐리어 통합
+✅ test/style(fedex): InputSection i18n 라벨 테스트 수정 + rubocop/prettier 정리

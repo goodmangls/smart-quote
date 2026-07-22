@@ -30,11 +30,7 @@ export const RateTableViewer: React.FC = () => {
   }, [carrier, fedexProduct]);
 
   const rangeRates: ReadonlyArray<{ min: number; max: number; rates: Record<string, number> }> =
-    carrier === 'FEDEX'
-      ? FEDEX_RANGE_RATES
-      : carrier === 'UPS'
-        ? UPS_RANGE_RATES
-        : DHL_RANGE_RATES;
+    carrier === 'FEDEX' ? FEDEX_RANGE_RATES : carrier === 'UPS' ? UPS_RANGE_RATES : DHL_RANGE_RATES;
 
   const zones = useMemo(() => {
     return Object.keys(exactRates).sort((a, b) =>
@@ -55,11 +51,7 @@ export const RateTableViewer: React.FC = () => {
   const handleCarrierChange = (next: Carrier) => {
     setCarrier(next);
     const nextExact =
-      next === 'FEDEX'
-        ? FEDEX_EXACT_RATES
-        : next === 'UPS'
-          ? UPS_EXACT_RATES
-          : DHL_EXACT_RATES;
+      next === 'FEDEX' ? FEDEX_EXACT_RATES : next === 'UPS' ? UPS_EXACT_RATES : DHL_EXACT_RATES;
     const nextZones = Object.keys(nextExact).sort((a, b) =>
       a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }),
     );
@@ -129,8 +121,12 @@ export const RateTableViewer: React.FC = () => {
             <table className='w-full text-xs'>
               <thead className='sticky top-0 bg-gray-50 dark:bg-gray-700/50'>
                 <tr>
-                  <th className='text-left px-4 py-2 text-gray-500 dark:text-gray-400'>Weight (kg)</th>
-                  <th className='text-right px-4 py-2 text-gray-500 dark:text-gray-400'>Rate (KRW)</th>
+                  <th className='text-left px-4 py-2 text-gray-500 dark:text-gray-400'>
+                    Weight (kg)
+                  </th>
+                  <th className='text-right px-4 py-2 text-gray-500 dark:text-gray-400'>
+                    Rate (KRW)
+                  </th>
                   <th className='text-right px-4 py-2 text-gray-500 dark:text-gray-400'>Per kg</th>
                 </tr>
               </thead>

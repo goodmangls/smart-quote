@@ -1,5 +1,12 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { QuoteInput, QuoteResult, QuoteDetail, Incoterm, PackingType, ShippingItemType } from '../types';
+import {
+  QuoteInput,
+  QuoteResult,
+  QuoteDetail,
+  Incoterm,
+  PackingType,
+  ShippingItemType,
+} from '../types';
 import { generatePDF } from '@/lib/pdfService';
 import { calculateQuote } from '@/features/quote/services/calculationService';
 import { trackEvent, IntercomEvents } from '@/lib/intercom';
