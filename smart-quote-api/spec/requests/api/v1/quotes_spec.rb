@@ -103,6 +103,77 @@ RSpec.describe "Api::V1::Quotes", type: :request do
     end
   end
 
+  describe "POST /api/v1/quote_api/quotes" do
+    let(:quote_api_payload) do
+      {
+        service_type: "express_courier",
+        carrier: "UPS",
+        origin: {
+          country: "KR",
+          city: "Changwon-si",
+          postal_code: "51609",
+          address: "434-2 Sinhang-ro, Jinhae-gu"
+        },
+        destination: {
+          country: "BE",
+          airport: "BRU",
+          city: "Brussels"
+        },
+        cargo: {
+          packages: [
+            {
+              quantity: 1,
+              length_cm: 55,
+              width_cm: 55,
+              height_cm: 33,
+              gross_weight_kg: 77
+            }
+          ]
+        },
+        terms: {
+          incoterms: "DAP",
+          pickup_required: true,
+          customs_clearance_required: false
+        },
+        currency: "USD",
+        requested_by: {
+          company: "Naxco Belgium",
+          contact: "David Van Der Snickt",
+          email: "david.vandersnickt@naxco.be"
+        }
+      }
+    end
+
+    it "returns 401 without authentication" do
+      post "/api/v1/quote_api/quotes", params: quote_api_payload, as: :json
+
+      expect(response).to have_http_status(:unauthorized)
+    end
+
+    it "creates a saved quote from email-automation API payload and returns partner-safe USD response" do
+      post "/api/v1/quote_api/quotes", params: quote_api_payload, headers: admin_headers, as: :json
+
+      expect(response).to have_http_status(:created)
+      expect(QuoteCalculator).to have_received(:call).with(hash_including(
+        "destinationCountry" => "BE",
+        "overseasCarrier" => "UPS",
+        "incoterm" => "DAP",
+        "items" => [ hash_including("quantity" => 1, "weight" => 77, "length" => 55, "width" => 55, "height" => 33) ]
+      ))
+      expect(Quote.last.user_id).to eq(admin.id)
+      expect(Quote.last.notes).to include("BridgeLogis Quote API v1")
+
+      expect(json["quote_id"]).to match(/\ASQ-\d{4}-\d{4}\z/)
+      expect(json["status"]).to eq("quoted")
+      expect(json["service"]).to include("provider" => "BridgeLogis", "carrier" => "UPS")
+      expect(json["route"]).to include("origin_country" => "KR", "destination_country" => "BE", "destination_airport" => "BRU")
+      expect(json["cargo_summary"]).to include("gross_weight_kg" => 77.0, "chargeable_weight_kg" => 15.5)
+      expect(json["pricing"]).to include("currency" => "USD", "total" => 1150.5)
+      expect(json["pricing"]).not_to have_key("total_krw")
+      expect(json["conditions"].join(" ")).to include("final carrier confirmation")
+    end
+  end
+
   describe "POST /api/v1/quotes" do
     it "returns 401 without authentication" do
       post "/api/v1/quotes", params: valid_params, as: :json

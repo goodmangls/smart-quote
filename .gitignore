@@ -33,3 +33,4 @@ dist-ssr
 # Phase 1/2/3 planning artifacts — local only
 output/
 
+.env*

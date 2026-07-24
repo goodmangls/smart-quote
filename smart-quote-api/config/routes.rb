@@ -17,6 +17,8 @@ Rails.application.routes.draw do
 
       # Quotes (protected, except calculate)
       post "quotes/calculate", to: "quotes#calculate"
+      # Partner/email automation API shape backed by the operating quote calculator.
+      post "quote_api/quotes", to: "quotes#api_create"
       get "quotes/export", to: "quotes#export"
       resources :quotes, only: [ :index, :show, :create, :update, :destroy ] do
         member do
