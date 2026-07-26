@@ -23,6 +23,7 @@ import {
   saveFscHistory,
   addFscEntry,
   removeFscEntry,
+  FscCarrier,
 } from '@/config/fsc-history';
 import { FscChart } from './FscChart';
 
@@ -38,12 +39,13 @@ export const FscRateWidget: React.FC<FscRateWidgetProps> = () => {
   // Edit state
   const [isEditing, setIsEditing] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [editRates, setEditRates] = useState({ UPS: '', DHL: '' });
+  const [editRates, setEditRates] = useState({ UPS: '', DHL: '', FEDEX: '' });
 
   const handleEditStart = () => {
     setEditRates({
       UPS: String(data?.rates.UPS.international ?? ''),
       DHL: String(data?.rates.DHL.international ?? ''),
+      FEDEX: String(data?.rates.FEDEX.international ?? ''),
     });
     setIsEditing(true);
   };
@@ -53,8 +55,10 @@ export const FscRateWidget: React.FC<FscRateWidgetProps> = () => {
     try {
       const upsRate = parseFloat(editRates.UPS);
       const dhlRate = parseFloat(editRates.DHL);
+      const fedexRate = parseFloat(editRates.FEDEX);
       if (!isNaN(upsRate)) await updateFscRate('UPS', upsRate, upsRate);
       if (!isNaN(dhlRate)) await updateFscRate('DHL', dhlRate, dhlRate);
+      if (!isNaN(fedexRate)) await updateFscRate('FEDEX', fedexRate, fedexRate);
       await fetchRates();
       setIsEditing(false);
     } catch {
@@ -71,13 +75,14 @@ export const FscRateWidget: React.FC<FscRateWidgetProps> = () => {
   const [showHistory, setShowHistory] = useState(false);
 
   // Add-entry form state
-  const [addCarrier, setAddCarrier] = useState<'ups' | 'dhl'>('ups');
+  const [addCarrier, setAddCarrier] = useState<FscCarrier>('ups');
   const [addDate, setAddDate] = useState('');
   const [addRate, setAddRate] = useState('');
 
   const carrierLinks = {
     UPS: 'https://www.ups.com/kr/ko/support/shipping-support/shipping-costs-rates/fuel-surcharges.page',
     DHL: 'https://mydhl.express.dhl/kr/ko/ship/surcharges.html',
+    FEDEX: 'https://www.fedex.com/ko-kr/shipping/surcharges.html',
   };
 
   // History handlers
@@ -98,7 +103,7 @@ export const FscRateWidget: React.FC<FscRateWidgetProps> = () => {
     setAddRate('');
   };
 
-  const handleRemoveEntry = (carrier: 'ups' | 'dhl', date: string) => {
+  const handleRemoveEntry = (carrier: FscCarrier, date: string) => {
     const next = removeFscEntry(history, carrier, date);
     persistHistory(next);
   };
@@ -108,12 +113,14 @@ export const FscRateWidget: React.FC<FscRateWidgetProps> = () => {
     () => [
       { entries: history.ups, color: CHART_COLORS.brandBlue, label: 'UPS' },
       { entries: history.dhl, color: CHART_COLORS.gold, label: 'DHL' },
+      { entries: history.fedex, color: '#f97316', label: 'FedEx' },
     ],
     [history],
   );
 
   const latestUps = history.ups.length > 0 ? history.ups[history.ups.length - 1].rate : null;
   const latestDhl = history.dhl.length > 0 ? history.dhl[history.dhl.length - 1].rate : null;
+  const latestFedex = history.fedex.length > 0 ? history.fedex[history.fedex.length - 1].rate : null;
 
   return (
     <div className='bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm'>
@@ -177,11 +184,11 @@ export const FscRateWidget: React.FC<FscRateWidgetProps> = () => {
         </div>
       ) : data ? (
         <div className='divide-y divide-gray-100 dark:divide-gray-700'>
-          {(['UPS', 'DHL'] as const).map((carrier) => {
+          {(['UPS', 'DHL', 'FEDEX'] as const).map((carrier) => {
             const rates = data.rates[carrier];
             const link = carrierLinks[carrier];
 
-            const editKey = carrier as 'UPS' | 'DHL';
+            const editKey = carrier as 'UPS' | 'DHL' | 'FEDEX';
 
             return (
               <div key={carrier} className='px-4 py-3'>
@@ -269,6 +276,10 @@ export const FscRateWidget: React.FC<FscRateWidgetProps> = () => {
                 <span className='inline-block w-2.5 h-2.5 rounded-full bg-amber-500' />
                 <span>DHL (Weekly){latestDhl !== null ? ` — ${latestDhl}%` : ''}</span>
               </div>
+              <div className='flex items-center gap-1.5'>
+                <span className='inline-block w-2.5 h-2.5 rounded-full bg-orange-500' />
+                <span>FedEx (Weekly){latestFedex !== null ? ` — ${latestFedex}%` : ''}</span>
+              </div>
             </div>
 
             {/* Update frequency notes */}
@@ -287,11 +298,12 @@ export const FscRateWidget: React.FC<FscRateWidgetProps> = () => {
                   <label className='block text-[10px] text-gray-400 mb-0.5'>Carrier</label>
                   <select
                     value={addCarrier}
-                    onChange={(e) => setAddCarrier(e.target.value as 'ups' | 'dhl')}
+                    onChange={(e) => setAddCarrier(e.target.value as FscCarrier)}
                     className='px-2 py-1 text-xs rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white'
                   >
                     <option value='ups'>UPS</option>
                     <option value='dhl'>DHL</option>
+                    <option value='fedex'>FedEx</option>
                   </select>
                 </div>
                 <div>
@@ -331,7 +343,7 @@ export const FscRateWidget: React.FC<FscRateWidgetProps> = () => {
 
             {/* Entry list with delete */}
             <div className='max-h-40 overflow-y-auto space-y-1'>
-              {(['ups', 'dhl'] as const).map((carrier) => (
+              {(['ups', 'dhl', 'fedex'] as const).map((carrier) => (
                 <div key={carrier}>
                   <p className='text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase mb-0.5'>
                     {carrier}

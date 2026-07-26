@@ -1,12 +1,13 @@
 class FscRate < ApplicationRecord
   include Constants::Rates
 
-  validates :carrier, presence: true, uniqueness: true, inclusion: { in: %w[UPS DHL] }
+  validates :carrier, presence: true, uniqueness: true, inclusion: { in: %w[UPS DHL FEDEX] }
   validates :international, :domestic, presence: true, numericality: { greater_than_or_equal_to: 0, less_than_or_equal_to: 100 }
 
   DEFAULT_SEED_RATES = {
     "UPS" => DEFAULT_FSC_PERCENT.to_f,
-    "DHL" => DEFAULT_FSC_PERCENT_DHL.to_f
+    "DHL" => DEFAULT_FSC_PERCENT_DHL.to_f,
+    "FEDEX" => DEFAULT_FSC_PERCENT_FEDEX.to_f
   }.freeze
 
   # Seed current default rates if the table is empty. If a row still carries an

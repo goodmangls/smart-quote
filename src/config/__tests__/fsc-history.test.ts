@@ -15,7 +15,7 @@ describe('fsc-history', () => {
 
   describe('addFscEntry', () => {
     it('adds a new entry and sorts by date', () => {
-      const data: FscHistoryData = { ups: [], dhl: [] };
+      const data: FscHistoryData = { ups: [], dhl: [], fedex: [] };
       const r1 = addFscEntry(data, 'ups', { date: '2026-03-01', rate: 30 });
       const r2 = addFscEntry(r1, 'ups', { date: '2026-01-01', rate: 28 });
 
@@ -28,6 +28,7 @@ describe('fsc-history', () => {
       const data: FscHistoryData = {
         ups: [{ date: '2026-01-01', rate: 28 }],
         dhl: [],
+        fedex: [],
       };
       const result = addFscEntry(data, 'ups', { date: '2026-01-01', rate: 30 });
 
@@ -39,6 +40,7 @@ describe('fsc-history', () => {
       const data: FscHistoryData = {
         ups: [{ date: '2026-01-01', rate: 28 }],
         dhl: [],
+        fedex: [],
       };
       addFscEntry(data, 'ups', { date: '2026-02-01', rate: 30 });
 
@@ -46,7 +48,7 @@ describe('fsc-history', () => {
     });
 
     it('adds to the correct carrier', () => {
-      const data: FscHistoryData = { ups: [], dhl: [] };
+      const data: FscHistoryData = { ups: [], dhl: [], fedex: [] };
       const result = addFscEntry(data, 'dhl', { date: '2026-03', rate: 31 });
 
       expect(result.dhl).toHaveLength(1);
@@ -64,6 +66,7 @@ describe('fsc-history', () => {
           { date: '2026-02-01', rate: 30 },
         ],
         dhl: [],
+        fedex: [],
       };
       const result = removeFscEntry(data, 'ups', '2026-01-01');
 
@@ -75,6 +78,7 @@ describe('fsc-history', () => {
       const data: FscHistoryData = {
         ups: [{ date: '2026-01-01', rate: 28 }],
         dhl: [],
+        fedex: [],
       };
       const result = removeFscEntry(data, 'ups', '2099-12-31');
 
@@ -85,6 +89,7 @@ describe('fsc-history', () => {
       const data: FscHistoryData = {
         ups: [{ date: '2026-01-01', rate: 28 }],
         dhl: [],
+        fedex: [],
       };
       removeFscEntry(data, 'ups', '2026-01-01');
 
@@ -100,17 +105,24 @@ describe('fsc-history', () => {
 
       expect(result.ups).toEqual(DEFAULT_FSC_HISTORY.ups);
       expect(result.dhl).toEqual(DEFAULT_FSC_HISTORY.dhl);
+      expect(result.fedex).toEqual(DEFAULT_FSC_HISTORY.fedex);
     });
 
-    it('loads valid data from localStorage', () => {
+    it('merges newly shipped default FSC entries into existing browser history', () => {
       const custom: FscHistoryData = {
         ups: [{ date: '2026-05-01', rate: 40 }],
         dhl: [{ date: '2026-05', rate: 35 }],
+        fedex: [{ date: '2026-05-01', rate: 39 }],
       };
       localStorage.setItem('fsc_history', JSON.stringify(custom));
 
       const result = loadFscHistory();
-      expect(result).toEqual(custom);
+      expect(result.ups).toEqual(expect.arrayContaining([custom.ups[0]]));
+      expect(result.dhl).toEqual(expect.arrayContaining([custom.dhl[0]]));
+      expect(result.fedex).toEqual(expect.arrayContaining([custom.fedex[0]]));
+      expect(result.ups.at(-1)).toEqual({ date: '2026-07-27', rate: 44.75 });
+      expect(result.dhl.at(-1)).toEqual({ date: '2026-07-27', rate: 38.75 });
+      expect(result.fedex.at(-1)).toEqual({ date: '2026-07-27', rate: 44.0 });
     });
 
     it('returns default data when localStorage contains corrupted JSON', () => {
@@ -126,6 +138,16 @@ describe('fsc-history', () => {
 
       const result = loadFscHistory();
       expect(result.ups).toEqual(DEFAULT_FSC_HISTORY.ups);
+    });
+  });
+
+  /* ───────── DEFAULT_FSC_HISTORY seed ───────── */
+
+  describe('DEFAULT_FSC_HISTORY', () => {
+    it('includes the 2026-07-27 FSC update for UPS, DHL, and FedEx', () => {
+      expect(DEFAULT_FSC_HISTORY.ups.at(-1)).toEqual({ date: '2026-07-27', rate: 44.75 });
+      expect(DEFAULT_FSC_HISTORY.dhl.at(-1)).toEqual({ date: '2026-07-27', rate: 38.75 });
+      expect(DEFAULT_FSC_HISTORY.fedex.at(-1)).toEqual({ date: '2026-07-27', rate: 44.0 });
     });
   });
 });

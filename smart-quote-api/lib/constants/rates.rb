@@ -12,15 +12,14 @@ module Constants
     #   1. smart-quote-api/lib/constants/rates.rb  ← 이 파일 (백엔드)
     #   2. src/config/rates.ts (프론트엔드)
     #
-    # UPS FSC : 매주 월요일 업데이트
-    #   출처: https://www.ups.com/kr/ko/support/shipping-support/shipping-costs-rates/fuel-surcharges.page
-    # DHL FSC : 매월 1일 업데이트
-    #   출처: https://mydhl.express.dhl/kr/ko/ship/surcharges.html#/fuel_surcharge
+    # UPS / DHL / FedEx FSC : 매주 월요일 본부장님 BridgeLogis 수동 입력값 기준 업데이트
     # ============================================================
-    DEFAULT_FSC_PERCENT = 42.25 # UPS FSC, effective 2026-06-22
-    DEFAULT_FSC_PERCENT_DHL = 45.25 # DHL FSC, effective 2026-06-22
+    DEFAULT_FSC_PERCENT = 44.75 # UPS FSC, effective 2026-07-27
+    DEFAULT_FSC_PERCENT_DHL = 38.75 # DHL FSC, effective 2026-07-27
+    DEFAULT_FSC_PERCENT_FEDEX = 44.00 # FedEx FSC, effective 2026-07-27
     MAX_MARGIN_PERCENT = 80 # Maximum margin rate (%)
     UPS_FSC_URL = "https://www.ups.com/kr/ko/support/shipping-support/shipping-costs-rates/fuel-surcharges.page"
     UPS_RATES_HUB_URL = "https://www.ups.com/kr/ko/support/shipping-support/shipping-costs-rates"
+    FEDEX_FSC_URL = "https://www.fedex.com/ko-kr/shipping/surcharges.html"
   end
 end
