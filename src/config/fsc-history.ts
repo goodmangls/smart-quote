@@ -50,6 +50,7 @@ export const DEFAULT_FSC_HISTORY: FscHistoryData = {
     { date: '2026-07-06', rate: 39.0 },
     { date: '2026-07-13', rate: 39.25 },
     { date: '2026-07-20', rate: 40.5 },
+    { date: '2026-07-27', rate: 44.75 },
   ],
   dhl: [
     { date: '2026-01', rate: 30.0 },
@@ -71,8 +72,12 @@ export const DEFAULT_FSC_HISTORY: FscHistoryData = {
     { date: '2026-07-06', rate: 40.75 },
     { date: '2026-07-13', rate: 39.75 },
     { date: '2026-07-20', rate: 38.5 },
+    { date: '2026-07-27', rate: 38.75 },
   ],
-  fedex: [{ date: '2026-07-20', rate: 39.75 }],
+  fedex: [
+    { date: '2026-07-20', rate: 39.75 },
+    { date: '2026-07-27', rate: 44.0 },
+  ],
 };
 
 function isValidEntry(e: unknown): e is FscHistoryEntry {

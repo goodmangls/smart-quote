@@ -119,8 +119,8 @@ describe('fsc-history', () => {
       const result = loadFscHistory();
       expect(result.ups).toEqual(expect.arrayContaining(custom.ups));
       expect(result.dhl).toEqual(expect.arrayContaining(custom.dhl));
-      expect(result.ups.at(-1)).toEqual({ date: '2026-07-20', rate: 40.5 });
-      expect(result.dhl.at(-1)).toEqual({ date: '2026-07-20', rate: 38.5 });
+      expect(result.ups.at(-1)).toEqual({ date: '2026-07-27', rate: 44.75 });
+      expect(result.dhl.at(-1)).toEqual({ date: '2026-07-27', rate: 38.75 });
     });
 
     it('merges 2026-07-20 defaults into existing browser history pinned at 2026-06-29', () => {
@@ -134,8 +134,8 @@ describe('fsc-history', () => {
 
       const result = loadFscHistory();
 
-      expect(result.ups.at(-1)).toEqual({ date: '2026-07-20', rate: 40.5 });
-      expect(result.dhl.at(-1)).toEqual({ date: '2026-07-20', rate: 38.5 });
+      expect(result.ups.at(-1)).toEqual({ date: '2026-07-27', rate: 44.75 });
+      expect(result.dhl.at(-1)).toEqual({ date: '2026-07-27', rate: 38.75 });
     });
 
     it('returns default data when localStorage contains corrupted JSON', () => {
@@ -157,10 +157,10 @@ describe('fsc-history', () => {
   /* ───────── DEFAULT_FSC_HISTORY seed ───────── */
 
   describe('DEFAULT_FSC_HISTORY', () => {
-    it('includes the 2026-07-20 FSC update for UPS, DHL, and FedEx', () => {
-      expect(DEFAULT_FSC_HISTORY.ups.at(-1)).toEqual({ date: '2026-07-20', rate: 40.5 });
-      expect(DEFAULT_FSC_HISTORY.dhl.at(-1)).toEqual({ date: '2026-07-20', rate: 38.5 });
-      expect(DEFAULT_FSC_HISTORY.fedex.at(-1)).toEqual({ date: '2026-07-20', rate: 39.75 });
+    it('includes the latest confirmed FSC seed entries for UPS, DHL, and FedEx', () => {
+      expect(DEFAULT_FSC_HISTORY.ups.at(-1)).toEqual({ date: '2026-07-27', rate: 44.75 });
+      expect(DEFAULT_FSC_HISTORY.dhl.at(-1)).toEqual({ date: '2026-07-27', rate: 38.75 });
+      expect(DEFAULT_FSC_HISTORY.fedex.at(-1)).toEqual({ date: '2026-07-27', rate: 44.0 });
     });
   });
 });
