@@ -2,7 +2,7 @@
 
 > Audience: forwarding partners · Estimated read time: 3 minutes
 
-Both UPS and DHL cover 190+ countries on BridgeLogis, but they're not
+Both UPS and DHL cover 250+ countries on BridgeLogis, but they're not
 interchangeable. Picking the right one in the first ten seconds of a quote
 saves margin and avoids surprises at pickup. Here's the short version.
 

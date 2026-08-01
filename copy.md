@@ -2,7 +2,7 @@
 
 > BridgeLogis 카피라이팅 가이드 및 텍스트 인벤토리
 
-**Last Updated**: 2026-07-22
+**Last Updated**: 2026-08-01
 
 ---
 
@@ -33,8 +33,8 @@
 | Key | Korean | English |
 |-----|--------|---------|
 | `landing.badge.networks` | Global Freight Networks | Global Freight Networks |
-| `landing.title.main` | 190개국 국제 운임, | Freight Quotes for |
-| `landing.title.sub` | 1초 만에 견적 완료. | 190+ Countries, Instantly. |
+| `landing.title.main` | 250+개국 국제 운임, | Freight Quotes for |
+| `landing.title.sub` | 1초 만에 견적 완료. | 250+ Countries, Instantly. |
 | `landing.subtitle` | 포워딩 파트너를 위한 국제 특송 견적 시스템. Door-to-Door 운임을 실시간 환율과 FSC를 반영하여 즉시 산출합니다. | The express freight quoting engine built for forwarding partners. Calculate Door-to-Door costs with real-time exchange rates and FSC — instantly. |
 
 ### Stats
@@ -42,9 +42,18 @@
 | Key | Value (LandingPage.tsx) | Korean Label | English Label |
 |-----|------|--------|---------|
 | `landing.stat.carriers` | `3` (UPS·DHL·FedEx) | 특송 캐리어 | Express Carriers |
-| `landing.stat.countries` | `190+` | 목적지 국가 | Destinations |
+| `landing.stat.countries` | `250+` (UPS·DHL·FedEx 합산 최대 ~265) | 목적지 국가 | Destinations |
 | `landing.stat.calculation` | `~3s` | 평균 견적 시간 | Avg. Quote Time |
 | `landing.stat.available` | `24/7` | 온라인 접속 | Always Online |
+
+### Coverage Claim
+
+| Key | Korean | English |
+|-----|--------|---------|
+| `landing.globalPorts` | 250+ 국가 커버리지 | 250+ Countries Covered |
+
+> **정책**: 마케팅·랜딩 표기는 **250+**. UPS·DHL·FedEx 합산 가능 목적지는 최대 약 265개국이나,
+> 과장·세부 변동을 피하기 위해 대외 카피는 `250+`로 통일한다 (정확한 개수·ISO 목록은 요율표 기준).
 
 ### Feature Cards
 
@@ -241,7 +250,7 @@
 
 | Item | Current | Recommendation |
 |------|---------|---------------|
-| Country names (options.ts) | English only (190+) | 내부 도구이므로 EN 유지 가능 |
+| Country names (options.ts) | English only (250+) | 내부 도구이므로 EN 유지 가능 |
 | text.ts 전체 | Hardcoded KO+EN mix | translations.ts로 이전 |
 | SignUpPage placeholders | "Optional", "Select" hardcoded | 번역 키로 변경 |
 | Header aria-label | "Select language" EN only | 번역 키로 변경 |
@@ -255,7 +264,7 @@ USER_GUIDE_ADMIN, AI chatbot 시스템 프롬프트를 UPS/DHL/FedEx 3사 기준
 
 | Context | Tone | Example |
 |---------|------|---------|
-| Landing/Marketing | Professional, Confident | "190개국 국제 운임, 1초 만에 견적 완료." |
+| Landing/Marketing | Professional, Confident | "250+개국 국제 운임, 1초 만에 견적 완료." |
 | Calculator UI | Clear, Functional | "배송 설정", "화물 정보를 입력하세요" |
 | Error Messages | Empathetic, Helpful | "문제가 발생했습니다. 다시 시도해주세요." |
 | Admin Interface | Technical, Precise | "Target Margin Rules", "Audit Log" |
