@@ -6,7 +6,6 @@ import {
   DEFAULT_FSC_PERCENT_FEDEX,
 } from '@/config/rates';
 import { MAX_MARGIN_PERCENT } from '@/config/business-rules';
-import { FEDEX_DOC_MAX_KG } from '@/config/fedex_tariff';
 import { calculateDhlAddOnCosts } from './dhlAddonCalculator';
 import { calculateUpsAddOnCosts } from './upsAddonCalculator';
 import { calculateItemCosts, computePackingTotal } from './itemCalculation';
@@ -14,6 +13,7 @@ import { calculateUpsCosts } from './upsCalculation';
 import { calculateDhlCosts } from './dhlCalculation';
 import { calculateFedexCosts } from './fedexCalculation';
 import { CarrierCostResult } from './carrierRateEngine';
+import { getDocumentCapKg } from './documentCaps';
 
 // Re-exports for backward compatibility (tests and other consumers import from here)
 export { calculateVolumetricWeight, calculateItemCosts } from './itemCalculation';
@@ -75,18 +75,18 @@ export const calculateQuote = (input: QuoteInput): QuoteResult => {
       break;
   }
 
-  if (shippingItemType === ShippingItemType.DOCUMENT) {
-    if (carrier === 'DHL' && billableWeight > 2) {
+  const docCapKg = getDocumentCapKg(carrier);
+  const documentRatedAsParcel =
+    shippingItemType === ShippingItemType.DOCUMENT && billableWeight > docCapKg;
+
+  if (documentRatedAsParcel) {
+    if (carrier === 'FEDEX') {
       userWarnings.push(
-        'Document rates apply up to 2.0kg on DHL; Parcel tariff used for this weight.',
+        `Document rates apply up to ${docCapKg}kg on FedEx (Envelope/Pak); IP Parcel tariff used for this weight.`,
       );
-    } else if (carrier === 'FEDEX' && billableWeight > FEDEX_DOC_MAX_KG) {
+    } else {
       userWarnings.push(
-        'Document rates apply up to 2.5kg on FedEx (Envelope/Pak); IP Parcel tariff used for this weight.',
-      );
-    } else if (carrier === 'UPS' && billableWeight > 5) {
-      userWarnings.push(
-        'Document rates apply up to 5.0kg on UPS; Parcel tariff used for this weight.',
+        `Document rates apply up to ${docCapKg}kg on ${carrier}; Parcel tariff used for this weight.`,
       );
     }
   }
@@ -218,6 +218,7 @@ export const calculateQuote = (input: QuoteInput): QuoteResult => {
     transitTime: carrierResult.transitTime,
     carrier,
     warnings: userWarnings,
+    documentRatedAsParcel: documentRatedAsParcel || undefined,
     breakdown: {
       packingMaterial: itemResult.packingMaterialCost,
       packingLabor: itemResult.packingLaborCost,

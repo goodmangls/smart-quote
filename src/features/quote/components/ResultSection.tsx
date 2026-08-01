@@ -35,7 +35,10 @@ export const ResultSection: React.FC<Props> = ({
         isKorean={isKorean}
         hideMargin={hideMargin}
       />
-      <WarningAlerts warnings={result.warnings} />
+      <WarningAlerts
+        warnings={result.warnings}
+        documentRatedAsParcel={result.documentRatedAsParcel}
+      />
       <KeyMetricsGrid result={result} hideMargin={hideMargin} />
 
       {input && onSwitchCarrier && (

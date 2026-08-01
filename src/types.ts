@@ -141,6 +141,8 @@ export interface QuoteResult {
   transitTime: string;
   carrier: string; // 'UPS' | 'DHL' | 'FEDEX'
   warnings: string[];
+  /** True when Shipping Item is Document but billable weight exceeded Document tariff cap → Parcel/IP rates applied */
+  documentRatedAsParcel?: boolean;
 
   breakdown: CostBreakdown;
 }
