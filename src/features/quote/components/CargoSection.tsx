@@ -5,6 +5,8 @@ import { Package, Plus, Box, Trash2, Copy, Mail } from 'lucide-react';
 import { SURGE_THRESHOLDS } from '@/config/business-rules';
 import { inputStyles } from './input-styles';
 import { DOCUMENT_ENVELOPE_DIMS_CM } from './documentEnvelope';
+import { getDocumentCapKg } from '@/features/quote/services/documentCaps';
+import { formatNum } from '@/lib/format';
 
 type UnitSystem = 'metric' | 'imperial';
 
@@ -88,8 +90,10 @@ export const CargoSection: React.FC<Props> = ({
 
   const dimLabel = unitSystem === 'metric' ? 'cm' : 'in';
   const wtLabel = unitSystem === 'metric' ? 'kg' : 'lb';
-  const docCapKg = overseasCarrier === 'DHL' ? 2 : overseasCarrier === 'FEDEX' ? 2.5 : 5;
+  const docCapKg = getDocumentCapKg(overseasCarrier);
   const isDocument = shippingItemType === ShippingItemType.DOCUMENT;
+  const totalActualWeightKg = items.reduce((sum, item) => sum + item.weight * item.quantity, 0);
+  const isOverDocCap = isDocument && totalActualWeightKg > docCapKg;
   const addItemLabel = isDocument ? t('calc.cargo.addEnvelope') : t('calc.cargo.addItem');
   const itemLabel = (n: number) =>
     (isDocument ? t('calc.cargo.envelopeLabel') : t('calc.cargo.itemLabel')).replace(
@@ -241,10 +245,29 @@ export const CargoSection: React.FC<Props> = ({
           </div>
         </div>
         {isDocument && (
-          <p className='text-xs text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-md px-3 py-2'>
-            {t('calc.hint.documentWeightCap').replace('{kg}', String(docCapKg))}{' '}
-            {t('calc.hint.documentDimsFixed')}
-          </p>
+          <div className='space-y-2'>
+            <p className='text-xs text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-md px-3 py-2'>
+              {t('calc.hint.documentWeightCap').replace('{kg}', String(docCapKg))}{' '}
+              {t('calc.hint.documentDimsFixed')}
+            </p>
+            {isOverDocCap && (
+              <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-xs bg-amber-100 dark:bg-amber-900/40 border border-amber-400 dark:border-amber-600 rounded-md px-3 py-2.5'>
+                <p className='text-amber-900 dark:text-amber-100 font-medium'>
+                  {t('calc.hint.documentOverCap')
+                    .replace('{kg}', String(docCapKg))
+                    .replace('{weight}', formatNum(Math.round(totalActualWeightKg * 10) / 10))
+                    .replace('{carrier}', overseasCarrier || 'UPS')}
+                </p>
+                <button
+                  type='button'
+                  onClick={() => onShippingItemTypeChange(ShippingItemType.NON_DOCUMENT)}
+                  className='shrink-0 self-start sm:self-center px-3 py-1.5 rounded-lg bg-brand-blue-600 hover:bg-brand-blue-700 text-white font-semibold transition-colors'
+                >
+                  {t('calc.action.switchToParcel')}
+                </button>
+              </div>
+            )}
+          </div>
         )}
       </div>
 
@@ -296,7 +319,12 @@ export const CargoSection: React.FC<Props> = ({
                     min='0.1'
                     value={roundDisplay(toDisplay(item.weight, unitSystem, 'weight'))}
                     onChange={(e) => updateItem(idx, 'weight', Number(e.target.value))}
-                    className={`${ic} ${item.weight > SURGE_THRESHOLDS.AHS_WEIGHT_KG ? 'ring-1 ring-amber-400 dark:ring-amber-600' : ''}`}
+                    className={`${ic} ${
+                      (isDocument && item.weight > docCapKg) ||
+                      item.weight > SURGE_THRESHOLDS.AHS_WEIGHT_KG
+                        ? 'ring-1 ring-amber-400 dark:ring-amber-600'
+                        : ''
+                    }`}
                     inputMode='decimal'
                     placeholder={wtLabel}
                   />

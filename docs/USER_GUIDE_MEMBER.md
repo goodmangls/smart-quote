@@ -2,7 +2,7 @@
 
 > **KS Ways** International Logistics Quoting System
 >
-> Version 3.6.0 | Last Updated: 2026-07-21
+> Version 3.6.1 | Last Updated: 2026-08-01
 
 ---
 
@@ -88,7 +88,7 @@ Access via `/quote` from the dashboard or header navigation.
 
 Select **Shipping Item**:
 - **Parcel** (default) — merchandise / parcel rates (Qty, Weight, L/W/H)
-- **Document** — envelope / document rates (UPS up to 5.0kg, DHL up to 2.0kg, FedEx Envelope ≤0.5kg / Pak ≤2.5kg). Heavier shipments automatically use Parcel rates. Document mode shows **Qty + Weight only** (envelope dimensions are standardized) and forces Packing Type to NONE.
+- **Document** — envelope / document rates (UPS up to 5.0kg, DHL up to 2.0kg, FedEx Envelope ≤0.5kg / Pak ≤2.5kg). Heavier shipments automatically use Parcel rates (quote continues; result shows **Rated as Parcel**). Cargo shows an inline warning with a **Switch to Parcel** button so Shipping Item matches the tariff. Document mode shows **Qty + Weight only** (envelope dimensions are standardized) and forces Packing Type to NONE.
 
 For each item, enter:
 - **Width / Length / Height** (cm) — Parcel only
