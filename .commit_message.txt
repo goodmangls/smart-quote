@@ -1,1 +1,1 @@
-🐛 fix(admin): Rate Table Viewer에 UPS/DHL Document 요율 선택 추가
+📝 copy: 목적지 커버리지 190+ → 250+ (UPS·DHL·FedEx ~265 반영)
