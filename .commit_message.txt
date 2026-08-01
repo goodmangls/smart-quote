@@ -1,1 +1,1 @@
-📝 fix(copy): FedEx 3사 카피 동기화 — 가이드·i18n·ADMIN·챗봇 프롬프트
+🐛 fix(admin): Rate Table Viewer에 UPS/DHL Document 요율 선택 추가
