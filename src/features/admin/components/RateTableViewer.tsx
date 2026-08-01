@@ -1,33 +1,73 @@
 import React, { useState, useMemo } from 'react';
-import { UPS_EXACT_RATES, UPS_RANGE_RATES } from '@/config/ups_tariff';
-import { DHL_EXACT_RATES, DHL_RANGE_RATES } from '@/config/dhl_tariff';
+import {
+  UPS_EXACT_RATES,
+  UPS_RANGE_RATES,
+  UPS_DOC_EXACT_RATES,
+  UPS_DOC_MAX_KG,
+} from '@/config/ups_tariff';
+import {
+  DHL_EXACT_RATES,
+  DHL_RANGE_RATES,
+  DHL_DOC_EXACT_RATES,
+  DHL_DOC_MAX_KG,
+} from '@/config/dhl_tariff';
 import {
   FEDEX_EXACT_RATES,
   FEDEX_RANGE_RATES,
   FEDEX_ENVELOPE_EXACT_RATES,
   FEDEX_PAK_EXACT_RATES,
+  FEDEX_ENVELOPE_MAX_KG,
+  FEDEX_DOC_MAX_KG,
 } from '@/config/fedex_tariff';
 import { TableProperties, ChevronDown } from 'lucide-react';
 import { formatNum } from '@/lib/format';
 
 type Carrier = 'UPS' | 'DHL' | 'FEDEX';
 type TableMode = 'exact' | 'range';
-type FedexProduct = 'ip' | 'envelope' | 'pak';
+/** Unified product key — Parcel for all; Document for UPS/DHL; Envelope/Pak for FedEx */
+type RateProduct = 'parcel' | 'document' | 'envelope' | 'pak';
+
+type ExactRateTable = Record<string, Record<number, number>>;
+
+const PRODUCT_OPTIONS: Record<Carrier, { value: RateProduct; label: string }[]> = {
+  UPS: [
+    { value: 'parcel', label: 'Parcel' },
+    { value: 'document', label: `Document (≤${UPS_DOC_MAX_KG}kg)` },
+  ],
+  DHL: [
+    { value: 'parcel', label: 'Parcel' },
+    { value: 'document', label: `Document (≤${DHL_DOC_MAX_KG}kg)` },
+  ],
+  FEDEX: [
+    { value: 'parcel', label: 'IP (Parcel)' },
+    { value: 'envelope', label: `Envelope (≤${FEDEX_ENVELOPE_MAX_KG}kg)` },
+    { value: 'pak', label: `Pak (≤${FEDEX_DOC_MAX_KG}kg)` },
+  ],
+};
+
+function resolveExactRates(carrier: Carrier, product: RateProduct): ExactRateTable {
+  if (carrier === 'FEDEX') {
+    if (product === 'envelope') return FEDEX_ENVELOPE_EXACT_RATES;
+    if (product === 'pak') return FEDEX_PAK_EXACT_RATES;
+    return FEDEX_EXACT_RATES;
+  }
+  if (carrier === 'UPS') {
+    return product === 'document' ? UPS_DOC_EXACT_RATES : UPS_EXACT_RATES;
+  }
+  return product === 'document' ? DHL_DOC_EXACT_RATES : DHL_EXACT_RATES;
+}
+
+function productLabel(carrier: Carrier, product: RateProduct): string {
+  return PRODUCT_OPTIONS[carrier].find((o) => o.value === product)?.label ?? product;
+}
 
 export const RateTableViewer: React.FC = () => {
   const [carrier, setCarrier] = useState<Carrier>('UPS');
   const [mode, setMode] = useState<TableMode>('exact');
   const [selectedZone, setSelectedZone] = useState<string>('Z1');
-  const [fedexProduct, setFedexProduct] = useState<FedexProduct>('ip');
+  const [product, setProduct] = useState<RateProduct>('parcel');
 
-  const exactRates = useMemo(() => {
-    if (carrier === 'FEDEX') {
-      if (fedexProduct === 'envelope') return FEDEX_ENVELOPE_EXACT_RATES;
-      if (fedexProduct === 'pak') return FEDEX_PAK_EXACT_RATES;
-      return FEDEX_EXACT_RATES;
-    }
-    return carrier === 'UPS' ? UPS_EXACT_RATES : DHL_EXACT_RATES;
-  }, [carrier, fedexProduct]);
+  const exactRates = useMemo(() => resolveExactRates(carrier, product), [carrier, product]);
 
   const rangeRates: ReadonlyArray<{ min: number; max: number; rates: Record<string, number> }> =
     carrier === 'FEDEX' ? FEDEX_RANGE_RATES : carrier === 'UPS' ? UPS_RANGE_RATES : DHL_RANGE_RATES;
@@ -50,12 +90,23 @@ export const RateTableViewer: React.FC = () => {
 
   const handleCarrierChange = (next: Carrier) => {
     setCarrier(next);
-    const nextExact =
-      next === 'FEDEX' ? FEDEX_EXACT_RATES : next === 'UPS' ? UPS_EXACT_RATES : DHL_EXACT_RATES;
+    setProduct('parcel');
+    const nextExact = resolveExactRates(next, 'parcel');
     const nextZones = Object.keys(nextExact).sort((a, b) =>
       a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }),
     );
     setSelectedZone(nextZones[0] ?? 'Z1');
+  };
+
+  const handleProductChange = (next: RateProduct) => {
+    setProduct(next);
+    const nextExact = resolveExactRates(carrier, next);
+    const nextZones = Object.keys(nextExact).sort((a, b) =>
+      a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }),
+    );
+    if (!nextZones.includes(selectedZone)) {
+      setSelectedZone(nextZones[0] ?? selectedZone);
+    }
   };
 
   return (
@@ -77,15 +128,17 @@ export const RateTableViewer: React.FC = () => {
             <option value='DHL'>DHL</option>
             <option value='FEDEX'>FedEx</option>
           </select>
-          {carrier === 'FEDEX' && mode === 'exact' && (
+          {mode === 'exact' && (
             <select
-              value={fedexProduct}
-              onChange={(e) => setFedexProduct(e.target.value as FedexProduct)}
+              value={product}
+              onChange={(e) => handleProductChange(e.target.value as RateProduct)}
               className='text-[10px] font-semibold px-2 py-0.5 rounded border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300'
             >
-              <option value='ip'>IP (Parcel)</option>
-              <option value='envelope'>Envelope</option>
-              <option value='pak'>Pak</option>
+              {PRODUCT_OPTIONS[carrier].map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
             </select>
           )}
           <select
@@ -196,7 +249,7 @@ export const RateTableViewer: React.FC = () => {
       <div className='px-4 py-2 border-t border-gray-100 dark:border-gray-700 flex items-center gap-1.5'>
         <ChevronDown className='w-3 h-3 text-gray-400' />
         <span className='text-[10px] text-gray-400 dark:text-gray-400'>
-          {carrier} tariff table •{' '}
+          {carrier} {mode === 'exact' ? productLabel(carrier, product) : 'Range'} •{' '}
           {mode === 'exact'
             ? `${activeZone}: ${exactWeights.length} weight steps`
             : `${rangeRates.length} weight ranges × ${zones.length} zones`}
