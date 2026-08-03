@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Upsert KS Ways admin per-user Default Margin (P100 weight-based):
-#   ≥20kg → 24%, <20kg → 32%
+# ≥20kg → 24%, <20kg → 32%
 # Targets: sophia@ksways.co, jhlim725@gmail.com
 class AddKswaysAdminMarginRules < ActiveRecord::Migration[7.1]
   RULES = [
@@ -16,6 +16,12 @@ class AddKswaysAdminMarginRules < ActiveRecord::Migration[7.1]
   ].freeze
 
   def up
+    # Guard: schema.rb에는 있지만 프로덕션 DB에 created_by 컬럼이 없는 drift 대응
+    unless column_exists?(:margin_rules, :created_by)
+      add_column :margin_rules, :created_by, :string, limit: 255
+    end
+    MarginRule.reset_column_information
+
     now = Time.current
     RULES.each do |attrs|
       rule = MarginRule.find_or_initialize_by(
