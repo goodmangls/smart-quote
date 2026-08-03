@@ -39,7 +39,7 @@ Rails.cache.delete(cache_key)
 puts "Cache cleared (#{cache_key})."
 
 %w[sophia@ksways.co jhlim725@gmail.com].each do |email|
-  [25.0, 10.0].each do |weight|
+  [ 25.0, 10.0 ].each do |weight|
     result = MarginRuleResolver.resolve(email: email, nationality: "KR", weight: weight)
     matched = result[:matched_rule]
     puts "VERIFY #{email} @ #{weight}kg → #{result[:margin_percent]}% (#{matched&.name})"
