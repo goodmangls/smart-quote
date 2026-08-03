@@ -119,11 +119,11 @@ describe('fsc-history', () => {
       const result = loadFscHistory();
       expect(result.ups).toEqual(expect.arrayContaining(custom.ups));
       expect(result.dhl).toEqual(expect.arrayContaining(custom.dhl));
-      expect(result.ups.at(-1)).toEqual({ date: '2026-07-27', rate: 44.75 });
-      expect(result.dhl.at(-1)).toEqual({ date: '2026-07-27', rate: 38.75 });
+      expect(result.ups.at(-1)).toEqual({ date: '2026-08-03', rate: 46.25 });
+      expect(result.dhl.at(-1)).toEqual({ date: '2026-08-03', rate: 38.25 });
     });
 
-    it('merges 2026-07-20 defaults into existing browser history pinned at 2026-06-29', () => {
+    it('merges 2026-08-03 defaults into existing browser history pinned at 2026-06-29', () => {
       localStorage.setItem(
         'fsc_history',
         JSON.stringify({
@@ -134,8 +134,8 @@ describe('fsc-history', () => {
 
       const result = loadFscHistory();
 
-      expect(result.ups.at(-1)).toEqual({ date: '2026-07-27', rate: 44.75 });
-      expect(result.dhl.at(-1)).toEqual({ date: '2026-07-27', rate: 38.75 });
+      expect(result.ups.at(-1)).toEqual({ date: '2026-08-03', rate: 46.25 });
+      expect(result.dhl.at(-1)).toEqual({ date: '2026-08-03', rate: 38.25 });
     });
 
     it('returns default data when localStorage contains corrupted JSON', () => {
@@ -158,9 +158,9 @@ describe('fsc-history', () => {
 
   describe('DEFAULT_FSC_HISTORY', () => {
     it('includes the latest confirmed FSC seed entries for UPS, DHL, and FedEx', () => {
-      expect(DEFAULT_FSC_HISTORY.ups.at(-1)).toEqual({ date: '2026-07-27', rate: 44.75 });
-      expect(DEFAULT_FSC_HISTORY.dhl.at(-1)).toEqual({ date: '2026-07-27', rate: 38.75 });
-      expect(DEFAULT_FSC_HISTORY.fedex.at(-1)).toEqual({ date: '2026-07-27', rate: 44.0 });
+      expect(DEFAULT_FSC_HISTORY.ups.at(-1)).toEqual({ date: '2026-08-03', rate: 46.25 });
+      expect(DEFAULT_FSC_HISTORY.dhl.at(-1)).toEqual({ date: '2026-08-03', rate: 38.25 });
+      expect(DEFAULT_FSC_HISTORY.fedex.at(-1)).toEqual({ date: '2026-08-03', rate: 45.5 });
     });
   });
 });
