@@ -1,1 +1,1 @@
-🔐 feat(partner-api): 파트너 견적 API 외부 공개 준비 — X-API-Key 인증·마진 서버 고정(MarginRuleResolver)·레이트 리밋 30/분·500/일
+🔧 fix(dev): 로컬 개발 이메일 인증 KeyError 해소 — development.rb FRONTEND_URL 기본값 + 백엔드 .env.example 신설
