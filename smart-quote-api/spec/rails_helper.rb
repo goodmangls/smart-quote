@@ -74,11 +74,23 @@ RSpec.configure do |config|
     Rails.cache.clear
   end
 
+  # Rack::Attack is off for the suite at large — otherwise specs that issue many
+  # requests would throttle themselves and fail nondeterministically. Specs that
+  # exercise throttling turn it on explicitly (see quote_api_rate_limit_spec.rb).
+  # Its counters use a dedicated store so enabling it cannot collide with
+  # Rails.cache state (MarginRuleResolver caches there).
+  Rack::Attack.cache.store = ActiveSupport::Cache::MemoryStore.new
+  Rack::Attack.enabled = false
+
   # FactoryBot
   config.include FactoryBot::Syntax::Methods
 
   # JWT test helpers
   config.include JwtHelpers
+
+  # freeze_time / travel_to — needed by specs that assert on fixed-window
+  # counters (Rack::Attack) where a real clock tick mid-example is flaky.
+  config.include ActiveSupport::Testing::TimeHelpers
 end
 
 # Shoulda Matchers

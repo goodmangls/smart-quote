@@ -53,6 +53,29 @@ class Rack::Attack
     req.ip if req.path.start_with?("/api/")
   end
 
+  # Partner quote API — throttled per API key rather than per IP, because a
+  # partner's automation may sit behind one egress IP while several partners can
+  # share one. Starts deliberately low; raising it is a one-line config change.
+  #
+  # The discriminator is a digest, never the raw key: throttle keys are written
+  # to the cache backend and would otherwise leak partner credentials there.
+  PARTNER_QUOTE_API_PATH = "/api/v1/quote_api/quotes"
+
+  def self.partner_api_key_discriminator(req)
+    return nil unless req.path == PARTNER_QUOTE_API_PATH && req.post?
+
+    raw = req.env["HTTP_X_API_KEY"].presence
+    raw && Digest::SHA256.hexdigest(raw)[0, 32]
+  end
+
+  throttle("quote_api/minute", limit: 30, period: 60) do |req|
+    partner_api_key_discriminator(req)
+  end
+
+  throttle("quote_api/day", limit: 500, period: 1.day) do |req|
+    partner_api_key_discriminator(req)
+  end
+
   # Return JSON error response
   self.throttled_responder = lambda do |_req|
     [

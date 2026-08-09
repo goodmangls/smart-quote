@@ -1,1 +1,1 @@
-⚙️ data: sophia@ksways.co·jhlim725@gmail.com Default Margin ≥20kg 24% / <20kg 32%
+🔐 feat(partner-api): 파트너 견적 API 외부 공개 준비 — X-API-Key 인증·마진 서버 고정(MarginRuleResolver)·레이트 리밋 30/분·500/일

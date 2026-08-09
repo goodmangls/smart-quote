@@ -2,7 +2,7 @@ class AuditLog < ApplicationRecord
   belongs_to :user, optional: true
 
   ACTIONS = %w[
-    quote.created quote.updated quote.deleted
+    quote.created quote.api_created quote.updated quote.deleted
     quote.status_changed quote.email_sent quote.exported
     margin_rule.created margin_rule.updated margin_rule.deleted
     surcharge.created surcharge.updated surcharge.deleted
