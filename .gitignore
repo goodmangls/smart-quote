@@ -35,3 +35,10 @@ dist-ssr
 
 # Phase 1/2/3 planning artifacts — local only
 output/
+
+# Playwright run artifacts — regenerated per run, never source.
+# test-results/.last-run.json slipped into a commit on 2026-08-10 because these
+# were not ignored.
+test-results/
+playwright-report/
+blob-report/

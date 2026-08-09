@@ -1,1 +1,1 @@
-📊 feat(analytics): Vercel Web Analytics 연동 — @vercel/analytics + App.tsx <Analytics /> 마운트
+🙈 chore(gitignore): Playwright 산출물(test-results·playwright-report·blob-report) 제외 — 실행 산출물이 커밋되던 문제 차단
