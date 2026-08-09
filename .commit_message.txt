@@ -1,1 +1,1 @@
-🙈 chore(gitignore): Playwright 산출물(test-results·playwright-report·blob-report) 제외 — 실행 산출물이 커밋되던 문제 차단
+⛽ FSC 요율 업데이트: UPS 46.75% / DHL 40.25% / FedEx 46.00% (2026-08-10 기준)
