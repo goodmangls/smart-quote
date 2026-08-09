@@ -1,6 +1,8 @@
 class Quote < ApplicationRecord
   belongs_to :user, optional: true
   belongs_to :customer, optional: true
+  # Set instead of user_id for quotes created through the partner quote API.
+  belongs_to :partner_api_key, optional: true
 
   VALID_INCOTERMS = %w[EXW FOB C&F CIF DAP DDP].freeze
   VALID_PACKING_TYPES = %w[NONE WOODEN_BOX SKID VACUUM].freeze

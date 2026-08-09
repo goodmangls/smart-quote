@@ -144,14 +144,129 @@ RSpec.describe "Api::V1::Quotes", type: :request do
       }
     end
 
-    it "returns 401 without authentication" do
-      post "/api/v1/quote_api/quotes", params: quote_api_payload, as: :json
+    let(:partner_identity) { "bridgelogis@partner.quote-api" }
+    let!(:partner_key) { create(:partner_api_key, margin_identity: partner_identity) }
+    let(:raw_key) { partner_key.instance_variable_get(:@raw_key) }
+    let(:api_key_headers) { { "X-API-Key" => raw_key } }
 
-      expect(response).to have_http_status(:unauthorized)
+    # Partner default margin lives in margin_rules, not in a constant.
+    let!(:partner_margin_rule) do
+      MarginRule.find_or_create_by!(match_email: partner_identity, priority: 90) do |r|
+        r.name = "Partner API — spec"
+        r.rule_type = "flat"
+        r.margin_percent = 24
+        r.is_active = true
+      end
+    end
+
+    describe "authentication" do
+      it "returns 401 without any credentials" do
+        post "/api/v1/quote_api/quotes", params: quote_api_payload, as: :json
+
+        expect(response).to have_http_status(:unauthorized)
+      end
+
+      it "returns 401 for an unknown API key" do
+        post "/api/v1/quote_api/quotes", params: quote_api_payload,
+             headers: { "X-API-Key" => "sqp_live_not_a_real_key" }, as: :json
+
+        expect(response).to have_http_status(:unauthorized)
+      end
+
+      it "returns 401 for a revoked API key" do
+        partner_key.revoke!
+
+        post "/api/v1/quote_api/quotes", params: quote_api_payload, headers: api_key_headers, as: :json
+
+        expect(response).to have_http_status(:unauthorized)
+      end
+
+      it "returns 401 for an inactive API key" do
+        partner_key.update!(is_active: false)
+
+        post "/api/v1/quote_api/quotes", params: quote_api_payload, headers: api_key_headers, as: :json
+
+        expect(response).to have_http_status(:unauthorized)
+      end
+
+      it "rejects a user JWT — this endpoint is API-key only" do
+        post "/api/v1/quote_api/quotes", params: quote_api_payload, headers: admin_headers, as: :json
+
+        expect(response).to have_http_status(:unauthorized)
+      end
+
+      it "records last_used_at on a successful call" do
+        partner_key.update!(last_used_at: nil)
+
+        expect {
+          post "/api/v1/quote_api/quotes", params: quote_api_payload, headers: api_key_headers, as: :json
+        }.to change { partner_key.reload.last_used_at }.from(nil)
+      end
+    end
+
+    describe "margin is resolved server-side" do
+      # The whole point of the partner contract: the caller must not be able to
+      # set its own margin, because margin is what hides our cost basis.
+      it "ignores a caller-supplied margin_percent and applies the margin rule value" do
+        payload = quote_api_payload.merge(margin_percent: 0)
+
+        post "/api/v1/quote_api/quotes", params: payload, headers: api_key_headers, as: :json
+
+        expect(response).to have_http_status(:created)
+        expect(Quote.last.margin_percent).to eq(24)
+        expect(QuoteCalculator).to have_received(:call).with(hash_including("marginPercent" => 24.0))
+      end
+
+      it "tracks the margin rule rather than hardcoding 24 — changing the rule changes the quote" do
+        partner_margin_rule.update!(margin_percent: 31)
+        Rails.cache.delete(MarginRuleResolver::CACHE_KEY)
+
+        post "/api/v1/quote_api/quotes", params: quote_api_payload, headers: api_key_headers, as: :json
+
+        expect(Quote.last.margin_percent).to eq(31)
+        expect(QuoteCalculator).to have_received(:call).with(hash_including("marginPercent" => 31.0))
+      end
+
+      it "falls back to the resolver default when no rule matches the key identity" do
+        partner_margin_rule.update!(is_active: false)
+        Rails.cache.delete(MarginRuleResolver::CACHE_KEY)
+
+        post "/api/v1/quote_api/quotes", params: quote_api_payload, headers: api_key_headers, as: :json
+
+        expect(Quote.last.margin_percent).to eq(MarginRuleResolver::DEFAULT_MARGIN)
+      end
+
+      it "never exposes the applied margin in the partner response" do
+        post "/api/v1/quote_api/quotes", params: quote_api_payload, headers: api_key_headers, as: :json
+
+        expect(json["pricing"].keys).to contain_exactly("currency", "total")
+        expect(response.body).not_to include("margin")
+        expect(response.body).not_to include("totalCost")
+      end
+    end
+
+    describe "attribution" do
+      it "attributes the quote to the API key, not to a user" do
+        post "/api/v1/quote_api/quotes", params: quote_api_payload, headers: api_key_headers, as: :json
+
+        expect(Quote.last.partner_api_key_id).to eq(partner_key.id)
+        expect(Quote.last.user_id).to be_nil
+      end
+
+      it "writes an audit log tagged with the partner key" do
+        expect {
+          post "/api/v1/quote_api/quotes", params: quote_api_payload, headers: api_key_headers, as: :json
+        }.to change(AuditLog, :count).by(1)
+
+        log = AuditLog.last
+        expect(log.action).to eq("quote.api_created")
+        expect(log.metadata["partner_api_key_id"]).to eq(partner_key.id)
+        expect(log.metadata["source"]).to eq("quote_api_v1")
+      end
     end
 
     it "creates a saved quote from email-automation API payload and returns partner-safe USD response" do
-      post "/api/v1/quote_api/quotes", params: quote_api_payload, headers: admin_headers, as: :json
+      post "/api/v1/quote_api/quotes", params: quote_api_payload, headers: api_key_headers, as: :json
 
       expect(response).to have_http_status(:created)
       expect(QuoteCalculator).to have_received(:call).with(hash_including(
@@ -160,7 +275,6 @@ RSpec.describe "Api::V1::Quotes", type: :request do
         "incoterm" => "DAP",
         "items" => [ hash_including("quantity" => 1, "weight" => 77, "length" => 55, "width" => 55, "height" => 33) ]
       ))
-      expect(Quote.last.user_id).to eq(admin.id)
       expect(Quote.last.notes).to include("BridgeLogis Quote API v1")
 
       expect(json["quote_id"]).to match(/\ASQ-\d{4}-\d{4}\z/)

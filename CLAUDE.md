@@ -294,6 +294,14 @@ PATCH  /api/v1/quotes/:id        # Update status/notes/customer
 DELETE /api/v1/quotes/:id        # Delete
 GET    /api/v1/quotes/export     # CSV download
 
+# Partner Quote API (X-API-Key auth, NOT user JWT)
+POST   /api/v1/quote_api/quotes  # Partner-facing calculate + save.
+                                 # Margin resolved server-side from margin_rules against
+                                 # PartnerApiKey#margin_identity — caller-supplied
+                                 # margin_percent is not permitted. Response is USD total
+                                 # only (no breakdown/margin). Throttled 30/min + 500/day
+                                 # per key. Keys: bin/rails partner_api_keys:issue[...]
+
 # Authentication
 POST   /api/v1/auth/login        # JWT Login
 POST   /api/v1/auth/register     # Account creation

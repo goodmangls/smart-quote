@@ -2,7 +2,7 @@
 
 > **KS Ways** Internal Logistics Quoting System
 >
-> Version 3.4 | Last Updated: 2026-07-22
+> Version 3.5 | Last Updated: 2026-08-09
 
 ---
 
@@ -156,6 +156,24 @@ Located in the admin widgets panel. Manages DB-driven margin rules that auto-res
 | **P0** | Default | Fallback margin when no other rule matches |
 
 Resolution uses **first-match-wins** algorithm with 5-minute cache.
+
+### Partner API Rules
+
+Quotes created through the partner quote API (`POST /api/v1/quote_api/quotes`) resolve
+their margin the same way, matched against the **identity stored on the partner's API
+key** rather than a user email. These rules look like any other rule in this widget:
+
+| Rule | Priority | Match Email | Margin |
+|------|----------|-------------|--------|
+| Partner API — BridgeLogis | P90 | `bridgelogis@partner.quote-api` | 24% |
+
+**To change a partner's rate**, edit that rule here — no deploy needed. To give one
+partner weight-banded rates, add rules at **P100** matching the same identity; P100
+wins over the P90 default. Deactivating all matching rules falls back to **24%**.
+
+> Partners cannot set their own margin. The API ignores any `margin_percent` a caller
+> sends — margin is always resolved from these rules, because it is what keeps our
+> cost basis out of the partner-facing response.
 
 ### CRUD Operations
 

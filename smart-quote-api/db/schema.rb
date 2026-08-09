@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_08_03_140254) do
+ActiveRecord::Schema[8.0].define(version: 2026_08_09_000003) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -105,6 +105,22 @@ ActiveRecord::Schema[8.0].define(version: 2026_08_03_140254) do
     t.index ["match_nationality"], name: "idx_margin_rules_nationality", where: "(match_nationality IS NOT NULL)"
   end
 
+  create_table "partner_api_keys", force: :cascade do |t|
+    t.string "name", limit: 100, null: false
+    t.string "key_digest", limit: 64, null: false
+    t.string "key_prefix", limit: 16, null: false
+    t.string "margin_identity", limit: 255
+    t.string "nationality", limit: 100
+    t.boolean "is_active", default: true, null: false
+    t.datetime "last_used_at"
+    t.datetime "revoked_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["is_active", "revoked_at"], name: "idx_partner_api_keys_usable"
+    t.index ["key_digest"], name: "index_partner_api_keys_on_key_digest", unique: true
+    t.index ["key_prefix"], name: "index_partner_api_keys_on_key_prefix"
+  end
+
   create_table "quotes", force: :cascade do |t|
     t.string "reference_no", limit: 20, null: false
     t.string "origin_country", limit: 3, default: "KR", null: false
@@ -114,7 +130,6 @@ ActiveRecord::Schema[8.0].define(version: 2026_08_03_140254) do
     t.boolean "is_jeju_pickup", default: false
     t.string "incoterm", limit: 5, null: false
     t.string "packing_type", limit: 20, default: "NONE", null: false
-    t.string "shipping_item_type", limit: 20, default: "NON_DOCUMENT", null: false
     t.decimal "margin_percent", precision: 5, scale: 2, null: false
     t.decimal "duty_tax_estimate", precision: 12, default: "0"
     t.decimal "exchange_rate", precision: 10, scale: 2, null: false
@@ -146,9 +161,12 @@ ActiveRecord::Schema[8.0].define(version: 2026_08_03_140254) do
     t.date "validity_date"
     t.string "share_token"
     t.datetime "share_expires_at"
+    t.string "shipping_item_type", limit: 20, default: "NON_DOCUMENT", null: false
+    t.bigint "partner_api_key_id"
     t.index ["created_at"], name: "index_quotes_on_created_at", order: :desc
     t.index ["customer_id"], name: "index_quotes_on_customer_id"
     t.index ["destination_country"], name: "index_quotes_on_destination_country"
+    t.index ["partner_api_key_id"], name: "index_quotes_on_partner_api_key_id"
     t.index ["reference_no"], name: "index_quotes_on_reference_no", unique: true
     t.index ["share_token"], name: "index_quotes_on_share_token", unique: true
     t.index ["status"], name: "index_quotes_on_status"
@@ -198,5 +216,6 @@ ActiveRecord::Schema[8.0].define(version: 2026_08_03_140254) do
   add_foreign_key "audit_logs", "users"
   add_foreign_key "customers", "users"
   add_foreign_key "quotes", "customers"
+  add_foreign_key "quotes", "partner_api_keys"
   add_foreign_key "quotes", "users"
 end

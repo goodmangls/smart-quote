@@ -2,10 +2,14 @@ module Api
   module V1
     class QuotesController < ApplicationController
       include JwtAuthenticatable
+      include ApiKeyAuthenticatable
 
       InvalidInputError = Class.new(StandardError)
 
-      before_action :authenticate_user!, except: [ :calculate ]
+      # api_create is partner (machine) traffic authenticated by X-API-Key, not by
+      # a user JWT — so it is excluded from authenticate_user! and gated separately.
+      before_action :authenticate_user!, except: [ :calculate, :api_create ]
+      before_action :authenticate_api_key!, only: [ :api_create ]
 
       # POST /api/v1/quotes/calculate (public - stateless)
       def calculate
@@ -55,7 +59,7 @@ module Api
         validate_quote_input!(input)
         result = QuoteCalculator.call(input)
 
-        quote = current_user.quotes.new(
+        quote = current_api_key.quotes.new(
           **input_attributes(input),
           **result_attributes(result),
           items: input["items"],
@@ -66,7 +70,7 @@ module Api
 
         if quote.save
           AuditLog.track!(
-            user: current_user,
+            user: nil,
             action: "quote.api_created",
             resource: quote,
             metadata: quote_api_audit_metadata,
@@ -229,7 +233,10 @@ module Api
           "incoterm" => api.dig("terms", "incoterms").presence || "DAP",
           "packingType" => api.dig("cargo", "packing_type").presence || "NONE",
           "shippingMode" => api["service_type"].presence || "express_courier",
-          "marginPercent" => (api["margin_percent"].presence || 15).to_f,
+          # Margin is resolved from margin_rules against the API key's identity —
+          # never from the payload. A partner that could set its own margin could
+          # set it to 0 and read our cost basis straight off the response.
+          "marginPercent" => resolved_partner_margin(packages),
           "dutyTaxEstimate" => (api.dig("terms", "duty_tax_estimate") || 0).to_f,
           "exchangeRate" => (api["exchange_rate"].presence || Constants::Rates::DEFAULT_EXCHANGE_RATE).to_f,
           "fscPercent" => fsc_percent.to_f,
@@ -254,8 +261,11 @@ module Api
       end
 
       def quote_api_params
+        # margin_percent is intentionally NOT permitted — margin is resolved
+        # server-side in resolved_partner_margin. Permitting it here would let a
+        # partner price its own shipment and back out our cost basis.
         params.permit(
-          :service_type, :carrier, :currency, :margin_percent, :exchange_rate,
+          :service_type, :carrier, :currency, :exchange_rate,
           :fsc_percent, :manual_surcharge_cost,
           origin: [ :country, :city, :postal_code, :address, :location_note,
                     :domestic_region_code, :is_jeju_pickup ],
@@ -279,10 +289,28 @@ module Api
         ].compact.join("\n")
       end
 
+      # Server-side margin for partner traffic.
+      #
+      # Resolved from margin_rules against the API key's margin_identity, so the
+      # rate is visible and editable in the admin Margin Rules UI. Falls back to
+      # MarginRuleResolver::DEFAULT_MARGIN when the key has no matching rule.
+      #
+      # Banded rules need a weight before QuoteCalculator has run, so we band on
+      # declared gross weight rather than chargeable weight.
+      def resolved_partner_margin(packages)
+        MarginRuleResolver.resolve(
+          email: current_api_key&.margin_identity,
+          nationality: current_api_key&.nationality,
+          weight: quote_api_gross_weight(packages)
+        )[:margin_percent].to_f
+      end
+
       def quote_api_audit_metadata
         api = quote_api_params
         {
           source: "quote_api_v1",
+          partner_api_key_id: current_api_key&.id,
+          partner_name: current_api_key&.name,
           requested_by: api["requested_by"],
           service_type: api["service_type"],
           carrier: api["carrier"]
