@@ -3,6 +3,11 @@ require "active_support/core_ext/integer/time"
 Rails.application.configure do
   # Settings specified here will take precedence over those in config/application.rb.
 
+  # Provide a default FRONTEND_URL so AuthMailer's ENV.fetch does not raise
+  # during local development. Individual devs can override this in .env.
+  # Mirrors the same default in config/environments/test.rb.
+  ENV["FRONTEND_URL"] ||= "http://localhost:5173"
+
   # Make code changes take effect immediately without server restart.
   config.enable_reloading = true
 
