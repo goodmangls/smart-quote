@@ -1,1 +1,1 @@
-🔧 fix(dev): 로컬 개발 이메일 인증 KeyError 해소 — development.rb FRONTEND_URL 기본값 + 백엔드 .env.example 신설
+📊 feat(analytics): Vercel Web Analytics 연동 — @vercel/analytics + App.tsx <Analytics /> 마운트
