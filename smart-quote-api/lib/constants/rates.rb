@@ -18,9 +18,9 @@ module Constants
     #   출처: https://mydhl.express.dhl/kr/ko/ship/surcharges.html#/fuel_surcharge
     # FedEx FSC : 주간 업데이트 (EMAX 공지)
     # ============================================================
-    DEFAULT_FSC_PERCENT = 46.25 # UPS FSC, effective 2026-08-03
-    DEFAULT_FSC_PERCENT_DHL = 38.25 # DHL FSC, effective 2026-08-03
-    DEFAULT_FSC_PERCENT_FEDEX = 45.50 # FedEx FSC, effective 2026-08-03
+    DEFAULT_FSC_PERCENT = 46.75 # UPS FSC, effective 2026-08-10
+    DEFAULT_FSC_PERCENT_DHL = 40.25 # DHL FSC, effective 2026-08-10~08-16
+    DEFAULT_FSC_PERCENT_FEDEX = 46.00 # FedEx FSC, effective 2026-08-10
     MAX_MARGIN_PERCENT = 80 # Maximum margin rate (%)
     UPS_FSC_URL = "https://www.ups.com/kr/ko/support/shipping-support/shipping-costs-rates/fuel-surcharges.page"
     UPS_RATES_HUB_URL = "https://www.ups.com/kr/ko/support/shipping-support/shipping-costs-rates"
