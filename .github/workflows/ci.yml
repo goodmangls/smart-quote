@@ -18,7 +18,10 @@ jobs:
       - run: npm ci
       - run: npx tsc --noEmit
       - run: npm run lint
-      - run: npx vitest run
+      # Coverage must run here, not plain `vitest run`. The thresholds in
+      # vitest.config.ts only apply when coverage is collected, so without this
+      # flag the regression floor would silently never be enforced.
+      - run: npm run test:coverage
 
   backend-rubocop:
     runs-on: ubuntu-latest
