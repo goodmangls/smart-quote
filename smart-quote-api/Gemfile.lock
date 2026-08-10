@@ -313,6 +313,7 @@ GEM
       logger
     shoulda-matchers (7.0.1)
       activesupport (>= 7.1)
+    simplecov (1.0.3)
     stringio (3.2.0)
     thor (1.5.0)
     timeout (0.6.0)
@@ -365,6 +366,7 @@ DEPENDENCIES
   sentry-rails
   sentry-ruby
   shoulda-matchers
+  simplecov
   tzinfo-data
 
 BUNDLED WITH

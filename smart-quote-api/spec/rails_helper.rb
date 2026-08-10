@@ -1,4 +1,24 @@
 # This file is copied to spec/ when you run 'rails generate rspec:install'
+
+# SimpleCov must start before any application code is loaded, otherwise lines
+# executed during boot are recorded as uncovered.
+#
+# Reporting only — no minimum_coverage is set yet. A threshold will be added once
+# a baseline is agreed; enabling one here without that would break CI immediately
+# and would conflate an aspirational target with a regression floor.
+require 'simplecov'
+SimpleCov.start 'rails' do
+  enable_coverage :branch
+  add_filter '/spec/'
+  add_filter '/config/'
+  add_filter '/db/'
+  add_group 'Services', 'app/services'
+  add_group 'Calculators', 'app/services/calculators'
+  add_group 'Controllers', 'app/controllers'
+  add_group 'Models', 'app/models'
+  add_group 'Constants', 'lib/constants'
+end
+
 require 'spec_helper'
 ENV['RAILS_ENV'] ||= 'test'
 require_relative '../config/environment'
