@@ -1,7 +1,16 @@
 /**
  * FedEx zone mapping: country code -> { rateKey, label }
- * Source: FDX IP Export 2026 Special Rates (letter zones A–Y)
- * Synced with FEDEX_ZONE_COUNTRIES in options.ts and Calculators::FedexZone
+ *
+ * Source of truth: "FDX 국가별 ZONE.pdf" (FedEx official country/territory zone table,
+ * 수출 columns IPE/BOX · IP/BOX · IE · IPF · IEF — all five agree per row).
+ * Generated from that table; do not hand-edit individual entries. When FedEx
+ * publishes a new table, regenerate and update the regression fixture in
+ * __tests__/fedex_zones.test.ts.
+ *
+ * Countries absent from the FedEx table (e.g. MM, SD, SS, SL, CF, KM, GW, TM, TJ,
+ * XK, SM, VA) are intentionally unmapped and fall through to FEDEX_DEFAULT_ZONE.
+ *
+ * Synced with Calculators::FedexZone (smart-quote-api).
  */
 
 import type { ZoneInfo } from './ups_zones';
@@ -9,104 +18,113 @@ import type { ZoneInfo } from './ups_zones';
 const z = (rateKey: string, label: string): ZoneInfo => ({ rateKey, label });
 
 export const FEDEX_ZONE_MAP: Record<string, ZoneInfo> = {
-  // A: Macao
+  // A (1): Macau
   MO: z('A', 'A/Macao'),
-  // D: Guam, Saipan, Laos, Mongolia, Brunei
-  GU: z('D', 'D/Guam-SEA'),
-  MP: z('D', 'D/Guam-SEA'),
-  LA: z('D', 'D/Guam-SEA'),
+  // D (5): Brunei, GU, Cambodia, Laos, Mongolia
+  BN: z('D', 'D/Guam-SEA'), GU: z('D', 'D/Guam-SEA'), KH: z('D', 'D/Guam-SEA'), LA: z('D', 'D/Guam-SEA'),
   MN: z('D', 'D/Guam-SEA'),
-  BN: z('D', 'D/Guam-SEA'),
-  // E: US West — unused without ZIP (US defaults to F)
-  // F: US, Canada, NZ, Mexico
-  US: z('F', 'F/Americas-Oceania'),
-  CA: z('F', 'F/Americas-Oceania'),
-  NZ: z('F', 'F/Americas-Oceania'),
-  MX: z('F', 'F/Americas-Oceania'),
-  // G: Austria, Denmark, Hungary, Belgium, Czech, Greece, Netherlands, Poland, Israel
-  AT: z('G', 'G/N.Europe'),
-  DK: z('G', 'G/N.Europe'),
-  HU: z('G', 'G/N.Europe'),
-  BE: z('G', 'G/N.Europe'),
-  CZ: z('G', 'G/N.Europe'),
-  GR: z('G', 'G/N.Europe'),
-  NL: z('G', 'G/N.Europe'),
-  PL: z('G', 'G/N.Europe'),
-  IL: z('G', 'G/N.Europe'),
-  // H: Eastern Europe, Russia, Romania, Turkey (+ nearby EE)
-  RU: z('H', 'H/E.Europe'),
-  RO: z('H', 'H/E.Europe'),
-  TR: z('H', 'H/E.Europe'),
-  BG: z('H', 'H/E.Europe'),
-  UA: z('H', 'H/E.Europe'),
-  BY: z('H', 'H/E.Europe'),
-  MD: z('H', 'H/E.Europe'),
-  // I: Argentina, Brazil, Chile, Paraguay, Peru, South America
-  AR: z('I', 'I/LatAm'),
-  BR: z('I', 'I/LatAm'),
-  CL: z('I', 'I/LatAm'),
-  PY: z('I', 'I/LatAm'),
-  PE: z('I', 'I/LatAm'),
-  CO: z('I', 'I/LatAm'),
-  EC: z('I', 'I/LatAm'),
-  VE: z('I', 'I/LatAm'),
-  UY: z('I', 'I/LatAm'),
-  BO: z('I', 'I/LatAm'),
-  // J: Middle East
-  AE: z('J', 'J/Middle East'),
-  BH: z('J', 'J/Middle East'),
-  KW: z('J', 'J/Middle East'),
-  OM: z('J', 'J/Middle East'),
-  QA: z('J', 'J/Middle East'),
-  SA: z('J', 'J/Middle East'),
-  JO: z('J', 'J/Middle East'),
-  LB: z('J', 'J/Middle East'),
-  EG: z('J', 'J/Middle East'),
-  IQ: z('J', 'J/Middle East'),
-  // K: China South
+  // F (4): Canada, Mexico, Puerto Rico, United States
+  CA: z('F', 'F/US-CA-MX'), MX: z('F', 'F/US-CA-MX'), PR: z('F', 'F/US-CA-MX'), US: z('F', 'F/US-CA-MX'),
+  // G (18): Austria, Switzerland, Czech Republic, Denmark, Finland, Faroe Islands …
+  AT: z('G', 'G/Europe-2'), CH: z('G', 'G/Europe-2'), CZ: z('G', 'G/Europe-2'), DK: z('G', 'G/Europe-2'),
+  FI: z('G', 'G/Europe-2'), FO: z('G', 'G/Europe-2'), GL: z('G', 'G/Europe-2'), GR: z('G', 'G/Europe-2'),
+  HU: z('G', 'G/Europe-2'), IE: z('G', 'G/Europe-2'), LI: z('G', 'G/Europe-2'), LU: z('G', 'G/Europe-2'),
+  MC: z('G', 'G/Europe-2'), NO: z('G', 'G/Europe-2'), PL: z('G', 'G/Europe-2'), PT: z('G', 'G/Europe-2'),
+  SE: z('G', 'G/Europe-2'), SK: z('G', 'G/Europe-2'),
+  // H (29): Andorra, Albania, Armenia, Azerbaijan, Bosnia & Herzegovina, Bulgaria …
+  AD: z('H', 'H/E.Europe-C.Asia'), AL: z('H', 'H/E.Europe-C.Asia'), AM: z('H', 'H/E.Europe-C.Asia'),
+  AZ: z('H', 'H/E.Europe-C.Asia'), BA: z('H', 'H/E.Europe-C.Asia'), BG: z('H', 'H/E.Europe-C.Asia'),
+  BY: z('H', 'H/E.Europe-C.Asia'), CY: z('H', 'H/E.Europe-C.Asia'), EE: z('H', 'H/E.Europe-C.Asia'),
+  GE: z('H', 'H/E.Europe-C.Asia'), GI: z('H', 'H/E.Europe-C.Asia'), HR: z('H', 'H/E.Europe-C.Asia'),
+  IL: z('H', 'H/E.Europe-C.Asia'), IS: z('H', 'H/E.Europe-C.Asia'), KG: z('H', 'H/E.Europe-C.Asia'),
+  KZ: z('H', 'H/E.Europe-C.Asia'), LT: z('H', 'H/E.Europe-C.Asia'), LV: z('H', 'H/E.Europe-C.Asia'),
+  MD: z('H', 'H/E.Europe-C.Asia'), ME: z('H', 'H/E.Europe-C.Asia'), MK: z('H', 'H/E.Europe-C.Asia'),
+  MT: z('H', 'H/E.Europe-C.Asia'), RO: z('H', 'H/E.Europe-C.Asia'), RS: z('H', 'H/E.Europe-C.Asia'),
+  RU: z('H', 'H/E.Europe-C.Asia'), SI: z('H', 'H/E.Europe-C.Asia'), TR: z('H', 'H/E.Europe-C.Asia'),
+  UA: z('H', 'H/E.Europe-C.Asia'), UZ: z('H', 'H/E.Europe-C.Asia'),
+  // I (62): Antigua & Barbuda, Anguilla, AN, Argentina, AS, Aruba …
+  AG: z('I', 'I/LatAm-Caribbean'), AI: z('I', 'I/LatAm-Caribbean'), AN: z('I', 'I/LatAm-Caribbean'),
+  AR: z('I', 'I/LatAm-Caribbean'), AS: z('I', 'I/LatAm-Caribbean'), AW: z('I', 'I/LatAm-Caribbean'),
+  BB: z('I', 'I/LatAm-Caribbean'), BM: z('I', 'I/LatAm-Caribbean'), BO: z('I', 'I/LatAm-Caribbean'),
+  BQ: z('I', 'I/LatAm-Caribbean'), BR: z('I', 'I/LatAm-Caribbean'), BS: z('I', 'I/LatAm-Caribbean'),
+  BZ: z('I', 'I/LatAm-Caribbean'), CK: z('I', 'I/LatAm-Caribbean'), CL: z('I', 'I/LatAm-Caribbean'),
+  CO: z('I', 'I/LatAm-Caribbean'), CR: z('I', 'I/LatAm-Caribbean'), CW: z('I', 'I/LatAm-Caribbean'),
+  DM: z('I', 'I/LatAm-Caribbean'), DO: z('I', 'I/LatAm-Caribbean'), EC: z('I', 'I/LatAm-Caribbean'),
+  FJ: z('I', 'I/LatAm-Caribbean'), FM: z('I', 'I/LatAm-Caribbean'), GD: z('I', 'I/LatAm-Caribbean'),
+  GF: z('I', 'I/LatAm-Caribbean'), GP: z('I', 'I/LatAm-Caribbean'), GT: z('I', 'I/LatAm-Caribbean'),
+  GY: z('I', 'I/LatAm-Caribbean'), HN: z('I', 'I/LatAm-Caribbean'), HT: z('I', 'I/LatAm-Caribbean'),
+  JM: z('I', 'I/LatAm-Caribbean'), KN: z('I', 'I/LatAm-Caribbean'), KY: z('I', 'I/LatAm-Caribbean'),
+  LC: z('I', 'I/LatAm-Caribbean'), MF: z('I', 'I/LatAm-Caribbean'), MH: z('I', 'I/LatAm-Caribbean'),
+  MP: z('I', 'I/LatAm-Caribbean'), MQ: z('I', 'I/LatAm-Caribbean'), MS: z('I', 'I/LatAm-Caribbean'),
+  NC: z('I', 'I/LatAm-Caribbean'), NI: z('I', 'I/LatAm-Caribbean'), PA: z('I', 'I/LatAm-Caribbean'),
+  PE: z('I', 'I/LatAm-Caribbean'), PF: z('I', 'I/LatAm-Caribbean'), PG: z('I', 'I/LatAm-Caribbean'),
+  PW: z('I', 'I/LatAm-Caribbean'), PY: z('I', 'I/LatAm-Caribbean'), SR: z('I', 'I/LatAm-Caribbean'),
+  SV: z('I', 'I/LatAm-Caribbean'), SX: z('I', 'I/LatAm-Caribbean'), TC: z('I', 'I/LatAm-Caribbean'),
+  TL: z('I', 'I/LatAm-Caribbean'), TO: z('I', 'I/LatAm-Caribbean'), TT: z('I', 'I/LatAm-Caribbean'),
+  UY: z('I', 'I/LatAm-Caribbean'), VC: z('I', 'I/LatAm-Caribbean'), VE: z('I', 'I/LatAm-Caribbean'),
+  VG: z('I', 'I/LatAm-Caribbean'), VI: z('I', 'I/LatAm-Caribbean'), VU: z('I', 'I/LatAm-Caribbean'),
+  WF: z('I', 'I/LatAm-Caribbean'), WS: z('I', 'I/LatAm-Caribbean'),
+  // J (65): UAE, Afghanistan, Angola, Bangladesh, Burkina Faso, Bahrain …
+  AE: z('J', 'J/Africa-M.East'), AF: z('J', 'J/Africa-M.East'), AO: z('J', 'J/Africa-M.East'),
+  BD: z('J', 'J/Africa-M.East'), BF: z('J', 'J/Africa-M.East'), BH: z('J', 'J/Africa-M.East'),
+  BI: z('J', 'J/Africa-M.East'), BJ: z('J', 'J/Africa-M.East'), BT: z('J', 'J/Africa-M.East'),
+  BW: z('J', 'J/Africa-M.East'), CD: z('J', 'J/Africa-M.East'), CG: z('J', 'J/Africa-M.East'),
+  CI: z('J', 'J/Africa-M.East'), CM: z('J', 'J/Africa-M.East'), CV: z('J', 'J/Africa-M.East'),
+  DJ: z('J', 'J/Africa-M.East'), DZ: z('J', 'J/Africa-M.East'), EG: z('J', 'J/Africa-M.East'),
+  ER: z('J', 'J/Africa-M.East'), ET: z('J', 'J/Africa-M.East'), GA: z('J', 'J/Africa-M.East'),
+  GH: z('J', 'J/Africa-M.East'), GM: z('J', 'J/Africa-M.East'), GN: z('J', 'J/Africa-M.East'),
+  IQ: z('J', 'J/Africa-M.East'), JO: z('J', 'J/Africa-M.East'), KE: z('J', 'J/Africa-M.East'),
+  KW: z('J', 'J/Africa-M.East'), LB: z('J', 'J/Africa-M.East'), LK: z('J', 'J/Africa-M.East'),
+  LR: z('J', 'J/Africa-M.East'), LS: z('J', 'J/Africa-M.East'), LY: z('J', 'J/Africa-M.East'),
+  MA: z('J', 'J/Africa-M.East'), MG: z('J', 'J/Africa-M.East'), ML: z('J', 'J/Africa-M.East'),
+  MR: z('J', 'J/Africa-M.East'), MU: z('J', 'J/Africa-M.East'), MV: z('J', 'J/Africa-M.East'),
+  MW: z('J', 'J/Africa-M.East'), MZ: z('J', 'J/Africa-M.East'), NA: z('J', 'J/Africa-M.East'),
+  NE: z('J', 'J/Africa-M.East'), NG: z('J', 'J/Africa-M.East'), NP: z('J', 'J/Africa-M.East'),
+  OM: z('J', 'J/Africa-M.East'), PK: z('J', 'J/Africa-M.East'), PS: z('J', 'J/Africa-M.East'),
+  QA: z('J', 'J/Africa-M.East'), RE: z('J', 'J/Africa-M.East'), RW: z('J', 'J/Africa-M.East'),
+  SA: z('J', 'J/Africa-M.East'), SC: z('J', 'J/Africa-M.East'), SN: z('J', 'J/Africa-M.East'),
+  SY: z('J', 'J/Africa-M.East'), SZ: z('J', 'J/Africa-M.East'), TD: z('J', 'J/Africa-M.East'),
+  TG: z('J', 'J/Africa-M.East'), TN: z('J', 'J/Africa-M.East'), TZ: z('J', 'J/Africa-M.East'),
+  UG: z('J', 'J/Africa-M.East'), YE: z('J', 'J/Africa-M.East'), ZA: z('J', 'J/Africa-M.East'),
+  ZM: z('J', 'J/Africa-M.East'), ZW: z('J', 'J/Africa-M.East'),
+  // K (1): CN-S
   'CN-S': z('K', 'K/S.China'),
-  // M: Italy, Spain, UK, Germany (+ nearby W.Europe peers)
-  IT: z('M', 'M/W.Europe'),
-  ES: z('M', 'M/W.Europe'),
-  GB: z('M', 'M/W.Europe'),
-  DE: z('M', 'M/W.Europe'),
-  FR: z('M', 'M/W.Europe'),
-  CH: z('M', 'M/W.Europe'),
-  PT: z('M', 'M/W.Europe'),
-  IE: z('M', 'M/W.Europe'),
-  LU: z('M', 'M/W.Europe'),
-  AD: z('M', 'M/W.Europe'),
-  MC: z('M', 'M/W.Europe'),
-  SM: z('M', 'M/W.Europe'),
-  VA: z('M', 'M/W.Europe'),
-  LI: z('M', 'M/W.Europe'),
-  // N: Vietnam
+  // M (7): Belgium, Germany, Spain, France, United Kingdom, Italy …
+  BE: z('M', 'M/W.Europe'), DE: z('M', 'M/W.Europe'), ES: z('M', 'M/W.Europe'), FR: z('M', 'M/W.Europe'),
+  GB: z('M', 'M/W.Europe'), IT: z('M', 'M/W.Europe'), NL: z('M', 'M/W.Europe'),
+  // N (1): Vietnam
   VN: z('N', 'N/Vietnam'),
-  // O: India
+  // O (1): India
   IN: z('O', 'O/India'),
-  // P: Japan
+  // P (1): Japan
   JP: z('P', 'P/Japan'),
-  // Q: Malaysia
+  // Q (1): Malaysia
   MY: z('Q', 'Q/Malaysia'),
-  // R: Thailand
+  // R (1): Thailand
   TH: z('R', 'R/Thailand'),
-  // S: Philippines
+  // S (1): Philippines
   PH: z('S', 'S/Philippines'),
-  // T: Indonesia
+  // T (1): Indonesia
   ID: z('T', 'T/Indonesia'),
-  // U: Australia
-  AU: z('U', 'U/Australia'),
-  // V: Hong Kong
+  // U (2): Australia, New Zealand
+  AU: z('U', 'U/Australia-NZ'), NZ: z('U', 'U/Australia-NZ'),
+  // V (1): Hong Kong
   HK: z('V', 'V/Hong Kong'),
-  // W: China
+  // W (1): China
   CN: z('W', 'W/China'),
-  // X: Taiwan
+  // X (1): Taiwan
   TW: z('X', 'X/Taiwan'),
-  // Y: Singapore
+  // Y (1): Singapore
   SG: z('Y', 'Y/Singapore'),
 };
 
-const FEDEX_DEFAULT_ZONE: ZoneInfo = { rateKey: 'Y', label: 'Y/Singapore (default)' };
+/**
+ * Fallback for countries the FedEx table does not list.
+ * Deliberately the most expensive common zone (J): an unknown destination must not
+ * be quoted below cost. Previously this was Y/Singapore — one of the cheapest zones —
+ * which under-quoted every unmapped destination by ~176% (median).
+ */
+const FEDEX_DEFAULT_ZONE: ZoneInfo = { rateKey: 'J', label: 'J/Africa-M.East (default)' };
 
 export const determineFedexZone = (country: string): ZoneInfo =>
   FEDEX_ZONE_MAP[country] || FEDEX_DEFAULT_ZONE;
