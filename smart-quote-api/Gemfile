@@ -58,6 +58,10 @@ group :development, :test do
   gem "shoulda-matchers"
   gem "faker"
 
+  # Coverage measurement. Reporting only for now — no minimum is enforced until
+  # a baseline is agreed, so this cannot break CI on its own.
+  gem "simplecov", require: false
+
   # Load environment variables from .env
   gem "dotenv-rails"
 end

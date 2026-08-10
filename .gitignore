@@ -42,3 +42,6 @@ output/
 test-results/
 playwright-report/
 blob-report/
+
+# Coverage reports — regenerated per run
+coverage/

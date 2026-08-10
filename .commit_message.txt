@@ -1,1 +1,1 @@
-🔒 chore(deps): npm audit fix — prod 취약점 3→0 (react-router CSRF, dompurify), 전체 22→11
+📊 test(coverage): 커버리지 측정 도구 도입 (@vitest/coverage-v8 · simplecov) — 리포트만, 임계값 미설정. baseline FE 52.4% / BE 68.5%
