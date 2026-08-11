@@ -213,39 +213,14 @@ module Api
         end
       end
 
+      # Field mapping lives in PartnerQuoteInput. Margin stays here because it
+      # depends on the authenticated API key: a partner must never be able to set
+      # its own margin, so resolving it at the call site keeps that rule visible.
       def normalize_quote_api_params
-        api = quote_api_params
-        packages = api.dig("cargo", "packages") || []
-        raise InvalidInputError, "cargo.packages is required" if packages.blank?
-
-        carrier = (api["carrier"].presence || "UPS").upcase
-        fsc_rates = FscFetcher.current_rates
-        fsc_percent = api["fsc_percent"].presence ||
-                      fsc_rates.dig(carrier, "international") ||
-                      (carrier == "DHL" ? Constants::Rates::DEFAULT_FSC_PERCENT_DHL : Constants::Rates::DEFAULT_FSC_PERCENT)
-
-        {
-          "originCountry" => api.dig("origin", "country").presence || "KR",
-          "destinationCountry" => api.dig("destination", "country"),
-          "destinationZip" => api.dig("destination", "postal_code") || api.dig("destination", "airport"),
-          "domesticRegionCode" => api.dig("origin", "domestic_region_code").presence || "A",
-          "isJejuPickup" => ActiveModel::Type::Boolean.new.cast(api.dig("origin", "is_jeju_pickup")),
-          "incoterm" => api.dig("terms", "incoterms").presence || "DAP",
-          "packingType" => api.dig("cargo", "packing_type").presence || "NONE",
-          "shippingMode" => api["service_type"].presence || "express_courier",
-          # Margin is resolved from margin_rules against the API key's identity —
-          # never from the payload. A partner that could set its own margin could
-          # set it to 0 and read our cost basis straight off the response.
-          "marginPercent" => resolved_partner_margin(packages),
-          "dutyTaxEstimate" => (api.dig("terms", "duty_tax_estimate") || 0).to_f,
-          "exchangeRate" => (api["exchange_rate"].presence || Constants::Rates::DEFAULT_EXCHANGE_RATE).to_f,
-          "fscPercent" => fsc_percent.to_f,
-          "manualDomesticCost" => api.dig("terms", "pickup_required") ? (api.dig("terms", "pickup_cost") || 0).to_f : 0,
-          "manualPackingCost" => api.dig("cargo", "manual_packing_cost"),
-          "manualSurgeCost" => (api["manual_surcharge_cost"] || 0).to_f,
-          "overseasCarrier" => carrier,
-          "items" => packages.map.with_index(1) { |package, idx| normalize_quote_api_package(package, idx) }
-        }
+        builder = PartnerQuoteInput.new(quote_api_params)
+        builder.to_h(margin_percent: resolved_partner_margin(builder.packages))
+      rescue PartnerQuoteInput::InvalidInput => e
+        raise InvalidInputError, e.message
       end
 
       def normalize_quote_api_package(package, idx)
