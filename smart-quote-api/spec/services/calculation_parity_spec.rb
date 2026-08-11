@@ -7,6 +7,29 @@ RSpec.describe QuoteCalculator, "Calculation Parity" do
 
   fixtures_data = JSON.parse(File.read(File.expand_path("../../../shared/test-fixtures/calculation-parity.json", __dir__)))
 
+  # A fixture carrying an "expected" block is asserted to the KRW here and, with the
+  # same numbers, in src/features/quote/services/__tests__/calculationParity.test.ts.
+  #
+  # The older fixtures have no "expected" and are checked structurally only. Sharing an
+  # input file does not by itself make two implementations agree: a UPS quote currently
+  # displays ~5% above what this calculator stores, and every structural assertion in
+  # this file passes on both sides regardless.
+  fixtures_data["fixtures"].select { |f| f["expected"] }.each do |fixture|
+    it "matches the frontend to the KRW: #{fixture['name']}" do
+      result = QuoteCalculator.call(fixture["input"])
+      expected = fixture["expected"]
+
+      expect(result[:totalQuoteAmount]).to eq(expected["totalQuoteAmount"])
+      expect(result[:totalCostAmount]).to be_within(0.0001).of(expected["totalCostAmount"])
+      expect(result[:billableWeight]).to be_within(0.0001).of(expected["billableWeight"])
+      expect(result[:breakdown][:intlBase]).to be_within(0.0001).of(expected["intlBase"])
+      expect(result[:breakdown][:carrierAddOnTotal] || 0)
+        .to be_within(0.0001).of(expected["carrierAddOnTotal"])
+      expect((result[:breakdown][:carrierAddOnDetails] || []).map { |d| d[:code] }.sort)
+        .to eq(expected["carrierAddOnCodes"])
+    end
+  end
+
   fixtures_data["fixtures"].each do |fixture|
     context fixture["name"] do
       let(:result) { QuoteCalculator.call(fixture["input"]) }

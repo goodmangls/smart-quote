@@ -2,7 +2,7 @@
  * Carrier-specific visual theme for Add-on panels.
  * Pricing/rates stay in each carrier's normalize*Rates + config — theme is UI only.
  */
-export type AddOnCarrierTheme = 'ups' | 'dhl';
+export type AddOnCarrierTheme = 'ups' | 'dhl' | 'fedex';
 
 export interface AddOnPanelThemeClasses {
   panel: string;
@@ -45,5 +45,20 @@ export const ADDON_PANEL_THEMES: Record<AddOnCarrierTheme, AddOnPanelThemeClasse
     checkbox: 'rounded border-gray-300 text-yellow-600 focus:ring-yellow-500 w-3.5 h-3.5',
     selectedName: 'text-yellow-800 dark:text-yellow-200',
     selectedAmount: 'text-yellow-700 dark:text-yellow-300 font-semibold',
+  },
+  fedex: {
+    panel:
+      'rounded-xl border border-purple-200 dark:border-purple-800 bg-purple-50/50 dark:bg-purple-900/10 p-3',
+    icon: 'w-4 h-4 text-purple-600 dark:text-purple-400',
+    title: 'font-semibold text-purple-700 dark:text-purple-300',
+    totalPill:
+      'ml-auto text-xs font-bold text-purple-700 dark:text-purple-300 bg-purple-100 dark:bg-purple-900/40 px-2 py-0.5 rounded-full',
+    selectedCard:
+      'bg-purple-100 dark:bg-purple-900/30 border border-purple-300 dark:border-purple-700',
+    unselectedCard:
+      'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-purple-300 dark:hover:border-purple-700',
+    checkbox: 'rounded border-gray-300 text-purple-600 focus:ring-purple-500 w-3.5 h-3.5',
+    selectedName: 'text-purple-800 dark:text-purple-200',
+    selectedAmount: 'text-purple-700 dark:text-purple-300 font-semibold',
   },
 };

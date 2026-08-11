@@ -49,12 +49,25 @@ class QuoteCalculator
     # the 0.5kg rating increment, then sum. A single box keeps the legacy raw
     # max-of-totals behavior unchanged.
     total_box_count = (@input[:items] || []).sum { |item| item[:quantity].to_i }
-    @billable_weight = if total_box_count >= 2
+    raw_billable_weight = if total_box_count >= 2
       @item_result[:total_billable_weight]
     else
       [ @item_result[:total_actual_weight], @item_result[:total_packed_volumetric_weight] ].max
     end
     @user_warnings = @item_result[:warnings].dup
+
+    # FedEx rates a package meeting the 추가 취급 요금 – 용적 criteria at no less than
+    # 18kg. The surcharge is flat, so the rule lands on the tariff lookup below.
+    # nil unless a package actually triggers it — other carriers are untouched.
+    fedex_min_chargeable = if @carrier == "FEDEX"
+      Calculators::FedexAddon.min_chargeable_weight(@input[:items], @input[:packingType] || "NONE")
+    end
+    @billable_weight = fedex_min_chargeable ? [ raw_billable_weight, fedex_min_chargeable ].max : raw_billable_weight
+
+    if fedex_min_chargeable && @billable_weight > raw_billable_weight
+      @user_warnings << "FedEx Minimum Chargeable Weight: rated at #{@billable_weight}kg " \
+                        "(actual #{raw_billable_weight}kg) — package meets the Additional Handling – Dimension criteria."
+    end
 
     if @item_result[:total_packed_volumetric_weight] > @item_result[:total_actual_weight] * 1.2
       @user_warnings << "High Volumetric Weight Detected (>20% over actual). Consider Repacking."
@@ -154,15 +167,25 @@ class QuoteCalculator
     @intl_fsc_new = (@base_with_margin * fsc_rate).round
 
     # Add-ons (no margin applied)
-    # Note: carrierAddOnTotal (DHL 19 + UPS 6 add-ons) is frontend-only
-    add_on_total = @packing_total + @pickup_in_seoul + @surge_cost + @dest_duty + @overseas_result[:intl_war_risk]
+    #
+    # FedEx add-ons are mirrored here so a saved FedEx quote matches the figure the
+    # customer was shown. DHL/UPS add-ons are still frontend-only — their saved
+    # totals therefore sit below the displayed ones. That gap predates this and is
+    # not corrected here because closing it moves existing saved UPS/DHL quotes.
+    fedex_add_on = @carrier == "FEDEX" ? fedex_add_on_result : nil
+    @carrier_add_on_total = fedex_add_on ? fedex_add_on[:total] : 0
+    @carrier_add_on_details = fedex_add_on && fedex_add_on[:details].any? ? fedex_add_on[:details] : nil
+
+    add_on_total = @packing_total + @pickup_in_seoul + @surge_cost + @carrier_add_on_total +
+                   @dest_duty + @overseas_result[:intl_war_risk]
 
     if [ "EXW", "FOB" ].include?(@input[:incoterm])
       @user_warnings << "Collect Term: International Freight calculated for reference but may be billed to Consignee/Partner."
     end
 
     cost_fsc = (base_rate * fsc_rate).round
-    @total_cost_amount = base_rate + cost_fsc + @overseas_result[:intl_war_risk] + @surge_cost + @packing_total + @dest_duty + @pickup_in_seoul
+    @total_cost_amount = base_rate + cost_fsc + @overseas_result[:intl_war_risk] + @surge_cost +
+                         @packing_total + @carrier_add_on_total + @dest_duty + @pickup_in_seoul
     raw_quote_amount = @base_with_margin + @intl_fsc_new + add_on_total
     @total_quote_amount = (raw_quote_amount / 100.0).ceil * 100
     @total_quote_amount_usd = @total_quote_amount / exchange_rate.to_f
@@ -203,8 +226,23 @@ class QuoteCalculator
         },
         pickupInSeoul: @pickup_in_seoul,
         destDuty: @dest_duty,
+        carrierAddOnTotal: @carrier_add_on_total,
+        carrierAddOnDetails: @carrier_add_on_details,
         totalCost: @total_cost_amount
       }
     }
+  end
+
+  # FedEx add-ons take the raw request fscPercent, matching the frontend call
+  # (`calculateFedexAddOnCosts(input, billableWeight, input.fscPercent)`): when the
+  # request omits it, add-ons carry no fuel surcharge even though the international
+  # leg falls back to the carrier default. That asymmetry is inherited from the
+  # UPS/DHL add-on path — mirrored here deliberately so FE and BE agree.
+  def fedex_add_on_result
+    Calculators::FedexAddon.call(
+      input: @input,
+      billable_weight: @billable_weight,
+      fsc_percent: @input[:fscPercent]
+    )
   end
 end
