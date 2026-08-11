@@ -3,12 +3,17 @@
 # SimpleCov must start before any application code is loaded, otherwise lines
 # executed during boot are recorded as uncovered.
 #
-# Reporting only — no minimum_coverage is set yet. A threshold will be added once
-# a baseline is agreed; enabling one here without that would break CI immediately
-# and would conflate an aspirational target with a regression floor.
+# REGRESSION FLOOR — not a target. Both numbers sit a few points below what the
+# suite actually covers today (2026-08-11: line 68.5%, branch 48.3%). The gate
+# stops coverage sliding; it does not demand a level we have not reached. The 80%
+# figure in the global rules is an aspiration tracked separately.
+#
+# Raise these when coverage genuinely improves. Never lower them to make a red
+# build pass.
 require 'simplecov'
 SimpleCov.start 'rails' do
   enable_coverage :branch
+  minimum_coverage line: 65, branch: 45
   add_filter '/spec/'
   add_filter '/config/'
   add_filter '/db/'

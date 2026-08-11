@@ -1,1 +1,1 @@
-📊 test(coverage): 커버리지 측정 도구 도입 (@vitest/coverage-v8 · simplecov) — 리포트만, 임계값 미설정. baseline FE 52.4% / BE 68.5%
+🚧 test(coverage): 커버리지 회귀 게이트 활성화 — FE stmt 50%/br 40%, BE line 65%/br 45% + CI 를 test:coverage 로 전환
