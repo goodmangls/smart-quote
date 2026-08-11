@@ -1,1 +1,1 @@
-♻️ refactor(api): normalize_quote_api_params 를 PartnerQuoteInput 으로 추출 (순환복잡도 19→0, ABC 47.5→33.6) + 특성화 테스트 18건
+♻️ refactor(quote): calculateQuote 가격 계산부를 computeQuotePricing 순수함수로 추출 (순환복잡도 30→25) + 특성화 테스트 21건 (마진 클램프·캐리어별 FSC 기본값·마크업 공식·KRW 100 올림 고정)
