@@ -13,7 +13,13 @@
 require 'simplecov'
 SimpleCov.start 'rails' do
   enable_coverage :branch
-  minimum_coverage line: 65, branch: 45
+
+  # Enforce only on a full-suite run. `rspec spec/one_spec.rb` measures just what
+  # that file touched, so enforcing there would fail every partial run and train
+  # everyone to ignore the gate. CI runs `bundle exec rspec` with no filter, so
+  # the floor still applies where it matters.
+  full_suite_run = ARGV.none? { |arg| arg.include?('spec/') }
+  minimum_coverage line: 65, branch: 45 if full_suite_run
   add_filter '/spec/'
   add_filter '/config/'
   add_filter '/db/'

@@ -1,1 +1,1 @@
-🚧 test(coverage): 커버리지 회귀 게이트 활성화 — FE stmt 50%/br 40%, BE line 65%/br 45% + CI 를 test:coverage 로 전환
+♻️ refactor(api): input_attributes 를 QuoteInputAttributes 로 추출 (복잡도 28→0) + 특성화 테스트 17건 + 커버리지 게이트 부분실행 오탐 수정
