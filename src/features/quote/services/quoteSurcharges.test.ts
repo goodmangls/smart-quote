@@ -84,7 +84,12 @@ describe('computeSystemSurcharges', () => {
 
     it('reports the declared amount alongside the applied amount', () => {
       const [line] = computeSystemSurcharges([rate(7.5)], 1_000_000).applied ?? [];
-      expect(line).toMatchObject({ code: 'EBS', chargeType: 'rate', amount: 7.5, appliedAmount: 75_000 });
+      expect(line).toMatchObject({
+        code: 'EBS',
+        chargeType: 'rate',
+        amount: 7.5,
+        appliedAmount: 75_000,
+      });
     });
   });
 });
