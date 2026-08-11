@@ -202,7 +202,20 @@ Zone mappings are config-driven (`src/config/ups_zones.ts`, `src/config/dhl_zone
 
 ### FedEx Zone Mapping (letter zones, 2026-07)
 
-FedEx uses letter zone keys `A D E F G H I J K M N O P Q R S T U V W X Y` (e.g. P=Japan, Y=Singapore, F=US/CA/NZ/MX, V=HK, W=CN). Default fallback for unmapped countries: **Y (Singapore)**. Document shipments resolve Envelope (rated ≤0.5kg) → Pak (≤2.5kg) → IP fallback (+warning); Parcel always uses IP. FedEx add-ons/IPF freight tables are out of scope until rate data arrives.
+FedEx uses letter zone keys `A D E F G H I J K M N O P Q R S T U V W X Y` (e.g. P=Japan, Y=Singapore, F=US/CA/NZ/MX, V=HK, W=CN). Default fallback for unmapped countries: **Y (Singapore)**. Document shipments resolve Envelope (rated ≤0.5kg) → Pak (≤2.5kg) → IP fallback (+warning); Parcel always uses IP.
+
+### FedEx Add-on Services (2026, IPE/IP/IE)
+
+Source: FedEx "추가 서비스 요금 및 기타 정보 — 대한민국" (KR_20251119_102313). Config `src/config/fedex_addons.ts` ↔ backend `app/services/calculators/fedex_addon.rb` — **동일 값 유지 필수**.
+
+Two rules are FedEx-specific and easy to get wrong:
+
+- **Highest-only** — 한 패키지가 비표준화물 기준(용적/중량/패키징 35,600 · 특대형 86,000 · 미허가 378,200) 2종 이상에 해당하면 **가장 높은 금액 하나만** 부과된다. 합산하면 최대 4배 과대견적.
+- **최소 청구 중량 18kg** — 추가 취급 요금–용적 기준에 해당하는 패키지는 18kg 미만으로 청구되지 않는다. 부가요금이 정액이므로 이 규칙은 **base 요율 조회**에 작용한다(`getFedexMinChargeableWeight` → `billableWeight`).
+
+**범위 밖**: Freight(IPF/IEF) 요금, 계약 기반 프리미엄(M&I·Priority Alert·ODC), 지역 그룹 기반 OPA/ODA(그룹 A/B/C 국가 목록이 원문에 없음), 제3자 청구 2.5%(과금 기준이 declared value 가 아니라 총 운임이라 `calcAddonFee` 경로와 맞지 않음).
+
+⚠️ **DHL/UPS 애드온은 여전히 프론트 전용**이라 저장 견적이 화면보다 낮다(UPS 는 IHF·SGF 자동 적용 때문에 미선택 시에도 ~5% 차이). FedEx 만 `quote_calculator.rb` 에 미러돼 있다.
 
 ### UPS Surge Fee (2026-03-15~)
 

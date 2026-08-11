@@ -10,7 +10,16 @@
         "destinationZip": "10001",
         "incoterm": "DAP",
         "packingType": "WOODEN_BOX",
-        "items": [{"id":"1","length":50,"width":40,"height":30,"weight":15,"quantity":2}],
+        "items": [
+          {
+            "id": "1",
+            "length": 50,
+            "width": 40,
+            "height": 30,
+            "weight": 15,
+            "quantity": 2
+          }
+        ],
         "marginPercent": 15,
         "dutyTaxEstimate": 0,
         "exchangeRate": 1400,
@@ -26,7 +35,16 @@
         "destinationZip": "10115",
         "incoterm": "CIF",
         "packingType": "NONE",
-        "items": [{"id":"1","length":30,"width":20,"height":15,"weight":5,"quantity":1}],
+        "items": [
+          {
+            "id": "1",
+            "length": 30,
+            "width": 20,
+            "height": 15,
+            "weight": 5,
+            "quantity": 1
+          }
+        ],
         "marginPercent": 20,
         "dutyTaxEstimate": 0,
         "exchangeRate": 1400,
@@ -43,7 +61,16 @@
         "destinationZip": "100-0001",
         "incoterm": "EXW",
         "packingType": "WOODEN_BOX",
-        "items": [{"id":"1","length":40,"width":30,"height":25,"weight":10,"quantity":3}],
+        "items": [
+          {
+            "id": "1",
+            "length": 40,
+            "width": 30,
+            "height": 25,
+            "weight": 10,
+            "quantity": 3
+          }
+        ],
         "marginPercent": 18,
         "dutyTaxEstimate": 0,
         "exchangeRate": 1400,
@@ -60,7 +87,16 @@
         "destinationZip": "048619",
         "incoterm": "DAP",
         "packingType": "NONE",
-        "items": [{"id":"1","length":20,"width":15,"height":10,"weight":2,"quantity":5}],
+        "items": [
+          {
+            "id": "1",
+            "length": 20,
+            "width": 15,
+            "height": 10,
+            "weight": 2,
+            "quantity": 5
+          }
+        ],
         "marginPercent": 15,
         "dutyTaxEstimate": 0,
         "exchangeRate": 1400,
@@ -76,7 +112,16 @@
         "destinationZip": "2000",
         "incoterm": "CIF",
         "packingType": "WOODEN_BOX",
-        "items": [{"id":"1","length":120,"width":80,"height":80,"weight":5,"quantity":1}],
+        "items": [
+          {
+            "id": "1",
+            "length": 120,
+            "width": 80,
+            "height": 80,
+            "weight": 5,
+            "quantity": 1
+          }
+        ],
         "marginPercent": 15,
         "dutyTaxEstimate": 0,
         "exchangeRate": 1400,
@@ -92,7 +137,16 @@
         "destinationZip": "700000",
         "incoterm": "FOB",
         "packingType": "VACUUM",
-        "items": [{"id":"1","length":60,"width":50,"height":40,"weight":20,"quantity":2}],
+        "items": [
+          {
+            "id": "1",
+            "length": 60,
+            "width": 50,
+            "height": 40,
+            "weight": 20,
+            "quantity": 2
+          }
+        ],
         "marginPercent": 25,
         "dutyTaxEstimate": 0,
         "exchangeRate": 1400,
@@ -108,7 +162,16 @@
         "destinationZip": "SW1A 1AA",
         "incoterm": "DAP",
         "packingType": "NONE",
-        "items": [{"id":"1","length":30,"width":25,"height":20,"weight":8,"quantity":1}],
+        "items": [
+          {
+            "id": "1",
+            "length": 30,
+            "width": 25,
+            "height": 20,
+            "weight": 8,
+            "quantity": 1
+          }
+        ],
         "marginPercent": 0,
         "dutyTaxEstimate": 0,
         "exchangeRate": 1400,
@@ -125,8 +188,22 @@
         "incoterm": "DDP",
         "packingType": "WOODEN_BOX",
         "items": [
-          {"id":"1","length":50,"width":40,"height":30,"weight":15,"quantity":1},
-          {"id":"2","length":30,"width":25,"height":20,"weight":8,"quantity":2}
+          {
+            "id": "1",
+            "length": 50,
+            "width": 40,
+            "height": 30,
+            "weight": 15,
+            "quantity": 1
+          },
+          {
+            "id": "2",
+            "length": 30,
+            "width": 25,
+            "height": 20,
+            "weight": 8,
+            "quantity": 2
+          }
         ],
         "marginPercent": 15,
         "dutyTaxEstimate": 200000,
@@ -136,6 +213,408 @@
         "pickupInSeoulCost": 60000,
         "manualSurgeCost": 35000
       }
+    },
+    {
+      "name": "fedex_jp_plain",
+      "input": {
+        "originCountry": "KR",
+        "destinationCountry": "JP",
+        "destinationZip": "100-0001",
+        "incoterm": "DAP",
+        "packingType": "NONE",
+        "items": [
+          {
+            "id": "1",
+            "length": 40,
+            "width": 30,
+            "height": 30,
+            "weight": 10,
+            "quantity": 1
+          }
+        ],
+        "marginPercent": 15,
+        "dutyTaxEstimate": 0,
+        "exchangeRate": 1300,
+        "fscPercent": 30,
+        "overseasCarrier": "FEDEX"
+      },
+      "expected": {
+        "totalQuoteAmount": 244700,
+        "totalCostAmount": 212758.0,
+        "billableWeight": 10.0,
+        "intlBase": 163660,
+        "carrierAddOnTotal": 0.0,
+        "carrierAddOnCodes": []
+      }
+    },
+    {
+      "name": "fedex_us_import_fee",
+      "input": {
+        "originCountry": "KR",
+        "destinationCountry": "US",
+        "destinationZip": "100-0001",
+        "incoterm": "DAP",
+        "packingType": "NONE",
+        "items": [
+          {
+            "id": "1",
+            "length": 40,
+            "width": 30,
+            "height": 30,
+            "weight": 10,
+            "quantity": 1
+          }
+        ],
+        "marginPercent": 15,
+        "dutyTaxEstimate": 0,
+        "exchangeRate": 1300,
+        "fscPercent": 30,
+        "overseasCarrier": "FEDEX"
+      },
+      "expected": {
+        "totalQuoteAmount": 330600,
+        "totalCostAmount": 287911.0,
+        "billableWeight": 10.0,
+        "intlBase": 218470,
+        "carrierAddOnTotal": 3900.0,
+        "carrierAddOnCodes": [
+          "USI"
+        ]
+      }
+    },
+    {
+      "name": "fedex_ahd_dimension",
+      "input": {
+        "originCountry": "KR",
+        "destinationCountry": "JP",
+        "destinationZip": "100-0001",
+        "incoterm": "DAP",
+        "packingType": "NONE",
+        "items": [
+          {
+            "id": "1",
+            "length": 122,
+            "width": 30,
+            "height": 30,
+            "weight": 10,
+            "quantity": 1
+          }
+        ],
+        "marginPercent": 15,
+        "dutyTaxEstimate": 0,
+        "exchangeRate": 1300,
+        "fscPercent": 30,
+        "overseasCarrier": "FEDEX"
+      },
+      "expected": {
+        "totalQuoteAmount": 403500,
+        "totalCostAmount": 356876.0,
+        "billableWeight": 21.96,
+        "intlBase": 238920,
+        "carrierAddOnTotal": 46280.0,
+        "carrierAddOnCodes": [
+          "AHD"
+        ]
+      }
+    },
+    {
+      "name": "fedex_ahd_min_chargeable_18kg",
+      "input": {
+        "originCountry": "KR",
+        "destinationCountry": "JP",
+        "destinationZip": "100-0001",
+        "incoterm": "DAP",
+        "packingType": "NONE",
+        "items": [
+          {
+            "id": "1",
+            "length": 122,
+            "width": 10,
+            "height": 10,
+            "weight": 5,
+            "quantity": 1
+          }
+        ],
+        "marginPercent": 15,
+        "dutyTaxEstimate": 0,
+        "exchangeRate": 1300,
+        "fscPercent": 30,
+        "overseasCarrier": "FEDEX"
+      },
+      "expected": {
+        "totalQuoteAmount": 359500,
+        "totalCostAmount": 318578.0,
+        "billableWeight": 18,
+        "intlBase": 209460,
+        "carrierAddOnTotal": 46280.0,
+        "carrierAddOnCodes": [
+          "AHD"
+        ]
+      }
+    },
+    {
+      "name": "fedex_oversize_highest_only",
+      "input": {
+        "originCountry": "KR",
+        "destinationCountry": "JP",
+        "destinationZip": "100-0001",
+        "incoterm": "DAP",
+        "packingType": "NONE",
+        "items": [
+          {
+            "id": "1",
+            "length": 250,
+            "width": 30,
+            "height": 30,
+            "weight": 10,
+            "quantity": 1
+          }
+        ],
+        "marginPercent": 15,
+        "dutyTaxEstimate": 0,
+        "exchangeRate": 1300,
+        "fscPercent": 30,
+        "overseasCarrier": "FEDEX"
+      },
+      "expected": {
+        "totalQuoteAmount": 800100,
+        "totalCostAmount": 710255.0,
+        "billableWeight": 45.0,
+        "intlBase": 460350,
+        "carrierAddOnTotal": 111800.0,
+        "carrierAddOnCodes": [
+          "OVR"
+        ]
+      }
+    },
+    {
+      "name": "fedex_unauthorized_highest_only",
+      "input": {
+        "originCountry": "KR",
+        "destinationCountry": "JP",
+        "destinationZip": "100-0001",
+        "incoterm": "DAP",
+        "packingType": "NONE",
+        "items": [
+          {
+            "id": "1",
+            "length": 300,
+            "width": 30,
+            "height": 30,
+            "weight": 70,
+            "quantity": 1
+          }
+        ],
+        "marginPercent": 15,
+        "dutyTaxEstimate": 0,
+        "exchangeRate": 1300,
+        "fscPercent": 30,
+        "overseasCarrier": "FEDEX"
+      },
+      "expected": {
+        "totalQuoteAmount": 1562300,
+        "totalCostAmount": 1422590.0,
+        "billableWeight": 70.0,
+        "intlBase": 716100,
+        "carrierAddOnTotal": 491660.0,
+        "carrierAddOnCodes": [
+          "UNA"
+        ]
+      }
+    },
+    {
+      "name": "fedex_mixed_boxes_per_package",
+      "input": {
+        "originCountry": "KR",
+        "destinationCountry": "JP",
+        "destinationZip": "100-0001",
+        "incoterm": "DAP",
+        "packingType": "NONE",
+        "items": [
+          {
+            "id": "1",
+            "length": 250,
+            "width": 30,
+            "height": 30,
+            "weight": 10,
+            "quantity": 1
+          },
+          {
+            "id": "2",
+            "length": 40,
+            "width": 30,
+            "height": 30,
+            "weight": 30,
+            "quantity": 1
+          }
+        ],
+        "marginPercent": 15,
+        "dutyTaxEstimate": 0,
+        "exchangeRate": 1300,
+        "fscPercent": 30,
+        "overseasCarrier": "FEDEX"
+      },
+      "expected": {
+        "totalQuoteAmount": 1263700,
+        "totalCostAmount": 1119430.0,
+        "billableWeight": 75.0,
+        "intlBase": 739500,
+        "carrierAddOnTotal": 158080.0,
+        "carrierAddOnCodes": [
+          "AHW",
+          "OVR"
+        ]
+      }
+    },
+    {
+      "name": "fedex_dangerous_goods_greater_of",
+      "input": {
+        "originCountry": "KR",
+        "destinationCountry": "JP",
+        "destinationZip": "100-0001",
+        "incoterm": "DAP",
+        "packingType": "NONE",
+        "items": [
+          {
+            "id": "1",
+            "length": 40,
+            "width": 30,
+            "height": 30,
+            "weight": 100,
+            "quantity": 1
+          }
+        ],
+        "marginPercent": 15,
+        "dutyTaxEstimate": 0,
+        "exchangeRate": 1300,
+        "fscPercent": 30,
+        "overseasCarrier": "FEDEX",
+        "fedexAddOns": [
+          "DGA"
+        ]
+      },
+      "expected": {
+        "totalQuoteAmount": 2200800,
+        "totalCostAmount": 2017860.0,
+        "billableWeight": 100.0,
+        "intlBase": 938000,
+        "carrierAddOnTotal": 798460.0,
+        "carrierAddOnCodes": [
+          "DGA",
+          "UNA"
+        ]
+      }
+    },
+    {
+      "name": "fedex_dry_ice_waived_with_dg",
+      "input": {
+        "originCountry": "KR",
+        "destinationCountry": "JP",
+        "destinationZip": "100-0001",
+        "incoterm": "DAP",
+        "packingType": "NONE",
+        "items": [
+          {
+            "id": "1",
+            "length": 40,
+            "width": 30,
+            "height": 30,
+            "weight": 10,
+            "quantity": 1
+          }
+        ],
+        "marginPercent": 15,
+        "dutyTaxEstimate": 0,
+        "exchangeRate": 1300,
+        "fscPercent": 30,
+        "overseasCarrier": "FEDEX",
+        "fedexAddOns": [
+          "DGA",
+          "DIC"
+        ]
+      },
+      "expected": {
+        "totalQuoteAmount": 442500,
+        "totalCostAmount": 410488.0,
+        "billableWeight": 10.0,
+        "intlBase": 163660,
+        "carrierAddOnTotal": 197730.0,
+        "carrierAddOnCodes": [
+          "DGA"
+        ]
+      }
+    },
+    {
+      "name": "fedex_declared_value_steps",
+      "input": {
+        "originCountry": "KR",
+        "destinationCountry": "JP",
+        "destinationZip": "100-0001",
+        "incoterm": "DAP",
+        "packingType": "NONE",
+        "items": [
+          {
+            "id": "1",
+            "length": 40,
+            "width": 30,
+            "height": 30,
+            "weight": 10,
+            "quantity": 1
+          }
+        ],
+        "marginPercent": 15,
+        "dutyTaxEstimate": 0,
+        "exchangeRate": 1300,
+        "fscPercent": 30,
+        "overseasCarrier": "FEDEX",
+        "fedexDeclaredValue": 460000
+      },
+      "expected": {
+        "totalQuoteAmount": 250400,
+        "totalCostAmount": 218438.0,
+        "billableWeight": 10.0,
+        "intlBase": 163660,
+        "carrierAddOnTotal": 5680.0,
+        "carrierAddOnCodes": [
+          "DVL"
+        ]
+      }
+    },
+    {
+      "name": "fedex_wooden_box_packaging",
+      "input": {
+        "originCountry": "KR",
+        "destinationCountry": "JP",
+        "destinationZip": "100-0001",
+        "incoterm": "DAP",
+        "packingType": "WOODEN_BOX",
+        "items": [
+          {
+            "id": "1",
+            "length": 40,
+            "width": 30,
+            "height": 30,
+            "weight": 10,
+            "quantity": 1
+          }
+        ],
+        "marginPercent": 15,
+        "dutyTaxEstimate": 0,
+        "exchangeRate": 1300,
+        "fscPercent": 30,
+        "overseasCarrier": "FEDEX"
+      },
+      "expected": {
+        "totalQuoteAmount": 485400,
+        "totalCostAmount": 440908.0,
+        "billableWeight": 21.0,
+        "intlBase": 228060,
+        "carrierAddOnTotal": 46280.0,
+        "carrierAddOnCodes": [
+          "AHP"
+        ]
+      }
     }
-  ]
+  ],
+  "note_expected": "Fixtures carrying an `expected` block are asserted to the KRW on BOTH sides. The older fixtures have no `expected` and are structural-only — a shared input file alone does not make the two implementations agree, which is how a 5% UPS gap went unnoticed."
 }

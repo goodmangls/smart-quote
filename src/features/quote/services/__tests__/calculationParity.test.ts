@@ -2,7 +2,43 @@ import { calculateQuote } from '../calculationService';
 import type { QuoteInput } from '@/types';
 import fixtures from '../../../../../shared/test-fixtures/calculation-parity.json';
 
+/**
+ * A fixture carrying an `expected` block is asserted to the KRW here and, with the
+ * same numbers, in spec/services/calculation_parity_spec.rb.
+ *
+ * The older fixtures have no `expected` and are checked structurally only. Sharing an
+ * input file does not by itself make two implementations agree: a UPS quote currently
+ * displays ~5% above what the backend stores, and every structural assertion here
+ * passes on both sides regardless.
+ */
+type ExpectedBlock = {
+  totalQuoteAmount: number;
+  totalCostAmount: number;
+  billableWeight: number;
+  intlBase: number;
+  carrierAddOnTotal: number;
+  carrierAddOnCodes: string[];
+};
+
 describe('Calculation Parity Tests (Frontend)', () => {
+  fixtures.fixtures
+    .filter((f): f is typeof f & { expected: ExpectedBlock } => 'expected' in f)
+    .forEach((fixture) => {
+      it(`matches the backend to the KRW: ${fixture.name}`, () => {
+        const r = calculateQuote(fixture.input as unknown as QuoteInput);
+        const e = fixture.expected;
+
+        expect(r.totalQuoteAmount).toBe(e.totalQuoteAmount);
+        expect(r.totalCostAmount).toBeCloseTo(e.totalCostAmount, 4);
+        expect(r.billableWeight).toBeCloseTo(e.billableWeight, 4);
+        expect(r.breakdown.intlBase).toBeCloseTo(e.intlBase, 4);
+        expect(r.breakdown.carrierAddOnTotal ?? 0).toBeCloseTo(e.carrierAddOnTotal, 4);
+        expect((r.breakdown.carrierAddOnDetails ?? []).map((d) => d.code).sort()).toEqual(
+          e.carrierAddOnCodes,
+        );
+      });
+    });
+
   fixtures.fixtures.forEach((fixture) => {
     it(`produces valid output: ${fixture.name}`, () => {
       const result = calculateQuote(fixture.input as unknown as QuoteInput);
