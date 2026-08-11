@@ -18,6 +18,11 @@ import {
  * rules that produce them — margin clamping, the per-carrier FSC default, the
  * markup formula, or the rounding step. Those are exactly the rules a refactor
  * could shift without any test noticing, and each one moves the quoted price.
+ *
+ * These deliberately go through calculateQuote rather than computeQuotePricing,
+ * despite the file name. Calling the pure function directly would stop covering
+ * how the orchestrator wires it up — the field mapping and the renamed
+ * destructuring — which is where a refactor is most likely to go wrong.
  */
 describe('quote pricing rules', () => {
   const baseInput: QuoteInput = {

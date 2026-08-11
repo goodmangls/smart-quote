@@ -1,5 +1,6 @@
 import { QuoteInput, QuoteResult, Incoterm, ShippingItemType } from '@/types';
 import { computeQuotePricing } from './quotePricing';
+import { computeSystemSurcharges } from './quoteSurcharges';
 import { calculateDhlAddOnCosts } from './dhlAddonCalculator';
 import { calculateUpsAddOnCosts } from './upsAddonCalculator';
 import { calculateItemCosts, computePackingTotal } from './itemCalculation';
@@ -87,30 +88,10 @@ export const calculateQuote = (input: QuoteInput): QuoteResult => {
 
   // System surcharges from DB (War Risk, PSS, EBS, etc.)
   const manualSurgeCost = input.manualSurgeCost ?? 0;
-  let systemSurchargeTotal = 0;
-  let appliedSurcharges:
-    | NonNullable<import('@/types').CostBreakdown['appliedSurcharges']>
-    | undefined;
-
-  if (input.resolvedSurcharges && input.resolvedSurcharges.length > 0) {
-    const applied = input.resolvedSurcharges.map((s) => {
-      const appliedAmount =
-        s.chargeType === 'rate'
-          ? Math.round((carrierResult.intlBase * s.amount) / 100)
-          : Math.round(s.amount);
-      return {
-        code: s.code,
-        name: s.name,
-        nameKo: s.nameKo ?? undefined,
-        chargeType: s.chargeType,
-        amount: s.amount,
-        appliedAmount,
-        sourceUrl: s.sourceUrl ?? undefined,
-      };
-    });
-    systemSurchargeTotal = applied.reduce((sum, s) => sum + s.appliedAmount, 0);
-    appliedSurcharges = applied;
-  }
+  const { total: systemSurchargeTotal, applied: appliedSurcharges } = computeSystemSurcharges(
+    input.resolvedSurcharges,
+    carrierResult.intlBase,
+  );
 
   const surgeCost = systemSurchargeTotal + manualSurgeCost;
 
