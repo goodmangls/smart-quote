@@ -1,1 +1,1 @@
-♻️ refactor(api): input_attributes 를 QuoteInputAttributes 로 추출 (복잡도 28→0) + 특성화 테스트 17건 + 커버리지 게이트 부분실행 오탐 수정
+♻️ refactor(api): normalize_quote_api_params 를 PartnerQuoteInput 으로 추출 (순환복잡도 19→0, ABC 47.5→33.6) + 특성화 테스트 18건
