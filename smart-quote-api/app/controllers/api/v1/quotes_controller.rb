@@ -406,26 +406,9 @@ module Api
         ).to_h
       end
 
+      # Field mapping and defaults live in QuoteInputAttributes.
       def input_attributes(input)
-        {
-          origin_country: input["originCountry"] || input[:originCountry] || "KR",
-          destination_country: input["destinationCountry"] || input[:destinationCountry],
-          destination_zip: input["destinationZip"] || input[:destinationZip],
-          domestic_region_code: input["domesticRegionCode"] || input[:domesticRegionCode] || "A",
-          is_jeju_pickup: input["isJejuPickup"] || input[:isJejuPickup] || false,
-          incoterm: input["incoterm"] || input[:incoterm],
-          packing_type: input["packingType"] || input[:packingType] || "NONE",
-          shipping_item_type: input["shippingItemType"] || input[:shippingItemType] || "NON_DOCUMENT",
-          margin_percent: input["marginPercent"] || input[:marginPercent] || 15,
-          duty_tax_estimate: input["dutyTaxEstimate"] || input[:dutyTaxEstimate] || 0,
-          exchange_rate: input["exchangeRate"] || input[:exchangeRate],
-          fsc_percent: input["fscPercent"] || input[:fscPercent],
-          manual_domestic_cost: input["manualDomesticCost"] || input[:manualDomesticCost],
-          manual_packing_cost: input["manualPackingCost"] || input[:manualPackingCost],
-          manual_surge_cost: input["manualSurgeCost"] || input[:manualSurgeCost] || 0,
-          pickup_in_seoul_cost: input["pickupInSeoulCost"] || input[:pickupInSeoulCost] || 0,
-          overseas_carrier: input["overseasCarrier"] || input[:overseasCarrier] || "UPS"
-        }
+        QuoteInputAttributes.call(input)
       end
 
       def result_attributes(result)
