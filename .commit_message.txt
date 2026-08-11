@@ -1,1 +1,1 @@
-💄 style(quote): quoteSurcharges.test.ts prettier 포맷 정리 (동작 변경 없음)
+🔒 security(api): 백엔드 취약 gem 일괄 패치 — bundler-audit 고유 권고 70건(High 12) → 0건, rails 8.0.4→8.0.5.1·rack 3.2.6·nokogiri 1.19.4·jwt 3.2.0 등 16개 타깃 업데이트 + puma 를 7.2 계열로 고정(무제한 >=5.0 이 메이저 점프 유발)
