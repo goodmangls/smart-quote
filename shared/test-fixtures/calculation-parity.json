@@ -614,6 +614,434 @@
           "AHP"
         ]
       }
+    },
+    {
+      "name": "fedex_db_override_selected",
+      "input": {
+        "originCountry": "KR",
+        "destinationCountry": "JP",
+        "destinationZip": "100-0001",
+        "incoterm": "DAP",
+        "packingType": "NONE",
+        "items": [
+          {
+            "id": "1",
+            "length": 40,
+            "width": 30,
+            "height": 30,
+            "weight": 10,
+            "quantity": 1
+          }
+        ],
+        "marginPercent": 15,
+        "dutyTaxEstimate": 0,
+        "exchangeRate": 1300,
+        "fscPercent": 30,
+        "overseasCarrier": "FEDEX",
+        "resolvedAddonRates": [
+          {
+            "code": "SPU",
+            "carrier": "FEDEX",
+            "nameEn": "Saturday Pickup",
+            "nameKo": "토요일 픽업",
+            "chargeType": "fixed",
+            "unit": "shipment",
+            "amount": 99999,
+            "perKgRate": null,
+            "ratePercent": null,
+            "minAmount": null,
+            "fscApplicable": true,
+            "autoDetect": false,
+            "selectable": true,
+            "condition": null,
+            "detectRules": null
+          },
+          {
+            "code": "OVR",
+            "carrier": "FEDEX",
+            "nameEn": "Oversize Charge",
+            "nameKo": "특대형",
+            "chargeType": "fixed",
+            "unit": "piece",
+            "amount": 70000,
+            "perKgRate": null,
+            "ratePercent": null,
+            "minAmount": null,
+            "fscApplicable": true,
+            "autoDetect": true,
+            "selectable": false,
+            "condition": null,
+            "detectRules": null
+          },
+          {
+            "code": "AHD",
+            "carrier": "FEDEX",
+            "nameEn": "AH Dimension",
+            "nameKo": "용적",
+            "chargeType": "fixed",
+            "unit": "piece",
+            "amount": 80000,
+            "perKgRate": null,
+            "ratePercent": null,
+            "minAmount": null,
+            "fscApplicable": true,
+            "autoDetect": true,
+            "selectable": false,
+            "condition": null,
+            "detectRules": null
+          },
+          {
+            "code": "DGA",
+            "carrier": "FEDEX",
+            "nameEn": "Accessible DG",
+            "nameKo": "근접위험물",
+            "chargeType": "calculated",
+            "unit": "shipment",
+            "amount": 200000,
+            "perKgRate": 5000,
+            "ratePercent": null,
+            "minAmount": 200000,
+            "fscApplicable": true,
+            "autoDetect": false,
+            "selectable": true,
+            "condition": null,
+            "detectRules": null
+          }
+        ],
+        "fedexAddOns": [
+          "SPU"
+        ]
+      },
+      "expected": {
+        "totalQuoteAmount": 374700,
+        "totalCostAmount": 342756.7,
+        "billableWeight": 10.0,
+        "intlBase": 163660,
+        "carrierAddOnTotal": 129998.7,
+        "carrierAddOnCodes": [
+          "SPU"
+        ]
+      }
+    },
+    {
+      "name": "fedex_db_override_flips_highest_only",
+      "input": {
+        "originCountry": "KR",
+        "destinationCountry": "JP",
+        "destinationZip": "100-0001",
+        "incoterm": "DAP",
+        "packingType": "NONE",
+        "items": [
+          {
+            "id": "1",
+            "length": 250,
+            "width": 30,
+            "height": 30,
+            "weight": 10,
+            "quantity": 1
+          }
+        ],
+        "marginPercent": 15,
+        "dutyTaxEstimate": 0,
+        "exchangeRate": 1300,
+        "fscPercent": 30,
+        "overseasCarrier": "FEDEX",
+        "resolvedAddonRates": [
+          {
+            "code": "SPU",
+            "carrier": "FEDEX",
+            "nameEn": "Saturday Pickup",
+            "nameKo": "토요일 픽업",
+            "chargeType": "fixed",
+            "unit": "shipment",
+            "amount": 99999,
+            "perKgRate": null,
+            "ratePercent": null,
+            "minAmount": null,
+            "fscApplicable": true,
+            "autoDetect": false,
+            "selectable": true,
+            "condition": null,
+            "detectRules": null
+          },
+          {
+            "code": "OVR",
+            "carrier": "FEDEX",
+            "nameEn": "Oversize Charge",
+            "nameKo": "특대형",
+            "chargeType": "fixed",
+            "unit": "piece",
+            "amount": 70000,
+            "perKgRate": null,
+            "ratePercent": null,
+            "minAmount": null,
+            "fscApplicable": true,
+            "autoDetect": true,
+            "selectable": false,
+            "condition": null,
+            "detectRules": null
+          },
+          {
+            "code": "AHD",
+            "carrier": "FEDEX",
+            "nameEn": "AH Dimension",
+            "nameKo": "용적",
+            "chargeType": "fixed",
+            "unit": "piece",
+            "amount": 80000,
+            "perKgRate": null,
+            "ratePercent": null,
+            "minAmount": null,
+            "fscApplicable": true,
+            "autoDetect": true,
+            "selectable": false,
+            "condition": null,
+            "detectRules": null
+          },
+          {
+            "code": "DGA",
+            "carrier": "FEDEX",
+            "nameEn": "Accessible DG",
+            "nameKo": "근접위험물",
+            "chargeType": "calculated",
+            "unit": "shipment",
+            "amount": 200000,
+            "perKgRate": 5000,
+            "ratePercent": null,
+            "minAmount": 200000,
+            "fscApplicable": true,
+            "autoDetect": false,
+            "selectable": true,
+            "condition": null,
+            "detectRules": null
+          }
+        ]
+      },
+      "expected": {
+        "totalQuoteAmount": 792300,
+        "totalCostAmount": 702455.0,
+        "billableWeight": 45.0,
+        "intlBase": 460350,
+        "carrierAddOnTotal": 104000.0,
+        "carrierAddOnCodes": [
+          "AHD"
+        ]
+      }
+    },
+    {
+      "name": "fedex_db_override_per_kg",
+      "input": {
+        "originCountry": "KR",
+        "destinationCountry": "JP",
+        "destinationZip": "100-0001",
+        "incoterm": "DAP",
+        "packingType": "NONE",
+        "items": [
+          {
+            "id": "1",
+            "length": 40,
+            "width": 30,
+            "height": 30,
+            "weight": 100,
+            "quantity": 1
+          }
+        ],
+        "marginPercent": 15,
+        "dutyTaxEstimate": 0,
+        "exchangeRate": 1300,
+        "fscPercent": 30,
+        "overseasCarrier": "FEDEX",
+        "resolvedAddonRates": [
+          {
+            "code": "SPU",
+            "carrier": "FEDEX",
+            "nameEn": "Saturday Pickup",
+            "nameKo": "토요일 픽업",
+            "chargeType": "fixed",
+            "unit": "shipment",
+            "amount": 99999,
+            "perKgRate": null,
+            "ratePercent": null,
+            "minAmount": null,
+            "fscApplicable": true,
+            "autoDetect": false,
+            "selectable": true,
+            "condition": null,
+            "detectRules": null
+          },
+          {
+            "code": "OVR",
+            "carrier": "FEDEX",
+            "nameEn": "Oversize Charge",
+            "nameKo": "특대형",
+            "chargeType": "fixed",
+            "unit": "piece",
+            "amount": 70000,
+            "perKgRate": null,
+            "ratePercent": null,
+            "minAmount": null,
+            "fscApplicable": true,
+            "autoDetect": true,
+            "selectable": false,
+            "condition": null,
+            "detectRules": null
+          },
+          {
+            "code": "AHD",
+            "carrier": "FEDEX",
+            "nameEn": "AH Dimension",
+            "nameKo": "용적",
+            "chargeType": "fixed",
+            "unit": "piece",
+            "amount": 80000,
+            "perKgRate": null,
+            "ratePercent": null,
+            "minAmount": null,
+            "fscApplicable": true,
+            "autoDetect": true,
+            "selectable": false,
+            "condition": null,
+            "detectRules": null
+          },
+          {
+            "code": "DGA",
+            "carrier": "FEDEX",
+            "nameEn": "Accessible DG",
+            "nameKo": "근접위험물",
+            "chargeType": "calculated",
+            "unit": "shipment",
+            "amount": 200000,
+            "perKgRate": 5000,
+            "ratePercent": null,
+            "minAmount": 200000,
+            "fscApplicable": true,
+            "autoDetect": false,
+            "selectable": true,
+            "condition": null,
+            "detectRules": null
+          }
+        ],
+        "fedexAddOns": [
+          "DGA"
+        ]
+      },
+      "expected": {
+        "totalQuoteAmount": 2143400,
+        "totalCostAmount": 1960400.0,
+        "billableWeight": 100.0,
+        "intlBase": 938000,
+        "carrierAddOnTotal": 741000.0,
+        "carrierAddOnCodes": [
+          "DGA",
+          "OVR"
+        ]
+      }
+    },
+    {
+      "name": "fedex_db_partial_drops_missing_codes",
+      "input": {
+        "originCountry": "KR",
+        "destinationCountry": "US",
+        "destinationZip": "100-0001",
+        "incoterm": "DAP",
+        "packingType": "NONE",
+        "items": [
+          {
+            "id": "1",
+            "length": 40,
+            "width": 30,
+            "height": 30,
+            "weight": 10,
+            "quantity": 1
+          }
+        ],
+        "marginPercent": 15,
+        "dutyTaxEstimate": 0,
+        "exchangeRate": 1300,
+        "fscPercent": 30,
+        "overseasCarrier": "FEDEX",
+        "resolvedAddonRates": [
+          {
+            "code": "SPU",
+            "carrier": "FEDEX",
+            "nameEn": "Saturday Pickup",
+            "nameKo": "토요일 픽업",
+            "chargeType": "fixed",
+            "unit": "shipment",
+            "amount": 99999,
+            "perKgRate": null,
+            "ratePercent": null,
+            "minAmount": null,
+            "fscApplicable": true,
+            "autoDetect": false,
+            "selectable": true,
+            "condition": null,
+            "detectRules": null
+          },
+          {
+            "code": "OVR",
+            "carrier": "FEDEX",
+            "nameEn": "Oversize Charge",
+            "nameKo": "특대형",
+            "chargeType": "fixed",
+            "unit": "piece",
+            "amount": 70000,
+            "perKgRate": null,
+            "ratePercent": null,
+            "minAmount": null,
+            "fscApplicable": true,
+            "autoDetect": true,
+            "selectable": false,
+            "condition": null,
+            "detectRules": null
+          },
+          {
+            "code": "AHD",
+            "carrier": "FEDEX",
+            "nameEn": "AH Dimension",
+            "nameKo": "용적",
+            "chargeType": "fixed",
+            "unit": "piece",
+            "amount": 80000,
+            "perKgRate": null,
+            "ratePercent": null,
+            "minAmount": null,
+            "fscApplicable": true,
+            "autoDetect": true,
+            "selectable": false,
+            "condition": null,
+            "detectRules": null
+          },
+          {
+            "code": "DGA",
+            "carrier": "FEDEX",
+            "nameEn": "Accessible DG",
+            "nameKo": "근접위험물",
+            "chargeType": "calculated",
+            "unit": "shipment",
+            "amount": 200000,
+            "perKgRate": 5000,
+            "ratePercent": null,
+            "minAmount": 200000,
+            "fscApplicable": true,
+            "autoDetect": false,
+            "selectable": true,
+            "condition": null,
+            "detectRules": null
+          }
+        ],
+        "fedexAddOns": [
+          "SDL"
+        ]
+      },
+      "expected": {
+        "totalQuoteAmount": 326700,
+        "totalCostAmount": 284011.0,
+        "billableWeight": 10.0,
+        "intlBase": 218470,
+        "carrierAddOnTotal": 0.0,
+        "carrierAddOnCodes": []
+      }
     }
   ],
   "note_expected": "Fixtures carrying an `expected` block are asserted to the KRW on BOTH sides. The older fixtures have no `expected` and are structural-only — a shared input file alone does not make the two implementations agree, which is how a 5% UPS gap went unnoticed."

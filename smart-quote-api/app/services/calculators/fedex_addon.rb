@@ -59,6 +59,50 @@ module Calculators
 
     module_function
 
+    # Rate resolution mirrors fedexAddonCalculator.ts exactly:
+    #   DB rows present for FEDEX → use them ALONE (a code missing from the DB is not
+    #   charged, no fallback); otherwise use the hardcoded RATES table.
+    #
+    # The all-or-nothing behaviour is inherited from the UPS/DHL path and is why the
+    # seed must be applied in full — a partial FEDEX seed silently drops the codes it
+    # omits, on both sides, rather than falling back to the table.
+    def rate_lookup(resolved_addon_rates)
+      db = Array(resolved_addon_rates).map { |r| normalize_db_rate(r) }
+                                      .select { |r| r[:carrier] == "FEDEX" }
+      return db.index_by { |r| r[:code] } if db.any?
+
+      RATES.keys.to_h { |code| [ code, hardcoded_rate(code) ] }
+    end
+
+    def hardcoded_rate(code)
+      row = RATES[code]
+      return nil unless row
+
+      name_ko, name_en, amount, fsc, per_kg = row
+      {
+        code: code, carrier: "FEDEX", name_ko: name_ko, name_en: name_en,
+        amount: amount.to_f, fsc: fsc,
+        charge_type: per_kg ? "calculated" : "fixed",
+        per_kg: per_kg&.to_f, min_amount: per_kg ? amount.to_f : nil
+      }
+    end
+
+    def normalize_db_rate(raw)
+      r = raw.respond_to?(:deep_symbolize_keys) ? raw.deep_symbolize_keys : raw.to_h.symbolize_keys
+      {
+        code: r[:code].to_s,
+        carrier: r[:carrier].to_s.upcase,
+        name_ko: r[:nameKo] || r[:name_ko] || r[:code].to_s,
+        name_en: r[:nameEn] || r[:name_en] || r[:code].to_s,
+        amount: r[:amount].to_f,
+        fsc: !!(r[:fscApplicable].nil? ? r[:fsc] : r[:fscApplicable]),
+        charge_type: (r[:chargeType] || r[:charge_type] || "fixed").to_s,
+        per_kg: (r[:perKgRate] || r[:per_kg_rate])&.to_f,
+        min_amount: (r[:minAmount] || r[:min_amount])&.to_f
+      }
+    end
+
+
     # 길이 + 둘레 = 가장 긴 면 + (나머지 두 면 × 2).
     def length_plus_girth(l, w, h)
       longest, second, third = [ l, w, h ].sort.reverse
@@ -112,13 +156,16 @@ module Calculators
     def call(input:, billable_weight:, fsc_percent:)
       fsc_rate = (fsc_percent || 0).to_f / 100
       packing_type = input[:packingType] || "NONE"
+      rates = rate_lookup(input[:resolvedAddonRates])
       details = []
       total = 0.0
 
       push = lambda do |code, amount|
-        _ko, _en, _amt, fsc_applicable, = RATES[code]
-        fsc = fsc_applicable ? amount * fsc_rate : 0
-        details << { code: code, nameKo: RATES[code][0], nameEn: RATES[code][1], amount: amount, fscAmount: fsc }
+        rate = rates[code]
+        next unless rate
+
+        fsc = rate[:fsc] ? amount * fsc_rate : 0
+        details << { code: code, nameKo: rate[:name_ko], nameEn: rate[:name_en], amount: amount, fscAmount: fsc }
         total += amount + fsc
       end
 
@@ -126,16 +173,16 @@ module Calculators
       winners = Hash.new(0)
       (input[:items] || []).each do |item|
         dims = packed_dimensions(item, packing_type)
-        codes = non_standard_codes(dims, packing_type)
+        codes = non_standard_codes(dims, packing_type).select { |code| rates[code] }
         next if codes.empty?
 
-        winner = codes.max_by { |code| RATES[code][2] }
+        winner = codes.max_by { |code| rates[code][:amount] }
         winners[winner] += item[:quantity].to_i
       end
-      winners.each { |code, count| push.call(code, RATES[code][2] * count) }
+      winners.each { |code, count| push.call(code, rates[code][:amount] * count) }
 
       # 2. 목적지 기반
-      push.call("USI", RATES["USI"][2]) if input[:destinationCountry] == "US"
+      push.call("USI", rates["USI"][:amount]) if input[:destinationCountry] == "US" && rates["USI"]
 
       # 3. 운송 신고 금액 추가 비용
       dv_fee = declared_value_fee(input[:fedexDeclaredValue])
@@ -148,11 +195,12 @@ module Calculators
       # 4. 사용자 선택
       selected = Array(input[:fedexAddOns])
       selected.each do |code|
-        next unless RATES.key?(code)
+        rate = rates[code]
+        next unless rate
         # Dry ice is waived when dangerous goods are also declared.
         next if code == "DIC" && selected.any? { |c| %w[DGA DGI].include?(c) }
 
-        push.call(code, greater_of(code, billable_weight))
+        push.call(code, greater_of(rate, billable_weight))
       end
 
       { total: total, details: details }
@@ -169,12 +217,13 @@ module Calculators
     end
 
     # "X원 또는 kg당 Y원 중 큰 금액" — flat amount unless the per-kg rate beats it.
-    def greater_of(code, billable_weight)
-      flat = RATES[code][2]
-      per_kg = RATES[code][4]
-      return flat if per_kg.nil?
+    # Gated on charge_type like calcAddonFee: a DB row carrying a per-kg rate but
+    # typed "fixed" bills the flat amount, matching the frontend.
+    def greater_of(rate, billable_weight)
+      return rate[:amount] unless rate[:charge_type] == "calculated" && rate[:per_kg].to_f.positive?
 
-      [ flat, billable_weight.ceil * per_kg ].max
+      min = rate[:min_amount] || rate[:amount]
+      [ min, billable_weight.ceil * rate[:per_kg] ].max
     end
 
     # Mirrors the +10/+10/+15 cm and weight buffer applied inline in

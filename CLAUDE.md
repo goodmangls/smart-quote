@@ -215,6 +215,8 @@ Two rules are FedEx-specific and easy to get wrong:
 
 **범위 밖**: Freight(IPF/IEF) 요금, 계약 기반 프리미엄(M&I·Priority Alert·ODC), 지역 그룹 기반 OPA/ODA(그룹 A/B/C 국가 목록이 원문에 없음), 제3자 청구 2.5%(과금 기준이 declared value 가 아니라 총 운임이라 `calcAddonFee` 경로와 맞지 않음).
 
+⚠️ **DB 요율(`resolvedAddonRates`)은 all-or-nothing 이다.** FEDEX 행이 하나라도 있으면 **DB 만** 쓰고 하드코딩 표로 폴백하지 않는다 — 프론트·백엔드 모두 동일. 따라서 **시드는 18행 전부 적용해야 한다.** 일부만 넣으면 빠진 코드가 조용히 미청구된다. (UPS/DHL 에서 물려받은 의미이며 양쪽이 같게 동작하도록 맞춰 둠)
+
 ⚠️ **DHL/UPS 애드온은 여전히 프론트 전용**이라 저장 견적이 화면보다 낮다(UPS 는 IHF·SGF 자동 적용 때문에 미선택 시에도 ~5% 차이). FedEx 만 `quote_calculator.rb` 에 미러돼 있다.
 
 ### UPS Surge Fee (2026-03-15~)

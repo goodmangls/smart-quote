@@ -1,1 +1,1 @@
-📦 feat(fedex): FedEx 2026 부대요금 도입 (프론트·백엔드 미러) — 비표준화물 자동감지 5종(2종 이상 해당 시 최고액 1건만)·선택 11종·위험물 greater-of·운송신고금액 계단식, 최소 청구 중량 18kg 은 base 요율 조회에 적용. parity fixture 에 기대값 11건 추가해 FE/BE 원 단위 대조
+🐛 fix(fedex): 백엔드 FedexAddon 이 DB 요율(resolvedAddonRates)을 읽도록 수정 — 관리자가 FedEx 요율을 재정의하면 화면 99,999 / 저장 20,100 으로 44% 어긋나던 문제. parity fixture 4건 추가(재정의·highest-only 역전·per-kg·부분시드)로 결함주입 검증
