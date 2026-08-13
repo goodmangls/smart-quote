@@ -1,1 +1,1 @@
-🐛 fix(fedex): 백엔드 FedexAddon 이 DB 요율(resolvedAddonRates)을 읽도록 수정 — 관리자가 FedEx 요율을 재정의하면 화면 99,999 / 저장 20,100 으로 44% 어긋나던 문제. parity fixture 4건 추가(재정의·highest-only 역전·per-kg·부분시드)로 결함주입 검증
+🐛 fix(zod): FedEx addon 스키마 허용 — saveQuote가 DB FEDEX 요율에서 실패하던 P0

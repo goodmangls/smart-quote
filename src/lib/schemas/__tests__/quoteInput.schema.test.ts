@@ -77,6 +77,43 @@ describe('quoteInputSchema — valid', () => {
     expect(r.success).toBe(true);
   });
 
+  it('accepts FedEx carrier + fedexAddOns + fedexDeclaredValue', () => {
+    const r = quoteInputSchema.safeParse({
+      ...validInput,
+      overseasCarrier: 'FEDEX',
+      fedexAddOns: ['SPU', 'DGA'],
+      fedexDeclaredValue: 500_000,
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("accepts resolvedAddonRates with carrier: 'FEDEX' (saveQuote regression)", () => {
+    const r = quoteInputSchema.safeParse({
+      ...validInput,
+      overseasCarrier: 'FEDEX',
+      resolvedAddonRates: [
+        {
+          code: 'AHV',
+          carrier: 'FEDEX',
+          nameEn: 'Additional Handling — Volume',
+          nameKo: '추가 취급 요금–용적 기준',
+          chargeType: 'fixed',
+          unit: 'piece',
+          amount: 35600,
+          perKgRate: null,
+          ratePercent: null,
+          minAmount: null,
+          fscApplicable: true,
+          autoDetect: false,
+          selectable: true,
+          condition: null,
+          detectRules: null,
+        },
+      ],
+    });
+    expect(r.success).toBe(true);
+  });
+
   it('applies default for destinationZip and dutyTaxEstimate', () => {
     const noDefaults = omit(validInput, 'dutyTaxEstimate', 'destinationZip');
     const r = quoteInputSchema.safeParse(noDefaults);
@@ -209,5 +246,10 @@ describe('quoteInputSchema — array bounds', () => {
   it('rejects more than 30 dhlAddOns', () => {
     const dhlAddOns = Array.from({ length: 31 }, (_, i) => `CODE${i}`);
     expect(quoteInputSchema.safeParse({ ...validInput, dhlAddOns }).success).toBe(false);
+  });
+
+  it('rejects more than 30 fedexAddOns', () => {
+    const fedexAddOns = Array.from({ length: 31 }, (_, i) => `CODE${i}`);
+    expect(quoteInputSchema.safeParse({ ...validInput, fedexAddOns }).success).toBe(false);
   });
 });

@@ -76,7 +76,7 @@ export interface QuoteInput {
     sourceUrl: string | null;
   }>;
 
-  // DB-driven add-on rates (resolved from API, replaces hardcoded dhl_addons/ups_addons)
+  // DB-driven add-on rates (resolved from API, replaces hardcoded dhl/ups/fedex_addons)
   resolvedAddonRates?: Array<{
     code: string;
     carrier: 'DHL' | 'UPS' | 'FEDEX';
@@ -108,7 +108,7 @@ export interface CostBreakdown {
   intlSurge: number; // Combined surge total (system + manual)
   intlSystemSurcharge?: number; // DB-driven surcharges (auto-calculated)
   intlManualSurge?: number; // User-entered manual surge override
-  carrierAddOnTotal?: number; // Carrier add-on services total (DHL/UPS)
+  carrierAddOnTotal?: number; // Carrier add-on services total (DHL/UPS/FEDEX)
   carrierAddOnDetails?: Array<{
     code: string;
     nameKo: string;
