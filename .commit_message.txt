@@ -1,1 +1,1 @@
-🐛 fix(zod): FedEx addon 스키마 허용 — saveQuote가 DB FEDEX 요율에서 실패하던 P0
+💱 chore(fx): 적용 기준환율 1450 → 1400 (하나은행 월요일 송금환율, 2026-08-10)

@@ -32,7 +32,7 @@ RSpec.describe "Quote input attribute mapping", type: :request do
     {
       destinationCountry: "US",
       incoterm: "DAP",
-      exchangeRate: 1450.0,
+      exchangeRate: 1400.0,
       fscPercent: 46.75,
       items: [ { name: "Box", quantity: 1, weight: 5.0, length: 40, width: 30, height: 20 } ]
     }

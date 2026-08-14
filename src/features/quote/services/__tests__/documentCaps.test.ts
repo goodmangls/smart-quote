@@ -23,7 +23,7 @@ describe('documentRatedAsParcel', () => {
     incoterm: Incoterm.DAP,
     dutyTaxEstimate: 0,
     marginPercent: 20,
-    exchangeRate: 1450,
+    exchangeRate: 1400,
     fscPercent: 39.75,
     items: [
       {

@@ -59,13 +59,14 @@ bundle exec rspec spec/requests/api/v1/quotes_spec.rb
       ups_tariff.ts            # UPS Z1-Z10 rate tables (synced with backend)
       dhl_tariff.ts            # DHL Z1-Z8 rate tables (synced with backend)
       fedex_tariff.ts          # FedEx IP/Envelope/Pak rate tables, letter zones A-Y (synced with backend)
-      rates.ts                 # KRW cost constants, DEFAULT_EXCHANGE_RATE=1450, DEFAULT_FSC_PERCENT=45.50 (UPS), DEFAULT_FSC_PERCENT_DHL=48.00 (DHL), DEFAULT_FSC_PERCENT_FEDEX=39.75 (FedEx 2026-07-20)
+      rates.ts                 # KRW cost constants, DEFAULT_EXCHANGE_RATE=1400, DEFAULT_FSC_PERCENT=45.50 (UPS), DEFAULT_FSC_PERCENT_DHL=48.00 (DHL), DEFAULT_FSC_PERCENT_FEDEX=39.75 (FedEx 2026-07-20)
       business-rules.ts        # Surge thresholds, packing weight buffer/addition
       options.ts               # Country options, carrier options, incoterm options
       addon-utils.ts           # Shared AddonRateLike/NormalizedRate types, calcAddonFee(), findRate()
       ups_zones.ts / dhl_zones.ts / fedex_zones.ts  # Config-driven zone mappings (Record<string, ZoneInfo>; FedEx letter zones, default Y/Singapore)
       ups_addons.ts            # UPS add-on rates (6) + Surge Fee config (Israel/ME)
       dhl_addons.ts            # DHL add-on rates (19) with auto-detect (OSP, OWT)
+      fedex_addons.ts          # FedEx add-on rates (18) — highest-only + 18kg min chargeable (synced with backend)
       ups_eas_lookup.ts        # EAS/RAS postal code lookup (binary search, lazy-load from public/data/)
     contexts/                  # React Context providers
       AuthContext.tsx           # JWT auth (user, session, login/logout)
@@ -75,7 +76,7 @@ bundle exec rspec spec/requests/api/v1/quotes_spec.rb
       quote/
         components/            # InputSection, ResultSection, SaveQuoteButton, CarrierComparisonCard
         components/widgets/    # ExchangeRateWidget, WeatherWidget, NoticeWidget, AccountManagerWidget, ExchangeRateCalculatorWidget
-        services/              # calculationService.ts (orchestrator), rateTableResolver.ts (carrier/document table select), fedexCalculation.ts, dhlAddonCalculator.ts, upsAddonCalculator.ts
+        services/              # calculationService.ts (orchestrator), rateTableResolver.ts (carrier/document table select), fedexCalculation.ts, fedexAddonCalculator.ts, dhlAddonCalculator.ts, upsAddonCalculator.ts
         hooks/                 # useSyncToInput (generic data sync hook)
         components/PackingTypeInfo.tsx  # Packing type info panel with live cost preview
       history/
@@ -106,6 +107,7 @@ bundle exec rspec spec/requests/api/v1/quotes_spec.rb
       packing-utils.ts         # applyPackingDimensions() shared utility (eliminates 6x duplication)
       fetchWithRetry.ts        # Generic fetch retry wrapper
       slackNotification.ts     # Slack notification for member quote saves
+      schemas/quoteInput.schema.ts  # Zod validation; addonCarrierSchema includes FEDEX (saveQuote must accept DB FEDEX rates)
 smart-quote-api/               # Backend (Rails 8 API-only, Ruby 3.4, PostgreSQL)
   app/models/
     margin_rule.rb             # Margin rule model (validations, scopes, soft delete)
@@ -123,6 +125,7 @@ smart-quote-api/               # Backend (Rails 8 API-only, Ruby 3.4, PostgreSQL
       ups_surge_fee.rb         # UPS Surge Fee auto-calc (Israel/Middle East)
       dhl_cost.rb / dhl_zone.rb
       fedex_cost.rb / fedex_zone.rb  # FedEx cost + letter zone mapping (mirror of FE)
+      fedex_addon.rb           # FedEx add-on calculator (mirror of fedexAddonCalculator.ts)
       rate_table_resolver.rb   # Carrier/document rate table selection (Envelope/Pak/IP)
       domestic_cost.rb         # Domestic pickup cost
   app/controllers/api/v1/
@@ -137,7 +140,7 @@ smart-quote-api/               # Backend (Rails 8 API-only, Ruby 3.4, PostgreSQL
     audit_logs_controller.rb   # Audit log viewer
     chat_controller.rb         # AI chatbot (Claude API, role-aware, language auto-detect, markdown, preset questions)
     notifications_controller.rb # Slack webhook proxy
-  db/seeds/addon_rates.rb      # DHL 19 + UPS 6 add-on rate seed data
+  db/seeds/addon_rates.rb      # DHL 19 + UPS 6 + FedEx 18 add-on rate seed data (FedEx must be all 18 or none)
   lib/constants/               # Tariff tables (ups_tariff.rb, dhl_tariff.rb, fedex_tariff.rb)
 ```
 
@@ -346,7 +349,7 @@ POST   /api/v1/notifications/slack   # Slack webhook proxy
 - **Tailwind**: BridgeLogis brand palette (`brand-blue-*`, `cyan-*`, `navy`, `deep-blue`, `gold`) + Semantic (`success/warning/destructive/info`), class-based dark mode. Phase 2 완료 후 레거시 `jways-*`/`accent-*` 제거.
 - **Environment**: `VITE_API_URL`, `VITE_EIA_API_KEY`, `VITE_SENTRY_DSN`, `VITE_INTERCOM_APP_ID`, `VITE_GOOGLE_MAPS_API_KEY`
 - **Tariff sync**: Frontend tariff files in `src/config/` must stay in sync with backend `lib/constants/`
-- **Market defaults**: `DEFAULT_EXCHANGE_RATE=1450` (하나은행 월요일 09시 송금환율, 2026-05-20), `DEFAULT_FSC_PERCENT=45.50` (UPS 2026-04-27), `DEFAULT_FSC_PERCENT_DHL=48.00` (DHL 2026-04-27), `DEFAULT_FSC_PERCENT_FEDEX=39.75` (FedEx 2026-07-20) in `src/config/rates.ts`
+- **Market defaults**: `DEFAULT_EXCHANGE_RATE=1400` (하나은행 월요일 09시 송금환율, 2026-08-10), `DEFAULT_FSC_PERCENT=45.50` (UPS 2026-04-27), `DEFAULT_FSC_PERCENT_DHL=48.00` (DHL 2026-04-27), `DEFAULT_FSC_PERCENT_FEDEX=39.75` (FedEx 2026-07-20) in `src/config/rates.ts`
 - **FSC 업데이트 주기**: UPS/DHL/FedEx 모두 매주 월요일. `src/config/rates.ts` + `smart-quote-api/lib/constants/rates.rb` 동시 수정 후 Vercel+Render 배포.
 - **Exchange rate policy**: Live API 자동세팅 비활성화, 매주 월요일 수동 업데이트 (하나은행 기준)
 - **Error tracking**: Sentry (`@sentry/browser`) integrated across all catch blocks
