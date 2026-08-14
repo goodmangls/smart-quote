@@ -22,7 +22,7 @@ const makeInput = (overrides: Partial<QuoteInput> = {}): QuoteInput =>
     items: [{ id: '1', length: 30, width: 30, height: 30, weight: 20, quantity: 1 }],
     marginPercent: 15,
     dutyTaxEstimate: 0,
-    exchangeRate: 1450,
+    exchangeRate: 1400,
     fscPercent: 0,
     upsAddOns: [],
     ...overrides,
