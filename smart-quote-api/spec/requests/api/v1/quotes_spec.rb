@@ -369,6 +369,42 @@ RSpec.describe "Api::V1::Quotes", type: :request do
       expect(response).to have_http_status(:unauthorized)
     end
 
+    context "stale draft auto-expiration" do
+      it "expires stale drafts and records an audit log per transition" do
+        stale = create(:quote, user: user, status: "draft", validity_date: 2.days.ago.to_date)
+        stale_sent = create(:quote, user: user, status: "sent", validity_date: 1.day.ago.to_date)
+        fresh = create(:quote, user: user, status: "draft", validity_date: 3.days.from_now.to_date)
+
+        expect {
+          get "/api/v1/quotes", headers: user_headers
+        }.to change { AuditLog.where(action: "quote.auto_expired").count }.by(2)
+
+        expect(stale.reload.status).to eq("expired")
+        expect(stale_sent.reload.status).to eq("expired")
+        expect(fresh.reload.status).to eq("draft")
+
+        log = AuditLog.find_by(action: "quote.auto_expired", resource_id: stale.id)
+        expect(log.resource_ref).to eq(stale.reference_no)
+        expect(log.metadata).to include("status_from" => "draft", "status_to" => "expired")
+      end
+
+      it "does not expire other users' quotes on a member listing" do
+        other_stale = create(:quote, user: admin, status: "draft", validity_date: 2.days.ago.to_date)
+
+        get "/api/v1/quotes", headers: user_headers
+
+        expect(other_stale.reload.status).to eq("draft")
+      end
+
+      it "does not write audit logs when nothing is stale" do
+        create(:quote, user: user, status: "draft", validity_date: 3.days.from_now.to_date)
+
+        expect {
+          get "/api/v1/quotes", headers: user_headers
+        }.not_to change { AuditLog.count }
+      end
+    end
+
     context "as admin" do
       before do
         create_list(:quote, 3, user: admin)
@@ -468,6 +504,59 @@ RSpec.describe "Api::V1::Quotes", type: :request do
 
       expect(response).to have_http_status(:not_found)
       expect(json["error"]["code"]).to eq("NOT_FOUND")
+    end
+  end
+
+  describe "POST /api/v1/quotes/:id/send_email" do
+    let(:mail) { instance_double(ActionMailer::MessageDelivery, deliver_later: true) }
+
+    before do
+      allow(QuoteMailer).to receive(:send_quote).and_return(mail)
+    end
+
+    it "rejects a missing or malformed recipient email" do
+      quote = create(:quote, user: user)
+
+      post "/api/v1/quotes/#{quote.id}/send_email", params: { recipientEmail: "not-an-email" },
+           headers: user_headers, as: :json
+
+      expect(response).to have_http_status(:unprocessable_entity)
+      expect(json.dig("error", "code")).to eq("INVALID_EMAIL")
+      expect(QuoteMailer).not_to have_received(:send_quote)
+    end
+
+    it "returns 404 for another user's quote" do
+      quote = create(:quote, user: admin)
+
+      post "/api/v1/quotes/#{quote.id}/send_email", params: { recipientEmail: "a@b.com" },
+           headers: user_headers, as: :json
+
+      expect(response).to have_http_status(:not_found)
+    end
+
+    it "sends the quote, transitions draft to sent, and records an audit log" do
+      quote = create(:quote, user: user, status: "draft")
+
+      expect {
+        post "/api/v1/quotes/#{quote.id}/send_email",
+             params: { recipientEmail: "client@example.com", recipientName: "Client" },
+             headers: user_headers, as: :json
+      }.to change { AuditLog.where(action: "quote.email_sent").count }.by(1)
+
+      expect(response).to have_http_status(:ok)
+      expect(QuoteMailer).to have_received(:send_quote)
+        .with(quote, "client@example.com", recipient_name: "Client", message: nil)
+      expect(mail).to have_received(:deliver_later)
+      expect(quote.reload.status).to eq("sent")
+    end
+
+    it "does not change a non-draft status" do
+      quote = create(:quote, user: user, status: "accepted")
+
+      post "/api/v1/quotes/#{quote.id}/send_email", params: { recipientEmail: "a@b.com" },
+           headers: user_headers, as: :json
+
+      expect(quote.reload.status).to eq("accepted")
     end
   end
 

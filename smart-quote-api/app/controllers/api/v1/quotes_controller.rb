@@ -73,10 +73,11 @@ module Api
             user: nil,
             action: "quote.api_created",
             resource: quote,
-            metadata: quote_api_audit_metadata,
+            metadata: PartnerQuoteResponse.audit_metadata(api_params: quote_api_params, api_key: current_api_key),
             ip_address: request.remote_ip
           )
-          render json: quote_api_response(quote, result, input), status: :created
+          render json: PartnerQuoteResponse.body(quote: quote, result: result, api_params: quote_api_params, api_key: current_api_key),
+                 status: :created
         else
           render json: { error: { code: "VALIDATION_ERROR", message: quote.errors.full_messages.join(", ") } }, status: :unprocessable_entity
         end
@@ -87,10 +88,13 @@ module Api
         render json: { error: { code: "CALCULATION_ERROR", message: "Failed to create API quote" } }, status: :unprocessable_entity
       end
 
+      # Auto-expiration batch bound: one giant backlog must not stall a listing
+      # request; the remainder expires on subsequent requests.
+      STALE_EXPIRE_BATCH = 500
+
       # GET /api/v1/quotes
       def index
-        # Auto-expire stale drafts (validity_date passed)
-        scoped_quotes.stale_drafts.update_all(status: "expired")
+        expire_stale_drafts!
 
         quotes = QuoteSearcher.call(scoped_quotes, params)
                       .page(params[:page] || 1)
@@ -205,6 +209,32 @@ module Api
 
       private
 
+      # Draft/sent quotes past validity expire on read, but the transition is a
+      # status change like any other — it must leave an audit trail
+      # (quote.auto_expired). Best-effort: a failure here never breaks listing.
+      def expire_stale_drafts!
+        stale = scoped_quotes.stale_drafts.limit(STALE_EXPIRE_BATCH).pluck(:id, :reference_no, :status)
+        return if stale.empty?
+
+        now = Time.current
+        Quote.where(id: stale.map(&:first)).update_all(status: "expired", updated_at: now)
+        AuditLog.insert_all(
+          stale.map do |id, reference_no, status_from|
+            {
+              action: "quote.auto_expired",
+              resource_type: "Quote",
+              resource_id: id,
+              resource_ref: reference_no,
+              metadata: { status_from: status_from, status_to: "expired" },
+              created_at: now,
+              updated_at: now
+            }
+          end
+        )
+      rescue StandardError => e
+        Rails.logger.error "[QUOTES] stale draft expiration failed: #{e.class}: #{e.message}"
+      end
+
       def scoped_quotes
         if current_user.role == "admin"
           Quote.includes(:customer, :user).recent
@@ -221,18 +251,6 @@ module Api
         builder.to_h(margin_percent: resolved_partner_margin(builder.packages))
       rescue PartnerQuoteInput::InvalidInput => e
         raise InvalidInputError, e.message
-      end
-
-      def normalize_quote_api_package(package, idx)
-        {
-          "id" => package["id"].presence || "api-package-#{idx}",
-          "name" => package["name"].presence || "Package #{idx}",
-          "quantity" => (package["quantity"].presence || 1).to_i,
-          "weight" => package["gross_weight_kg"].to_f,
-          "length" => package["length_cm"].to_f,
-          "width" => package["width_cm"].to_f,
-          "height" => package["height_cm"].to_f
-        }
       end
 
       def quote_api_params
@@ -276,70 +294,8 @@ module Api
         MarginRuleResolver.resolve(
           email: current_api_key&.margin_identity,
           nationality: current_api_key&.nationality,
-          weight: quote_api_gross_weight(packages)
+          weight: PartnerQuoteResponse.gross_weight(packages)
         )[:margin_percent].to_f
-      end
-
-      def quote_api_audit_metadata
-        api = quote_api_params
-        {
-          source: "quote_api_v1",
-          partner_api_key_id: current_api_key&.id,
-          partner_name: current_api_key&.name,
-          requested_by: api["requested_by"],
-          service_type: api["service_type"],
-          carrier: api["carrier"]
-        }
-      end
-
-      def quote_api_response(quote, result, input)
-        api = quote_api_params
-        packages = api.dig("cargo", "packages") || []
-        {
-          quote_id: quote.reference_no,
-          status: "quoted",
-          service: {
-            provider: "BridgeLogis",
-            service_name: "BridgeLogis Express Courier",
-            carrier: quote.carrier || quote.overseas_carrier
-          },
-          route: {
-            origin_country: quote.origin_country,
-            origin_city: api.dig("origin", "city"),
-            destination_country: quote.destination_country,
-            destination_city: api.dig("destination", "city"),
-            destination_airport: api.dig("destination", "airport")
-          },
-          cargo_summary: {
-            packages: packages.sum { |p| p["quantity"].to_i },
-            gross_weight_kg: quote_api_gross_weight(packages),
-            volume_weight_kg: quote_api_volume_weight(packages),
-            chargeable_weight_kg: result[:billableWeight].to_f
-          },
-          pricing: {
-            currency: "USD",
-            total: result[:totalQuoteAmountUSD].to_f.round(2)
-          },
-          transit_time: {
-            value: result[:transitTime],
-            unit: "business_days"
-          },
-          conditions: [
-            "Subject to final pickup availability.",
-            "Subject to customs requirements and commodity acceptance.",
-            "Subject to final carrier confirmation at booking."
-          ],
-          valid_until: quote.validity_date&.iso8601,
-          created_at: quote.created_at.iso8601
-        }
-      end
-
-      def quote_api_gross_weight(packages)
-        packages.sum { |p| p["quantity"].to_i * p["gross_weight_kg"].to_f }.round(2)
-      end
-
-      def quote_api_volume_weight(packages)
-        packages.sum { |p| p["quantity"].to_i * p["length_cm"].to_f * p["width_cm"].to_f * p["height_cm"].to_f / 5000.0 }.ceil.to_f
       end
 
       def validate_quote_input!(input)

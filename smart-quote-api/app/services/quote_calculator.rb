@@ -121,22 +121,11 @@ class QuoteCalculator
     @system_surcharge_total = surcharge_result[:total]
     @applied_surcharges = surcharge_result[:applied]
 
-    # UPS Surge Fee (급증수수료) — auto-detect for Middle East / Israel
-    @ups_surge_total = 0
-    if @carrier == "UPS"
-      fsc_for_surge = @input[:fscPercent].nil? ?
-        (@db_fsc_rates.dig("UPS", "international") || DEFAULT_FSC_PERCENT) :
-        @input[:fscPercent].to_f
-      ups_surge_fee_result = Calculators::UpsSurgeFee.call(
-        country: @input[:destinationCountry],
-        billable_weight: @billable_weight,
-        fsc_percent: fsc_for_surge
-      )
-      @ups_surge_total = ups_surge_fee_result&.dig(:total) || 0
-    end
-
+    # UPS Surge Fee lives in the UPS add-on mirror (Calculators::UpsAddon,
+    # code SGF) — same bucket as the frontend — so the surge total here is
+    # system surcharges + manual only, matching intlSurge on the FE breakdown.
     @manual_surge_cost = @input[:manualSurgeCost] || 0
-    @surge_cost = @system_surcharge_total + @manual_surge_cost + @ups_surge_total
+    @surge_cost = @system_surcharge_total + @manual_surge_cost
 
     @dest_duty = @input[:incoterm] == "DDP" ? (@input[:dutyTaxEstimate] || 0) : 0
     @pickup_in_seoul = @input[:pickupInSeoulCost] || 0
@@ -168,13 +157,13 @@ class QuoteCalculator
 
     # Add-ons (no margin applied)
     #
-    # FedEx add-ons are mirrored here so a saved FedEx quote matches the figure the
-    # customer was shown. DHL/UPS add-ons are still frontend-only — their saved
-    # totals therefore sit below the displayed ones. That gap predates this and is
-    # not corrected here because closing it moves existing saved UPS/DHL quotes.
-    fedex_add_on = @carrier == "FEDEX" ? fedex_add_on_result : nil
-    @carrier_add_on_total = fedex_add_on ? fedex_add_on[:total] : 0
-    @carrier_add_on_details = fedex_add_on && fedex_add_on[:details].any? ? fedex_add_on[:details] : nil
+    # All three carriers mirror their frontend add-on calculators here, so a
+    # saved quote matches the figure the customer was shown. (UPS/DHL joined
+    # FedEx 2026-08-17 — before that their saved totals sat ~5% below the
+    # displayed ones; already-saved quotes keep their stored amounts.)
+    add_on = carrier_add_on_result
+    @carrier_add_on_total = add_on ? add_on[:total] : 0
+    @carrier_add_on_details = add_on && add_on[:details].any? ? add_on[:details] : nil
 
     add_on_total = @packing_total + @pickup_in_seoul + @surge_cost + @carrier_add_on_total +
                    @dest_duty + @overseas_result[:intl_war_risk]
@@ -233,13 +222,19 @@ class QuoteCalculator
     }
   end
 
-  # FedEx add-ons take the raw request fscPercent, matching the frontend call
-  # (`calculateFedexAddOnCosts(input, billableWeight, input.fscPercent)`): when the
-  # request omits it, add-ons carry no fuel surcharge even though the international
-  # leg falls back to the carrier default. That asymmetry is inherited from the
-  # UPS/DHL add-on path — mirrored here deliberately so FE and BE agree.
-  def fedex_add_on_result
-    Calculators::FedexAddon.call(
+  # Add-ons take the raw request fscPercent, matching the frontend calls
+  # (`calculate*AddOnCosts(input, billableWeight, input.fscPercent)`): when the
+  # request omits it, add-ons carry no fuel surcharge even though the
+  # international leg falls back to the carrier default. That asymmetry exists
+  # on the frontend — mirrored here deliberately so FE and BE agree.
+  def carrier_add_on_result
+    calculator = case @carrier
+    when "FEDEX" then Calculators::FedexAddon
+    when "DHL" then Calculators::DhlAddon
+    else Calculators::UpsAddon
+    end
+
+    calculator.call(
       input: @input,
       billable_weight: @billable_weight,
       fsc_percent: @input[:fscPercent]

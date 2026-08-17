@@ -25,6 +25,18 @@
         "exchangeRate": 1400,
         "fscPercent": 30,
         "overseasCarrier": "UPS"
+      },
+      "expected": {
+        "totalQuoteAmount": 1272300,
+        "totalCostAmount": 1143826,
+        "billableWeight": 54,
+        "intlBase": 658692,
+        "carrierAddOnTotal": 109826,
+        "carrierAddOnCodes": [
+          "AHS",
+          "IHF",
+          "SGF"
+        ]
       }
     },
     {
@@ -51,6 +63,14 @@
         "fscPercent": 28,
         "overseasCarrier": "DHL",
         "pickupInSeoulCost": 50000
+      },
+      "expected": {
+        "totalQuoteAmount": 285800,
+        "totalCostAmount": 246457,
+        "billableWeight": 5,
+        "intlBase": 153482,
+        "carrierAddOnTotal": 0,
+        "carrierAddOnCodes": []
       }
     },
     {
@@ -77,6 +97,18 @@
         "fscPercent": 30,
         "overseasCarrier": "UPS",
         "manualPackingCost": 100000
+      },
+      "expected": {
+        "totalQuoteAmount": 933300,
+        "totalCostAmount": 821253.7,
+        "billableWeight": 63,
+        "intlBase": 478800,
+        "carrierAddOnTotal": 98813.7,
+        "carrierAddOnCodes": [
+          "AHS",
+          "IHF",
+          "SGF"
+        ]
       }
     },
     {
@@ -102,6 +134,14 @@
         "exchangeRate": 1400,
         "fscPercent": 30,
         "overseasCarrier": "DHL"
+      },
+      "expected": {
+        "totalQuoteAmount": 171800,
+        "totalCostAmount": 149336,
+        "billableWeight": 10,
+        "intlBase": 114874,
+        "carrierAddOnTotal": 0,
+        "carrierAddOnCodes": []
       }
     },
     {
@@ -127,6 +167,18 @@
         "exchangeRate": 1400,
         "fscPercent": 30,
         "overseasCarrier": "UPS"
+      },
+      "expected": {
+        "totalQuoteAmount": 3709300,
+        "totalCostAmount": 3258140.7,
+        "billableWeight": 222.3,
+        "intlBase": 2313402,
+        "carrierAddOnTotal": 72917.7,
+        "carrierAddOnCodes": [
+          "AHS",
+          "IHF",
+          "SGF"
+        ]
       }
     },
     {
@@ -152,6 +204,18 @@
         "exchangeRate": 1400,
         "fscPercent": 30,
         "overseasCarrier": "UPS"
+      },
+      "expected": {
+        "totalQuoteAmount": 1387100,
+        "totalCostAmount": 1174597.7,
+        "billableWeight": 93,
+        "intlBase": 653790,
+        "carrierAddOnTotal": 76570.7,
+        "carrierAddOnCodes": [
+          "AHS",
+          "IHF",
+          "SGF"
+        ]
       }
     },
     {
@@ -177,6 +241,14 @@
         "exchangeRate": 1400,
         "fscPercent": 30,
         "overseasCarrier": "DHL"
+      },
+      "expected": {
+        "totalQuoteAmount": 262400,
+        "totalCostAmount": 262363,
+        "billableWeight": 8,
+        "intlBase": 201818,
+        "carrierAddOnTotal": 0,
+        "carrierAddOnCodes": []
       }
     },
     {
@@ -212,6 +284,19 @@
         "overseasCarrier": "UPS",
         "pickupInSeoulCost": 60000,
         "manualSurgeCost": 35000
+      },
+      "expected": {
+        "totalQuoteAmount": 1884800,
+        "totalCostAmount": 1730173,
+        "billableWeight": 65,
+        "intlBase": 792870,
+        "carrierAddOnTotal": 176442,
+        "carrierAddOnCodes": [
+          "AHS",
+          "DDP",
+          "IHF",
+          "SGF"
+        ]
       }
     },
     {

@@ -226,26 +226,10 @@ module Calculators
       [ min, billable_weight.ceil * rate[:per_kg] ].max
     end
 
-    # Mirrors the +10/+10/+15 cm and weight buffer applied inline in
-    # Calculators::ItemCost#call, and applyPackingDimensions on the frontend.
-    # Kept in step with those two — a divergence here silently shifts which
-    # packages trip the 비표준화물 thresholds.
-    PACKING_DIM_ADDITIONS = { length: 10, width: 10, height: 15 }.freeze
-
+    # Packed dimensions live in CarrierAddonSupport, shared with the UPS/DHL
+    # add-on mirrors so the three cannot drift apart.
     def packed_dimensions(item, packing_type)
-      l = item[:length].to_f
-      w = item[:width].to_f
-      h = item[:height].to_f
-      weight = item[:weight].to_f
-      return { l: l, w: w, h: h, weight: weight } if packing_type == "NONE"
-
-      {
-        l: l + PACKING_DIM_ADDITIONS[:length],
-        w: w + PACKING_DIM_ADDITIONS[:width],
-        h: h + PACKING_DIM_ADDITIONS[:height],
-        weight: weight * Constants::BusinessRules::PACKING_WEIGHT_BUFFER +
-                Constants::BusinessRules::PACKING_WEIGHT_ADDITION
-      }
+      CarrierAddonSupport.packed_dimensions(item, packing_type)
     end
   end
 end

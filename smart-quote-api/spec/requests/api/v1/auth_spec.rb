@@ -221,6 +221,26 @@ RSpec.describe "Api::V1::Auth", type: :request do
     end
   end
 
+  describe "POST /api/v1/auth/magic_link/verify" do
+    let(:user) { create(:user, email: "verify@example.com") }
+
+    it "verifies a token sent in the request body (keeps it out of URLs/logs)" do
+      raw = user.generate_magic_link_token!
+      post "/api/v1/auth/magic_link/verify", params: { token: raw }, as: :json
+
+      expect(response).to have_http_status(:ok)
+      body = JSON.parse(response.body)
+      expect(body["token"]).to be_present
+      expect(body["user"]["email"]).to eq(user.email)
+      expect(user.reload.magic_link_token_digest).to be_nil
+    end
+
+    it "returns 401 for an invalid token" do
+      post "/api/v1/auth/magic_link/verify", params: { token: "bogus" }, as: :json
+      expect(response).to have_http_status(:unauthorized)
+    end
+  end
+
   describe "GET /api/v1/auth/magic_link/verify" do
     let(:user) { create(:user, email: "verify@example.com") }
 

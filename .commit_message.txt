@@ -1,1 +1,1 @@
-🛡️ fix(quality): 코드 분석 HIGH 4건 해소 — 견적번호 채번 레이스·9999 롤오버 수정(숫자 MAX+재시도), 요율표 FE↔BE 전셀 parity 게이트 신설(tariff:snapshot, 결함주입 증명), 무음 계산실패 Sentry 보고(비교카드·계산기), promote secure_compare·챗 입력 캡(role 화이트리스트·4천자·30건)·마진 상한 상수화
+📦 feat(quote): 백로그 5건 일괄 — ①UPS·DHL 애드온 백엔드 미러(ups_addon·dhl_addon.rb, 화면=저장 원 단위 일치, 구형 UpsSurgeFee 2권역 요율 제거→SGF 5권역 애드온 이동, parity fixture 23건 전부 expected 단언+결함주입 증명) ②stale draft 만료 감사로그(quote.auto_expired, 배치 500) ③매직링크 verify POST 전환(토큰 URL 노출 제거) ④PartnerQuoteResponse 추출+죽은코드 삭제 ⑤addon_rates·fsc·surcharges·send_email 스펙 신설(BE 커버리지 71.5→83.9%)

@@ -220,7 +220,7 @@ Two rules are FedEx-specific and easy to get wrong:
 
 ⚠️ **DB 요율(`resolvedAddonRates`)은 all-or-nothing 이다.** FEDEX 행이 하나라도 있으면 **DB 만** 쓰고 하드코딩 표로 폴백하지 않는다 — 프론트·백엔드 모두 동일. 따라서 **시드는 18행 전부 적용해야 한다.** 일부만 넣으면 빠진 코드가 조용히 미청구된다. (UPS/DHL 에서 물려받은 의미이며 양쪽이 같게 동작하도록 맞춰 둠)
 
-⚠️ **DHL/UPS 애드온은 여전히 프론트 전용**이라 저장 견적이 화면보다 낮다(UPS 는 IHF·SGF 자동 적용 때문에 미선택 시에도 ~5% 차이). FedEx 만 `quote_calculator.rb` 에 미러돼 있다.
+✅ **UPS·DHL·FedEx 애드온 모두 백엔드에 미러됨** (2026-08-17, `calculators/ups_addon.rb`·`dhl_addon.rb`·`fedex_addon.rb`) — 저장 견적이 화면과 원 단위로 일치한다. parity fixture 23건 전부 expected 블록으로 양쪽 단언. UPS SGF(급증수수료)는 FE 와 같은 **애드온 버킷**에 있다(구 `UpsSurgeFee` 서비스의 surge 버킷 방식·2권역 구요율은 제거됨). 이 전환 이전에 저장된 UPS/DHL 견적의 금액은 재계산되지 않는다.
 
 ### UPS Surge Fee (2026-03-15~)
 

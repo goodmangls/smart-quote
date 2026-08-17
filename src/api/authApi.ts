@@ -35,14 +35,13 @@ export async function requestMagicLink(email: string): Promise<MagicLinkResponse
 }
 
 export async function verifyMagicLink(token: string): Promise<VerifyMagicLinkResponse> {
-  const response = await fetch(
-    `${API_URL}/api/v1/auth/magic_link/verify?token=${encodeURIComponent(token)}`,
-    {
-      method: 'GET',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-    },
-  );
+  // POST body keeps the one-time token out of URLs (server/proxy access logs).
+  const response = await fetch(`${API_URL}/api/v1/auth/magic_link/verify`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ token }),
+    credentials: 'include',
+  });
 
   if (!response.ok) {
     const body = await response.json().catch(() => ({}));

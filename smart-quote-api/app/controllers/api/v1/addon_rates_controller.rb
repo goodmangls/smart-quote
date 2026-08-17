@@ -53,7 +53,7 @@ module Api
       def resolve
         carrier = params[:carrier]&.upcase
         unless carrier.present? && AddonRate::CARRIERS.include?(carrier)
-          return render json: { error: { code: "INVALID_CARRIER", message: "carrier must be UPS or DHL" } },
+          return render json: { error: { code: "INVALID_CARRIER", message: "carrier must be one of #{AddonRate::CARRIERS.join(', ')}" } },
                         status: :unprocessable_entity
         end
 

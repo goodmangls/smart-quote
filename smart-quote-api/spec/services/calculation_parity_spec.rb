@@ -7,13 +7,11 @@ RSpec.describe QuoteCalculator, "Calculation Parity" do
 
   fixtures_data = JSON.parse(File.read(File.expand_path("../../../shared/test-fixtures/calculation-parity.json", __dir__)))
 
-  # A fixture carrying an "expected" block is asserted to the KRW here and, with the
-  # same numbers, in src/features/quote/services/__tests__/calculationParity.test.ts.
-  #
-  # The older fixtures have no "expected" and are checked structurally only. Sharing an
-  # input file does not by itself make two implementations agree: a UPS quote currently
-  # displays ~5% above what this calculator stores, and every structural assertion in
-  # this file passes on both sides regardless.
+  # Every fixture carries an "expected" block asserted to the KRW here and, with
+  # the same numbers, in src/features/quote/services/__tests__/calculationParity.test.ts.
+  # Sharing an input file does not by itself make two implementations agree —
+  # only the baked expected values do. (The historical ~5% UPS display-vs-saved
+  # gap was closed 2026-08-17 when the UPS/DHL add-on mirrors landed.)
   fixtures_data["fixtures"].select { |f| f["expected"] }.each do |fixture|
     it "matches the frontend to the KRW: #{fixture['name']}" do
       result = QuoteCalculator.call(fixture["input"])

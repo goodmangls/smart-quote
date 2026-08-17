@@ -3,13 +3,11 @@ import type { QuoteInput } from '@/types';
 import fixtures from '../../../../../shared/test-fixtures/calculation-parity.json';
 
 /**
- * A fixture carrying an `expected` block is asserted to the KRW here and, with the
- * same numbers, in spec/services/calculation_parity_spec.rb.
- *
- * The older fixtures have no `expected` and are checked structurally only. Sharing an
- * input file does not by itself make two implementations agree: a UPS quote currently
- * displays ~5% above what the backend stores, and every structural assertion here
- * passes on both sides regardless.
+ * Every fixture carries an `expected` block asserted to the KRW here and, with
+ * the same numbers, in spec/services/calculation_parity_spec.rb. Sharing an
+ * input file does not by itself make two implementations agree — only the
+ * baked expected values do. (The historical ~5% UPS display-vs-saved gap was
+ * closed 2026-08-17 when the UPS/DHL add-on mirrors landed on the backend.)
  */
 type ExpectedBlock = {
   totalQuoteAmount: number;

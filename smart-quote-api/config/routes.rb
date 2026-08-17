@@ -12,6 +12,10 @@ Rails.application.routes.draw do
       put  "auth/password", to: "auth#update_password"
       post "auth/promote",  to: "auth#promote"
       post "auth/magic_link",        to: "auth#request_magic_link"
+      # POST keeps the one-time token out of URLs (server/proxy access logs).
+      # GET remains for the deploy window while older frontends are live —
+      # remove once the POST-only frontend is fully rolled out.
+      post "auth/magic_link/verify", to: "auth#verify_magic_link"
       get  "auth/magic_link/verify", to: "auth#verify_magic_link"
       get  "auth/magic_link/peek",   to: "auth#peek_magic_link" if Rails.env.test?
 
