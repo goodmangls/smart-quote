@@ -53,6 +53,10 @@ class Quote < ApplicationRecord
   }
 
   before_validation :generate_reference_no, on: :create
+  # Model-level default: the production quotes table was found without the
+  # column default (2026-08-17) and every save failed validation on a nil
+  # status — never depend on the DB schema for this.
+  before_validation ->(quote) { quote.status ||= "draft" }, on: :create
   before_create :set_validity_date
 
   def expired?

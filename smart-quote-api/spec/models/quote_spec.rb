@@ -27,6 +27,26 @@ RSpec.describe Quote, type: :model do
     it { is_expected.to validate_presence_of(:breakdown) }
   end
 
+  describe "status default" do
+    # The DB column default cannot be relied on: the production quotes table
+    # was found without it (2026-08-17, every save 422'd with "Status is not
+    # included in the list"). The model must supply the default itself.
+    it "defaults a nil status to draft at the model level" do
+      quote = build(:quote, status: nil)
+
+      expect(quote.save).to be(true)
+      expect(quote.reload.status).to eq("draft")
+    end
+
+    it "does not override an explicitly provided status" do
+      quote = build(:quote, status: "sent")
+
+      quote.save!
+
+      expect(quote.reload.status).to eq("sent")
+    end
+  end
+
   describe "callback: generate_reference_no" do
     it "generates reference_no in SQ-YYYY-NNNN format on create" do
       quote = build(:quote, reference_no: nil)

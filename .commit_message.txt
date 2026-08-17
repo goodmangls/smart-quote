@@ -1,1 +1,1 @@
-📦 feat(quote): 백로그 5건 일괄 — ①UPS·DHL 애드온 백엔드 미러(ups_addon·dhl_addon.rb, 화면=저장 원 단위 일치, 구형 UpsSurgeFee 2권역 요율 제거→SGF 5권역 애드온 이동, parity fixture 23건 전부 expected 단언+결함주입 증명) ②stale draft 만료 감사로그(quote.auto_expired, 배치 500) ③매직링크 verify POST 전환(토큰 URL 노출 제거) ④PartnerQuoteResponse 추출+죽은코드 삭제 ⑤addon_rates·fsc·surcharges·send_email 스펙 신설(BE 커버리지 71.5→83.9%)
+🐛 fix(quote): status 모델 레벨 기본값 — 프로덕션 quotes.status 컬럼에 default 부재로 모든 견적 저장이 422 "Status is not included in the list"로 실패하던 P0. before_validation ||= "draft" + 컬럼 default 재보정 마이그레이션(백필 포함)
