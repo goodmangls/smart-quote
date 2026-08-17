@@ -119,11 +119,15 @@ describe('fsc-history', () => {
       const result = loadFscHistory();
       expect(result.ups).toEqual(expect.arrayContaining(custom.ups));
       expect(result.dhl).toEqual(expect.arrayContaining(custom.dhl));
-      expect(result.ups.at(-1)).toEqual({ date: '2026-08-10', rate: 46.75 });
-      expect(result.dhl.at(-1)).toEqual({ date: '2026-08-10', rate: 40.25 });
+      // 이 예제가 검증하는 것은 "병합해도 최신 기본 시드가 살아남는가" 이지 특정 요율값이
+      // 아니다. 숫자를 복제하면 FSC 갱신마다 무관한 테스트가 깨진다 — 시드에 바인딩한다.
+      // 시드 값 자체의 정합성은 아래 'includes the latest confirmed FSC seed entries'가 지킨다.
+      expect(result.ups.at(-1)).toEqual(DEFAULT_FSC_HISTORY.ups.at(-1));
+      expect(result.dhl.at(-1)).toEqual(DEFAULT_FSC_HISTORY.dhl.at(-1));
+      expect(result.fedex.at(-1)).toEqual(DEFAULT_FSC_HISTORY.fedex.at(-1));
     });
 
-    it('merges 2026-08-10 defaults into existing browser history pinned at 2026-06-29', () => {
+    it('merges newly shipped default FSC entries into existing browser history pinned at 2026-06-29', () => {
       localStorage.setItem(
         'fsc_history',
         JSON.stringify({
@@ -134,8 +138,12 @@ describe('fsc-history', () => {
 
       const result = loadFscHistory();
 
-      expect(result.ups.at(-1)).toEqual({ date: '2026-08-10', rate: 46.75 });
-      expect(result.dhl.at(-1)).toEqual({ date: '2026-08-10', rate: 40.25 });
+      // 이 예제가 검증하는 것은 "병합해도 최신 기본 시드가 살아남는가" 이지 특정 요율값이
+      // 아니다. 숫자를 복제하면 FSC 갱신마다 무관한 테스트가 깨진다 — 시드에 바인딩한다.
+      // 시드 값 자체의 정합성은 아래 'includes the latest confirmed FSC seed entries'가 지킨다.
+      expect(result.ups.at(-1)).toEqual(DEFAULT_FSC_HISTORY.ups.at(-1));
+      expect(result.dhl.at(-1)).toEqual(DEFAULT_FSC_HISTORY.dhl.at(-1));
+      expect(result.fedex.at(-1)).toEqual(DEFAULT_FSC_HISTORY.fedex.at(-1));
     });
 
     it('returns default data when localStorage contains corrupted JSON', () => {
@@ -158,9 +166,9 @@ describe('fsc-history', () => {
 
   describe('DEFAULT_FSC_HISTORY', () => {
     it('includes the latest confirmed FSC seed entries for UPS, DHL, and FedEx', () => {
-      expect(DEFAULT_FSC_HISTORY.ups.at(-1)).toEqual({ date: '2026-08-10', rate: 46.75 });
-      expect(DEFAULT_FSC_HISTORY.dhl.at(-1)).toEqual({ date: '2026-08-10', rate: 40.25 });
-      expect(DEFAULT_FSC_HISTORY.fedex.at(-1)).toEqual({ date: '2026-08-10', rate: 46.0 });
+      expect(DEFAULT_FSC_HISTORY.ups.at(-1)).toEqual({ date: '2026-08-17', rate: 44.25 });
+      expect(DEFAULT_FSC_HISTORY.dhl.at(-1)).toEqual({ date: '2026-08-17', rate: 42.0 });
+      expect(DEFAULT_FSC_HISTORY.fedex.at(-1)).toEqual({ date: '2026-08-17', rate: 43.5 });
     });
   });
 });
