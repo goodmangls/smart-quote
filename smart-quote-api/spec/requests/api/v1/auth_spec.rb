@@ -436,4 +436,50 @@ RSpec.describe "Api::V1::Auth", type: :request do
       expect(response).to have_http_status(:unauthorized)
     end
   end
+
+  describe "POST /api/v1/auth/promote" do
+    around do |example|
+      original = ENV["ADMIN_PROMOTE_SECRET"]
+      ENV["ADMIN_PROMOTE_SECRET"] = "test-promote-secret"
+      example.run
+      ENV["ADMIN_PROMOTE_SECRET"] = original
+    end
+
+    it "promotes the user with the correct secret" do
+      user = create(:user, email: "member@example.com", role: "user")
+
+      post "/api/v1/auth/promote", params: { secret: "test-promote-secret", email: "member@example.com" }, as: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(user.reload.role).to eq("admin")
+    end
+
+    it "rejects a wrong secret with 403" do
+      user = create(:user, email: "member@example.com", role: "user")
+
+      post "/api/v1/auth/promote", params: { secret: "wrong", email: "member@example.com" }, as: :json
+
+      expect(response).to have_http_status(:forbidden)
+      expect(user.reload.role).to eq("user")
+    end
+
+    it "rejects when the secret is not configured server-side" do
+      ENV["ADMIN_PROMOTE_SECRET"] = nil
+      user = create(:user, email: "member@example.com", role: "user")
+
+      post "/api/v1/auth/promote", params: { secret: "", email: "member@example.com" }, as: :json
+
+      expect(response).to have_http_status(:forbidden)
+      expect(user.reload.role).to eq("user")
+    end
+
+    it "compares the secret in constant time" do
+      expect(ActiveSupport::SecurityUtils).to receive(:secure_compare)
+        .with("wrong", "test-promote-secret").and_call_original
+
+      post "/api/v1/auth/promote", params: { secret: "wrong", email: "x@example.com" }, as: :json
+
+      expect(response).to have_http_status(:forbidden)
+    end
+  end
 end

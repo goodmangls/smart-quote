@@ -59,18 +59,41 @@ class Quote < ApplicationRecord
     validity_date.present? && validity_date < Date.current && %w[draft sent].include?(status)
   end
 
+  # Concurrent creates can compute the same next sequence before either row
+  # is inserted; the unique index then rejects the second INSERT. Clearing
+  # reference_no lets the before_validation callback pick a fresh number.
+  def save_with_reference_retry(max_retries: 3)
+    attempts = 0
+    begin
+      save
+    rescue ActiveRecord::RecordNotUnique => e
+      raise unless e.message.include?("reference_no")
+
+      attempts += 1
+      raise if attempts > max_retries
+
+      self.reference_no = nil
+      retry
+    end
+  end
+
   private
 
   def set_validity_date
     self.validity_date ||= (created_at || Time.current).to_date + DEFAULT_VALIDITY_DAYS
   end
 
+  # Numeric MAX over the sequence part — lexicographic ordering breaks past
+  # 9999 ("SQ-2026-10000" sorts before "SQ-2026-9999"), which would repeat
+  # and permanently collide on the same number.
   def generate_reference_no
     return if reference_no.present?
 
     year = Time.current.year
-    last = self.class.where("reference_no LIKE ?", "SQ-#{year}-%").order(:reference_no).last
-    seq = last ? last.reference_no.split("-").last.to_i + 1 : 1
-    self.reference_no = "SQ-#{year}-#{seq.to_s.rjust(4, '0')}"
+    max_seq = self.class
+      .where("reference_no ~ ?", "^SQ-#{year}-\\d+$")
+      .maximum(Arel.sql("CAST(SPLIT_PART(reference_no, '-', 3) AS INTEGER)"))
+      .to_i
+    self.reference_no = format("SQ-%d-%04d", year, max_seq + 1)
   end
 end

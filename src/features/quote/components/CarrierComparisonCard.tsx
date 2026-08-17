@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import * as Sentry from '@sentry/browser';
 import { QuoteInput, QuoteResult, CarrierComparisonItem, CarrierBadge } from '@/types';
 import { calculateQuote } from '@/features/quote/services/calculationService';
 import { assignBadges } from '@/features/quote/services/carrierRanker';
@@ -21,6 +22,19 @@ const defaultFscFor = (carrier: QuoteCarrier): number => {
   if (carrier === 'DHL') return DEFAULT_FSC_PERCENT_DHL;
   if (carrier === 'FEDEX') return DEFAULT_FSC_PERCENT_FEDEX;
   return DEFAULT_FSC_PERCENT;
+};
+
+// The comparison memo recalculates on every keystroke — report each distinct
+// failure once per session so a broken rate table doesn't flood Sentry.
+const reportedComparisonErrors = new Set<string>();
+
+const reportComparisonError = (carrier: QuoteCarrier, error: unknown): void => {
+  const key = `${carrier}:${error instanceof Error ? error.message : String(error)}`;
+  if (reportedComparisonErrors.has(key)) return;
+  reportedComparisonErrors.add(key);
+  Sentry.captureException(error, {
+    tags: { feature: 'carrier-comparison', carrier },
+  });
 };
 
 interface Props {
@@ -55,8 +69,10 @@ export const CarrierComparisonCard: React.FC<Props> = ({
           overseasCarrier: carrier,
           fscPercent: defaultFscFor(carrier),
         });
-      } catch {
-        // skip failed carrier
+      } catch (error) {
+        // Card degrades to the carriers that did calculate, but the failure
+        // itself must surface — it usually means a corrupted rate table.
+        reportComparisonError(carrier, error);
       }
     }
     return map;

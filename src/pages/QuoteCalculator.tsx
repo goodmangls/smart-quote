@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
+import * as Sentry from '@sentry/browser';
 import {
   QuoteInput,
   QuoteResult,
@@ -33,6 +34,8 @@ import { AdminWidgets } from './components/AdminWidgets';
 import { Footer } from '@/components/layout/Footer';
 import { MobileStickyBottomBar } from './components/MobileStickyBottomBar';
 import { getQuoteAccessFlags } from './quoteAccess';
+
+const reportedCalculationErrors = new Set<string>();
 
 const INITIAL_INPUT: QuoteInput = {
   originCountry: 'KR',
@@ -89,7 +92,15 @@ const QuoteCalculator: React.FC<{ isPublic?: boolean }> = ({ isPublic = false })
   const result = useMemo<QuoteResult | null>(() => {
     try {
       return calculateQuote(input);
-    } catch {
+    } catch (error) {
+      // The memo re-runs on every keystroke — report each distinct failure
+      // once per session so a broken input/rate combination doesn't flood
+      // Sentry, but never let it fail silently (empty result column).
+      const key = error instanceof Error ? error.message : String(error);
+      if (!reportedCalculationErrors.has(key)) {
+        reportedCalculationErrors.add(key);
+        Sentry.captureException(error, { tags: { feature: 'quote-calculation' } });
+      }
       return null;
     }
   }, [input]);

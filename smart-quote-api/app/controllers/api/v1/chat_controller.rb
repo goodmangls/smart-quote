@@ -9,11 +9,22 @@ module Api
       CHAT_RATE_LIMIT = 20
       CHAT_RATE_PERIOD = 60 # seconds
 
+      # Message-level caps: roles are whitelisted (a "system" role would let a
+      # user override the system prompt) and content length is bounded so one
+      # request cannot inflate Anthropic token spend within the rate limit.
+      VALID_MESSAGE_ROLES = %w[user assistant].freeze
+      MAX_MESSAGES = 30
+      MAX_MESSAGE_CONTENT_LENGTH = 4_000
+
       # POST /api/v1/chat
       def create
         messages = params.permit(messages: [ :role, :content ]).fetch(:messages, []).map(&:to_h)
 
         return render json: { error: { message: "Messages required" } }, status: :unprocessable_entity if messages.empty?
+
+        if (validation_error = validate_messages(messages))
+          return render json: { error: { message: validation_error } }, status: :unprocessable_entity
+        end
 
         api_key = ENV["ANTHROPIC_API_KEY"]
         unless api_key.present?
@@ -47,6 +58,20 @@ module Api
       end
 
       private
+
+      def validate_messages(messages)
+        return "Too many messages (max #{MAX_MESSAGES})" if messages.length > MAX_MESSAGES
+
+        messages.each do |m|
+          role = (m["role"] || m[:role]).to_s
+          content = (m["content"] || m[:content]).to_s
+          return "Invalid message role" unless VALID_MESSAGE_ROLES.include?(role)
+          return "Message content required" if content.strip.empty?
+          return "Message content too long (max #{MAX_MESSAGE_CONTENT_LENGTH} characters)" if content.length > MAX_MESSAGE_CONTENT_LENGTH
+        end
+
+        nil
+      end
 
       def enforce_chat_rate_limit
         window = Time.now.to_i / CHAT_RATE_PERIOD

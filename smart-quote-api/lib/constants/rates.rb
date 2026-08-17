@@ -21,7 +21,13 @@ module Constants
     DEFAULT_FSC_PERCENT = 44.25 # UPS FSC, effective 2026-08-17
     DEFAULT_FSC_PERCENT_DHL = 42.00 # DHL FSC, effective 2026-08-17
     DEFAULT_FSC_PERCENT_FEDEX = 43.50 # FedEx FSC, effective 2026-08-17
-    MAX_MARGIN_PERCENT = 80 # Maximum margin rate (%)
+    # Two intentional margin ceilings:
+    #   MAX_MARGIN_PERCENT      — clamp for ad-hoc marginPercent supplied on a
+    #                             quote request (admin manual override headroom)
+    #   MAX_RULE_MARGIN_PERCENT — cap for stored MarginRule rows (automatic,
+    #                             standing rules stay conservative)
+    MAX_MARGIN_PERCENT = 80
+    MAX_RULE_MARGIN_PERCENT = 50
     UPS_FSC_URL = "https://www.ups.com/kr/ko/support/shipping-support/shipping-costs-rates/fuel-surcharges.page"
     UPS_RATES_HUB_URL = "https://www.ups.com/kr/ko/support/shipping-support/shipping-costs-rates"
     FEDEX_FSC_URL = "https://www.fedex.com/ko-kr/shipping/surcharges.html"

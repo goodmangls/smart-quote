@@ -1,1 +1,1 @@
-⛽ UPS·DHL·FedEx FSC 2026-08-17 주간 요율 반영
+🛡️ fix(quality): 코드 분석 HIGH 4건 해소 — 견적번호 채번 레이스·9999 롤오버 수정(숫자 MAX+재시도), 요율표 FE↔BE 전셀 parity 게이트 신설(tariff:snapshot, 결함주입 증명), 무음 계산실패 Sentry 보고(비교카드·계산기), promote secure_compare·챗 입력 캡(role 화이트리스트·4천자·30건)·마진 상한 상수화

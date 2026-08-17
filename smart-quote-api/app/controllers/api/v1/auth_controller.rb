@@ -127,7 +127,7 @@ module Api
       # POST /api/v1/auth/promote — one-time admin promotion (secret-protected)
       def promote
         secret = ENV["ADMIN_PROMOTE_SECRET"]
-        if secret.blank? || params[:secret] != secret
+        if secret.blank? || !ActiveSupport::SecurityUtils.secure_compare(params[:secret].to_s, secret)
           return render json: { error: { code: "FORBIDDEN", message: "Forbidden" } }, status: :forbidden
         end
 

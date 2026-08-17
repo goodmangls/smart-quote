@@ -4,7 +4,8 @@ class MarginRule < ApplicationRecord
   validates :name, presence: true, length: { maximum: 100 }
   validates :rule_type, presence: true, inclusion: { in: RULE_TYPES }
   validates :priority, presence: true, numericality: { only_integer: true, in: 0..200 }
-  validates :margin_percent, presence: true, numericality: { greater_than_or_equal_to: 0, less_than_or_equal_to: 50 }
+  validates :margin_percent, presence: true,
+    numericality: { greater_than_or_equal_to: 0, less_than_or_equal_to: Constants::Rates::MAX_RULE_MARGIN_PERCENT }
   validates :weight_min, numericality: { greater_than_or_equal_to: 0 }, allow_nil: true
   validates :weight_max, numericality: { greater_than: 0 }, allow_nil: true
 
