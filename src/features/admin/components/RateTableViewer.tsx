@@ -61,6 +61,15 @@ function productLabel(carrier: Carrier, product: RateProduct): string {
   return PRODUCT_OPTIONS[carrier].find((o) => o.value === product)?.label ?? product;
 }
 
+/** Sentinel used by the tariff tables for the open-ended last bracket. */
+const OPEN_ENDED_MAX = 99_999;
+
+const rangeLabel = (min: number, max: number): string =>
+  max >= OPEN_ENDED_MAX ? `${min}kg+` : `${min}–${max}kg`;
+
+const sortZones = (keys: string[]): string[] =>
+  keys.sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }));
+
 export const RateTableViewer: React.FC = () => {
   const [carrier, setCarrier] = useState<Carrier>('UPS');
   const [mode, setMode] = useState<TableMode>('exact');
@@ -73,10 +82,32 @@ export const RateTableViewer: React.FC = () => {
     carrier === 'FEDEX' ? FEDEX_RANGE_RATES : carrier === 'UPS' ? UPS_RANGE_RATES : DHL_RANGE_RATES;
 
   const zones = useMemo(() => {
-    return Object.keys(exactRates).sort((a, b) =>
-      a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }),
-    );
+    return sortZones(Object.keys(exactRates));
   }, [exactRates]);
+
+  // The per-kg range table extends the Parcel tariff, so its threshold and
+  // zone list come from the parcel table regardless of the selected product.
+  const parcelMaxKg = useMemo(() => {
+    const parcel = resolveExactRates(carrier, 'parcel');
+    const weights = Object.values(parcel).flatMap((zone) => Object.keys(zone).map(Number));
+    return Math.max(...weights);
+  }, [carrier]);
+
+  const rangeZones = useMemo(
+    () => sortZones(Object.keys(resolveExactRates(carrier, 'parcel'))),
+    [carrier],
+  );
+
+  // Worked example for the banner: first bracket, first zone, a sample weight
+  // a few kg into the bracket — makes "rate × weight" concrete.
+  const rangeExample = useMemo(() => {
+    const first = rangeRates[0];
+    const zone = rangeZones[0];
+    const rate = first && zone ? first.rates[zone] : undefined;
+    if (!first || !zone || !rate) return null;
+    const weight = Math.min(Math.ceil(first.min) + 4, Math.floor(first.max));
+    return { zone, weight, rate, total: rate * weight };
+  }, [rangeRates, rangeZones]);
 
   const activeZone = zones.includes(selectedZone) ? selectedZone : (zones[0] ?? selectedZone);
 
@@ -147,7 +178,7 @@ export const RateTableViewer: React.FC = () => {
             className='text-[10px] font-semibold px-2 py-0.5 rounded border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300'
           >
             <option value='exact'>Exact</option>
-            <option value='range'>Range (per kg)</option>
+            <option value='range'>{`Over ${parcelMaxKg}kg (per-kg)`}</option>
           </select>
         </div>
       </div>
@@ -200,59 +231,88 @@ export const RateTableViewer: React.FC = () => {
                     </td>
                   </tr>
                 ))}
+                {product === 'parcel' && (
+                  <tr>
+                    <td colSpan={3} className='p-0'>
+                      <button
+                        onClick={() => setMode('range')}
+                        className='w-full text-left px-4 py-2 text-[11px] font-medium text-brand-blue-600 dark:text-brand-blue-400 hover:bg-brand-blue-50 dark:hover:bg-brand-blue-900/20 transition-colors'
+                      >
+                        Over {parcelMaxKg}kg — per-kg range rates →
+                      </button>
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
         </div>
       ) : (
-        <div className='max-h-[350px] overflow-y-auto'>
-          <table className='w-full text-xs'>
-            <thead className='sticky top-0 bg-gray-50 dark:bg-gray-700/50'>
-              <tr>
-                <th className='text-left px-4 py-2 text-gray-500 dark:text-gray-400'>Range (kg)</th>
-                {zones.map((z) => (
-                  <th key={z} className='text-right px-2 py-2 text-gray-500 dark:text-gray-400'>
-                    {z}
+        <div>
+          <div className='px-4 py-2 border-b border-gray-100 dark:border-gray-700 bg-brand-blue-50/50 dark:bg-brand-blue-900/10'>
+            <p className='text-[11px] font-medium text-gray-700 dark:text-gray-300'>
+              Per-kg tariff for shipments over {parcelMaxKg}kg — picks up where the {carrier} Parcel
+              table ends.
+            </p>
+            <p className='text-[10px] text-gray-500 dark:text-gray-400 mt-0.5'>
+              Freight = rate (₩/kg) × chargeable weight, rounded up to the next 1kg.
+            </p>
+            {rangeExample && (
+              <p className='text-[10px] text-gray-500 dark:text-gray-400 tabular-nums mt-0.5'>
+                e.g. {rangeExample.zone} · {rangeExample.weight}kg → {formatNum(rangeExample.rate)}{' '}
+                × {rangeExample.weight} = ₩{formatNum(rangeExample.total)}
+              </p>
+            )}
+          </div>
+          <div className='max-h-[350px] overflow-y-auto'>
+            <table className='w-full text-xs'>
+              <thead className='sticky top-0 bg-gray-50 dark:bg-gray-700/50'>
+                <tr>
+                  <th className='text-left px-4 py-2 text-gray-500 dark:text-gray-400'>
+                    Weight range
                   </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {rangeRates.map((row, i) => {
-                const min = row.min;
-                const max = row.max;
-                const rates = row.rates as Record<string, number>;
-                return (
-                  <tr
-                    key={i}
-                    className='border-b border-gray-50 dark:border-gray-700/30 hover:bg-gray-50 dark:hover:bg-gray-700/20'
-                  >
-                    <td className='px-4 py-1.5 font-medium text-gray-700 dark:text-gray-300'>
-                      {min}-{max}
-                    </td>
-                    {zones.map((z) => (
-                      <td
-                        key={z}
-                        className='px-2 py-1.5 text-right text-gray-900 dark:text-white tabular-nums'
-                      >
-                        {rates[z] ? formatNum(rates[z]) : '-'}
+                  {rangeZones.map((z) => (
+                    <th key={z} className='text-right px-2 py-2 text-gray-500 dark:text-gray-400'>
+                      {z}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {rangeRates.map((row, i) => {
+                  const rates = row.rates as Record<string, number>;
+                  return (
+                    <tr
+                      key={i}
+                      className='border-b border-gray-50 dark:border-gray-700/30 hover:bg-gray-50 dark:hover:bg-gray-700/20'
+                    >
+                      <td className='px-4 py-1.5 font-medium text-gray-700 dark:text-gray-300'>
+                        {rangeLabel(row.min, row.max)}
                       </td>
-                    ))}
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+                      {rangeZones.map((z) => (
+                        <td
+                          key={z}
+                          className='px-2 py-1.5 text-right text-gray-900 dark:text-white tabular-nums'
+                        >
+                          {rates[z] ? formatNum(rates[z]) : '-'}
+                        </td>
+                      ))}
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
 
       <div className='px-4 py-2 border-t border-gray-100 dark:border-gray-700 flex items-center gap-1.5'>
         <ChevronDown className='w-3 h-3 text-gray-400' />
         <span className='text-[10px] text-gray-400 dark:text-gray-400'>
-          {carrier} {mode === 'exact' ? productLabel(carrier, product) : 'Range'} •{' '}
+          {carrier} {mode === 'exact' ? productLabel(carrier, product) : `Over ${parcelMaxKg}kg`} •{' '}
           {mode === 'exact'
             ? `${activeZone}: ${exactWeights.length} weight steps`
-            : `${rangeRates.length} weight ranges × ${zones.length} zones`}
+            : `${rangeRates.length} weight brackets × ${rangeZones.length} zones · unit ₩/kg`}
         </span>
       </div>
     </div>

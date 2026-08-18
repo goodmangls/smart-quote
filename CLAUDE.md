@@ -363,10 +363,11 @@ POST   /api/v1/notifications/slack   # Slack webhook proxy
 
 ## Deployment
 
-- **Frontend**: Vercel **goodman-jways** 팀 (production: `bridgelogis.com` / `smart-quote-main.vercel.app`) — `origin/main` push 시 **자동배포** (2026-06-13 Git Disconnect→Reconnect 로 webhook 복구; org 이전 jlinsights→goodmangls 때 끊겼었음)
-  - 수동 배포(필요 시): `vercel --prod --scope goodman-jways --yes` (repo 루트). `.vercel` 링크 stale 시 `vercel link --yes --scope goodman-jways --project smart-quote-main`
-  - ⚠️ Vercel **MCP(jlinsights 토큰)는 이 프로젝트 접근 불가** — `vercel` CLI(jlinsights 계정, goodman-jways 스코프)로만. GitHub Deployments API도 이 팀 배포를 못 봄 → 배포 상태는 `vercel ls smart-quote-main --scope goodman-jways --prod` 로 확인
-- **Backend**: Render.com (Singapore region, PostgreSQL) — auto-redeploys from `origin/main` when `smart-quote-api/` changes (monorepo mode via `render.yaml` `dockerContext: smart-quote-api`, migrated 2026-05-04)
+- **Frontend**: Vercel **goodman-ksways** 팀 — 구 goodman-jways 에서 개명됨 (production: `bridgelogis.com` / `smart-quote-main.vercel.app`) — `origin/main` push 시 **자동배포** (2026-06-13 Git Disconnect→Reconnect 로 webhook 복구; org 이전 jlinsights→goodmangls 때 끊겼었음)
+  - 수동 배포(필요 시): `vercel --prod --scope goodman-ksways --yes` (repo 루트). `.vercel` 링크 stale 시 `vercel link --yes --scope goodman-ksways --project smart-quote-main`
+  - ⚠️ Vercel **MCP(jlinsights 토큰)는 이 프로젝트 접근 불가** — `vercel` CLI(jlinsights 계정, goodman-ksways 스코프)로만. GitHub Deployments API도 이 팀 배포를 못 봄 → 배포 상태는 `vercel ls smart-quote-main --scope goodman-ksways --prod` 로 확인
+- **Backend**: Render.com (Singapore region, PostgreSQL) — `render.yaml` `rootDir: smart-quote-api` monorepo 모드 (migrated 2026-05-04)
+  - ⚠️ **자동배포 이력**: org 이전(jlinsights→goodmangls) 후 Render 가 구 repo 에 연결된 채 방치돼 **자동·수동배포가 모두 헛돌았음** (그 사이 백엔드 변경은 프로덕션 미반영). 2026-08-17 goodmangls/smart-quote 로 재연결했으나 **push 트리거 자동배포는 여전히 미발화** — 배포는 대시보드 **Manual Deploy** 로 실행하고, 반영 여부는 커밋 해시가 아니라 **프로덕션 응답의 코드 마커**로 검증할 것. 근본 복구는 GitHub org 의 Render App 설치 확인 필요
 - **Config**: `render.yaml` (repo root) for backend infrastructure; `healthCheckPath: /up` for zero-downtime deploys
 - **Seed**: After backend deploy, run `rails runner db/seeds/addon_rates.rb` in Render Shell for new add-on rates
 

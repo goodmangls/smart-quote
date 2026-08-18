@@ -62,13 +62,13 @@ describe('Calculation Parity Tests (Frontend)', () => {
           intlSurge: expect.any(Number),
           destDuty: expect.any(Number),
           totalCost: expect.any(Number),
-        })
+        }),
       );
     });
   });
 
   it('includes pickupInSeoulCost in totalCostAmount', () => {
-    const fixture = fixtures.fixtures.find(f => f.name === 'dhl_eu_with_pickup')!;
+    const fixture = fixtures.fixtures.find((f) => f.name === 'dhl_eu_with_pickup')!;
     const result = calculateQuote(fixture.input as unknown as QuoteInput);
 
     expect(result.breakdown.pickupInSeoul).toBe(50000);
@@ -77,21 +77,21 @@ describe('Calculation Parity Tests (Frontend)', () => {
   });
 
   it('includes manualSurgeCost in breakdown.intlSurge', () => {
-    const fixture = fixtures.fixtures.find(f => f.name === 'ups_us_ddp_full_options')!;
+    const fixture = fixtures.fixtures.find((f) => f.name === 'ups_us_ddp_full_options')!;
     const result = calculateQuote(fixture.input as unknown as QuoteInput);
 
     expect(result.breakdown.intlSurge).toBe(35000);
   });
 
   it('handling fee is always 0 (no auto handling fee)', () => {
-    const fixture = fixtures.fixtures.find(f => f.name === 'basic_ups_us_wooden_box')!;
+    const fixture = fixtures.fixtures.find((f) => f.name === 'basic_ups_us_wooden_box')!;
     const result = calculateQuote(fixture.input as unknown as QuoteInput);
 
     expect(result.breakdown.handlingFees).toBe(0);
   });
 
   it('zeroes fumigation when manualPackingCost overrides Packing & Docs', () => {
-    const fixture = fixtures.fixtures.find(f => f.name === 'ups_jp_manual_packing')!;
+    const fixture = fixtures.fixtures.find((f) => f.name === 'ups_jp_manual_packing')!;
     const result = calculateQuote(fixture.input as unknown as QuoteInput);
 
     expect(result.breakdown.handlingFees).toBe(0);

@@ -2,7 +2,7 @@
 
 > **KS Ways** Internal Logistics Quoting System
 >
-> Version 3.5 | Last Updated: 2026-08-09
+> Version 3.6 | Last Updated: 2026-08-18
 
 ---
 
@@ -104,14 +104,18 @@ When selecting **WOODEN_BOX**, **SKID**, or **VACUUM** packing type, a detailed 
 
 ### UPS Surge Fee Auto-Detection
 
-For **Middle East and Israel** destinations, UPS Surge Fee is automatically calculated:
+UPS Surge Fee is automatically applied by destination region (official UPS table, 2026-05-24):
 
 | Region | Rate |
 |--------|------|
-| Israel (IL) | KRW 4,722/kg + FSC |
-| Middle East (15 countries) | KRW 2,004/kg + FSC |
+| U.A.E. & Israel (AE, IL) | KRW 4,722/kg + FSC |
+| Middle East (14 countries) | KRW 4,220/kg + FSC |
+| Europe | KRW 720/kg + FSC |
+| U.S. & Americas | KRW 720/kg + FSC |
+| Asia Pacific | KRW 143/kg + FSC |
+| Rest of World | KRW 720/kg + FSC |
 
-The surge fee appears as a carrier add-on (code: **SGF**) and is included in the carrier cost automatically.
+Domestic (KR) shipments are exempt. The surge fee appears as a carrier add-on (code: **SGF**) on both the screen and the saved quote — since 2026-08-17 all UPS/DHL add-ons are mirrored on the backend, so saved totals match the displayed quote exactly.
 
 ### EAS/RAS Postal Code Auto-Detection
 
@@ -283,6 +287,11 @@ Read-only viewer for carrier rate tables.
 | UPS Tariff | Z1-Z10 zone rates, weight tiers 0.5-70kg |
 | DHL Tariff | Z1-Z8 zone rates, weight tiers 0.5-70kg |
 | FedEx Tariff | Letter zones A–Y; Envelope / Pak / IP exact + per-kg ranges |
+
+Two table modes per carrier:
+
+- **Exact** — fixed price per 0.5kg weight step, up to the Parcel table ceiling (UPS/FedEx 20kg, DHL 30kg). The last row links straight into the per-kg view.
+- **Over Nkg (per-kg)** — unit rates (₩/kg) for shipments heavier than the Parcel ceiling. Freight = rate × chargeable weight rounded up to the next 1kg; the banner above the table shows a worked example, and the last bracket is open-ended (e.g. `299.1kg+`).
 
 Use this to verify rate accuracy and compare carrier pricing.
 

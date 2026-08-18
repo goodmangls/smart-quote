@@ -1,1 +1,1 @@
-🐛 fix(quote): status 모델 레벨 기본값 — 프로덕션 quotes.status 컬럼에 default 부재로 모든 견적 저장이 422 "Status is not included in the list"로 실패하던 P0. before_validation ||= "draft" + 컬럼 default 재보정 마이그레이션(백필 포함)
+✨ feat(admin): Rate Tables의 per-kg 구간 뷰 직관화 — 드롭다운을 "Over {N}kg (per-kg)"로 캐리어별 동적 표기, 설명 배너(적용 조건·운임 공식·실계산 예시), 99999 sentinel을 "299.1kg+" 개방 구간으로, Parcel 표 말미에 range 뷰 연결 행. 컴포넌트 테스트 6건 신규 + 관리자 가이드 v3.6(UPS SGF 5권역 요율표 현행화 포함) + CLAUDE.md 배포 섹션 갱신(goodman-ksways·Render 재연결 이력)
