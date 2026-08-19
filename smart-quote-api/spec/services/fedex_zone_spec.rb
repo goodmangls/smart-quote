@@ -45,30 +45,27 @@ RSpec.describe Calculators::FedexZone do
     end
   end
 
-  describe "fallback" do
-    # The previous fallback was Y/Singapore — one of the cheapest zones — which
-    # under-quoted every unmapped destination. An unknown country must never be
-    # cheaper than a known one.
-    it "falls back to J, not to a cheap zone" do
-      expect(described_class.call("ZZ")[:rate_key]).to eq("J")
+  describe "unmapped countries" do
+    # There is deliberately no fallback zone. Earlier fallbacks (Y/Singapore,
+    # then J) both priced unmapped destinations without telling the caller; now
+    # an unmapped country raises and the API returns 422 ZONE_NOT_FOUND.
+    it "raises ZoneNotFoundError instead of guessing a zone" do
+      expect { described_class.call("ZZ") }.to raise_error(Calculators::ZoneNotFoundError) do |error|
+        expect(error.carrier).to eq("FEDEX")
+        expect(error.country).to eq("ZZ")
+      end
     end
 
-    it "labels the fallback so it is visible in the quote" do
-      expect(described_class.call("ZZ")[:label]).to include("default")
+    it "returns the mapped zone for countries that are listed" do
+      expect(described_class.call("SG")).to eq(rate_key: "Y", label: "Y/Singapore")
     end
 
-    it "does not mark a mapped country as fallback" do
-      result = described_class.call("SG")
-      expect(result[:rate_key]).to eq("Y")
-      expect(result[:label]).not_to include("default")
-    end
-
-    # Countries FedEx does not list. They must stay unmapped so the safe fallback
-    # applies; a guessed zone would be worse than no data.
+    # Countries FedEx does not list. They must stay unmapped — a guessed zone
+    # would be worse than no data.
     %w[MM SD SS SL CF KM GW TM TJ XK SM VA].each do |country|
-      it "#{country} is absent from the official table and uses the fallback" do
+      it "#{country} is absent from the official table and raises" do
         expect(described_class::ZONE_MAP).not_to have_key(country)
-        expect(described_class.call(country)[:rate_key]).to eq("J")
+        expect { described_class.call(country) }.to raise_error(Calculators::ZoneNotFoundError)
       end
     end
   end

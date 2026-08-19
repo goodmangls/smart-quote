@@ -9,7 +9,14 @@ import {
   ShippingItemType,
 } from '../types';
 import { generatePDF } from '@/lib/pdfService';
-import { calculateQuote } from '@/features/quote/services/calculationService';
+import {
+  calculateQuote,
+  determineUpsZone,
+  determineDhlZone,
+  determineFedexZone,
+  ZoneNotFoundError,
+} from '@/features/quote/services/calculationService';
+import { ZoneUnavailableNotice } from '@/features/quote/components/ZoneUnavailableNotice';
 import { trackEvent, IntercomEvents } from '@/lib/intercom';
 import { MobileLayout } from '@/components/layout/MobileLayout';
 import { QuoteHistoryPage } from '@/features/history/components/QuoteHistoryPage';
@@ -89,10 +96,28 @@ const QuoteCalculator: React.FC<{ isPublic?: boolean }> = ({ isPublic = false })
     }
   }, [input.overseasCarrier, lastFscCarrier]);
 
+  // Destination without a zone in the selected carrier's official table: there
+  // is no fallback zone, so instead of a silently guessed rate the result
+  // column shows an explicit "zone unavailable" notice.
+  const activeCarrier = (input.overseasCarrier || 'UPS') as 'UPS' | 'DHL' | 'FEDEX';
+  const zoneUnavailable = useMemo(() => {
+    const resolveZone =
+      activeCarrier === 'DHL'
+        ? determineDhlZone
+        : activeCarrier === 'FEDEX'
+          ? determineFedexZone
+          : determineUpsZone;
+    return resolveZone(input.destinationCountry) === null;
+  }, [activeCarrier, input.destinationCountry]);
+
   const result = useMemo<QuoteResult | null>(() => {
+    if (zoneUnavailable) return null;
     try {
       return calculateQuote(input);
     } catch (error) {
+      // Expected condition, surfaced by the ZoneUnavailableNotice — not a
+      // broken rate table, so keep it out of Sentry.
+      if (error instanceof ZoneNotFoundError) return null;
       // The memo re-runs on every keystroke — report each distinct failure
       // once per session so a broken input/rate combination doesn't flood
       // Sentry, but never let it fail silently (empty result column).
@@ -103,7 +128,7 @@ const QuoteCalculator: React.FC<{ isPublic?: boolean }> = ({ isPublic = false })
       }
       return null;
     }
-  }, [input]);
+  }, [input, zoneUnavailable]);
 
   // Debounced Intercom event: fire 2s after the user stops editing so the
   // operator side sees one event per real quote, not one per keystroke.
@@ -231,6 +256,7 @@ const QuoteCalculator: React.FC<{ isPublic?: boolean }> = ({ isPublic = false })
     input,
     setInput,
     result,
+    zoneUnavailable,
     onMarginChange: handleMarginChange,
     onDownloadPdf: handleDownloadPdf,
     onReset: handleReset,
@@ -285,6 +311,12 @@ const QuoteCalculator: React.FC<{ isPublic?: boolean }> = ({ isPublic = false })
                   {isAdmin && <AdminWidgets />}
                 </div>
                 <div className='lg:col-span-5 lg:sticky top-24' id='result-section'>
+                  {!result && zoneUnavailable && (
+                    <ZoneUnavailableNotice
+                      carrier={activeCarrier}
+                      country={input.destinationCountry}
+                    />
+                  )}
                   {result && (
                     <ResultSection
                       result={result}

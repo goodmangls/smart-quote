@@ -2,7 +2,7 @@
 
 > **KS Ways** Internal Logistics Quoting System
 >
-> Version 3.6 | Last Updated: 2026-08-18
+> Version 3.7 | Last Updated: 2026-08-19
 
 ---
 
@@ -294,6 +294,10 @@ Two table modes per carrier:
 - **Over Nkg (per-kg)** — unit rates (₩/kg) for shipments heavier than the Parcel ceiling. Freight = rate × chargeable weight rounded up to the next 1kg; the banner above the table shows a worked example, and the last bracket is open-ended (e.g. `299.1kg+`).
 
 Use this to verify rate accuracy and compare carrier pricing.
+
+> **No fallback zone (2026-08-19)**: a destination country absent from a carrier's official zone table is never priced off a guessed zone. The calculator shows a "no zone" notice (and the comparison card marks that carrier "No zone — quote unavailable"); the API rejects such saves with `422 ZONE_NOT_FOUND`. Currently unmapped selectable countries — UPS: PG, FJ, XK, YE, TJ, SD, SS, LY · DHL: XK, CW, SX · FedEx: MM, VA, SM, XK, TM, TJ, SL, CF, KM, GW, SD, SS. To add coverage, update the carrier zone map from the official zone sheet.
+>
+> **DHL × China (Southern)**: DHL's zone sheet does not split China, so CN-S is rated identically to CN (Z1). The applied zone displays as `Z1/Asia (S.China=CN)` so users can see the equivalence. (UPS and FedEx keep their separate southern-China zones: Z10 and K.)
 
 ---
 

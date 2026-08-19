@@ -19,6 +19,8 @@ module Api
         render json: result
       rescue InvalidInputError => e
         render json: { error: { code: "INVALID_INPUT", message: e.message } }, status: :unprocessable_entity
+      rescue Calculators::ZoneNotFoundError => e
+        render json: { error: { code: "ZONE_NOT_FOUND", message: e.message } }, status: :unprocessable_entity
       rescue StandardError => e
         Rails.logger.error "[CALCULATE] #{e.class}: #{e.message}"
         render json: { error: { code: "CALCULATION_ERROR", message: "Failed to calculate quote" } }, status: :unprocessable_entity
@@ -48,6 +50,8 @@ module Api
         end
       rescue InvalidInputError => e
         render json: { error: { code: "INVALID_INPUT", message: e.message } }, status: :unprocessable_entity
+      rescue Calculators::ZoneNotFoundError => e
+        render json: { error: { code: "ZONE_NOT_FOUND", message: e.message } }, status: :unprocessable_entity
       rescue StandardError => e
         Rails.logger.error "[CREATE] #{e.class}: #{e.message}"
         render json: { error: { code: "CALCULATION_ERROR", message: "Failed to create quote" } }, status: :unprocessable_entity
@@ -83,6 +87,8 @@ module Api
         end
       rescue InvalidInputError => e
         render json: { error: { code: "INVALID_INPUT", message: e.message } }, status: :unprocessable_entity
+      rescue Calculators::ZoneNotFoundError => e
+        render json: { error: { code: "ZONE_NOT_FOUND", message: e.message } }, status: :unprocessable_entity
       rescue StandardError => e
         Rails.logger.error "[QUOTE_API_CREATE] #{e.class}: #{e.message}"
         render json: { error: { code: "CALCULATION_ERROR", message: "Failed to create API quote" } }, status: :unprocessable_entity

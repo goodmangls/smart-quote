@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import * as Sentry from '@sentry/browser';
 import { QuoteInput, QuoteResult, CarrierComparisonItem, CarrierBadge } from '@/types';
-import { calculateQuote } from '@/features/quote/services/calculationService';
+import { calculateQuote, ZoneNotFoundError } from '@/features/quote/services/calculationService';
 import { assignBadges } from '@/features/quote/services/carrierRanker';
 import { CARRIER_METADATA } from '@/config/carrier_metadata';
 import { calculateCo2Kg } from '@/lib/co2';
@@ -58,10 +58,14 @@ export const CarrierComparisonCard: React.FC<Props> = ({
   const [showKRW, setShowKRW] = useState(!hideMargin || isKorean);
   const currentCarrier = (input.overseasCarrier || 'UPS') as QuoteCarrier;
 
-  const resultsByCarrier = useMemo<Partial<Record<QuoteCarrier, QuoteResult>>>(() => {
+  const { resultsByCarrier, zoneUnavailable } = useMemo<{
+    resultsByCarrier: Partial<Record<QuoteCarrier, QuoteResult>>;
+    zoneUnavailable: ReadonlySet<QuoteCarrier>;
+  }>(() => {
     const map: Partial<Record<QuoteCarrier, QuoteResult>> = {
       [currentCarrier]: currentResult,
     };
+    const noZone = new Set<QuoteCarrier>();
     for (const carrier of ALL_CARRIERS) {
       if (carrier === currentCarrier) continue;
       try {
@@ -71,12 +75,18 @@ export const CarrierComparisonCard: React.FC<Props> = ({
           fscPercent: defaultFscFor(carrier),
         });
       } catch (error) {
+        // Destination without a zone for this carrier is an expected state:
+        // the column renders a "no zone" notice instead of a price.
+        if (error instanceof ZoneNotFoundError) {
+          noZone.add(carrier);
+          continue;
+        }
         // Card degrades to the carriers that did calculate, but the failure
         // itself must surface — it usually means a corrupted rate table.
         reportComparisonError(carrier, error);
       }
     }
-    return map;
+    return { resultsByCarrier: map, zoneUnavailable: noZone };
   }, [input, currentResult, currentCarrier]);
 
   const badgedItems = useMemo<Record<string, CarrierComparisonItem> | null>(() => {
@@ -102,7 +112,8 @@ export const CarrierComparisonCard: React.FC<Props> = ({
     return Object.fromEntries(withBadges.map((item) => [item.carrier, item]));
   }, [resultsByCarrier, input.destinationCountry]);
 
-  if (!badgedItems) return null;
+  // Nothing to compare and nothing to explain — hide the card entirely.
+  if (!badgedItems && zoneUnavailable.size === 0) return null;
 
   const carrierColors: Record<string, string> = {
     UPS: 'bg-amber-50 border-amber-200 dark:bg-amber-900/20 dark:border-amber-800',
@@ -136,7 +147,10 @@ export const CarrierComparisonCard: React.FC<Props> = ({
       <div className='grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-gray-100 dark:divide-gray-700'>
         {ALL_CARRIERS.map((carrier) => {
           const result = resultsByCarrier[carrier];
-          if (!result) return null;
+          if (!result) {
+            if (!zoneUnavailable.has(carrier)) return null;
+            return <NoZoneColumn key={carrier} carrier={carrier} />;
+          }
           const isCurrent = carrier === currentCarrier;
           const diff = result.totalQuoteAmount - currentResult.totalQuoteAmount;
           const diffPercent =
@@ -152,15 +166,37 @@ export const CarrierComparisonCard: React.FC<Props> = ({
               diff={isCurrent ? undefined : diff}
               diffPercent={isCurrent ? undefined : diffPercent}
               exchangeRate={input.exchangeRate}
-              badges={badgedItems[carrier]?.badges ?? []}
+              badges={badgedItems?.[carrier]?.badges ?? []}
               transitDaysMin={CARRIER_METADATA[carrier].transitDaysMin}
               transitDaysMax={CARRIER_METADATA[carrier].transitDaysMax}
-              co2Kg={badgedItems[carrier]?.co2Kg ?? null}
+              co2Kg={badgedItems?.[carrier]?.co2Kg ?? null}
               onSelect={() => onSwitchCarrier(carrier)}
               hideSwitch={hideMargin}
             />
           );
         })}
+      </div>
+    </div>
+  );
+};
+
+/**
+ * Column for a carrier whose zone table does not list the destination country.
+ * Renders an explicit notice instead of hiding the carrier, so the user knows
+ * why no price is offered.
+ */
+const NoZoneColumn: React.FC<{ carrier: string }> = ({ carrier }) => {
+  const { t } = useLanguage();
+  return (
+    <div className='p-4'>
+      <div className='min-h-[20px] mb-2' />
+      <div className='flex items-center justify-between mb-3'>
+        <span className='text-sm font-bold text-gray-400 dark:text-gray-500'>{carrier}</span>
+      </div>
+      <div className='rounded-lg border border-dashed border-amber-300 dark:border-amber-700 bg-amber-50/60 dark:bg-amber-900/10 px-3 py-4 text-center'>
+        <p className='text-xs font-semibold text-amber-700 dark:text-amber-300'>
+          {t('comparison.noZone')}
+        </p>
       </div>
     </div>
   );

@@ -5,12 +5,12 @@ import {
   calculateDhlCosts,
   calculateUpsCosts,
   calculateQuote,
+  ZoneNotFoundError,
 } from './calculationService';
 import { PackingType, Incoterm, QuoteInput } from '@/types';
 import { DHL_EXACT_RATES } from '@/config/dhl_tariff';
 
 describe('calculationService', () => {
-
   // --- Zone Mapping Tests ---
 
   describe('determineUpsZone', () => {
@@ -46,8 +46,8 @@ describe('calculationService', () => {
       expect(determineUpsZone('AT')).toEqual({ rateKey: 'Z7', label: 'Z7/N.Europe' });
     });
 
-    it('maps unknown country to Rest of World (Z10)', () => {
-      expect(determineUpsZone('XX')).toEqual({ rateKey: 'Z10', label: 'Rest of World' });
+    it('returns null for a country absent from the UPS zone table (no fallback)', () => {
+      expect(determineUpsZone('XX')).toBeNull();
     });
 
     it('maps CN-S (China Southern) to Z10', () => {
@@ -62,6 +62,12 @@ describe('calculationService', () => {
 
     it('maps CN to Z1', () => {
       expect(determineDhlZone('CN')).toEqual({ rateKey: 'Z1', label: 'Z1/Asia' });
+    });
+
+    it('maps CN-S to Z1 at the CN rate, with a label that says so', () => {
+      // DHL's rate sheet does not split China (confirmed 2026-08-19); the label
+      // surfaces this wherever the applied zone is displayed.
+      expect(determineDhlZone('CN-S')).toEqual({ rateKey: 'Z1', label: 'Z1/Asia (S.China=CN)' });
     });
 
     it('maps VN to Z3', () => {
@@ -92,8 +98,8 @@ describe('calculationService', () => {
       expect(determineDhlZone('AE')).toEqual({ rateKey: 'Z7', label: 'Z7/ME-Balkans' });
     });
 
-    it('falls back to Z8 for unknown country', () => {
-      expect(determineDhlZone('XX')).toEqual({ rateKey: 'Z8', label: 'Rest of World' });
+    it('returns null for a country absent from the DHL zone table (no fallback)', () => {
+      expect(determineDhlZone('XX')).toBeNull();
     });
   });
 
@@ -197,7 +203,7 @@ describe('calculationService', () => {
     it('EXW incoterm: shows Collect Term warning', () => {
       const result = calculateQuote({ ...baseInput, incoterm: Incoterm.EXW });
       expect(result.warnings).toEqual(
-        expect.arrayContaining([expect.stringContaining('Collect Term')])
+        expect.arrayContaining([expect.stringContaining('Collect Term')]),
       );
       // New structure: EXW and DAP produce same quote (margin on base rate, FSC on base+margin)
       // EXW only adds a warning that freight may be billed to consignee
@@ -210,16 +216,39 @@ describe('calculationService', () => {
       expect(result.carrier).toBe('UPS');
     });
 
+    // No fallback zone: an unmapped destination must throw a typed error the
+    // UI can turn into a "zone unavailable" notice — never a guessed price.
+    it.each([
+      ['UPS', 'SD'], // Sudan: selectable but absent from the UPS zone table
+      ['DHL', 'CW'], // Curaçao: selectable but absent from the DHL zone table
+      ['FEDEX', 'MM'], // Myanmar: selectable but absent from the FedEx zone table
+    ] as const)('%s + %s (no zone) throws ZoneNotFoundError', (carrier, country) => {
+      expect(() =>
+        calculateQuote({ ...baseInput, overseasCarrier: carrier, destinationCountry: country }),
+      ).toThrowError(ZoneNotFoundError);
+      try {
+        calculateQuote({ ...baseInput, overseasCarrier: carrier, destinationCountry: country });
+      } catch (error) {
+        expect(error).toBeInstanceOf(ZoneNotFoundError);
+        expect((error as ZoneNotFoundError).carrier).toBe(carrier);
+        expect((error as ZoneNotFoundError).country).toBe(country);
+      }
+    });
+
     it('surge is 0 by default (auto-calc disabled)', () => {
       const result = calculateQuote({ ...baseInput, overseasCarrier: 'UPS' });
       expect(result.breakdown.intlSurge).toBe(0);
     });
 
     it('manual surge cost is applied when provided', () => {
-      const result = calculateQuote({ ...baseInput, overseasCarrier: 'UPS', manualSurgeCost: 50000 });
+      const result = calculateQuote({
+        ...baseInput,
+        overseasCarrier: 'UPS',
+        manualSurgeCost: 50000,
+      });
       expect(result.breakdown.intlSurge).toBe(50000);
       expect(result.totalCostAmount).toBeGreaterThan(
-        calculateQuote({ ...baseInput, overseasCarrier: 'UPS' }).totalCostAmount
+        calculateQuote({ ...baseInput, overseasCarrier: 'UPS' }).totalCostAmount,
       );
     });
 

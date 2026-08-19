@@ -78,30 +78,25 @@ describe('FEDEX_ZONE_MAP', () => {
   });
 });
 
-describe('determineFedexZone fallback', () => {
-  // The previous fallback was Y/Singapore — one of the cheapest zones — which
-  // under-quoted every unmapped destination. An unknown country must never be
-  // cheaper than a known one, or a typo in a country code becomes a discount.
-  it('falls back to J, not to a cheap zone', () => {
-    expect(determineFedexZone('ZZ').rateKey).toBe('J');
+describe('determineFedexZone for unmapped countries', () => {
+  // There is deliberately no fallback zone. Earlier fallbacks (Y/Singapore,
+  // then J) both priced unmapped destinations without telling the user; now an
+  // unmapped country returns null and the UI shows "zone unavailable".
+  it('returns null instead of a guessed zone', () => {
+    expect(determineFedexZone('ZZ')).toBeNull();
   });
 
-  it('labels the fallback so it is visible in the quote', () => {
-    expect(determineFedexZone('ZZ').label).toContain('default');
+  it('returns the mapped zone for countries that are listed', () => {
+    expect(determineFedexZone('SG')).toEqual({ rateKey: 'Y', label: 'Y/Singapore' });
   });
 
-  it('does not fall back for countries that are mapped', () => {
-    expect(determineFedexZone('SG').rateKey).toBe('Y');
-    expect(determineFedexZone('SG').label).not.toContain('default');
-  });
-
-  // Countries FedEx does not list at all. They must stay unmapped so the safe
-  // fallback applies; adding a guessed zone here would be worse than no data.
+  // Countries FedEx does not list at all. They must stay unmapped — adding a
+  // guessed zone here would be worse than no data.
   it.each(['MM', 'SD', 'SS', 'SL', 'CF', 'KM', 'GW', 'TM', 'TJ', 'XK', 'SM', 'VA'])(
-    '%s is absent from the official table and uses the fallback',
+    '%s is absent from the official table and resolves to null',
     (iso) => {
       expect(FEDEX_ZONE_MAP[iso]).toBeUndefined();
-      expect(determineFedexZone(iso).rateKey).toBe('J');
+      expect(determineFedexZone(iso)).toBeNull();
     },
   );
 });

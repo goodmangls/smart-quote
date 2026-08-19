@@ -97,19 +97,15 @@ module Calculators
       "Y" => "Y/Singapore"
     }.freeze
 
-    # Unlisted destinations fall back to the most expensive common zone so an
-    # unknown country is never quoted below cost (was "Y"/Singapore, the cheapest).
-    DEFAULT_ZONE = "J"
-    DEFAULT_LABEL = "J/Africa-M.East (default)"
-
+    # No fallback zone: an unmapped destination raises so the API returns 422
+    # (ZONE_NOT_FOUND) instead of quoting off a guessed zone. (History: the
+    # fallback was Y/Singapore, then J — both quoted unmapped destinations
+    # without telling the caller.)
     def self.call(country)
-      zone = ZONE_MAP[country] || DEFAULT_ZONE
-      label = if zone == DEFAULT_ZONE && !ZONE_MAP.key?(country)
-                DEFAULT_LABEL
-      else
-                ZONE_LABELS[zone]
-      end
-      { rate_key: zone, label: label }
+      zone = ZONE_MAP[country]
+      raise ZoneNotFoundError.new(carrier: "FEDEX", country: country) unless zone
+
+      { rate_key: zone, label: ZONE_LABELS[zone] }
     end
   end
 end

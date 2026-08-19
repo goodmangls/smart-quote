@@ -3,6 +3,7 @@ import { WAR_RISK_SURCHARGE_RATE, TRANSIT_TIMES } from '@/config/rates';
 import { ShippingItemType } from '@/types';
 import { lookupCarrierRate, CarrierCostResult } from './carrierRateEngine';
 import { resolveCarrierRateTables } from './rateTableResolver';
+import { ZoneNotFoundError } from './zoneNotFoundError';
 
 export { determineFedexZone };
 
@@ -12,6 +13,7 @@ export const calculateFedexCosts = (
   shippingItemType: ShippingItemType = ShippingItemType.NON_DOCUMENT,
 ): CarrierCostResult => {
   const zoneInfo = determineFedexZone(country);
+  if (!zoneInfo) throw new ZoneNotFoundError('FEDEX', country);
   const { exact, range } = resolveCarrierRateTables('FEDEX', shippingItemType, billableWeight);
   const intlBase = lookupCarrierRate(
     billableWeight,

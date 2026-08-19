@@ -101,6 +101,21 @@ RSpec.describe "Api::V1::Quotes", type: :request do
         expect(json["error"]["code"]).to eq("INVALID_INPUT")
       end
     end
+
+    context "destination without a carrier zone" do
+      # End-to-end through the real calculator: no fallback zone exists, so an
+      # unmapped destination must become 422 ZONE_NOT_FOUND — never a quote
+      # priced off a guessed zone.
+      it "returns 422 ZONE_NOT_FOUND for a country absent from the zone table" do
+        allow(QuoteCalculator).to receive(:call).and_call_original
+        params = valid_params.merge(destinationCountry: "XK", overseasCarrier: "UPS")
+        post "/api/v1/quotes/calculate", params: params, as: :json
+
+        expect(response).to have_http_status(:unprocessable_entity)
+        expect(json["error"]["code"]).to eq("ZONE_NOT_FOUND")
+        expect(json["error"]["message"]).to include("UPS").and include("XK")
+      end
+    end
   end
 
   describe "POST /api/v1/quote_api/quotes" do

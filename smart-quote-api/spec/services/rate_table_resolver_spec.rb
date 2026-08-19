@@ -107,10 +107,10 @@ RSpec.describe Calculators::FedexZone do
     expect(described_class.call("JP")).to eq(rate_key: "P", label: "P/Japan")
   end
 
-  # The fallback used to be Y/Singapore — one of the cheapest zones — and this spec
-  # asserted it, which locked in an under-quote for every unmapped destination.
-  # Full coverage of the fallback lives in spec/services/fedex_zone_spec.rb.
-  it "defaults unknown countries to J so they are never quoted below cost" do
-    expect(described_class.call("ZZ")).to eq(rate_key: "J", label: "J/Africa-M.East (default)")
+  # No fallback zone: earlier fallbacks (Y/Singapore, then J) both quoted
+  # unmapped destinations without telling the caller. Full coverage lives in
+  # spec/services/fedex_zone_spec.rb.
+  it "raises ZoneNotFoundError for unknown countries instead of guessing a zone" do
+    expect { described_class.call("ZZ") }.to raise_error(Calculators::ZoneNotFoundError)
   end
 end

@@ -3,8 +3,9 @@ module Calculators
     # Synced with frontend src/config/dhl_zones.ts
     # Source: Zone Guide 2026.xlsx (DHL sheet)
     ZONE_MAP = {
-      # Z1: Asia
-      "CN" => "Z1", "HK" => "Z1", "MO" => "Z1", "SG" => "Z1", "TW" => "Z1",
+      # Z1: Asia — DHL's rate sheet does not split China: Southern China (CN-S)
+      # ships at the CN (Z1) rate (confirmed 2026-08-19)
+      "CN" => "Z1", "CN-S" => "Z1", "HK" => "Z1", "MO" => "Z1", "SG" => "Z1", "TW" => "Z1",
       # Z2: Japan
       "JP" => "Z2",
       # Z3: SEA
@@ -68,12 +69,18 @@ module Calculators
       "Z7" => "Z7/ME-Balkans", "Z8" => "Z8/Global"
     }.freeze
 
-    DEFAULT_ZONE = "Z8"
-    DEFAULT_LABEL = "Rest of World"
+    # CN-S gets a self-describing label so every surface that shows the applied
+    # zone (result panel, comparison card, saved quote, PDF) tells the user that
+    # DHL rates Southern China as CN. Mirrors src/config/dhl_zones.ts.
+    CN_SOUTH_LABEL = "Z1/Asia (S.China=CN)"
 
+    # No fallback zone: an unmapped destination raises so the API returns 422
+    # (ZONE_NOT_FOUND) instead of quoting off a guessed zone.
     def self.call(country)
-      zone = ZONE_MAP[country] || DEFAULT_ZONE
-      label = zone == DEFAULT_ZONE && !ZONE_MAP.key?(country) ? DEFAULT_LABEL : ZONE_LABELS[zone]
+      zone = ZONE_MAP[country]
+      raise ZoneNotFoundError.new(carrier: "DHL", country: country) unless zone
+
+      label = country == "CN-S" ? CN_SOUTH_LABEL : ZONE_LABELS[zone]
       { rate_key: zone, label: label }
     end
   end

@@ -1,6 +1,6 @@
 ---
 name: BridgeLogis Design System (smart-quote-main)
-version: 1.2.0
+version: 1.3.0
 description: >-
   BridgeLogis by KS Ways 웹 애플리케이션의 디자인 시스템 명세.
   외부 운영 중인 SaaS(bridgelogis.com)의 단일 진실 공급원(SSOT).
@@ -259,7 +259,33 @@ Tailwind 기본 shadow scale 사용 (`shadow-sm` · `shadow-md` · `shadow-lg` �
 - 배지 행은 배지가 없는 캐리어도 `min-h-[20px]` 로 높이를 맞춰 3장 카드의 수직 정렬을 유지한다.
 - Zone / Transit / CO₂ 정보는 2-col grid 가 아닌 **세로 스택** (`space-y-1` + `flex justify-between`) 으로 배치한다 (가독성 이슈로 2026-07-22 변경).
 
-### 8.6 미구현 컴포넌트 작성 시
+### 8.6 Zone 미지정 상태 (ZoneUnavailableNotice / NoZoneColumn)
+
+존 테이블에 없는 목적지는 임의 존으로 견적하지 않고 **경고가 아닌 "상태"로 표시**한다.
+Semantic `warning`(amber) 계열을 쓰되, 오류(destructive)와 구분한다 — 사용자 잘못이
+아니라 데이터 커버리지의 한계이기 때문.
+
+```tsx
+// 결과 영역 대체 카드 (ZoneUnavailableNotice.tsx)
+<div className="rounded-xl border border-amber-300 dark:border-amber-700
+  bg-amber-50 dark:bg-amber-900/20 px-4 py-4">
+  <AlertTriangle className="h-5 w-5 text-amber-500" />
+  <h3 className="text-sm font-bold text-amber-800 dark:text-amber-200">…</h3>
+  <p className="text-sm text-amber-700 dark:text-amber-300">…</p>
+</div>
+
+// 비교 카드 내 캐리어 컬럼 (CarrierComparisonCard.tsx NoZoneColumn)
+<div className="rounded-lg border border-dashed border-amber-300 dark:border-amber-700
+  bg-amber-50/60 dark:bg-amber-900/10 px-3 py-4 text-center">
+  <p className="text-xs font-semibold text-amber-700 dark:text-amber-300">…</p>
+</div>
+```
+
+- 비교 카드에서는 컬럼을 **숨기지 않고** dashed 보더로 자리 유지 — 3사 정렬 보존 + 이유 전달
+- 캐리어명은 `text-gray-400`으로 강등해 가격 있는 컬럼과 시각적 위계 차등
+- 문구는 i18n 키 사용: `zone.unavailable.title/message`, `comparison.noZone`, `calc.option.noZone`
+
+### 8.7 미구현 컴포넌트 작성 시
 
 1. 기존 Brand/Semantic 토큰만으로 구현
 2. 토큰이 부족하면 이 문서를 먼저 수정 후 구현
@@ -323,6 +349,9 @@ import { CHART_COLORS } from '@/lib/chartColors';
 
 ### Changelog
 
+- **1.3.0** (2026-08-19) — 존 폴백 제거 UI 반영. §8.6 Zone 미지정 상태 패턴 신설
+  (ZoneUnavailableNotice amber 카드 · CarrierComparisonCard NoZoneColumn dashed
+  보더 — 컬럼 숨김 대신 자리 유지). 기존 §8.6(미구현 컴포넌트)은 §8.7 로 이동.
 - **1.2.0** (2026-07-22) — FedEx 3캐리어 통합 반영. §8.5 Carrier 구분 색 추가
   (UPS `amber-*` / DHL `yellow-*` / FEDEX `cyan-*`), CarrierComparisonCard 배지
   `min-h-[20px]` 정렬 및 Zone/Transit/CO₂ 세로 스택 패턴 문서화.

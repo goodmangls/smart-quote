@@ -1,7 +1,7 @@
 /**
  * DHL zone mapping: country code -> { rateKey, label }
  * Source: Zone Guide 2026.xlsx (DHL sheet)
- * Auto-synced with DHL_ZONE_COUNTRIES in options.ts
+ * DHL_ZONE_COUNTRIES in options.ts is derived from this map — edit here only.
  */
 
 import type { ZoneInfo } from './ups_zones';
@@ -9,8 +9,11 @@ import type { ZoneInfo } from './ups_zones';
 const z = (rateKey: string, label: string): ZoneInfo => ({ rateKey, label });
 
 export const DHL_ZONE_MAP: Record<string, ZoneInfo> = {
-  // Z1: CN, HK, MO, SG, TW
+  // Z1: CN (incl. CN-S), HK, MO, SG, TW
   CN: z('Z1', 'Z1/Asia'),
+  // DHL's rate sheet does not split China: Southern China ships at the CN (Z1)
+  // rate (confirmed 2026-08-19). The label says so wherever the zone shows.
+  'CN-S': z('Z1', 'Z1/Asia (S.China=CN)'),
   HK: z('Z1', 'Z1/Asia'),
   MO: z('Z1', 'Z1/Asia'),
   SG: z('Z1', 'Z1/Asia'),
@@ -113,8 +116,8 @@ export const DHL_ZONE_MAP: Record<string, ZoneInfo> = {
   BR: z('Z8', 'Z8/Global'),
   BS: z('Z8', 'Z8/Global'),
   BT: z('Z8', 'Z8/Global'),
-  XB: z('Z8', 'Z8/Global'),  // Bonaire (DHL code)
-  BQ: z('Z8', 'Z8/Global'),  // Bonaire, St. Eustatius, Saba (ISO code)
+  XB: z('Z8', 'Z8/Global'), // Bonaire (DHL code)
+  BQ: z('Z8', 'Z8/Global'), // Bonaire, St. Eustatius, Saba (ISO code)
   BW: z('Z8', 'Z8/Global'),
   BY: z('Z8', 'Z8/Global'),
   BZ: z('Z8', 'Z8/Global'),
@@ -247,7 +250,9 @@ export const DHL_ZONE_MAP: Record<string, ZoneInfo> = {
   ZW: z('Z8', 'Z8/Global'),
 };
 
-const DHL_DEFAULT_ZONE: ZoneInfo = { rateKey: 'Z8', label: 'Rest of World' };
-
-export const determineDhlZone = (country: string): ZoneInfo =>
-  DHL_ZONE_MAP[country] || DHL_DEFAULT_ZONE;
+/**
+ * No fallback zone: a country absent from the official DHL zone table returns
+ * null and must surface as "zone unavailable" in the UI / a 422 on the API —
+ * never a silently guessed rate.
+ */
+export const determineDhlZone = (country: string): ZoneInfo | null => DHL_ZONE_MAP[country] ?? null;

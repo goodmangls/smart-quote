@@ -1,7 +1,7 @@
 import { render } from '@testing-library/react';
 import * as Sentry from '@sentry/browser';
 import { CarrierComparisonCard } from '../CarrierComparisonCard';
-import { calculateQuote } from '@/features/quote/services/calculationService';
+import { calculateQuote, ZoneNotFoundError } from '@/features/quote/services/calculationService';
 import { Incoterm, PackingType } from '@/types';
 import type { QuoteInput, QuoteResult } from '@/types';
 
@@ -13,9 +13,14 @@ vi.mock('@/contexts/LanguageContext', () => ({
   useLanguage: () => ({ t: (key: string) => key, language: 'en', setLanguage: vi.fn() }),
 }));
 
-vi.mock('@/features/quote/services/calculationService', () => ({
-  calculateQuote: vi.fn(),
-}));
+vi.mock('@/features/quote/services/calculationService', async (importOriginal) => {
+  const actual =
+    await importOriginal<typeof import('@/features/quote/services/calculationService')>();
+  return {
+    ...actual,
+    calculateQuote: vi.fn(),
+  };
+});
 
 const makeInput = (overrides: Partial<QuoteInput> = {}): QuoteInput =>
   ({
@@ -68,6 +73,26 @@ describe('CarrierComparisonCard', () => {
     );
     // The card still renders with the two carriers that did calculate.
     expect(container.firstChild).not.toBeNull();
+  });
+
+  it('renders a "no zone" column instead of reporting when the destination is unmapped', () => {
+    vi.mocked(calculateQuote).mockImplementation((input: QuoteInput) => {
+      if (input.overseasCarrier === 'FEDEX') throw new ZoneNotFoundError('FEDEX', 'MM');
+      return makeResult({ totalQuoteAmount: 90_000 });
+    });
+
+    const { getByText } = render(
+      <CarrierComparisonCard
+        input={makeInput({ destinationCountry: 'MM' })}
+        currentResult={makeResult()}
+        onSwitchCarrier={vi.fn()}
+      />,
+    );
+
+    // Expected state, not a broken rate table: no Sentry noise, and the FedEx
+    // column tells the user why there is no price.
+    expect(Sentry.captureException).not.toHaveBeenCalled();
+    expect(getByText('comparison.noZone')).toBeInTheDocument();
   });
 
   it('reports each distinct failure only once across re-renders', () => {

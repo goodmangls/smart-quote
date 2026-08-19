@@ -1,7 +1,7 @@
 /**
  * UPS zone mapping: country code -> { rateKey, label }
  * Source: Zone Guide 2026.xlsx (UPS sheet)
- * Auto-synced with UPS_ZONE_COUNTRIES in options.ts
+ * UPS_ZONE_COUNTRIES in options.ts is derived from this map — edit here only.
  */
 
 export type ZoneInfo = { rateKey: string; label: string };
@@ -213,19 +213,21 @@ export const UPS_ZONE_MAP: Record<string, ZoneInfo> = {
   ZM: z('Z9', 'Z9/Extended'),
   ZW: z('Z9', 'Z9/Extended'),
   // Z9 territories (2026 update)
-  BQ: z('Z9', 'Z9/Extended'),  // Bonaire, St. Eustatius, Saba
-  VG: z('Z9', 'Z9/Extended'),  // British Virgin Islands
-  KY: z('Z9', 'Z9/Extended'),  // Cayman Islands
-  GF: z('Z9', 'Z9/Extended'),  // French Guiana
-  GU: z('Z9', 'Z9/Extended'),  // Guam
-  GG: z('Z9', 'Z9/Extended'),  // Guernsey (Channel Islands)
-  JE: z('Z9', 'Z9/Extended'),  // Jersey (Channel Islands)
+  BQ: z('Z9', 'Z9/Extended'), // Bonaire, St. Eustatius, Saba
+  VG: z('Z9', 'Z9/Extended'), // British Virgin Islands
+  KY: z('Z9', 'Z9/Extended'), // Cayman Islands
+  GF: z('Z9', 'Z9/Extended'), // French Guiana
+  GU: z('Z9', 'Z9/Extended'), // Guam
+  GG: z('Z9', 'Z9/Extended'), // Guernsey (Channel Islands)
+  JE: z('Z9', 'Z9/Extended'), // Jersey (Channel Islands)
   // Z10: HK + China Southern
   HK: z('Z10', 'Z10/HK+S.China'),
   'CN-S': z('Z10', 'Z10/HK+S.China'),
 };
 
-const UPS_DEFAULT_ZONE: ZoneInfo = { rateKey: 'Z10', label: 'Rest of World' };
-
-export const determineUpsZone = (country: string): ZoneInfo =>
-  UPS_ZONE_MAP[country] || UPS_DEFAULT_ZONE;
+/**
+ * No fallback zone: a country absent from the official UPS zone table returns
+ * null and must surface as "zone unavailable" in the UI / a 422 on the API —
+ * never a silently guessed rate.
+ */
+export const determineUpsZone = (country: string): ZoneInfo | null => UPS_ZONE_MAP[country] ?? null;

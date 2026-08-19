@@ -41,6 +41,7 @@ export const RouteSection: React.FC<Props> = ({ input, onFieldChange, isMobileVi
   const { t } = useLanguage();
 
   const carrier = input.overseasCarrier || 'UPS';
+  const carrierDisplay = carrier === 'FEDEX' ? 'FedEx' : carrier;
   const zoneMap =
     carrier === 'DHL'
       ? DHL_ZONE_COUNTRIES
@@ -48,6 +49,11 @@ export const RouteSection: React.FC<Props> = ({ input, onFieldChange, isMobileVi
         ? FEDEX_ZONE_COUNTRIES
         : UPS_ZONE_COUNTRIES;
   const zoneKeys = Object.keys(zoneMap);
+
+  // Countries with a zone for the selected carrier. The rest stay selectable
+  // (the user may switch carriers) but are labeled as having no zone.
+  const mappedCountryCodes = useMemo(() => new Set(Object.values(zoneMap).flat()), [zoneMap]);
+  const noZoneSuffix = ` — ${t('calc.option.noZone').replace('{carrier}', carrierDisplay)}`;
 
   // Extract country name without emoji flag for proper alphabetical sorting
   const getNameWithoutFlag = (name: string): string =>
@@ -115,6 +121,7 @@ export const RouteSection: React.FC<Props> = ({ input, onFieldChange, isMobileVi
               {filteredCountries.map((c) => (
                 <option key={c.code} value={c.code}>
                   {c.name}
+                  {mappedCountryCodes.has(c.code) ? '' : noZoneSuffix}
                 </option>
               ))}
             </select>

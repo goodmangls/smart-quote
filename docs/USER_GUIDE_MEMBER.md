@@ -2,7 +2,7 @@
 
 > **KS Ways** International Logistics Quoting System
 >
-> Version 3.7.0 | Last Updated: 2026-08-11
+> Version 3.8.0 | Last Updated: 2026-08-19
 
 ---
 
@@ -78,7 +78,7 @@ Access via `/quote` from the dashboard or header navigation.
 | Field | Description |
 |-------|-------------|
 | Origin Country | Fixed to South Korea (KR) |
-| Destination Country | Select from supported countries (includes China Southern as separate option for UPS Z10 routing) |
+| Destination Country | Select from supported countries. China (Southern) is a separate option: UPS rates it as Z10, FedEx as zone K, and DHL the same as China — shown as `Z1/Asia (S.China=CN)`. Countries without a zone for the selected carrier are labeled "— no {carrier} zone" |
 | Destination ZIP | Optional ZIP/postal code |
 | Shipping Mode | Door-to-Door |
 | Incoterm | EXW, FOB, CNF, CIF, DAP, DDP |
@@ -149,6 +149,8 @@ When entering a destination ZIP code, the system automatically checks against 86
 ### Carrier Comparison
 
 A comparison card shows estimated costs for UPS, DHL, and FedEx side-by-side. Each carrier uses its own FSC% for accurate comparison. Click **Switch** to change the active carrier.
+
+If the destination country has no zone in a carrier's official zone table, that carrier's column shows **"No zone — quote unavailable"** instead of a price — the system never prices an unmapped destination off a guessed zone. If the *selected* carrier has no zone for the destination, the result panel shows a notice instead of a quote; choose another carrier or contact the operations team.
 
 > **Note**: As a Member, the margin breakdown is hidden. You see the final quoted price only.
 

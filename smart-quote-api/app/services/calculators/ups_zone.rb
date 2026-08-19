@@ -68,13 +68,13 @@ module Calculators
       "Z10" => "Z10/HK+S.China"
     }.freeze
 
-    DEFAULT_ZONE = "Z10"
-    DEFAULT_LABEL = "Rest of World"
-
+    # No fallback zone: an unmapped destination raises so the API returns 422
+    # (ZONE_NOT_FOUND) instead of quoting off a guessed zone.
     def self.call(country)
-      zone = ZONE_MAP[country] || DEFAULT_ZONE
-      label = zone == DEFAULT_ZONE && !ZONE_MAP.key?(country) ? DEFAULT_LABEL : ZONE_LABELS[zone]
-      { rate_key: zone, label: label }
+      zone = ZONE_MAP[country]
+      raise ZoneNotFoundError.new(carrier: "UPS", country: country) unless zone
+
+      { rate_key: zone, label: ZONE_LABELS[zone] }
     end
   end
 end

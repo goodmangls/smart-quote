@@ -12,6 +12,7 @@ import { CarrierCostResult } from './carrierRateEngine';
 import { getDocumentCapKg } from './documentCaps';
 
 // Re-exports for backward compatibility (tests and other consumers import from here)
+export { ZoneNotFoundError } from './zoneNotFoundError';
 export { calculateVolumetricWeight, calculateItemCosts } from './itemCalculation';
 export { calculateUpsCosts, determineUpsZone } from './upsCalculation';
 export { calculateDhlCosts, determineDhlZone } from './dhlCalculation';

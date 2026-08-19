@@ -17,19 +17,20 @@ The **Smart Quote System** is a full-stack logistics quoting application for **K
 ### Multi-Carrier Quoting (UPS, DHL, FedEx)
 
 - **Zone-based pricing**: Config-driven country-to-zone mapping (Z1-Z10 for UPS, Z1-Z8 for DHL, letter zones A-Y for FedEx) with exact rate tables (0.5-20kg in 0.5kg steps) and range rates (>20kg per-kg)
+- **No fallback zone**: a destination absent from a carrier's official zone table is never priced off a guessed zone — the UI shows a "zone unavailable" notice (result panel, comparison card, country dropdown) and the API rejects the quote with `422 ZONE_NOT_FOUND`
 - **Shared rate lookup**: Common `lookupCarrierRate()` engine for all carriers (exact table -> range table -> fallback), carrier/document-aware table selection via `rateTableResolver`
 - **FedEx Document rates**: Envelope (rated ≤0.5kg) / Pak (≤2.5kg) tables for Document shipments, International Priority (IP) fallback with warning above the cap
 - **UPS Surge Fee**: Auto-detected for Middle East (KRW 2,004/kg) and Israel (KRW 4,722/kg) destinations, FSC applicable
 - **EAS/RAS Auto-Detection**: Postal code-based Extended/Remote Area Surcharge lookup (86 countries, 39,876 zip ranges, binary search O(log n), lazy-loaded)
-- **Surcharges**: FSC% fuel surcharge, DB-driven surcharges, manual surge fees, carrier-specific add-ons (UPS: 6 types, DHL: 19 types; FedEx add-ons not yet available)
-- **Carrier comparison**: 3-way side-by-side cost comparison with Fastest/Cheapest/Eco badges
+- **Surcharges**: FSC% fuel surcharge, DB-driven surcharges, manual surge fees, carrier-specific add-ons (UPS: 6, DHL: 19, FedEx: 18 — all mirrored on the backend)
+- **Carrier comparison**: 3-way side-by-side cost comparison with Fastest/Cheapest/Eco badges; carriers without a zone for the destination show a "No zone — quote unavailable" column
 - **Incoterm Policy**: Express shipments (UPS/DHL/FedEx) use DAP exclusively
 
 ### Calculation Pipeline
 
 1. **Item Costs** - Packing dimensions via `applyPackingDimensions()` utility (+10/+10/+15cm), volumetric weight (L x W x H / 5000), packing material/labor, Special Packing info panel (WOODEN_BOX/SKID/VACUUM with live cost preview)
 2. **Carrier Costs** - Config-driven zone lookup -> `lookupCarrierRate()` -> FSC -> UPS Surge Fee (auto) -> EAS/RAS (auto)
-3. **Add-on Services** - Auto-detected (AHS, OSP, OWT, DDP, Surge Fee, EAS/RAS) + user-selectable (19 DHL / 6 UPS add-ons)
+3. **Add-on Services** - Auto-detected (AHS, OSP, OWT, DDP, Surge Fee, EAS/RAS) + user-selectable (19 DHL / 6 UPS / 18 FedEx add-ons; FedEx applies highest-only and 18kg minimum chargeable weight rules)
 4. **Margin** - Dynamic margin resolution via `MarginRuleResolver` (priority-based first-match-wins algorithm with 5min cache), admin CRUD management, hardcoded fallback if API unavailable. **Markup 방식**: `revenue = cost × (1 + margin%)`, rounded up to nearest KRW 100
 5. **Warnings** - Low margin (<10%), high volumetric weight, surge charges, collect terms (EXW/FOB)
 6. **PDF Output** - Branded PDF with packing type/cost breakdown, carrier add-on details, surcharge info
@@ -121,7 +122,7 @@ When a **Member** saves a quote, a Slack notification is automatically sent to t
 | ------------ | ---------------------------------------------------------------------------- |
 | **Frontend** | React 19, TypeScript 5.8, Vite 6, Tailwind CSS                               |
 | **Backend**  | Rails 8 API-only, Ruby 3.4, PostgreSQL                                       |
-| **Testing**  | Vitest + Testing Library (58 files, 1,480 tests), RSpec + FactoryBot (backend) |
+| **Testing**  | Vitest + Testing Library (66 files, 1,663 tests), RSpec + FactoryBot (557 examples) |
 | **Deploy**   | Vercel (frontend, auto-deploy on push to `main`), Render.com (backend, Docker, Singapore) |
 | **APIs**     | open.er-api.com (exchange rates), Open-Meteo (weather), Rails JWT (auth)     |
 | **Other**    | jsPDF, Sentry, Lucide React, React Router v7, ChannelTalk                    |
@@ -135,17 +136,17 @@ When a **Member** saves a quote, a Slack notification is automatically sent to t
     types.ts                   # Core TypeScript types & enums
     i18n/translations.ts       # 4-language translation dictionary (en/ko/cn/ja)
     config/                    # Rate tables, business rules, shared utilities
-      ups_zones.ts / dhl_zones.ts / fedex_zones.ts  # Config-driven zone mappings (FedEx: letter zones A-Y)
+      ups_zones.ts / dhl_zones.ts / fedex_zones.ts  # Config-driven zone mappings (FedEx: letter zones A-Y; no fallback — unmapped → ZoneNotFoundError)
       ups_tariff.ts / dhl_tariff.ts / fedex_tariff.ts  # Rate tables (FedEx: IP + Envelope + Pak)
       addon-utils.ts             # Shared add-on types, normalizers, fee calculators
-      ups_addons.ts / dhl_addons.ts  # Carrier add-on rates + surge fee config
+      ups_addons.ts / dhl_addons.ts / fedex_addons.ts  # Carrier add-on rates + surge fee config
       ups_eas_lookup.ts          # EAS/RAS postal code lookup (binary search, lazy-load)
     contexts/                  # AuthContext, LanguageContext, ThemeContext
     features/
       quote/
         components/            # InputSection, ResultSection, SaveQuoteButton, CarrierComparisonCard
         components/widgets/    # ExchangeRateWidget, WeatherWidget, NoticeWidget, AccountManagerWidget, ExchangeRateCalculatorWidget
-        services/              # calculationService.ts, rateTableResolver.ts, fedexCalculation.ts, dhlAddonCalculator.ts, upsAddonCalculator.ts
+        services/              # calculationService.ts, rateTableResolver.ts, fedexCalculation.ts, dhlAddonCalculator.ts, upsAddonCalculator.ts, fedexAddonCalculator.ts
         hooks/                 # useSyncToInput (generic data sync hook)
       history/
         components/            # QuoteHistoryPage, QuoteHistoryTable, QuoteSearchBar, QuotePagination, QuoteDetailModal
@@ -163,7 +164,7 @@ When a **Member** saves a quote, a Slack notification is automatically sent to t
 smart-quote-api/               # Backend (Rails 8 API)
   app/models/                  # MarginRule, AuditLog, Quote, User, Customer, Surcharge, AddonRate
   app/services/                # QuoteCalculator, QuoteSearcher, QuoteExporter, QuoteSerializer, MarginRuleResolver
-    calculators/               # ItemCost, SurgeCost, UpsCost, DhlCost, FedexCost, DomesticCost, UpsSurgeFee, RateTableResolver
+    calculators/               # ItemCost, SurgeCost, Ups/Dhl/FedexCost + Ups/Dhl/FedexZone, Ups/Dhl/FedexAddon, DomesticCost, RateTableResolver
   app/controllers/api/v1/      # Quotes, MarginRules, Surcharges, AddonRates, Customers, Users, Auth, Fsc, AuditLogs, Notifications, Chat
   lib/constants/               # Tariff tables (synced with frontend)
 ```
@@ -182,7 +183,7 @@ npm install
 npm run dev          # Dev server on http://localhost:5173
 npm run build        # Production build (tsc + vite)
 npm run lint         # ESLint (--max-warnings 0)
-npx vitest run       # Run tests once (58 files, 1,480 tests)
+npx vitest run       # Run tests once (66 files, 1,663 tests)
 ```
 
 ### Backend (from `smart-quote-api/`)
@@ -220,6 +221,10 @@ PATCH  /api/v1/quotes/:id        # Update status/notes/customer
 DELETE /api/v1/quotes/:id        # Delete
 GET    /api/v1/quotes/export     # CSV download
 
+# Partner Quote API (X-API-Key auth, not user JWT)
+POST   /api/v1/quote_api/quotes  # Partner-facing calculate + save; margin resolved
+                                 # server-side, USD total only, throttled per key
+
 # Authentication
 POST   /api/v1/auth/login        # JWT Login
 POST   /api/v1/auth/register     # Account creation
@@ -241,10 +246,13 @@ POST   /api/v1/notifications/slack  # Slack webhook proxy
 
 ## Environment Variables
 
-| Variable           | Purpose              | Default                 |
-| ------------------ | -------------------- | ----------------------- |
-| `VITE_API_URL`     | Backend API base URL | `http://localhost:3000` |
-| `VITE_EIA_API_KEY` | US EIA API key       | -                       |
+| Variable                   | Purpose                    | Default                 |
+| -------------------------- | -------------------------- | ----------------------- |
+| `VITE_API_URL`             | Backend API base URL       | `http://localhost:3000` |
+| `VITE_EIA_API_KEY`         | US EIA API key             | -                       |
+| `VITE_SENTRY_DSN`          | Sentry error tracking      | -                       |
+| `VITE_INTERCOM_APP_ID`     | Intercom messenger         | -                       |
+| `VITE_GOOGLE_MAPS_API_KEY` | Google Maps (flight sched) | -                       |
 
 ## Documentation
 

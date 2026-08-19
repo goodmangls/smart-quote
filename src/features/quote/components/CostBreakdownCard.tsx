@@ -14,6 +14,7 @@ import {
   AlertTriangle,
 } from 'lucide-react';
 import { formatKRW, formatUSD } from '@/lib/format';
+import { DEFAULT_EXCHANGE_RATE } from '@/config/rates';
 import { resultStyles } from './result-styles';
 
 interface Props {
@@ -65,7 +66,8 @@ export const CostBreakdownCard: React.FC<Props> = ({
   );
 
   const localizeSurchargeName = useCallback(
-    (surcharge: { name: string; nameKo?: string }) => (language === 'ko' ? surcharge.nameKo || surcharge.name : surcharge.name),
+    (surcharge: { name: string; nameKo?: string }) =>
+      language === 'ko' ? surcharge.nameKo || surcharge.name : surcharge.name,
     [language],
   );
 
@@ -75,7 +77,9 @@ export const CostBreakdownCard: React.FC<Props> = ({
   const [showKRW, setShowKRW] = useState(!hideMargin || isKorean);
 
   const exchangeRate =
-    result.totalQuoteAmountUSD > 0 ? result.totalQuoteAmount / result.totalQuoteAmountUSD : 1400;
+    result.totalQuoteAmountUSD > 0
+      ? result.totalQuoteAmount / result.totalQuoteAmountUSD
+      : DEFAULT_EXCHANGE_RATE;
 
   const formatCurrency = useCallback(
     (val: number) => (showKRW ? formatKRW(val) : formatUSD(val / exchangeRate)),
@@ -134,7 +138,10 @@ export const CostBreakdownCard: React.FC<Props> = ({
             <div className='flex justify-between items-center text-gray-700 dark:text-gray-300'>
               <div className='flex items-center'>
                 <Plane className='w-4 h-4 mr-2 text-gray-400 flex-shrink-0' />
-                <span>{t('quote.cost.baseRate')}{!hideMargin ? ` (${result.carrier})` : ''}</span>
+                <span>
+                  {t('quote.cost.baseRate')}
+                  {!hideMargin ? ` (${result.carrier})` : ''}
+                </span>
               </div>
               <span className='font-medium'>
                 {formatCurrency(hideMargin ? baseWithMargin : baseRate)}
@@ -265,7 +272,9 @@ export const CostBreakdownCard: React.FC<Props> = ({
                         <Package
                           className={`w-4 h-4 mr-2 flex-shrink-0 ${result.carrier === 'UPS' ? 'text-blue-500' : 'text-yellow-500'}`}
                         />
-                        <span>{t('quote.cost.carrierAddOns').replace('{carrier}', result.carrier)}</span>
+                        <span>
+                          {t('quote.cost.carrierAddOns').replace('{carrier}', result.carrier)}
+                        </span>
                       </div>
                       <span className='font-medium'>
                         {formatCurrency(result.breakdown.carrierAddOnTotal || 0)}
