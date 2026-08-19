@@ -1,1 +1,1 @@
-✨ feat(admin): Rate Tables의 per-kg 구간 뷰 직관화 — 드롭다운을 "Over {N}kg (per-kg)"로 캐리어별 동적 표기, 설명 배너(적용 조건·운임 공식·실계산 예시), 99999 sentinel을 "299.1kg+" 개방 구간으로, Parcel 표 말미에 range 뷰 연결 행. 컴포넌트 테스트 6건 신규 + 관리자 가이드 v3.6(UPS SGF 5권역 요율표 현행화 포함) + CLAUDE.md 배포 섹션 갱신(goodman-ksways·Render 재연결 이력)
+💱 config: 기준환율 1400→1350 갱신(하나은행 2026-08-19) — CarrierComparisonCard 하드코딩 폴백을 상수 참조로 정렬, CLAUDE.md 문서 동기화

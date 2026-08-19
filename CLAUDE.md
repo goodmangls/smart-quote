@@ -59,11 +59,11 @@ bundle exec rspec spec/requests/api/v1/quotes_spec.rb
       ups_tariff.ts            # UPS Z1-Z10 rate tables (synced with backend)
       dhl_tariff.ts            # DHL Z1-Z8 rate tables (synced with backend)
       fedex_tariff.ts          # FedEx IP/Envelope/Pak rate tables, letter zones A-Y (synced with backend)
-      rates.ts                 # KRW cost constants, DEFAULT_EXCHANGE_RATE=1400, DEFAULT_FSC_PERCENT=45.50 (UPS), DEFAULT_FSC_PERCENT_DHL=48.00 (DHL), DEFAULT_FSC_PERCENT_FEDEX=39.75 (FedEx 2026-07-20)
+      rates.ts                 # KRW cost constants, DEFAULT_EXCHANGE_RATE=1350, DEFAULT_FSC_PERCENT=45.50 (UPS), DEFAULT_FSC_PERCENT_DHL=48.00 (DHL), DEFAULT_FSC_PERCENT_FEDEX=39.75 (FedEx 2026-07-20)
       business-rules.ts        # Surge thresholds, packing weight buffer/addition
-      options.ts               # Country options, carrier options, incoterm options
+      options.ts               # Country options, carrier options, incoterm options; *_ZONE_COUNTRIES (zone-filter UI lists) derived from the zone maps
       addon-utils.ts           # Shared AddonRateLike/NormalizedRate types, calcAddonFee(), findRate()
-      ups_zones.ts / dhl_zones.ts / fedex_zones.ts  # Config-driven zone mappings (Record<string, ZoneInfo>; FedEx letter zones, default Y/Singapore)
+      ups_zones.ts / dhl_zones.ts / fedex_zones.ts  # Config-driven zone mappings (Record<string, ZoneInfo>; FedEx letter zones; no fallback — unmapped country → null → ZoneNotFoundError)
       ups_addons.ts            # UPS add-on rates (6) + Surge Fee config (Israel/ME)
       dhl_addons.ts            # DHL add-on rates (19) with auto-detect (OSP, OWT)
       fedex_addons.ts          # FedEx add-on rates (18) — highest-only + 18kg min chargeable (synced with backend)
@@ -199,13 +199,17 @@ Frontend (`src/features/quote/services/calculationService.ts`) and backend (`sma
 
 ### UPS Zone Mapping (Z1-Z10) — per UPS 2026 Service Guide
 
-Z1: SG/TW/MO/CN, Z2: JP/VN, Z3: TH/PH, Z4: AU/IN, Z5: CA/US, Z6: ES/IT/GB/FR, Z7: DK/NO/SE/FI/DE/NL/BE/IE/CH/AT/PT/CZ/PL/HU/RO/BG, Z8: AR/BR/CL/CO/AE/TR/ZA/EG/BH/SA/PK/KW/QA, Z9: IL/JO/LB, Z10: HK/CN-S+default
+Z1: SG/TW/MO/CN, Z2: JP/VN, Z3: TH/PH, Z4: AU/IN, Z5: CA/US, Z6: ES/IT/GB/FR, Z7: DK/NO/SE/FI/DE/NL/BE/IE/CH/AT/PT/CZ/PL/HU/RO/BG, Z8: AR/BR/CL/CO/AE/TR/ZA/EG/BH/SA/PK/KW/QA, Z9: IL/JO/LB, Z10: HK/CN-S
 
 Zone mappings are config-driven (`src/config/ups_zones.ts`, `src/config/dhl_zones.ts`, `src/config/fedex_zones.ts`).
 
+⚠️ **폴백 존 없음 (2026-08-19)**: 세 캐리어 모두 존 테이블에 없는 국가는 `determine*Zone`이 `null`을 반환하고 계산기는 `ZoneNotFoundError`를 던진다(백엔드 미러 `Calculators::ZoneNotFoundError` → API `422 ZONE_NOT_FOUND`). UI는 결과 영역 안내 카드 + 비교 카드 "존 미지정" 컬럼 + 국가 드롭다운 접미사로 표시한다. 과거의 Rest-of-World(UPS Z10/DHL Z8)·FedEx J 폴백은 제거됨 — 임의 존으로 견적을 내지 않는다. `*_ZONE_COUNTRIES`(options.ts, 존 필터 UI)는 존 맵에서 파생되므로 존 맵만 수정하면 된다.
+
+**DHL × CN-S**: DHL 존 시트는 중국을 분할하지 않는다 — CN-S는 CN과 동일한 **Z1** 요율이며 라벨 `Z1/Asia (S.China=CN)`로 표기(2026-08-19 사용자 확인). UPS Z10·FedEx K는 남중국을 별도 존으로 유지.
+
 ### FedEx Zone Mapping (letter zones, 2026-07)
 
-FedEx uses letter zone keys `A D E F G H I J K M N O P Q R S T U V W X Y` (e.g. P=Japan, Y=Singapore, F=US/CA/NZ/MX, V=HK, W=CN). Default fallback for unmapped countries: **Y (Singapore)**. Document shipments resolve Envelope (rated ≤0.5kg) → Pak (≤2.5kg) → IP fallback (+warning); Parcel always uses IP.
+FedEx uses letter zone keys `A D E F G H I J K M N O P Q R S T U V W X Y` (e.g. P=Japan, Y=Singapore, F=US/CA/NZ/MX, V=HK, W=CN). Unmapped countries: **no fallback** — ZoneNotFoundError/422 + UI notice (위 참조). Document shipments resolve Envelope (rated ≤0.5kg) → Pak (≤2.5kg) → IP fallback (+warning); Parcel always uses IP.
 
 ### FedEx Add-on Services (2026, IPE/IP/IE)
 
@@ -349,7 +353,7 @@ POST   /api/v1/notifications/slack   # Slack webhook proxy
 - **Tailwind**: BridgeLogis brand palette (`brand-blue-*`, `cyan-*`, `navy`, `deep-blue`, `gold`) + Semantic (`success/warning/destructive/info`), class-based dark mode. Phase 2 완료 후 레거시 `jways-*`/`accent-*` 제거.
 - **Environment**: `VITE_API_URL`, `VITE_EIA_API_KEY`, `VITE_SENTRY_DSN`, `VITE_INTERCOM_APP_ID`, `VITE_GOOGLE_MAPS_API_KEY`
 - **Tariff sync**: Frontend tariff files in `src/config/` must stay in sync with backend `lib/constants/`
-- **Market defaults**: `DEFAULT_EXCHANGE_RATE=1400` (하나은행 월요일 09시 송금환율, 2026-08-10), `DEFAULT_FSC_PERCENT=45.50` (UPS 2026-04-27), `DEFAULT_FSC_PERCENT_DHL=48.00` (DHL 2026-04-27), `DEFAULT_FSC_PERCENT_FEDEX=39.75` (FedEx 2026-07-20) in `src/config/rates.ts`
+- **Market defaults**: `DEFAULT_EXCHANGE_RATE=1350` (하나은행 월요일 09시 송금환율, 2026-08-19), `DEFAULT_FSC_PERCENT=45.50` (UPS 2026-04-27), `DEFAULT_FSC_PERCENT_DHL=48.00` (DHL 2026-04-27), `DEFAULT_FSC_PERCENT_FEDEX=39.75` (FedEx 2026-07-20) in `src/config/rates.ts`
 - **FSC 업데이트 주기**: UPS/DHL/FedEx 모두 매주 월요일. `src/config/rates.ts` + `smart-quote-api/lib/constants/rates.rb` 동시 수정 후 Vercel+Render 배포.
 - **Exchange rate policy**: Live API 자동세팅 비활성화, 매주 월요일 수동 업데이트 (하나은행 기준)
 - **Error tracking**: Sentry (`@sentry/browser`) integrated across all catch blocks
