@@ -1,1 +1,1 @@
-💱 config: 기준환율 1400→1350 갱신(하나은행 2026-08-19) — CarrierComparisonCard 하드코딩 폴백을 상수 참조로 정렬, CLAUDE.md 문서 동기화
+🚑 fix: dd6cb0af에 병행 작업 조각 혼입 교정 — CLAUDE.md·CarrierComparisonCard를 기준환율 변경만으로 재구성 (미커밋 존 작업 조각이 ZoneNotFoundError 미존재 참조로 빌드 파손)
