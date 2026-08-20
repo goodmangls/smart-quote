@@ -308,6 +308,20 @@ module Api
         destination = input["destinationCountry"] || input[:destinationCountry]
         raise InvalidInputError, "destinationCountry is required" if destination.blank?
 
+        # A supplied exchangeRate must be usable. Omitting it (or sending null)
+        # is fine — the calculator falls back to DEFAULT_EXCHANGE_RATE — but 0
+        # divided straight through to Infinity, which ActiveSupport renders as
+        # null, so the caller silently received a quote with no USD total.
+        #
+        # `nil?` rather than `present?`: "" is blank but NOT nil, and `"" ||
+        # DEFAULT` keeps the empty string because "" is truthy in Ruby, so a
+        # `present?` guard would wave "" through to the same division. This also
+        # rejects junk like "abc", whose to_f is 0.0.
+        rate = input["exchangeRate"] || input[:exchangeRate]
+        if !rate.nil? && rate.to_f <= 0
+          raise InvalidInputError, "exchangeRate must be greater than 0"
+        end
+
         items = input["items"] || input[:items] || []
         items.each_with_index do |item, idx|
           quantity = item["quantity"] || item[:quantity] || 1

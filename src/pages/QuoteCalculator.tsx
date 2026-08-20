@@ -27,12 +27,7 @@ import { Header } from '@/components/layout/Header';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useAuth } from '@/contexts/AuthContext';
-import {
-  DEFAULT_EXCHANGE_RATE,
-  DEFAULT_FSC_PERCENT,
-  DEFAULT_FSC_PERCENT_DHL,
-  DEFAULT_FSC_PERCENT_FEDEX,
-} from '@/config/rates';
+import { DEFAULT_EXCHANGE_RATE, DEFAULT_FSC_PERCENT, defaultFscFor } from '@/config/rates';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { useResolvedMargin } from '@/features/dashboard/hooks/useResolvedMargin';
 import { useQuoteDeepLink } from '@/features/quote/hooks/useQuoteDeepLink';
@@ -85,13 +80,7 @@ const QuoteCalculator: React.FC<{ isPublic?: boolean }> = ({ isPublic = false })
   React.useEffect(() => {
     const carrier = input.overseasCarrier || 'UPS';
     if (lastFscCarrier !== carrier) {
-      const carrierDefault =
-        carrier === 'DHL'
-          ? DEFAULT_FSC_PERCENT_DHL
-          : carrier === 'FEDEX'
-            ? DEFAULT_FSC_PERCENT_FEDEX
-            : DEFAULT_FSC_PERCENT;
-      setInput((prev) => ({ ...prev, fscPercent: carrierDefault }));
+      setInput((prev) => ({ ...prev, fscPercent: defaultFscFor(carrier) }));
       setLastFscCarrier(carrier);
     }
   }, [input.overseasCarrier, lastFscCarrier]);

@@ -100,6 +100,60 @@ RSpec.describe "Api::V1::Quotes", type: :request do
         expect(response).to have_http_status(:unprocessable_entity)
         expect(json["error"]["code"]).to eq("INVALID_INPUT")
       end
+
+      # An exchangeRate of 0 used to divide straight through to Infinity, which
+      # ActiveSupport serialises as null — so the caller got a quote whose USD
+      # total was silently missing. There is no reading of "0" that produces a
+      # usable rate, so it is rejected rather than defaulted.
+      it "returns 422 when exchangeRate is 0" do
+        params = valid_params.merge(exchangeRate: 0)
+        post "/api/v1/quotes/calculate", params: params, as: :json
+
+        expect(response).to have_http_status(:unprocessable_entity)
+        expect(json["error"]["code"]).to eq("INVALID_INPUT")
+        expect(json["error"]["message"]).to match(/exchangeRate/)
+      end
+
+      it "returns 422 when exchangeRate is negative" do
+        params = valid_params.merge(exchangeRate: -1400)
+        post "/api/v1/quotes/calculate", params: params, as: :json
+
+        expect(response).to have_http_status(:unprocessable_entity)
+        expect(json["error"]["code"]).to eq("INVALID_INPUT")
+      end
+
+      # "" is the trap that 0 was: `"".present?` is false so a `present?` guard
+      # waves it through, and `"" || DEFAULT` keeps the empty string because ""
+      # is truthy in Ruby — landing on the same `/ 0.0` → Infinity → null.
+      it "returns 422 when exchangeRate is an empty string" do
+        params = valid_params.merge(exchangeRate: "")
+        post "/api/v1/quotes/calculate", params: params, as: :json
+
+        expect(response).to have_http_status(:unprocessable_entity)
+        expect(json["error"]["code"]).to eq("INVALID_INPUT")
+      end
+
+      it "returns 422 when exchangeRate is not a number" do
+        params = valid_params.merge(exchangeRate: "abc")
+        post "/api/v1/quotes/calculate", params: params, as: :json
+
+        expect(response).to have_http_status(:unprocessable_entity)
+        expect(json["error"]["code"]).to eq("INVALID_INPUT")
+      end
+
+      it "accepts a numeric string" do
+        params = valid_params.merge(exchangeRate: "1400")
+        post "/api/v1/quotes/calculate", params: params, as: :json
+
+        expect(response).to have_http_status(:ok)
+      end
+
+      it "still accepts a request that omits exchangeRate entirely" do
+        params = valid_params.except(:exchangeRate)
+        post "/api/v1/quotes/calculate", params: params, as: :json
+
+        expect(response).to have_http_status(:ok)
+      end
     end
 
     context "destination without a carrier zone" do
@@ -171,6 +225,42 @@ RSpec.describe "Api::V1::Quotes", type: :request do
         r.rule_type = "flat"
         r.margin_percent = 24
         r.is_active = true
+      end
+    end
+
+    # `0.presence` is 0 in Rails (0 is not blank), so a partner-supplied
+    # exchange_rate of 0 passed straight through the mapper's `|| DEFAULT` and
+    # the response came back with totalQuoteAmountUSD: null while the quote was
+    # still saved. Rejecting it keeps a partner integration from silently
+    # receiving a quote with no USD figure.
+    describe "exchange_rate validation" do
+      it "returns 422 when a partner supplies exchange_rate 0" do
+        post "/api/v1/quote_api/quotes", params: quote_api_payload.merge(exchange_rate: 0),
+             headers: api_key_headers, as: :json
+
+        expect(response).to have_http_status(:unprocessable_entity)
+        expect(json["error"]["code"]).to eq("INVALID_INPUT")
+      end
+
+      it "accepts a payload that omits exchange_rate" do
+        post "/api/v1/quote_api/quotes", params: quote_api_payload,
+             headers: api_key_headers, as: :json
+
+        expect(response).to have_http_status(:created)
+      end
+
+      # Deliberately unlike the JWT endpoint, which rejects "". PartnerQuoteInput
+      # normalises blanks with `.presence || DEFAULT` before validation runs, so
+      # a partner sending an empty string is treated as "not supplied". Pinned
+      # here so the difference is a decision rather than an accident.
+      it "treats an empty exchange_rate as not supplied" do
+        post "/api/v1/quote_api/quotes", params: quote_api_payload.merge(exchange_rate: ""),
+             headers: api_key_headers, as: :json
+
+        expect(response).to have_http_status(:created)
+        # The point of the case: a real USD figure, not the null that Infinity
+        # serialises to.
+        expect(json["pricing"]["total"]).to be > 0
       end
     end
 

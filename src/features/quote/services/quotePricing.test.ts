@@ -75,10 +75,13 @@ describe('quote pricing rules', () => {
   });
 
   describe('FSC default depends on the carrier', () => {
-    // `input.fscPercent || default` — 0 is falsy, so it falls through to the
-    // carrier default rather than meaning "no fuel surcharge".
+    // The default applies only when no fscPercent was supplied at all. An
+    // explicit 0 means "no fuel surcharge" and must survive — the same rule the
+    // backend has always followed (`if @input[:fscPercent].nil?`). Before
+    // 2026-08-21 the frontend used `||` here, so a supplied 0 silently became
+    // the carrier default and the displayed quote diverged from the stored one.
     const fscOf = (carrier: NonNullable<QuoteInput['overseasCarrier']>) => {
-      const r = quote({ overseasCarrier: carrier, fscPercent: 0, marginPercent: 0 });
+      const r = quote({ overseasCarrier: carrier, fscPercent: undefined, marginPercent: 0 });
       return { applied: r.breakdown.intlFsc, base: r.breakdown.intlBase };
     };
 
@@ -100,6 +103,19 @@ describe('quote pricing rules', () => {
     it('an explicit fscPercent wins over the default', () => {
       const r = quote({ fscPercent: 10, marginPercent: 0 });
       expect(r.breakdown.intlFsc).toBe(Math.round(r.breakdown.intlBase * 0.1));
+    });
+
+    it('keeps an explicit fscPercent of 0 rather than falling back to the carrier default', () => {
+      // `?? default` — nullish, so a supplied 0 survives. This is the frontend
+      // half of the FE/BE agreement; calculationParity.test.ts pins the other.
+      expect(quote({ fscPercent: 0, marginPercent: 0 }).breakdown.intlFsc).toBe(0);
+    });
+
+    it('charges no fuel surcharge on the cost side either at an explicit 0', () => {
+      const r = quote({ fscPercent: 0, marginPercent: 0 });
+      expect(r.totalCostAmount).toBe(
+        r.breakdown.intlBase + r.breakdown.intlWarRisk + (r.breakdown.carrierAddOnTotal ?? 0),
+      );
     });
   });
 

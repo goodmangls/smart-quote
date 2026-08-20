@@ -5,12 +5,7 @@ import { calculateQuote, ZoneNotFoundError } from '@/features/quote/services/cal
 import { assignBadges } from '@/features/quote/services/carrierRanker';
 import { CARRIER_METADATA } from '@/config/carrier_metadata';
 import { calculateCo2Kg } from '@/lib/co2';
-import {
-  DEFAULT_EXCHANGE_RATE,
-  DEFAULT_FSC_PERCENT,
-  DEFAULT_FSC_PERCENT_DHL,
-  DEFAULT_FSC_PERCENT_FEDEX,
-} from '@/config/rates';
+import { DEFAULT_EXCHANGE_RATE, defaultFscFor } from '@/config/rates';
 import { formatKRW, formatUSDInt } from '@/lib/format';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { ArrowRightLeft, Check, ArrowUpDown } from 'lucide-react';
@@ -18,12 +13,6 @@ import { ArrowRightLeft, Check, ArrowUpDown } from 'lucide-react';
 type QuoteCarrier = 'UPS' | 'DHL' | 'FEDEX';
 
 const ALL_CARRIERS: QuoteCarrier[] = ['UPS', 'DHL', 'FEDEX'];
-
-const defaultFscFor = (carrier: QuoteCarrier): number => {
-  if (carrier === 'DHL') return DEFAULT_FSC_PERCENT_DHL;
-  if (carrier === 'FEDEX') return DEFAULT_FSC_PERCENT_FEDEX;
-  return DEFAULT_FSC_PERCENT;
-};
 
 // The comparison memo recalculates on every keystroke — report each distinct
 // failure once per session so a broken rate table doesn't flood Sentry.

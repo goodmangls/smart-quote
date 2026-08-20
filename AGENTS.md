@@ -197,6 +197,21 @@ Frontend (`src/features/quote/services/calculationService.ts`) and backend (`sma
 3. **Margin** - Dynamic margin via `MarginRuleResolver` (priority-based: P100 per-user flat > P90 per-user weight > P50 nationality > P0 default), **Markup 방식**: `revenue = cost × (1 + margin%)`, rounded up to nearest KRW 100. Admin can manually override at any time. ⚠ 매출 대비 실효 마진율은 명목값보다 낮음 (예: 24% Markup → 실효 마진율 19.35% = margin / revenue).
 4. **Warnings** - Low margin (<10%), high volumetric weight, surge charges, collect terms (EXW/FOB)
 
+### 입력값 `0` 의 의미 (2026-08-21)
+
+**명시적으로 보낸 0 은 진짜 0 이다. 기본값은 값이 아예 없을 때만 적용된다.** FE·BE 가 같은 규칙을 따라야 화면 견적과 저장 견적이 일치한다.
+
+| 필드 | 0 을 보냈을 때 | 값이 없을 때 |
+|---|---|---|
+| `fscPercent` | 연료할증료 0원 | 캐리어 기본 FSC (`defaultFscFor`, BE 는 DB FSC 테이블 우선) |
+| `marginPercent` | 마진 0% | 15% |
+| `exchangeRate` | **422 INVALID_INPUT** (0 은 어떤 해석으로도 무의미) | `DEFAULT_EXCHANGE_RATE` |
+
+- FE 는 `??`, BE 는 `.nil?` 로 읽는다. **Ruby 의 `||` 는 0 이 truthy 라 JS 의 `||` 와 반대로 동작한다** — 이 자리에서 `||` 를 쓰면 안 된다.
+- FSC 입력칸(`FinancialSection`)은 **빈칸과 0 을 구분**한다. 빈칸은 캐리어 기본값으로 해석되므로 실수로 칸을 비워도 할증료가 통째로 빠지지 않는다. 표시용 draft 상태를 따로 두는 이유가 이것이다.
+- 게이트: 공유 픽스처 `ups_us_fsc_zero_explicit`(양쪽 원 단위 단언) + `spec/services/fsc_zero_semantics_spec.rb` + `FinancialSection.test.tsx`.
+- 이력: 2026-08-21 이전 FE 가 `||` 를 써서 `fscPercent: 0` 견적이 **화면 1,355,800 / 저장 1,020,600** 으로 갈렸다. 이미 저장된 견적의 금액은 재계산하지 않는다.
+
 ### UPS Zone Mapping (Z1-Z10) — per UPS 2026 Service Guide
 
 Z1: SG/TW/MO/CN, Z2: JP/VN, Z3: TH/PH, Z4: AU/IN, Z5: CA/US, Z6: ES/IT/GB/FR, Z7: DK/NO/SE/FI/DE/NL/BE/IE/CH/AT/PT/CZ/PL/HU/RO/BG, Z8: AR/BR/CL/CO/AE/TR/ZA/EG/BH/SA/PK/KW/QA, Z9: IL/JO/LB, Z10: HK/CN-S
