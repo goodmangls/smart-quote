@@ -27,6 +27,20 @@ export const DEFAULT_EXCHANGE_RATE = 1350; // Manual: 하나은행 월요일 09�
 export const DEFAULT_FSC_PERCENT = 44.25; // UPS FSC, effective 2026-08-17
 export const DEFAULT_FSC_PERCENT_DHL = 42.0; // DHL FSC, effective 2026-08-17
 export const DEFAULT_FSC_PERCENT_FEDEX = 43.5; // FedEx FSC, effective 2026-08-17
+
+/**
+ * The fuel surcharge to apply when the request carries no fscPercent at all.
+ *
+ * Single source for a rule that used to be written out three times (the pricing
+ * math, the carrier comparison card, and the carrier-switch effect). Only a
+ * missing value takes this default — an explicit 0 means "no fuel surcharge"
+ * and is honoured on both the frontend and the backend.
+ */
+export const defaultFscFor = (carrier: string | undefined): number => {
+  if (carrier === 'DHL') return DEFAULT_FSC_PERCENT_DHL;
+  if (carrier === 'FEDEX') return DEFAULT_FSC_PERCENT_FEDEX;
+  return DEFAULT_FSC_PERCENT;
+};
 export const UPS_FSC_URL =
   'https://www.ups.com/kr/ko/support/shipping-support/shipping-costs-rates/fuel-surcharges.page';
 export const UPS_RATES_HUB_URL =

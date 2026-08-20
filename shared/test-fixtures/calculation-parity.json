@@ -1127,6 +1127,44 @@
         "carrierAddOnTotal": 0.0,
         "carrierAddOnCodes": []
       }
+    },
+    {
+      "name": "ups_us_fsc_zero_explicit",
+      "note": "An explicit fscPercent of 0 means \"no fuel surcharge\" and must survive on both sides. Same input as basic_ups_us_wooden_box, which quotes 1,272,300 at fscPercent 30 — the two fixtures together pin that 0 is honoured rather than replaced by the carrier default. Before 2026-08-21 the frontend showed 1,355,800 here (UPS default 44.25%) while the backend stored 1,020,600.",
+      "input": {
+        "originCountry": "KR",
+        "destinationCountry": "US",
+        "destinationZip": "10001",
+        "incoterm": "DAP",
+        "packingType": "WOODEN_BOX",
+        "items": [
+          {
+            "id": "1",
+            "length": 50,
+            "width": 40,
+            "height": 30,
+            "weight": 15,
+            "quantity": 2
+          }
+        ],
+        "marginPercent": 15,
+        "dutyTaxEstimate": 0,
+        "exchangeRate": 1400,
+        "fscPercent": 0,
+        "overseasCarrier": "UPS"
+      },
+      "expected": {
+        "totalQuoteAmount": 1020600,
+        "totalCostAmount": 921714,
+        "billableWeight": 54,
+        "intlBase": 658692,
+        "carrierAddOnTotal": 85322,
+        "carrierAddOnCodes": [
+          "AHS",
+          "IHF",
+          "SGF"
+        ]
+      }
     }
   ],
   "note_expected": "Fixtures carrying an `expected` block are asserted to the KRW on BOTH sides. The older fixtures have no `expected` and are structural-only — a shared input file alone does not make the two implementations agree, which is how a 5% UPS gap went unnoticed."

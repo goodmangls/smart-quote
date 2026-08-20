@@ -1,7 +1,7 @@
 import React from 'react';
 import { QuoteInput } from '@/types';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { UPS_FSC_URL, DHL_FSC_URL, FEDEX_FSC_URL } from '@/config/rates';
+import { UPS_FSC_URL, DHL_FSC_URL, FEDEX_FSC_URL, defaultFscFor } from '@/config/rates';
 import { TrendingUp, ExternalLink, Target } from 'lucide-react';
 import { inputStyles } from './input-styles';
 import type { ResolvedMargin } from '@/api/marginRuleApi';
@@ -29,6 +29,33 @@ export const FinancialSection: React.FC<Props> = ({
   const isKo = language === 'ko';
 
   const financialGrid = `grid grid-cols-1 ${!isMobileView ? 'sm:grid-cols-3' : 'grid-cols-2'} gap-3`;
+
+  // The FSC box keeps its own draft text so an emptied field can stay empty
+  // while the quote falls back to the carrier default. Binding `value` straight
+  // to input.fscPercent would refill the box the moment it was cleared, and
+  // pushing 0 instead would mean an accidental clear silently strips the whole
+  // fuel surcharge — the backend honours an explicit 0.
+  const carrierFscDefault = defaultFscFor(input.overseasCarrier);
+  const [fscDraft, setFscDraft] = React.useState<string>(String(input.fscPercent));
+  const pushedFsc = React.useRef<number>(input.fscPercent);
+
+  // Re-sync only when the value changed somewhere else (carrier switch, loading
+  // a saved quote). Without the ref this would overwrite the user's own draft.
+  React.useEffect(() => {
+    if (input.fscPercent !== pushedFsc.current) {
+      pushedFsc.current = input.fscPercent;
+      setFscDraft(String(input.fscPercent));
+    }
+  }, [input.fscPercent]);
+
+  const handleFscChange = (raw: string) => {
+    setFscDraft(raw);
+    const next = raw.trim() === '' ? carrierFscDefault : Number(raw);
+    // Reject junk (a lone "-", "e") instead of collapsing it to a number.
+    if (Number.isNaN(next) || next < 0) return;
+    pushedFsc.current = next;
+    onFieldChange('fscPercent', next);
+  };
 
   return (
     <div className={grayCardClass}>
@@ -100,11 +127,8 @@ export const FinancialSection: React.FC<Props> = ({
               type='number'
               step='0.01'
               min='0'
-              value={input.fscPercent}
-              onChange={(e) => {
-                const v = Number(e.target.value);
-                onFieldChange('fscPercent', isNaN(v) || v < 0 ? 0 : v);
-              }}
+              value={fscDraft}
+              onChange={(e) => handleFscChange(e.target.value)}
               className={`${ic} pr-20`}
               placeholder='30.25'
               inputMode='decimal'

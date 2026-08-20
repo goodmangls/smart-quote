@@ -1,9 +1,4 @@
-import {
-  DEFAULT_EXCHANGE_RATE,
-  DEFAULT_FSC_PERCENT,
-  DEFAULT_FSC_PERCENT_DHL,
-  DEFAULT_FSC_PERCENT_FEDEX,
-} from '@/config/rates';
+import { DEFAULT_EXCHANGE_RATE, defaultFscFor } from '@/config/rates';
 import { MAX_MARGIN_PERCENT } from '@/config/business-rules';
 
 /**
@@ -53,13 +48,6 @@ export interface QuotePricingResult {
   totalQuoteAmountUSD: number;
 }
 
-/** Per-carrier fallback used when the request carries no fscPercent. */
-const defaultFscFor = (carrier: string): number => {
-  if (carrier === 'DHL') return DEFAULT_FSC_PERCENT_DHL;
-  if (carrier === 'FEDEX') return DEFAULT_FSC_PERCENT_FEDEX;
-  return DEFAULT_FSC_PERCENT;
-};
-
 export const computeQuotePricing = (input: QuotePricingInput): QuotePricingResult => {
   const {
     baseRate,
@@ -79,8 +67,14 @@ export const computeQuotePricing = (input: QuotePricingInput): QuotePricingResul
   const baseWithMargin = baseRate * (1 + safeMarginPercent / 100);
   const marginAmount = baseWithMargin - baseRate;
 
-  // `||` not `??` — a supplied 0 means "unset", not "no fuel surcharge".
-  const fscRate = (input.fscPercent || defaultFscFor(carrier)) / 100;
+  // `??` not `||` — a supplied 0 is a real "no fuel surcharge" and must
+  // survive, exactly as an explicit margin of 0 does above. The backend has
+  // always read this field with `.nil?`, so using `||` here made a quote with
+  // fscPercent 0 display the carrier default while the stored quote charged
+  // nothing. "No value at all" is the only case that takes the default; the
+  // FSC input resolves an emptied field to the carrier default before it ever
+  // reaches this function (see FinancialSection).
+  const fscRate = (input.fscPercent ?? defaultFscFor(carrier)) / 100;
   const quotedFsc = Math.round(baseWithMargin * fscRate);
   const costFsc = Math.round(baseRate * fscRate);
 
