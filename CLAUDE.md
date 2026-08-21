@@ -210,6 +210,7 @@ Frontend (`src/features/quote/services/calculationService.ts`) and backend (`sma
 - FE 는 `??`, BE 는 `.nil?` 로 읽는다. **Ruby 의 `||` 는 0 이 truthy 라 JS 의 `||` 와 반대로 동작한다** — 이 자리에서 `||` 를 쓰면 안 된다.
 - FSC 입력칸(`FinancialSection`)은 **빈칸과 0 을 구분**한다. 빈칸은 캐리어 기본값으로 해석되므로 실수로 칸을 비워도 할증료가 통째로 빠지지 않는다. 표시용 draft 상태를 따로 두는 이유가 이것이다.
 - 게이트: 공유 픽스처 `ups_us_fsc_zero_explicit`(양쪽 원 단위 단언) + `spec/services/fsc_zero_semantics_spec.rb` + `FinancialSection.test.tsx`.
+- **범위 검증의 단일 출처는 `QuotesController::NUMERIC_INPUT_BOUNDS`** (2026-08-21 신설). 여기 값을 바꾸면 calculate·create·파트너 3경로에 동시 적용된다. ⚠️`"abc".to_f`·`"".to_f` 가 모두 `0.0` 이라 **범위 검사만으로는 문자열이 "유효한 0" 으로 통과한다** — 반드시 `NUMERIC_INPUT_PATTERN` 으로 숫자 여부부터 거를 것. `marginPercent`(계산기가 이미 clamp)와 품목 수(파트너 화물은 100개 초과가 정상)는 **의도적으로 제외**.
 - 이력: 2026-08-21 이전 FE 가 `||` 를 써서 `fscPercent: 0` 견적이 **화면 1,355,800 / 저장 1,020,600** 으로 갈렸다. 이미 저장된 견적의 금액은 재계산하지 않는다.
 
 ### UPS Zone Mapping (Z1-Z10) — per UPS 2026 Service Guide

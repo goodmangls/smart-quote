@@ -6,6 +6,41 @@ module Api
 
       InvalidInputError = Class.new(StandardError)
 
+      # Numeric inputs the money math trusts. The frontend Zod schema bounds
+      # every one of these, but the backend is what recalculates and persists,
+      # so a caller that skips the frontend — a direct API call, a partner
+      # integration — reached the math unchecked. Measured before the guard
+      # existed, against a 292,000 baseline quote:
+      #
+      #   fscPercent: "abc"          → 232,100  (to_f is 0.0, so no fuel surcharge)
+      #   fscPercent: 100000         → 200,105,400
+      #   dutyTaxEstimate: -500,000  → -208,000 (a negative total is not a price)
+      #   manualSurgeCost: -300,000  → -8,000
+      #
+      # nil means "not supplied" and is always allowed; the calculator has its
+      # own defaults. marginPercent is deliberately absent — the calculator
+      # already clamps it to 0..MAX_MARGIN_PERCENT, which bounds the money.
+      # Item count is deliberately absent too: the frontend caps at 100 because
+      # it is a form, but a freight partner shipping 150 packages is legitimate,
+      # and the partner API is already rate limited per key.
+      NUMERIC_INPUT_BOUNDS = {
+        "exchangeRate" => { min: 0, exclusive_min: true, max: 10_000 },
+        "fscPercent" => { min: 0, max: 200 },
+        "dutyTaxEstimate" => { min: 0 },
+        "manualDomesticCost" => { min: 0 },
+        "manualPackingCost" => { min: 0 },
+        "manualSurgeCost" => { min: 0 },
+        "pickupInSeoulCost" => { min: 0 },
+        "dhlDeclaredValue" => { min: 0 },
+        "fedexDeclaredValue" => { min: 0 }
+      }.freeze
+
+      # Anything not matching this is rejected outright rather than coerced.
+      # `"abc".to_f` and `"".to_f` are both 0.0, so a range check alone accepts
+      # junk as a valid zero — which is how an empty exchangeRate slipped past
+      # a `present?` guard and divided the total by zero.
+      NUMERIC_INPUT_PATTERN = /\A-?\d+(\.\d+)?\z/
+
       # api_create is partner (machine) traffic authenticated by X-API-Key, not by
       # a user JWT — so it is excluded from authenticate_user! and gated separately.
       before_action :authenticate_user!, except: [ :calculate, :api_create ]
@@ -308,19 +343,7 @@ module Api
         destination = input["destinationCountry"] || input[:destinationCountry]
         raise InvalidInputError, "destinationCountry is required" if destination.blank?
 
-        # A supplied exchangeRate must be usable. Omitting it (or sending null)
-        # is fine — the calculator falls back to DEFAULT_EXCHANGE_RATE — but 0
-        # divided straight through to Infinity, which ActiveSupport renders as
-        # null, so the caller silently received a quote with no USD total.
-        #
-        # `nil?` rather than `present?`: "" is blank but NOT nil, and `"" ||
-        # DEFAULT` keeps the empty string because "" is truthy in Ruby, so a
-        # `present?` guard would wave "" through to the same division. This also
-        # rejects junk like "abc", whose to_f is 0.0.
-        rate = input["exchangeRate"] || input[:exchangeRate]
-        if !rate.nil? && rate.to_f <= 0
-          raise InvalidInputError, "exchangeRate must be greater than 0"
-        end
+        validate_numeric_bounds!(input)
 
         items = input["items"] || input[:items] || []
         items.each_with_index do |item, idx|
@@ -332,6 +355,29 @@ module Api
           weight = item["weight"] || item[:weight]
           unless weight.present? && weight.to_f > 0
             raise InvalidInputError, "Item #{idx + 1}: weight must be greater than 0"
+          end
+        end
+      end
+
+      def validate_numeric_bounds!(input)
+        NUMERIC_INPUT_BOUNDS.each do |key, bounds|
+          raw = input[key] || input[key.to_sym]
+          next if raw.nil?
+
+          unless raw.is_a?(Numeric) || raw.to_s.match?(NUMERIC_INPUT_PATTERN)
+            raise InvalidInputError, "#{key} must be a number"
+          end
+
+          value = raw.to_f
+          min = bounds[:min]
+
+          if bounds[:exclusive_min] ? value <= min : value < min
+            floor = bounds[:exclusive_min] ? "greater than #{min}" : "at least #{min}"
+            raise InvalidInputError, "#{key} must be #{floor}"
+          end
+
+          if bounds[:max] && value > bounds[:max]
+            raise InvalidInputError, "#{key} must be at most #{bounds[:max]}"
           end
         end
       end
