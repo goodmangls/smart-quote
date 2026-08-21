@@ -310,6 +310,7 @@
   "zone.unavailable.title": "该目的地没有 {carrier} 区域",
   "zone.unavailable.message": "{country} 未列入 {carrier} 官方区域表，无法计算报价。请选择其他承运商或联系运营团队。",
   "calc.option.noZone": "无 {carrier} 区域",
+  "calc.option.noZoneAnyCarrier": "所有承运商均不承接",
   "auth.magicLink.noticeTitle": "忘记密码了？",
   "auth.magicLink.noticeBody": "请输入公司邮箱，我们会发送一次性安全链接。链接将在15分钟后过期，且只能使用一次。",
   "quote.cost.freight": "运输费用",

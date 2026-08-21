@@ -244,6 +244,23 @@ export const DHL_ZONE_COUNTRIES: Record<string, string[]> = deriveZoneCountries(
 export const FEDEX_ZONE_COUNTRIES: Record<string, string[]> =
   deriveZoneCountries(FEDEX_ZONE_MAP);
 
+/**
+ * Selectable destinations that no carrier has a zone for.
+ *
+ * A country missing from the *selected* carrier is labeled "no {carrier} zone",
+ * which tells the user to try another carrier. When every carrier is missing it
+ * that advice is a dead end, so the dropdown says so outright instead.
+ *
+ * Derived from the zone maps, never a hand-kept list: add a zone for one of
+ * these and it drops out of the set on the next build.
+ */
+export const UNSERVICEABLE_COUNTRY_CODES: ReadonlySet<string> = new Set(
+  COUNTRY_OPTIONS.map((c) => c.code).filter(
+    (code) =>
+      code !== 'KR' && !UPS_ZONE_MAP[code] && !DHL_ZONE_MAP[code] && !FEDEX_ZONE_MAP[code]
+  )
+);
+
 // ─── Nationality options for signup / admin ─────────────────────────
 // Top 7 pinned (frequent B2B partners), rest alphabetical from COUNTRY_OPTIONS
 const PINNED_NATIONALITY_CODES = ['KR', 'US', 'CN', 'JP', 'VN', 'TW', 'SG'];
