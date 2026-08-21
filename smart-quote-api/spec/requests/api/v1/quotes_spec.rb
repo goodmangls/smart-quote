@@ -156,6 +156,83 @@ RSpec.describe "Api::V1::Quotes", type: :request do
       end
     end
 
+    # The frontend Zod schema bounds every one of these, but the backend is
+    # what recalculates and persists — so a caller that skips the frontend
+    # (direct API call, partner integration) reached the money math unchecked.
+    # Each case below was measured against the real calculator before the
+    # guard existed; the comment records what it produced.
+    context "numeric input bounds" do
+      def expect_rejected(patch, matching: nil)
+        post "/api/v1/quotes/calculate", params: valid_params.merge(patch), as: :json
+
+        expect(response).to have_http_status(:unprocessable_entity)
+        expect(json["error"]["code"]).to eq("INVALID_INPUT")
+        expect(json["error"]["message"]).to match(matching) if matching
+      end
+
+      # "abc".to_f is 0.0, so an unchecked fscPercent of "abc" charged no fuel
+      # surcharge at all — 292,000 became 232,100. Same shape as the ""
+      # exchangeRate hole: a range check alone would have passed it.
+      it "rejects a non-numeric fscPercent" do
+        expect_rejected({ fscPercent: "abc" }, matching: /fscPercent/)
+      end
+
+      it "rejects a negative fscPercent" do
+        # Measured: -50 produced 132,100 against a 292,000 baseline.
+        expect_rejected({ fscPercent: -50 }, matching: /fscPercent/)
+      end
+
+      it "rejects an absurd fscPercent" do
+        # Measured: 100000 produced a 200,105,400 quote.
+        expect_rejected({ fscPercent: 100_000 }, matching: /fscPercent/)
+      end
+
+      it "accepts fscPercent at the upper bound" do
+        post "/api/v1/quotes/calculate", params: valid_params.merge(fscPercent: 200), as: :json
+
+        expect(response).to have_http_status(:ok)
+      end
+
+      it "accepts a numeric string fscPercent" do
+        post "/api/v1/quotes/calculate", params: valid_params.merge(fscPercent: "30"), as: :json
+
+        expect(response).to have_http_status(:ok)
+      end
+
+      # Measured: -500,000 drove the quoted total to -208,000. A negative
+      # total is not a price.
+      it "rejects a negative dutyTaxEstimate" do
+        expect_rejected({ dutyTaxEstimate: -500_000 }, matching: /dutyTaxEstimate/)
+      end
+
+      # Measured: -300,000 drove the quoted total to -8,000.
+      it "rejects a negative manualSurgeCost" do
+        expect_rejected({ manualSurgeCost: -300_000 }, matching: /manualSurgeCost/)
+      end
+
+      it "rejects a negative pickupInSeoulCost" do
+        expect_rejected({ pickupInSeoulCost: -200_000 }, matching: /pickupInSeoulCost/)
+      end
+
+      # This one was already harmless — the calculator guards `>= 0` and falls
+      # back to the computed packing cost. Silently ignoring an input the
+      # caller meant is still worse than saying no.
+      it "rejects a negative manualPackingCost rather than ignoring it" do
+        expect_rejected({ manualPackingCost: -100_000 }, matching: /manualPackingCost/)
+      end
+
+      it "rejects an exchangeRate beyond any plausible KRW/USD rate" do
+        expect_rejected({ exchangeRate: 999_999 }, matching: /exchangeRate/)
+      end
+
+      it "accepts a request that omits all optional numeric fields" do
+        params = valid_params.except(:dutyTaxEstimate, :fscPercent, :exchangeRate)
+        post "/api/v1/quotes/calculate", params: params, as: :json
+
+        expect(response).to have_http_status(:ok)
+      end
+    end
+
     context "destination without a carrier zone" do
       # End-to-end through the real calculator: no fallback zone exists, so an
       # unmapped destination must become 422 ZONE_NOT_FOUND — never a quote
@@ -261,6 +338,35 @@ RSpec.describe "Api::V1::Quotes", type: :request do
         # The point of the case: a real USD figure, not the null that Infinity
         # serialises to.
         expect(json["pricing"]["total"]).to be > 0
+      end
+    end
+
+    # The partner mapper passes these through with `(… || 0).to_f`, so the
+    # bounds have to hold on this path too — a partner is exactly the caller
+    # that never sees the frontend schema.
+    describe "numeric bounds on the partner path" do
+      it "rejects a negative duty_tax_estimate" do
+        payload = quote_api_payload.deep_merge(terms: { duty_tax_estimate: -500_000 })
+        post "/api/v1/quote_api/quotes", params: payload, headers: api_key_headers, as: :json
+
+        expect(response).to have_http_status(:unprocessable_entity)
+        expect(json["error"]["code"]).to eq("INVALID_INPUT")
+      end
+
+      it "rejects a negative manual_surcharge_cost" do
+        post "/api/v1/quote_api/quotes", params: quote_api_payload.merge(manual_surcharge_cost: -300_000),
+             headers: api_key_headers, as: :json
+
+        expect(response).to have_http_status(:unprocessable_entity)
+        expect(json["error"]["code"]).to eq("INVALID_INPUT")
+      end
+
+      it "rejects an out-of-range fsc_percent" do
+        post "/api/v1/quote_api/quotes", params: quote_api_payload.merge(fsc_percent: 100_000),
+             headers: api_key_headers, as: :json
+
+        expect(response).to have_http_status(:unprocessable_entity)
+        expect(json["error"]["code"]).to eq("INVALID_INPUT")
       end
     end
 
