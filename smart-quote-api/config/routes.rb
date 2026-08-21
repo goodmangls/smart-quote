@@ -13,10 +13,12 @@ Rails.application.routes.draw do
       post "auth/promote",  to: "auth#promote"
       post "auth/magic_link",        to: "auth#request_magic_link"
       # POST keeps the one-time token out of URLs (server/proxy access logs).
-      # GET remains for the deploy window while older frontends are live —
-      # remove once the POST-only frontend is fully rolled out.
+      # The GET form was kept through the 2026-08-17 deploy window and removed
+      # on 2026-08-21 once the POST-only frontend was live. The emailed link
+      # points at the frontend (`FRONTEND_URL/auth/verify?token=`), which reads
+      # the token, strips it from the address bar, and POSTs it here — so no
+      # live link depended on the GET route.
       post "auth/magic_link/verify", to: "auth#verify_magic_link"
-      get  "auth/magic_link/verify", to: "auth#verify_magic_link"
       get  "auth/magic_link/peek",   to: "auth#peek_magic_link" if Rails.env.test?
 
       # Quotes (protected, except calculate)

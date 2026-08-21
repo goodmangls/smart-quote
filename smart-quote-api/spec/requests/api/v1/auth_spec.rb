@@ -239,54 +239,52 @@ RSpec.describe "Api::V1::Auth", type: :request do
       post "/api/v1/auth/magic_link/verify", params: { token: "bogus" }, as: :json
       expect(response).to have_http_status(:unauthorized)
     end
-  end
 
-  describe "GET /api/v1/auth/magic_link/verify" do
-    let(:user) { create(:user, email: "verify@example.com") }
-
-    it "returns a JWT for a valid raw token" do
+    # Ported from the GET block when that route was removed on 2026-08-21.
+    # The behaviours live in the shared verify_magic_link action, but they were
+    # only ever exercised through GET — deleting the block would have dropped
+    # the coverage silently.
+    it "issues the refresh token as an httpOnly cookie, never in the body" do
       raw = user.generate_magic_link_token!
-      get "/api/v1/auth/magic_link/verify", params: { token: raw }
+      post "/api/v1/auth/magic_link/verify", params: { token: raw }, as: :json
 
-      expect(response).to have_http_status(:ok)
       body = JSON.parse(response.body)
-      expect(body["token"]).to be_present
       expect(body).not_to have_key("refresh_token")
       expect(response.cookies["refresh_token"]).to be_present
       set_cookie = response.headers["Set-Cookie"]
       expect(set_cookie).to include("refresh_token=")
       expect(set_cookie).to match(/HttpOnly/i)
-      expect(body["user"]["email"]).to eq(user.email)
-    end
-
-    it "consumes the token after successful verification" do
-      raw = user.generate_magic_link_token!
-      get "/api/v1/auth/magic_link/verify", params: { token: raw }
-      expect(user.reload.magic_link_token_digest).to be_nil
     end
 
     it "returns 401 for an already-consumed token" do
       raw = user.generate_magic_link_token!
-      get "/api/v1/auth/magic_link/verify", params: { token: raw }
-      get "/api/v1/auth/magic_link/verify", params: { token: raw }
+      post "/api/v1/auth/magic_link/verify", params: { token: raw }, as: :json
+      post "/api/v1/auth/magic_link/verify", params: { token: raw }, as: :json
       expect(response).to have_http_status(:unauthorized)
     end
 
     it "returns 401 for an expired token" do
       raw = user.generate_magic_link_token!
       user.update_columns(magic_link_token_expires_at: 1.minute.ago)
-      get "/api/v1/auth/magic_link/verify", params: { token: raw }
-      expect(response).to have_http_status(:unauthorized)
-    end
-
-    it "returns 401 for an invalid token" do
-      get "/api/v1/auth/magic_link/verify", params: { token: "bogus-token" }
+      post "/api/v1/auth/magic_link/verify", params: { token: raw }, as: :json
       expect(response).to have_http_status(:unauthorized)
     end
 
     it "returns 401 for an empty token without crashing" do
-      get "/api/v1/auth/magic_link/verify", params: { token: "" }
+      post "/api/v1/auth/magic_link/verify", params: { token: "" }, as: :json
       expect(response).to have_http_status(:unauthorized)
+    end
+
+    # The token is credential-equivalent, so it must not be reachable through a
+    # path that parks it in URLs, access logs, and Referer headers.
+    it "no longer accepts GET — the token must not travel in a URL" do
+      raw = user.generate_magic_link_token!
+
+      get "/api/v1/auth/magic_link/verify", params: { token: raw }
+
+      expect(response).to have_http_status(:not_found)
+      # The decisive part: the token survives, so a GET cannot burn it either.
+      expect(user.reload.magic_link_token_digest).to be_present
     end
   end
 

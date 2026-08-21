@@ -97,7 +97,10 @@ module Api
         render json: { message: "If that email exists, a login link has been sent." }
       end
 
-      # GET /api/v1/auth/magic_link/verify?token=...
+      # POST /api/v1/auth/magic_link/verify  { token: "..." }
+      #
+      # POST-only: the token is credential-equivalent and must stay out of URLs,
+      # access logs, and Referer headers. Throttled at 20/min per IP.
       def verify_magic_link
         token = params[:token].to_s
         digest = Digest::SHA256.hexdigest(token)
