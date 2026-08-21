@@ -332,6 +332,7 @@
   "zone.unavailable.title": "No {carrier} zone for this destination",
   "zone.unavailable.message": "{country} is not listed in the official {carrier} zone table, so a quote cannot be calculated. Choose another carrier or contact the operations team.",
   "calc.option.noZone": "no {carrier} zone",
+  "calc.option.noZoneAnyCarrier": "not served by any carrier",
   "auth.magicLink.noticeTitle": "Forgot your password?",
   "auth.magicLink.noticeBody": "Enter your company email and we'll send a one-time secure link. It expires in 15 minutes and can only be used once.",
   "quote.cost.freight": "Freight Cost",

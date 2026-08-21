@@ -6,6 +6,7 @@ import {
   UPS_ZONE_COUNTRIES,
   DHL_ZONE_COUNTRIES,
   FEDEX_ZONE_COUNTRIES,
+  UNSERVICEABLE_COUNTRY_CODES,
 } from '@/config/options';
 import { inputStyles } from './input-styles';
 
@@ -54,6 +55,15 @@ export const RouteSection: React.FC<Props> = ({ input, onFieldChange, isMobileVi
   // (the user may switch carriers) but are labeled as having no zone.
   const mappedCountryCodes = useMemo(() => new Set(Object.values(zoneMap).flat()), [zoneMap]);
   const noZoneSuffix = ` — ${t('calc.option.noZone').replace('{carrier}', carrierDisplay)}`;
+
+  // "no UPS zone" reads as "try another carrier". For a destination none of the
+  // carriers reach, that is a dead end, so say so instead of sending the user
+  // round the carrier switcher. The list is derived from the zone maps.
+  const unserviceableSuffix = ` — ${t('calc.option.noZoneAnyCarrier')}`;
+  const suffixFor = (code: string): string => {
+    if (UNSERVICEABLE_COUNTRY_CODES.has(code)) return unserviceableSuffix;
+    return mappedCountryCodes.has(code) ? '' : noZoneSuffix;
+  };
 
   // Extract country name without emoji flag for proper alphabetical sorting
   const getNameWithoutFlag = (name: string): string =>
@@ -121,7 +131,7 @@ export const RouteSection: React.FC<Props> = ({ input, onFieldChange, isMobileVi
               {filteredCountries.map((c) => (
                 <option key={c.code} value={c.code}>
                   {c.name}
-                  {mappedCountryCodes.has(c.code) ? '' : noZoneSuffix}
+                  {suffixFor(c.code)}
                 </option>
               ))}
             </select>
