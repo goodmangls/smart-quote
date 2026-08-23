@@ -8,6 +8,45 @@ const switchToRange = async (user: ReturnType<typeof userEvent.setup>) => {
 };
 
 /**
+ * Every control needs an accessible name (WCAG 4.1.2). These three selects had
+ * neither a <label> nor an aria-label, so a screen reader announced three
+ * unnamed comboboxes — and the e2e a11y suite never caught it because it only
+ * visits `/` and `/login`, never an admin surface.
+ *
+ * The catch-all below matters more than the three named cases: it fails for any
+ * future control added without a name, which is how this one slipped in.
+ */
+describe('RateTableViewer — accessible names', () => {
+  it('names the carrier select', () => {
+    render(<RateTableViewer />);
+
+    expect(screen.getByRole('combobox', { name: /carrier/i })).toBeInTheDocument();
+  });
+
+  it('names the product select', () => {
+    render(<RateTableViewer />);
+
+    expect(screen.getByRole('combobox', { name: /product|rate type/i })).toBeInTheDocument();
+  });
+
+  it('names the table mode select', () => {
+    render(<RateTableViewer />);
+
+    expect(screen.getByRole('combobox', { name: /table|view|mode/i })).toBeInTheDocument();
+  });
+
+  it('leaves no control without an accessible name', () => {
+    render(<RateTableViewer />);
+
+    const unnamed = (screen.getAllByRole('combobox') as HTMLSelectElement[])
+      .filter((el) => !el.getAttribute('aria-label') && !el.getAttribute('aria-labelledby'))
+      .filter((el) => !el.labels?.length);
+
+    expect(unnamed).toEqual([]);
+  });
+});
+
+/**
  * Zone ordering is numeric-aware — Z10 sorts after Z9, not between Z1 and Z2.
  *
  * The rule was written out three times (a shared helper plus two inline copies
