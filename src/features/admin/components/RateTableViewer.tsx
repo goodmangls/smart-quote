@@ -152,6 +152,7 @@ export const RateTableViewer: React.FC = () => {
           <select
             value={carrier}
             onChange={(e) => handleCarrierChange(e.target.value as Carrier)}
+            aria-label='Carrier'
             className='text-[10px] font-semibold px-2 py-0.5 rounded border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300'
           >
             <option value='UPS'>UPS</option>
@@ -162,6 +163,7 @@ export const RateTableViewer: React.FC = () => {
             <select
               value={product}
               onChange={(e) => handleProductChange(e.target.value as RateProduct)}
+              aria-label='Rate product'
               className='text-[10px] font-semibold px-2 py-0.5 rounded border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300'
             >
               {PRODUCT_OPTIONS[carrier].map((opt) => (
@@ -174,6 +176,7 @@ export const RateTableViewer: React.FC = () => {
           <select
             value={mode}
             onChange={(e) => setMode(e.target.value as TableMode)}
+            aria-label='Table view'
             className='text-[10px] font-semibold px-2 py-0.5 rounded border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300'
           >
             <option value='exact'>Exact</option>
