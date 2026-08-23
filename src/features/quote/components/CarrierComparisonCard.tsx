@@ -3,7 +3,7 @@ import * as Sentry from '@sentry/browser';
 import { QuoteInput, QuoteResult, CarrierComparisonItem, CarrierBadge } from '@/types';
 import { calculateQuote, ZoneNotFoundError } from '@/features/quote/services/calculationService';
 import { assignBadges } from '@/features/quote/services/carrierRanker';
-import { CARRIER_METADATA } from '@/config/carrier_metadata';
+import { CARRIER_METADATA, CARRIER_SURFACE_CLASS } from '@/config/carrier_metadata';
 import { calculateCo2Kg } from '@/lib/co2';
 import { DEFAULT_EXCHANGE_RATE, defaultFscFor } from '@/config/rates';
 import { formatKRW, formatUSDInt } from '@/lib/format';
@@ -104,11 +104,6 @@ export const CarrierComparisonCard: React.FC<Props> = ({
   // Nothing to compare and nothing to explain — hide the card entirely.
   if (!badgedItems && zoneUnavailable.size === 0) return null;
 
-  const carrierColors: Record<string, string> = {
-    UPS: 'bg-amber-50 border-amber-200 dark:bg-amber-900/20 dark:border-amber-800',
-    DHL: 'bg-yellow-50 border-yellow-200 dark:bg-yellow-900/20 dark:border-yellow-800',
-    FEDEX: 'bg-cyan-50 border-cyan-200 dark:bg-cyan-900/20 dark:border-cyan-800',
-  };
 
   return (
     <div className='bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm'>
@@ -151,7 +146,7 @@ export const CarrierComparisonCard: React.FC<Props> = ({
               result={result}
               showKRW={showKRW}
               isCurrent={isCurrent}
-              colorClass={carrierColors[carrier] || ''}
+              colorClass={CARRIER_SURFACE_CLASS[carrier] ?? ''}
               diff={isCurrent ? undefined : diff}
               diffPercent={isCurrent ? undefined : diffPercent}
               exchangeRate={input.exchangeRate}
