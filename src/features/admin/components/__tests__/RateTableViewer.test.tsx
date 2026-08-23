@@ -7,6 +7,53 @@ const switchToRange = async (user: ReturnType<typeof userEvent.setup>) => {
   await user.selectOptions(modeSelect, 'range');
 };
 
+/**
+ * Zone ordering is numeric-aware — Z10 sorts after Z9, not between Z1 and Z2.
+ *
+ * The rule was written out three times (a shared helper plus two inline copies
+ * in the carrier and product handlers), so these pin the ordering at every
+ * entry point: a future edit that touches only one copy turns one of these red.
+ */
+describe('RateTableViewer — zone tab ordering', () => {
+  const zoneTabs = (): string[] =>
+    screen
+      .getAllByRole('button')
+      .map((b) => b.textContent?.trim() ?? '')
+      .filter((label) => /^Z\d+$/.test(label));
+
+  it('sorts zones numerically on first render', () => {
+    render(<RateTableViewer />);
+
+    expect(zoneTabs()).toEqual(['Z1', 'Z2', 'Z3', 'Z4', 'Z5', 'Z6', 'Z7', 'Z8', 'Z9', 'Z10']);
+  });
+
+  // Round-trips back to UPS deliberately: it is the only carrier with a Z10, so
+  // it is the only one where a naive lexicographic sort would show. DHL stops at
+  // Z8 and FedEx uses letters, so neither would catch the regression.
+  it('keeps numeric order after switching carrier', async () => {
+    const user = userEvent.setup();
+    render(<RateTableViewer />);
+
+    await user.selectOptions(screen.getByDisplayValue('UPS'), 'DHL');
+    expect(zoneTabs()).not.toContain('Z10');
+
+    await user.selectOptions(screen.getByDisplayValue('DHL'), 'UPS');
+
+    expect(zoneTabs()).toEqual(['Z1', 'Z2', 'Z3', 'Z4', 'Z5', 'Z6', 'Z7', 'Z8', 'Z9', 'Z10']);
+  });
+
+  it('keeps numeric order after switching product', async () => {
+    const user = userEvent.setup();
+    render(<RateTableViewer />);
+
+    await user.selectOptions(screen.getByDisplayValue('Parcel'), 'document');
+    const tabs = zoneTabs();
+
+    expect(tabs.length).toBeGreaterThan(0);
+    expect(tabs).toEqual([...tabs].sort((a, b) => Number(a.slice(1)) - Number(b.slice(1))));
+  });
+});
+
 describe('RateTableViewer — range (per-kg) view', () => {
   it('labels the range option with the carrier parcel threshold (UPS 20kg)', () => {
     render(<RateTableViewer />);

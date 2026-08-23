@@ -67,8 +67,19 @@ const OPEN_ENDED_MAX = 99_999;
 const rangeLabel = (min: number, max: number): string =>
   max >= OPEN_ENDED_MAX ? `${min}kg+` : `${min}–${max}kg`;
 
+/**
+ * Zone keys in display order — numeric-aware, so Z10 follows Z9 rather than
+ * landing between Z1 and Z2. FedEx letter zones fall back to alphabetical.
+ *
+ * Copies before sorting: `Array.prototype.sort` mutates, and callers pass keys
+ * derived from the shared tariff tables.
+ */
 const sortZones = (keys: string[]): string[] =>
-  keys.sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }));
+  [...keys].sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }));
+
+/** Zones of the table a carrier/product pair resolves to, ready to render. */
+const zonesFor = (carrier: Carrier, product: RateProduct): string[] =>
+  sortZones(Object.keys(resolveExactRates(carrier, product)));
 
 export const RateTableViewer: React.FC = () => {
   const [carrier, setCarrier] = useState<Carrier>('UPS');
@@ -81,9 +92,7 @@ export const RateTableViewer: React.FC = () => {
   const rangeRates: ReadonlyArray<{ min: number; max: number; rates: Record<string, number> }> =
     carrier === 'FEDEX' ? FEDEX_RANGE_RATES : carrier === 'UPS' ? UPS_RANGE_RATES : DHL_RANGE_RATES;
 
-  const zones = useMemo(() => {
-    return sortZones(Object.keys(exactRates));
-  }, [exactRates]);
+  const zones = useMemo(() => sortZones(Object.keys(exactRates)), [exactRates]);
 
   // The per-kg range table extends the Parcel tariff, so its threshold and
   // zone list come from the parcel table regardless of the selected product.
@@ -93,10 +102,7 @@ export const RateTableViewer: React.FC = () => {
     return Math.max(...weights);
   }, [carrier]);
 
-  const rangeZones = useMemo(
-    () => sortZones(Object.keys(resolveExactRates(carrier, 'parcel'))),
-    [carrier],
-  );
+  const rangeZones = useMemo(() => zonesFor(carrier, 'parcel'), [carrier]);
 
   // Worked example for the banner: first bracket, first zone, a sample weight
   // a few kg into the bracket — makes "rate × weight" concrete.
@@ -122,19 +128,12 @@ export const RateTableViewer: React.FC = () => {
   const handleCarrierChange = (next: Carrier) => {
     setCarrier(next);
     setProduct('parcel');
-    const nextExact = resolveExactRates(next, 'parcel');
-    const nextZones = Object.keys(nextExact).sort((a, b) =>
-      a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }),
-    );
-    setSelectedZone(nextZones[0] ?? 'Z1');
+    setSelectedZone(zonesFor(next, 'parcel')[0] ?? 'Z1');
   };
 
   const handleProductChange = (next: RateProduct) => {
     setProduct(next);
-    const nextExact = resolveExactRates(carrier, next);
-    const nextZones = Object.keys(nextExact).sort((a, b) =>
-      a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }),
-    );
+    const nextZones = zonesFor(carrier, next);
     if (!nextZones.includes(selectedZone)) {
       setSelectedZone(nextZones[0] ?? selectedZone);
     }

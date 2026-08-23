@@ -1,3 +1,4 @@
+import type { Mock } from 'vitest';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MobileLayout } from './MobileLayout';
@@ -80,8 +81,99 @@ const renderLayout = (props?: Partial<React.ComponentProps<typeof MobileLayout>>
     isKorean: false,
   };
 
-  return render(<MobileLayout {...defaultProps} {...props} />);
+  const utils = render(<MobileLayout {...defaultProps} {...props} />);
+  return {
+    ...utils,
+    /** Re-render with the same defaults plus an override — e.g. a new carrier. */
+    update: (next: Partial<React.ComponentProps<typeof MobileLayout>>) =>
+      utils.rerender(<MobileLayout {...defaultProps} {...props} {...next} />),
+  };
 };
+
+/**
+ * Changing carrier scrolls the result into view after a short delay, so the
+ * recalculated figures are on screen. The timer has to be cancelled when the
+ * effect re-runs or the component unmounts: switching carriers quickly used to
+ * stack one pending scroll per switch, and jsdom has no scrollIntoView, so an
+ * uncancelled timer also throws after the test that scheduled it has finished.
+ */
+describe('MobileLayout carrier-change auto-scroll', () => {
+  // jsdom has no scrollIntoView at all, so this is a stand-in rather than a spy.
+  let scrollIntoView: Mock<(arg?: boolean | ScrollIntoViewOptions) => void>;
+
+  beforeEach(() => {
+    vi.useFakeTimers();
+    scrollIntoView = vi.fn<(arg?: boolean | ScrollIntoViewOptions) => void>();
+    Element.prototype.scrollIntoView = scrollIntoView;
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  // Three switches before any timer fires. Without a cleanup each one leaves its
+  // own pending scroll, so the result jumps three times in a row.
+  it('collapses rapid carrier switches into a single scroll', () => {
+    const { update } = renderLayout();
+
+    update({ input: { ...mockInput, overseasCarrier: 'DHL' } });
+    update({ input: { ...mockInput, overseasCarrier: 'FEDEX' } });
+    update({ input: { ...mockInput, overseasCarrier: 'UPS' } });
+    vi.runAllTimers();
+
+    expect(scrollIntoView).toHaveBeenCalledTimes(1);
+  });
+
+  it('still scrolls for a single carrier change', () => {
+    const { update } = renderLayout();
+
+    update({ input: { ...mockInput, overseasCarrier: 'DHL' } });
+    vi.runAllTimers();
+
+    expect(scrollIntoView).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not scroll when nothing but the carrier stays put', () => {
+    const { update } = renderLayout();
+
+    update({ isDarkMode: true });
+    vi.runAllTimers();
+
+    expect(scrollIntoView).not.toHaveBeenCalled();
+  });
+
+});
+
+describe('MobileLayout sticky bar carrier badge', () => {
+  const badgeFor = (carrier: 'UPS' | 'DHL' | 'FEDEX') => {
+    renderLayout({
+      input: { ...mockInput, overseasCarrier: carrier },
+      result: { ...mockResult, carrier },
+    });
+    return screen.getByText(carrier);
+  };
+
+  // DESIGN.md §8.5 assigns each carrier a hue, and FedEx deliberately uses the
+  // brand `cyan-*` scale rather than Tailwind's `blue-*`. The badge rendered
+  // FedEx blue, so the same carrier looked different on mobile and desktop.
+  it.each([
+    ['UPS', 'amber'],
+    ['DHL', 'yellow'],
+    ['FEDEX', 'cyan'],
+  ] as const)('renders the %s badge in its design-system hue (%s)', (carrier, hue) => {
+    const badge = badgeFor(carrier);
+
+    expect(badge.className).toContain(`bg-${hue}-100`);
+    expect(badge.className).toContain(`text-${hue}-800`);
+  });
+
+  it('never uses the banned Tailwind blue/sky scales', () => {
+    for (const carrier of ['UPS', 'DHL', 'FEDEX'] as const) {
+      const { className } = badgeFor(carrier);
+      expect(className).not.toMatch(/\b(bg|text|border)-(blue|sky)-\d/);
+    }
+  });
+});
 
 describe('MobileLayout sticky quote bar currency policy', () => {
   it('keeps non-Korean account-owner sticky totals USD-only and downloads USD PDF', async () => {
