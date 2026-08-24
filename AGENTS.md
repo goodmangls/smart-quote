@@ -370,7 +370,10 @@ POST   /api/v1/notifications/slack   # Slack webhook proxy
 - **Environment**: `VITE_API_URL`, `VITE_EIA_API_KEY`, `VITE_SENTRY_DSN`, `VITE_INTERCOM_APP_ID`, `VITE_GOOGLE_MAPS_API_KEY`
 - **Tariff sync**: Frontend tariff files in `src/config/` must stay in sync with backend `lib/constants/`
 - **Market defaults**: `DEFAULT_EXCHANGE_RATE=1350` (하나은행 월요일 09시 송금환율, 2026-08-19), `DEFAULT_FSC_PERCENT=45.50` (UPS 2026-04-27), `DEFAULT_FSC_PERCENT_DHL=48.00` (DHL 2026-04-27), `DEFAULT_FSC_PERCENT_FEDEX=39.75` (FedEx 2026-07-20) in `src/config/rates.ts`
-- **FSC 업데이트 주기**: UPS/DHL/FedEx 모두 매주 월요일. `src/config/rates.ts` + `smart-quote-api/lib/constants/rates.rb` 동시 수정 후 Vercel+Render 배포.
+- **FSC 업데이트 주기**: UPS/DHL/FedEx 모두 매주 월요일.
+  - **평시 갱신은 Admin FSC 위젯(DB)만으로 끝난다** — 배포 불필요. 2026-08-24부터 계산기가 `useCarrierFscDefault` 로 DB 요율을 기본값으로 읽는다(백엔드는 이전부터 DB 우선). 그 전까지는 위젯 값이 견적에 반영되지 않아 관리자가 올려도 지난주 요율로 견적이 나갔다.
+  - 코드 상수(`src/config/rates.ts` + `smart-quote-api/lib/constants/rates.rb` + `src/config/fsc-history.ts`)는 **DB 조회 실패·요청 대기 중 폴백**이자 이력 차트 시드다. 세 파일은 항상 같은 값으로 함께 수정하며, `fsc-history.test.ts` 가 시드↔상수 정합을 강제한다(부분 갱신 시 RED).
+  - ⚠️ 사용자가 FSC 칸에 직접 입력한 값은 DB 응답이 늦게 와도 덮이지 않는다. 캐리어를 바꾸면 새 캐리어 기본값으로 초기화된다.
 - **Exchange rate policy**: Live API 자동세팅 비활성화, 매주 월요일 수동 업데이트 (하나은행 기준)
 - **Error tracking**: Sentry (`@sentry/browser`) integrated across all catch blocks
 
