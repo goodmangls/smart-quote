@@ -5,6 +5,11 @@ import {
   DEFAULT_FSC_HISTORY,
   FscHistoryData,
 } from '../fsc-history';
+import {
+  DEFAULT_FSC_PERCENT,
+  DEFAULT_FSC_PERCENT_DHL,
+  DEFAULT_FSC_PERCENT_FEDEX,
+} from '../rates';
 
 describe('fsc-history', () => {
   afterEach(() => {
@@ -166,9 +171,19 @@ describe('fsc-history', () => {
 
   describe('DEFAULT_FSC_HISTORY', () => {
     it('includes the latest confirmed FSC seed entries for UPS, DHL, and FedEx', () => {
-      expect(DEFAULT_FSC_HISTORY.ups.at(-1)).toEqual({ date: '2026-08-17', rate: 44.25 });
-      expect(DEFAULT_FSC_HISTORY.dhl.at(-1)).toEqual({ date: '2026-08-17', rate: 42.0 });
-      expect(DEFAULT_FSC_HISTORY.fedex.at(-1)).toEqual({ date: '2026-08-17', rate: 43.5 });
+      expect(DEFAULT_FSC_HISTORY.ups.at(-1)).toEqual({ date: '2026-08-24', rate: 47.0 });
+      expect(DEFAULT_FSC_HISTORY.dhl.at(-1)).toEqual({ date: '2026-08-24', rate: 42.5 });
+      expect(DEFAULT_FSC_HISTORY.fedex.at(-1)).toEqual({ date: '2026-08-24', rate: 46.5 });
+    });
+
+    // The seed and the fallback constants are two copies of the same weekly
+    // figure. They drifted once already — history was appended while rates.ts
+    // was left behind — so the tail is asserted against the constants rather
+    // than restated, and a partial update turns this red.
+    it('agrees with the fallback constants in rates.ts', () => {
+      expect(DEFAULT_FSC_HISTORY.ups.at(-1)?.rate).toBe(DEFAULT_FSC_PERCENT);
+      expect(DEFAULT_FSC_HISTORY.dhl.at(-1)?.rate).toBe(DEFAULT_FSC_PERCENT_DHL);
+      expect(DEFAULT_FSC_HISTORY.fedex.at(-1)?.rate).toBe(DEFAULT_FSC_PERCENT_FEDEX);
     });
   });
 });
