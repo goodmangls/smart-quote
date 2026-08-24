@@ -13,6 +13,11 @@ interface Props {
   effectiveMarginPercent?: number;
   hideMargin?: boolean;
   resolvedMargin?: ResolvedMargin | null;
+  /**
+   * FSC an emptied field falls back to — the DB rate the calculator resolved.
+   * Omitted (tests, standalone use) means the shipped constant for the carrier.
+   */
+  carrierFscDefault?: number;
 }
 
 export const FinancialSection: React.FC<Props> = ({
@@ -21,6 +26,7 @@ export const FinancialSection: React.FC<Props> = ({
   isMobileView,
   hideMargin,
   resolvedMargin,
+  carrierFscDefault,
 }) => {
   const { inputClass, labelClass, grayCardClass } = inputStyles;
   const ic = inputClass(isMobileView);
@@ -35,7 +41,7 @@ export const FinancialSection: React.FC<Props> = ({
   // to input.fscPercent would refill the box the moment it was cleared, and
   // pushing 0 instead would mean an accidental clear silently strips the whole
   // fuel surcharge — the backend honours an explicit 0.
-  const carrierFscDefault = defaultFscFor(input.overseasCarrier);
+  const fscDefault = carrierFscDefault ?? defaultFscFor(input.overseasCarrier);
   const [fscDraft, setFscDraft] = React.useState<string>(String(input.fscPercent));
   const pushedFsc = React.useRef<number>(input.fscPercent);
 
@@ -50,7 +56,7 @@ export const FinancialSection: React.FC<Props> = ({
 
   const handleFscChange = (raw: string) => {
     setFscDraft(raw);
-    const next = raw.trim() === '' ? carrierFscDefault : Number(raw);
+    const next = raw.trim() === '' ? fscDefault : Number(raw);
     // Reject junk (a lone "-", "e") instead of collapsing it to a number.
     if (Number.isNaN(next) || next < 0) return;
     pushedFsc.current = next;

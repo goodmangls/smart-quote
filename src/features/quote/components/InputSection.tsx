@@ -18,9 +18,11 @@ interface Props {
   intlBase?: number;
   billableWeight?: number;
   resolvedMargin?: ResolvedMargin | null;
+  /** DB-resolved FSC for the selected carrier; see useCarrierFscDefault. */
+  carrierFscDefault?: number;
 }
 
-export const InputSection: React.FC<Props> = ({ input, onChange, isMobileView = false, effectiveMarginPercent, hideMargin, intlBase, billableWeight, resolvedMargin }) => {
+export const InputSection: React.FC<Props> = ({ input, onChange, isMobileView = false, effectiveMarginPercent, hideMargin, intlBase, billableWeight, resolvedMargin, carrierFscDefault }) => {
 
   const updateField = <K extends keyof QuoteInput>(key: K, value: QuoteInput[K]) => {
     onChange({ ...input, [key]: value });
@@ -62,7 +64,7 @@ export const InputSection: React.FC<Props> = ({ input, onChange, isMobileView = 
       />
       <FscRateWidget readOnly={hideMargin} />
       {!hideMargin && (
-        <FinancialSection input={input} onFieldChange={updateField} isMobileView={isMobileView} effectiveMarginPercent={effectiveMarginPercent} hideMargin={hideMargin} resolvedMargin={resolvedMargin} />
+        <FinancialSection input={input} onFieldChange={updateField} isMobileView={isMobileView} effectiveMarginPercent={effectiveMarginPercent} hideMargin={hideMargin} resolvedMargin={resolvedMargin} carrierFscDefault={carrierFscDefault} />
       )}
       <SeoulPickupSection input={input} onFieldChange={updateField} isMobileView={isMobileView} hideMargin={hideMargin} />
       <ServiceSection input={input} onFieldChange={updateField} isMobileView={isMobileView} intlBase={intlBase} billableWeight={billableWeight} hideMargin={hideMargin} />

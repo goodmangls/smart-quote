@@ -97,6 +97,35 @@ describe('FinancialSection — FSC input', () => {
     expect(fscInput.value).toBe('');
   });
 
+  // The DB rate (admin FSC widget) is the real default; the shipped constant is
+  // only the stand-in until that request lands. An emptied field must fall back
+  // to whichever one the calculator resolved, not to the constant.
+  it('falls back to the supplied carrier default over the shipped constant', async () => {
+    const user = userEvent.setup();
+    const onFieldChange = vi.fn();
+    render(
+      <FinancialSection
+        input={makeInput()}
+        onFieldChange={onFieldChange}
+        isMobileView={false}
+        carrierFscDefault={50.5}
+      />
+    );
+
+    await user.clear(screen.getByDisplayValue('30') as HTMLInputElement);
+
+    expect(onFieldChange).toHaveBeenLastCalledWith('fscPercent', 50.5);
+  });
+
+  it('still uses the constant when no carrier default is supplied', async () => {
+    const user = userEvent.setup();
+    const { onFieldChange, fscInput } = renderSection();
+
+    await user.clear(fscInput);
+
+    expect(onFieldChange).toHaveBeenLastCalledWith('fscPercent', DEFAULT_FSC_PERCENT);
+  });
+
   it('passes an ordinary value straight through', async () => {
     const user = userEvent.setup();
     const { onFieldChange, fscInput } = renderSection();

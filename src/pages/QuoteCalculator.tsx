@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import * as Sentry from '@sentry/browser';
 import {
   QuoteInput,
@@ -27,7 +27,8 @@ import { Header } from '@/components/layout/Header';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { DEFAULT_EXCHANGE_RATE, DEFAULT_FSC_PERCENT, defaultFscFor } from '@/config/rates';
+import { DEFAULT_EXCHANGE_RATE, DEFAULT_FSC_PERCENT } from '@/config/rates';
+import { useCarrierFscDefault } from '@/features/quote/hooks/useCarrierFscDefault';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { useResolvedMargin } from '@/features/dashboard/hooks/useResolvedMargin';
 import { useQuoteDeepLink } from '@/features/quote/hooks/useQuoteDeepLink';
@@ -75,15 +76,18 @@ const QuoteCalculator: React.FC<{ isPublic?: boolean }> = ({ isPublic = false })
     ...INITIAL_INPUT,
     ...deepLink.partial,
   }));
-  const [lastFscCarrier, setLastFscCarrier] = useState<string | null>(null);
-
-  React.useEffect(() => {
-    const carrier = input.overseasCarrier || 'UPS';
-    if (lastFscCarrier !== carrier) {
-      setInput((prev) => ({ ...prev, fscPercent: defaultFscFor(carrier) }));
-      setLastFscCarrier(carrier);
-    }
-  }, [input.overseasCarrier, lastFscCarrier]);
+  // Fuel surcharge defaults come from the DB (the admin FSC widget), falling
+  // back to the shipped constant while that request is in flight. The hook owns
+  // the carrier-switch reset and the "don't clobber a manual rate" rule.
+  const applyFsc = useCallback(
+    (next: number) => setInput((prev) => ({ ...prev, fscPercent: next })),
+    [],
+  );
+  const carrierFscDefault = useCarrierFscDefault({
+    carrier: input.overseasCarrier || 'UPS',
+    fscPercent: input.fscPercent,
+    onApply: applyFsc,
+  });
 
   // Destination without a zone in the selected carrier's official table: there
   // is no fallback zone, so instead of a silently guessed rate the result
@@ -192,6 +196,7 @@ const QuoteCalculator: React.FC<{ isPublic?: boolean }> = ({ isPublic = false })
   }, [
     result?.billableWeight,
     resolvedMargin,
+    carrierFscDefault,
     user?.nationality,
     user?.email,
     isKorean,
@@ -296,6 +301,7 @@ const QuoteCalculator: React.FC<{ isPublic?: boolean }> = ({ isPublic = false })
                     intlBase={result?.breakdown.intlBase}
                     billableWeight={result?.billableWeight}
                     resolvedMargin={resolvedMargin}
+                    carrierFscDefault={carrierFscDefault}
                   />
                   {isAdmin && <AdminWidgets />}
                 </div>

@@ -33,6 +33,8 @@ interface Props {
   scrollToResults: () => void;
   hideMargin?: boolean;
   resolvedMargin?: ResolvedMargin | null;
+  /** DB-resolved FSC for the selected carrier; see useCarrierFscDefault. */
+  carrierFscDefault?: number;
   isAdmin?: boolean;
   isKorean?: boolean;
 }
@@ -52,6 +54,7 @@ export const MobileLayout: React.FC<Props> = ({
   scrollToResults,
   hideMargin,
   resolvedMargin,
+  carrierFscDefault,
   isAdmin,
   isKorean = true,
 }) => {
@@ -165,6 +168,7 @@ export const MobileLayout: React.FC<Props> = ({
                 intlBase={result?.breakdown.intlBase}
                 billableWeight={result?.billableWeight}
                 resolvedMargin={resolvedMargin}
+                carrierFscDefault={carrierFscDefault}
               />
               {isAdmin && <AdminWidgets />}
             </div>
