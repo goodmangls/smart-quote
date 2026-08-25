@@ -2,6 +2,8 @@
 
 This file provides guidance to Codex and other coding agents when working with code in this repository.
 
+> 이 파일은 `CLAUDE.md` 의 쌍둥이다. **한쪽만 고치면 두 에이전트가 다른 사실을 보게 된다** — 내용 변경은 항상 두 파일에 함께 적용할 것.
+
 ## Project Overview
 
 Smart Quote System for **KS Ways** - an internal logistics quoting tool that calculates international shipping costs across carriers (UPS, DHL, FedEx). React frontend with a Rails API backend, sharing mirrored calculation logic. Includes customer dashboard with live exchange rates, weather, jet fuel prices, notices, and account manager widgets. Role-based access (Admin/Member) with Slack notifications and Sentry error tracking.
