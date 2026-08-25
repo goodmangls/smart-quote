@@ -3,12 +3,26 @@ import userEvent from '@testing-library/user-event';
 import { ExchangeRateWidget } from '../ExchangeRateWidget';
 import type { ExchangeRate } from '@/types/dashboard';
 
+/**
+ * Pin the quoting rate. The widget reads DEFAULT_EXCHANGE_RATE from the module,
+ * and that constant moves whenever /fx-update runs — leaving it live would make
+ * these tests fail on an unrelated week. The drift cases below own this number.
+ */
+// vi.hoisted, because vi.mock is lifted above ordinary top-level consts.
+const { APPLIED_RATE } = vi.hoisted(() => ({ APPLIED_RATE: 1350 }));
+
+vi.mock('@/config/rates', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/config/rates')>()),
+  DEFAULT_EXCHANGE_RATE: APPLIED_RATE,
+}));
+
 function makeRate(currency: string, overrides: Partial<ExchangeRate> = {}): ExchangeRate {
   return {
     currency,
     code: 'TST',
     flag: '🏳️',
-    rate: 1385.5,
+    // Comfortably inside the applied bucket so unrelated cases stay quiet.
+    rate: 1370,
     previousClose: 1380.0,
     change: 5.5,
     changePercent: 0.4,
