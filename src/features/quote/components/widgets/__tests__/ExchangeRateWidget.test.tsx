@@ -57,6 +57,60 @@ function mockFscHook(overrides: Record<string, unknown> = {}) {
 describe('ExchangeRateWidget', () => {
   afterEach(() => vi.restoreAllMocks());
 
+  /**
+   * The widget watches USD/KRW all day; DEFAULT_EXCHANGE_RATE only moves when
+   * someone runs /fx-update. These pin the reminder that connects the two —
+   * without it a stale quoting rate is invisible, which is how emax sat five
+   * months behind.
+   */
+  describe('quoting-rate drift reminder', () => {
+    const showUsd = (rate: number) => {
+      mockUseExchangeRates.mockReturnValue(
+        mockHook({ data: [makeRate('USD', { code: 'USD', flag: '🇺🇸', rate })] })
+      );
+      mockUseFscRates.mockReturnValue(mockFscHook());
+      render(<ExchangeRateWidget />);
+    };
+
+    it('says nothing while the market sits inside the applied bucket', () => {
+      showUsd(1370); // applied 1350 -> bucket [1350, 1400)
+
+      expect(screen.queryByRole('status')).not.toBeInTheDocument();
+      expect(screen.queryByText('widget.exchange.fxDrift.title')).not.toBeInTheDocument();
+    });
+
+    it('warns once the market leaves the bucket, and names the rate to move to', () => {
+      showUsd(1402);
+
+      const alert = screen.getByRole('status');
+      expect(alert).toHaveTextContent('widget.exchange.fxDrift.title');
+      // Applied -> suggested, rendered outside the translated sentence so the
+      // numbers survive a missing translation.
+      expect(alert).toHaveTextContent('1,350 → 1,400');
+      expect(alert).toHaveTextContent('widget.exchange.fxDrift.action');
+    });
+
+    it('gives an earlier heads-up while still inside but near the boundary', () => {
+      showUsd(1396);
+
+      const alert = screen.getByRole('status');
+      expect(alert).toHaveTextContent('widget.exchange.fxDrift.near');
+      expect(alert).not.toHaveTextContent('widget.exchange.fxDrift.title');
+      // 1400 - 1396 = 4 KRW to the boundary.
+      expect(alert).toHaveTextContent('(−4)');
+    });
+
+    it('stays quiet when no USD rate came back', () => {
+      mockUseExchangeRates.mockReturnValue(
+        mockHook({ data: [makeRate('EUR', { code: 'EUR', rate: 1600 })] })
+      );
+      mockUseFscRates.mockReturnValue(mockFscHook());
+      render(<ExchangeRateWidget />);
+
+      expect(screen.queryByRole('status')).not.toBeInTheDocument();
+    });
+  });
+
   it('renders loading skeleton when loading', () => {
     mockUseExchangeRates.mockReturnValue(mockHook({ loading: true }));
     mockUseFscRates.mockReturnValue(mockFscHook({ loading: true }));
