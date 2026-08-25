@@ -2,6 +2,8 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+> 이 파일은 `AGENTS.md` 의 쌍둥이다. **한쪽만 고치면 두 에이전트가 다른 사실을 보게 된다** — 내용 변경은 항상 두 파일에 함께 적용할 것.
+
 ## Project Overview
 
 Smart Quote System for **KS Ways** - an internal logistics quoting tool that calculates international shipping costs across carriers (UPS, DHL, FedEx). React frontend with a Rails API backend, sharing mirrored calculation logic. Includes customer dashboard with live exchange rates, weather, jet fuel prices, notices, and account manager widgets. Role-based access (Admin/Member) with Slack notifications and Sentry error tracking.
@@ -15,7 +17,9 @@ npm run dev          # Dev server on http://localhost:5173
 npm run build        # tsc + vite build
 npm run lint         # ESLint (--max-warnings 0)
 npm run test         # Vitest in watch mode
-npx vitest run       # Run tests once (58 files, 1480 tests)
+npx vitest run       # Run frontend tests once
+npm run test:coverage  # Run frontend tests with coverage
+npm run test:e2e       # Run Playwright end-to-end tests
 npx tsc --noEmit     # Type check only
 ```
 
@@ -59,7 +63,7 @@ bundle exec rspec spec/requests/api/v1/quotes_spec.rb
       ups_tariff.ts            # UPS Z1-Z10 rate tables (synced with backend)
       dhl_tariff.ts            # DHL Z1-Z8 rate tables (synced with backend)
       fedex_tariff.ts          # FedEx IP/Envelope/Pak rate tables, letter zones A-Y (synced with backend)
-      rates.ts                 # KRW cost constants, DEFAULT_EXCHANGE_RATE=1350, DEFAULT_FSC_PERCENT=45.50 (UPS), DEFAULT_FSC_PERCENT_DHL=48.00 (DHL), DEFAULT_FSC_PERCENT_FEDEX=39.75 (FedEx 2026-07-20)
+      rates.ts                 # KRW cost constants + 환율·FSC 폴백 상수 (수치는 파일 참조 — 매주 바뀜)
       business-rules.ts        # Surge thresholds, packing weight buffer/addition
       options.ts               # Country options, carrier options, incoterm options; *_ZONE_COUNTRIES (zone-filter UI lists) derived from the zone maps
       addon-utils.ts           # Shared AddonRateLike/NormalizedRate types, calcAddonFee(), findRate()
@@ -369,19 +373,25 @@ POST   /api/v1/notifications/slack   # Slack webhook proxy
 - **Tailwind**: BridgeLogis brand palette (`brand-blue-*`, `cyan-*`, `navy`, `deep-blue`, `gold`) + Semantic (`success/warning/destructive/info`), class-based dark mode. Phase 2 완료 후 레거시 `jways-*`/`accent-*` 제거.
 - **Environment**: `VITE_API_URL`, `VITE_EIA_API_KEY`, `VITE_SENTRY_DSN`, `VITE_INTERCOM_APP_ID`, `VITE_GOOGLE_MAPS_API_KEY`
 - **Tariff sync**: Frontend tariff files in `src/config/` must stay in sync with backend `lib/constants/`
-- **Market defaults**: `DEFAULT_EXCHANGE_RATE=1350` (하나은행 월요일 09시 송금환율, 2026-08-19), `DEFAULT_FSC_PERCENT=45.50` (UPS 2026-04-27), `DEFAULT_FSC_PERCENT_DHL=48.00` (DHL 2026-04-27), `DEFAULT_FSC_PERCENT_FEDEX=39.75` (FedEx 2026-07-20) in `src/config/rates.ts`
+- **Market defaults**: `DEFAULT_EXCHANGE_RATE` (하나은행 월요일 09시 송금환율) 과 캐리어별 `DEFAULT_FSC_PERCENT*` 는 `src/config/rates.ts` 에 있다. **현재 수치는 여기 옮겨 적지 않는다** — 매주 바뀌어서 문서가 곧 stale 해진다(실제로 2026-08-25 까지 UPS 45.50·DHL 48.00·FedEx 39.75 라는 넉 달 묵은 값이 이 줄에 남아 있었다). 값이 필요하면 파일을 볼 것.
 - **FSC 업데이트 주기**: UPS/DHL/FedEx 모두 매주 월요일.
   - **평시 갱신은 Admin FSC 위젯(DB)만으로 끝난다** — 배포 불필요. 2026-08-24부터 계산기가 `useCarrierFscDefault` 로 DB 요율을 기본값으로 읽는다(백엔드는 이전부터 DB 우선). 그 전까지는 위젯 값이 견적에 반영되지 않아 관리자가 올려도 지난주 요율로 견적이 나갔다.
   - 코드 상수(`src/config/rates.ts` + `smart-quote-api/lib/constants/rates.rb` + `src/config/fsc-history.ts`)는 **DB 조회 실패·요청 대기 중 폴백**이자 이력 차트 시드다. 세 파일은 항상 같은 값으로 함께 수정하며, `fsc-history.test.ts` 가 시드↔상수 정합을 강제한다(부분 갱신 시 RED).
   - ⚠️ 사용자가 FSC 칸에 직접 입력한 값은 DB 응답이 늦게 와도 덮이지 않는다. 캐리어를 바꾸면 새 캐리어 기본값으로 초기화된다.
-- **Exchange rate policy**: Live API 자동세팅 비활성화, 매주 월요일 수동 업데이트 (하나은행 기준)
+- **Exchange rate policy**: Live API 자동세팅 비활성화. 매주 월요일 **하나은행 09시 송금환율을 50원 내림**(`floor(시장/50)×50`)해서 적용한다 — 내림이 원화강세 방향이고, 견적 USD = `KRW ÷ 환율` 이라 낮은 환율이 USD 견적을 높여 안전 버퍼가 된다.
+  - 갱신은 **`/fx-update` 스킬**이 한다(`~/.claude/skills/fx-update/`). main+emax 를 같은 값으로 동시 처리하고, 저장소당 `src/config/rates.ts` + `smart-quote-api/lib/constants/rates.rb` 2파일을 쓴 뒤 재읽기로 검증한다.
+  - ⚠️ **FSC 와 달리 DB·Admin 위젯이 없다. 상수뿐이라 반드시 배포해야 반영된다.** TS↔RB 를 교차 검증하는 게 없어 한쪽만 고치면 조용히 어긋난다 — `fx-apply.py --check` 가 유일한 감지 장치다.
+  - ✅ **대시보드가 이탈을 경고한다**(2026-08-25). `ExchangeRateWidget` 이 `evaluateFxDrift`(`src/features/dashboard/lib/fxDrift.ts`)로 시장 USD/KRW 를 적용값과 비교해, 버킷을 벗어나면 🔴 재검토·경계 15원 이내면 ⚠️ 근접 배너를 띄운다. 이게 없던 동안 emax 가 1450 으로 5개월 방치됐다.
+  - ⚠️ 임계값 15원은 **위젯이 시장(중간)환율이고 정책 입력은 송금환율**이라 둘이 다르기 때문이다(TT 스프레드 최대 ~1%). 조정은 `FX_NEAR_BAND` 상수 하나.
+  - ⚠️ **위젯 테스트에서 `DEFAULT_EXCHANGE_RATE` 실값을 읽지 말 것.** `vi.hoisted` + `@/config/rates` 부분 mock 으로 고정한다 — 안 그러면 `/fx-update` 가 값을 바꾸는 주에 무관한 테스트가 깨진다. 그 mock 은 실제 상수와 값이 같으면 무력해도 통과하므로, 다른 값 주입으로 RED 를 확인해야 유효성이 증명된다.
 - **Error tracking**: Sentry (`@sentry/browser`) integrated across all catch blocks
 
 ## Testing
 
 - **Frontend**: Vitest + @testing-library/react, jsdom environment, setup in `src/test/setup.ts`
   - Tests use `vitest/globals` (no imports needed for `describe`, `it`, `expect`)
-  - 58 test files, 1480 tests
+  - 전체 실행은 `npx vitest run`, 커버리지는 `npm run test:coverage`, E2E는 `npm run test:e2e`
+  - ⚠️ 테스트 **개수를 문서에 적지 않는다** — 커밋마다 바뀌어 반드시 stale 해진다. 실제로 이 줄에 박혀 있던 수치가 2026-08 기준 260 여 건 어긋나 있었다. 개수가 필요하면 위 명령을 돌릴 것
 - **Backend**: RSpec + FactoryBot + Shoulda Matchers, factories in `spec/factories/`
 
 ## Deployment
