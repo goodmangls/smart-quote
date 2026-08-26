@@ -170,7 +170,7 @@ RSpec.describe "Partner quote input mapping", type: :request do
     it "rejects a payload with no packages" do
       post_partner(minimal.merge(cargo: { packages: [] }))
 
-      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response).to have_http_status(:unprocessable_content)
       expect(JSON.parse(response.body).dig("error", "message")).to match(/cargo\.packages/)
     end
   end

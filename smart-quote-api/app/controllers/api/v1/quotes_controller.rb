@@ -53,12 +53,12 @@ module Api
         result = QuoteCalculator.call(input)
         render json: result
       rescue InvalidInputError => e
-        render json: { error: { code: "INVALID_INPUT", message: e.message } }, status: :unprocessable_entity
+        render json: { error: { code: "INVALID_INPUT", message: e.message } }, status: :unprocessable_content
       rescue Calculators::ZoneNotFoundError => e
-        render json: { error: { code: "ZONE_NOT_FOUND", message: e.message } }, status: :unprocessable_entity
+        render json: { error: { code: "ZONE_NOT_FOUND", message: e.message } }, status: :unprocessable_content
       rescue StandardError => e
         Rails.logger.error "[CALCULATE] #{e.class}: #{e.message}"
-        render json: { error: { code: "CALCULATION_ERROR", message: "Failed to calculate quote" } }, status: :unprocessable_entity
+        render json: { error: { code: "CALCULATION_ERROR", message: "Failed to calculate quote" } }, status: :unprocessable_content
       end
 
       # POST /api/v1/quotes (calculate + save)
@@ -81,15 +81,15 @@ module Api
           AuditLog.track!(user: current_user, action: "quote.created", resource: quote, ip_address: request.remote_ip)
           render json: QuoteSerializer.detail(quote), status: :created
         else
-          render json: { error: { code: "VALIDATION_ERROR", message: quote.errors.full_messages.join(", ") } }, status: :unprocessable_entity
+          render json: { error: { code: "VALIDATION_ERROR", message: quote.errors.full_messages.join(", ") } }, status: :unprocessable_content
         end
       rescue InvalidInputError => e
-        render json: { error: { code: "INVALID_INPUT", message: e.message } }, status: :unprocessable_entity
+        render json: { error: { code: "INVALID_INPUT", message: e.message } }, status: :unprocessable_content
       rescue Calculators::ZoneNotFoundError => e
-        render json: { error: { code: "ZONE_NOT_FOUND", message: e.message } }, status: :unprocessable_entity
+        render json: { error: { code: "ZONE_NOT_FOUND", message: e.message } }, status: :unprocessable_content
       rescue StandardError => e
         Rails.logger.error "[CREATE] #{e.class}: #{e.message}"
-        render json: { error: { code: "CALCULATION_ERROR", message: "Failed to create quote" } }, status: :unprocessable_entity
+        render json: { error: { code: "CALCULATION_ERROR", message: "Failed to create quote" } }, status: :unprocessable_content
       end
 
       # POST /api/v1/quote_api/quotes (authenticated partner/email automation API)
@@ -118,15 +118,15 @@ module Api
           render json: PartnerQuoteResponse.body(quote: quote, result: result, api_params: quote_api_params, api_key: current_api_key),
                  status: :created
         else
-          render json: { error: { code: "VALIDATION_ERROR", message: quote.errors.full_messages.join(", ") } }, status: :unprocessable_entity
+          render json: { error: { code: "VALIDATION_ERROR", message: quote.errors.full_messages.join(", ") } }, status: :unprocessable_content
         end
       rescue InvalidInputError => e
-        render json: { error: { code: "INVALID_INPUT", message: e.message } }, status: :unprocessable_entity
+        render json: { error: { code: "INVALID_INPUT", message: e.message } }, status: :unprocessable_content
       rescue Calculators::ZoneNotFoundError => e
-        render json: { error: { code: "ZONE_NOT_FOUND", message: e.message } }, status: :unprocessable_entity
+        render json: { error: { code: "ZONE_NOT_FOUND", message: e.message } }, status: :unprocessable_content
       rescue StandardError => e
         Rails.logger.error "[QUOTE_API_CREATE] #{e.class}: #{e.message}"
-        render json: { error: { code: "CALCULATION_ERROR", message: "Failed to create API quote" } }, status: :unprocessable_entity
+        render json: { error: { code: "CALCULATION_ERROR", message: "Failed to create API quote" } }, status: :unprocessable_content
       end
 
       # Auto-expiration batch bound: one giant backlog must not stall a listing
@@ -167,7 +167,7 @@ module Api
 
         if permitted[:status].present?
           unless Quote::VALID_STATUSES.include?(permitted[:status])
-            return render json: { error: { code: "INVALID_STATUS", message: "Invalid status" } }, status: :unprocessable_entity
+            return render json: { error: { code: "INVALID_STATUS", message: "Invalid status" } }, status: :unprocessable_content
           end
         end
 
@@ -180,7 +180,7 @@ module Api
           AuditLog.track!(user: current_user, action: action, resource: quote, metadata: metadata, ip_address: request.remote_ip)
           render json: QuoteSerializer.detail(quote)
         else
-          render json: { error: { code: "VALIDATION_ERROR", message: quote.errors.full_messages.join(", ") } }, status: :unprocessable_entity
+          render json: { error: { code: "VALIDATION_ERROR", message: quote.errors.full_messages.join(", ") } }, status: :unprocessable_content
         end
       rescue ActiveRecord::RecordNotFound
         render json: { error: { code: "NOT_FOUND", message: "Quote not found" } }, status: :not_found
@@ -195,7 +195,7 @@ module Api
 
         valid_email_regex = /\A[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+\z/
         unless email.present? && email.match?(valid_email_regex)
-          return render json: { error: { code: "INVALID_EMAIL", message: "Valid email required" } }, status: :unprocessable_entity
+          return render json: { error: { code: "INVALID_EMAIL", message: "Valid email required" } }, status: :unprocessable_content
         end
 
         QuoteMailer.send_quote(quote, email, recipient_name: name, message: message).deliver_later
@@ -243,9 +243,9 @@ module Api
           send_data result[:csv_data], filename: "quotes-#{Date.current}.csv", type: "text/csv"
         end
       rescue QuoteSearcher::InvalidRangeError => e
-        render json: { error: { code: "INVALID_AMOUNT_RANGE", message: e.message } }, status: :unprocessable_entity
+        render json: { error: { code: "INVALID_AMOUNT_RANGE", message: e.message } }, status: :unprocessable_content
       rescue QuoteExporter::TooLargeError => e
-        render json: { error: { code: "EXPORT_TOO_LARGE", message: e.message } }, status: :unprocessable_entity
+        render json: { error: { code: "EXPORT_TOO_LARGE", message: e.message } }, status: :unprocessable_content
       end
 
       private

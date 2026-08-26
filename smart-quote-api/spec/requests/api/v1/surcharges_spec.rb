@@ -55,7 +55,7 @@ RSpec.describe "Api::V1::Surcharges", type: :request do
     it "returns validation errors for an incomplete payload" do
       post "/api/v1/surcharges", params: valid_params.except(:name), headers: admin_headers, as: :json
 
-      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response).to have_http_status(:unprocessable_content)
       expect(json.dig("error", "code")).to eq("VALIDATION_ERROR")
     end
   end

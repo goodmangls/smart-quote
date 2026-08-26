@@ -75,11 +75,23 @@ RSpec.describe "Api::V1::Quotes", type: :request do
     end
 
     context "input validation" do
+      # Everything else in here asserts through a Rack status symbol, and those
+      # get renamed: :unprocessable_entity was deprecated in favour of
+      # :unprocessable_content, and Rack 3.2 already dropped the old name from
+      # its lookup table. A symbol assertion cannot tell you the wire code did
+      # not move with it, so pin the number itself once.
+      it "answers a rejected input with HTTP 422 on the wire" do
+        params = valid_params.except(:destinationCountry)
+        post "/api/v1/quotes/calculate", params: params, as: :json
+
+        expect(response.status).to eq(422)
+      end
+
       it "returns 422 when destinationCountry is missing" do
         params = valid_params.except(:destinationCountry)
         post "/api/v1/quotes/calculate", params: params, as: :json
 
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to have_http_status(:unprocessable_content)
         expect(json["error"]["code"]).to eq("INVALID_INPUT")
         expect(json["error"]["message"]).to match(/destinationCountry/)
       end
@@ -88,7 +100,7 @@ RSpec.describe "Api::V1::Quotes", type: :request do
         params = valid_params.merge(items: [ { weight: 0, quantity: 1 } ])
         post "/api/v1/quotes/calculate", params: params, as: :json
 
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to have_http_status(:unprocessable_content)
         expect(json["error"]["code"]).to eq("INVALID_INPUT")
         expect(json["error"]["message"]).to match(/weight must be greater than 0/)
       end
@@ -97,7 +109,7 @@ RSpec.describe "Api::V1::Quotes", type: :request do
         params = valid_params.merge(items: [ { weight: -1, quantity: 1 } ])
         post "/api/v1/quotes/calculate", params: params, as: :json
 
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to have_http_status(:unprocessable_content)
         expect(json["error"]["code"]).to eq("INVALID_INPUT")
       end
 
@@ -109,7 +121,7 @@ RSpec.describe "Api::V1::Quotes", type: :request do
         params = valid_params.merge(exchangeRate: 0)
         post "/api/v1/quotes/calculate", params: params, as: :json
 
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to have_http_status(:unprocessable_content)
         expect(json["error"]["code"]).to eq("INVALID_INPUT")
         expect(json["error"]["message"]).to match(/exchangeRate/)
       end
@@ -118,7 +130,7 @@ RSpec.describe "Api::V1::Quotes", type: :request do
         params = valid_params.merge(exchangeRate: -1400)
         post "/api/v1/quotes/calculate", params: params, as: :json
 
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to have_http_status(:unprocessable_content)
         expect(json["error"]["code"]).to eq("INVALID_INPUT")
       end
 
@@ -129,7 +141,7 @@ RSpec.describe "Api::V1::Quotes", type: :request do
         params = valid_params.merge(exchangeRate: "")
         post "/api/v1/quotes/calculate", params: params, as: :json
 
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to have_http_status(:unprocessable_content)
         expect(json["error"]["code"]).to eq("INVALID_INPUT")
       end
 
@@ -137,7 +149,7 @@ RSpec.describe "Api::V1::Quotes", type: :request do
         params = valid_params.merge(exchangeRate: "abc")
         post "/api/v1/quotes/calculate", params: params, as: :json
 
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to have_http_status(:unprocessable_content)
         expect(json["error"]["code"]).to eq("INVALID_INPUT")
       end
 
@@ -165,7 +177,7 @@ RSpec.describe "Api::V1::Quotes", type: :request do
       def expect_rejected(patch, matching: nil)
         post "/api/v1/quotes/calculate", params: valid_params.merge(patch), as: :json
 
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to have_http_status(:unprocessable_content)
         expect(json["error"]["code"]).to eq("INVALID_INPUT")
         expect(json["error"]["message"]).to match(matching) if matching
       end
@@ -242,7 +254,7 @@ RSpec.describe "Api::V1::Quotes", type: :request do
         params = valid_params.merge(destinationCountry: "XK", overseasCarrier: "UPS")
         post "/api/v1/quotes/calculate", params: params, as: :json
 
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to have_http_status(:unprocessable_content)
         expect(json["error"]["code"]).to eq("ZONE_NOT_FOUND")
         expect(json["error"]["message"]).to include("UPS").and include("XK")
       end
@@ -315,7 +327,7 @@ RSpec.describe "Api::V1::Quotes", type: :request do
         post "/api/v1/quote_api/quotes", params: quote_api_payload.merge(exchange_rate: 0),
              headers: api_key_headers, as: :json
 
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to have_http_status(:unprocessable_content)
         expect(json["error"]["code"]).to eq("INVALID_INPUT")
       end
 
@@ -349,7 +361,7 @@ RSpec.describe "Api::V1::Quotes", type: :request do
         payload = quote_api_payload.deep_merge(terms: { duty_tax_estimate: -500_000 })
         post "/api/v1/quote_api/quotes", params: payload, headers: api_key_headers, as: :json
 
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to have_http_status(:unprocessable_content)
         expect(json["error"]["code"]).to eq("INVALID_INPUT")
       end
 
@@ -357,7 +369,7 @@ RSpec.describe "Api::V1::Quotes", type: :request do
         post "/api/v1/quote_api/quotes", params: quote_api_payload.merge(manual_surcharge_cost: -300_000),
              headers: api_key_headers, as: :json
 
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to have_http_status(:unprocessable_content)
         expect(json["error"]["code"]).to eq("INVALID_INPUT")
       end
 
@@ -365,7 +377,7 @@ RSpec.describe "Api::V1::Quotes", type: :request do
         post "/api/v1/quote_api/quotes", params: quote_api_payload.merge(fsc_percent: 100_000),
              headers: api_key_headers, as: :json
 
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to have_http_status(:unprocessable_content)
         expect(json["error"]["code"]).to eq("INVALID_INPUT")
       end
     end
@@ -540,7 +552,7 @@ RSpec.describe "Api::V1::Quotes", type: :request do
 
         post "/api/v1/quotes", params: valid_params.merge(incoterm: "INVALID"), headers: admin_headers, as: :json
 
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to have_http_status(:unprocessable_content)
         expect(json["error"]["code"]).to eq("VALIDATION_ERROR")
       end
     end
@@ -550,7 +562,7 @@ RSpec.describe "Api::V1::Quotes", type: :request do
         params = valid_params.except(:destinationCountry)
         post "/api/v1/quotes", params: params, headers: user_headers, as: :json
 
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to have_http_status(:unprocessable_content)
         expect(json["error"]["code"]).to eq("INVALID_INPUT")
         expect(json["error"]["message"]).to match(/destinationCountry/)
       end
@@ -559,7 +571,7 @@ RSpec.describe "Api::V1::Quotes", type: :request do
         params = valid_params.merge(items: [ { weight: 0, quantity: 1 } ])
         post "/api/v1/quotes", params: params, headers: user_headers, as: :json
 
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to have_http_status(:unprocessable_content)
         expect(json["error"]["code"]).to eq("INVALID_INPUT")
         expect(json["error"]["message"]).to match(/weight must be greater than 0/)
       end
@@ -731,7 +743,7 @@ RSpec.describe "Api::V1::Quotes", type: :request do
       post "/api/v1/quotes/#{quote.id}/send_email", params: { recipientEmail: "not-an-email" },
            headers: user_headers, as: :json
 
-      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response).to have_http_status(:unprocessable_content)
       expect(json.dig("error", "code")).to eq("INVALID_EMAIL")
       expect(QuoteMailer).not_to have_received(:send_quote)
     end
@@ -872,7 +884,7 @@ RSpec.describe "Api::V1::Quotes", type: :request do
         params: { min_amount: 1_000_000, max_amount: 100, amount_currency: "KRW" },
         headers: admin_headers
 
-      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response).to have_http_status(:unprocessable_content)
       expect(JSON.parse(response.body).dig("error", "code")).to eq("INVALID_AMOUNT_RANGE")
     end
   end

@@ -85,7 +85,7 @@ RSpec.describe "Api::V1::MarginRules", type: :request do
            params: valid_params.merge(margin_percent: -1),
            headers: admin_headers, as: :json
 
-      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response).to have_http_status(:unprocessable_content)
       expect(json["error"]["code"]).to eq("VALIDATION_ERROR")
     end
 
@@ -121,7 +121,7 @@ RSpec.describe "Api::V1::MarginRules", type: :request do
           params: { margin_percent: 60 },
           headers: admin_headers, as: :json
 
-      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response).to have_http_status(:unprocessable_content)
     end
   end
 

@@ -53,7 +53,7 @@ RSpec.describe "Api::V1::AddonRates", type: :request do
 
       post "/api/v1/addon_rates", params: valid_params, headers: admin_headers, as: :json
 
-      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response).to have_http_status(:unprocessable_content)
       expect(json.dig("error", "code")).to eq("VALIDATION_ERROR")
     end
 
@@ -84,7 +84,7 @@ RSpec.describe "Api::V1::AddonRates", type: :request do
     it "rejects an unknown carrier" do
       get "/api/v1/addon_rates/resolve", params: { carrier: "TNT" }, headers: user_headers
 
-      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response).to have_http_status(:unprocessable_content)
       expect(json.dig("error", "code")).to eq("INVALID_CARRIER")
     end
   end

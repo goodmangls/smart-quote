@@ -35,7 +35,7 @@ RSpec.describe "Api::V1::Fsc", type: :request do
     it "rejects an unknown carrier" do
       post "/api/v1/fsc/update", params: valid_params.merge(carrier: "TNT"), headers: admin_headers, as: :json
 
-      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response).to have_http_status(:unprocessable_content)
       expect(json.dig("error", "code")).to eq("INVALID_CARRIER")
     end
 

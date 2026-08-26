@@ -21,14 +21,14 @@ module Api
         carrier = params[:carrier]&.upcase
 
         unless %w[UPS DHL FEDEX].include?(carrier)
-          return render json: { error: { code: "INVALID_CARRIER", message: "Carrier must be UPS, DHL, or FEDEX" } }, status: :unprocessable_entity
+          return render json: { error: { code: "INVALID_CARRIER", message: "Carrier must be UPS, DHL, or FEDEX" } }, status: :unprocessable_content
         end
 
         international = parse_rate(params[:international])
         domestic = parse_rate(params[:domestic])
 
         if international.nil? || domestic.nil?
-          return render json: { error: { code: "INVALID_RATE", message: "international/domestic must be numeric between 0 and 100" } }, status: :unprocessable_entity
+          return render json: { error: { code: "INVALID_RATE", message: "international/domestic must be numeric between 0 and 100" } }, status: :unprocessable_content
         end
 
         FscFetcher.update!(
@@ -49,7 +49,7 @@ module Api
         render json: { success: true, rates: FscFetcher.current_rates }
       rescue ActiveRecord::RecordInvalid, ActiveRecord::RecordNotSaved => e
         Rails.logger.error "[FSC] #{e.class}: #{e.message}"
-        render json: { error: { code: "UPDATE_FAILED", message: "FSC rate update failed" } }, status: :unprocessable_entity
+        render json: { error: { code: "UPDATE_FAILED", message: "FSC rate update failed" } }, status: :unprocessable_content
       end
 
       private

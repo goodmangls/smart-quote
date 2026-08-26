@@ -26,7 +26,7 @@ module Api
           render json: serialize_rule(rule), status: :created
         else
           render json: { error: { code: "VALIDATION_ERROR", messages: rule.errors.full_messages } },
-                 status: :unprocessable_entity
+                 status: :unprocessable_content
         end
       end
 
@@ -38,7 +38,7 @@ module Api
           render json: serialize_rule(@margin_rule)
         else
           render json: { error: { code: "VALIDATION_ERROR", messages: @margin_rule.errors.full_messages } },
-                 status: :unprocessable_entity
+                 status: :unprocessable_content
         end
       end
 
@@ -93,13 +93,13 @@ module Api
       def validate_resolve_params!
         unless params[:email].present?
           render json: { error: { code: "VALIDATION_ERROR", message: "email is required" } },
-                 status: :unprocessable_entity and return
+                 status: :unprocessable_content and return
         end
 
         weight = params[:weight]
         unless weight.present? && weight.to_s.match?(/\A\d+(\.\d+)?\z/) && weight.to_f > 0
           render json: { error: { code: "VALIDATION_ERROR", message: "weight must be a positive number" } },
-                 status: :unprocessable_entity and return
+                 status: :unprocessable_content and return
         end
       end
 

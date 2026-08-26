@@ -20,10 +20,10 @@ module Api
       def create
         messages = params.permit(messages: [ :role, :content ]).fetch(:messages, []).map(&:to_h)
 
-        return render json: { error: { message: "Messages required" } }, status: :unprocessable_entity if messages.empty?
+        return render json: { error: { message: "Messages required" } }, status: :unprocessable_content if messages.empty?
 
         if (validation_error = validate_messages(messages))
-          return render json: { error: { message: validation_error } }, status: :unprocessable_entity
+          return render json: { error: { message: validation_error } }, status: :unprocessable_content
         end
 
         api_key = ENV["ANTHROPIC_API_KEY"]
