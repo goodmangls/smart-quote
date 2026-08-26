@@ -28,7 +28,7 @@ RSpec.describe "Api::V1::Auth", type: :request do
       create(:user, email: "newuser@example.com")
       post "/api/v1/auth/register", params: valid_params, as: :json
 
-      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response).to have_http_status(:unprocessable_content)
       body = JSON.parse(response.body)
       expect(body["error"]["message"]).to include("Email has already been taken")
     end
@@ -36,19 +36,19 @@ RSpec.describe "Api::V1::Auth", type: :request do
     it "rejects short password" do
       post "/api/v1/auth/register", params: valid_params.merge(password: "short", password_confirmation: "short"), as: :json
 
-      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response).to have_http_status(:unprocessable_content)
     end
 
     it "rejects mismatched password confirmation" do
       post "/api/v1/auth/register", params: valid_params.merge(password_confirmation: "different"), as: :json
 
-      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response).to have_http_status(:unprocessable_content)
     end
 
     it "rejects missing nationality" do
       post "/api/v1/auth/register", params: valid_params.merge(nationality: ""), as: :json
 
-      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response).to have_http_status(:unprocessable_content)
       body = JSON.parse(response.body)
       expect(body["error"]["message"]).to match(/nationality/i)
     end
