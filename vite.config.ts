@@ -115,7 +115,18 @@ export default defineConfig({
           if (!id.includes('node_modules')) return;
           if (id.includes('react-router')) return 'vendor-router';
           if (id.includes('react-dom') || id.includes('node_modules/react/')) return 'vendor-react';
-          if (id.includes('jspdf')) return 'vendor-pdf';
+          // jsPDF is deliberately NOT force-grouped here. It is only ever
+          // reached through `await import('jspdf')`, so Rollup already splits
+          // it out on its own. Naming it as a manual chunk made Rollup place
+          // Vite's `__vitePreload` helper inside that chunk, and since the
+          // entry needs that helper for every dynamic import, the entry ended
+          // up statically importing vendor-pdf — pulling ~139 KB (wire) of PDF
+          // code into the landing page, where it never executes.
+          //
+          // Verified 2026-08-26 against production and a local preview build:
+          // the entry chunk contained `import{_ as p}from"./vendor-pdf-*.js"`.
+          // Removing the modulepreload hint alone did NOT stop the fetch,
+          // because the dependency was real — the grouping was the cause.
           if (id.includes('lucide-react')) return 'vendor-icons';
           if (id.includes('@sentry')) return 'vendor-sentry';
         },
