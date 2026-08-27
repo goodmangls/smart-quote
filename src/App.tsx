@@ -8,6 +8,7 @@ import { LanguageProvider } from './contexts/LanguageContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { ToastProvider } from './components/ui/Toast';
 import { Intercom } from './components/Intercom';
+import { CanonicalLink } from './components/CanonicalLink';
 
 const LandingPage = React.lazy(() =>
   import('./pages/LandingPage').then((m) => ({ default: m.LandingPage })),
@@ -29,6 +30,7 @@ function App() {
           <ToastProvider>
             <BrowserRouter>
               <AuthProvider>
+                <CanonicalLink />
                 <Intercom />
                 <Suspense
                   fallback={

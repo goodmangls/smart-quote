@@ -20,9 +20,19 @@ interface UrlEntry {
   hreflang?: Record<string, string>;
 }
 
+// Only publicly reachable pages belong here.
+//
+// /quote was listed at priority 0.9 but sits behind ProtectedRoute: an
+// unauthenticated crawler is redirected to /login (verified against production
+// 2026-08-26). Asking Google to index a URL that answers with a login form
+// spends crawl budget and puts a dead entry in the index.
+//
+// `lastmod` is deliberately omitted. It used to default to `new Date()`, so
+// every fetch of this sitemap claimed all pages had changed today — a signal
+// Google learns to distrust. Set a real date per entry when a page actually
+// changes; no lastmod is better than a false one.
 const STATIC_PAGES: UrlEntry[] = [
   { loc: '/',      changefreq: 'weekly',  priority: 1.0 },
-  { loc: '/quote', changefreq: 'weekly',  priority: 0.9 },
   { loc: '/guide', changefreq: 'monthly', priority: 0.6 },
 ];
 
@@ -35,15 +45,18 @@ function escapeXml(s: string): string {
     .replace(/'/g, '&apos;');
 }
 
-function buildUrlNode(entry: UrlEntry, defaultLastmod: string): string {
-  const lastmod = entry.lastmod ?? defaultLastmod;
+function buildUrlNode(entry: UrlEntry): string {
   const lines = [
     '  <url>',
     `    <loc>${escapeXml(SITE + entry.loc)}</loc>`,
-    `    <lastmod>${lastmod}</lastmod>`,
+  ];
+  // Emitted only when an entry carries a real date. Stamping "today" on every
+  // request made the whole sitemap look freshly edited on every crawl.
+  if (entry.lastmod) lines.push(`    <lastmod>${entry.lastmod}</lastmod>`);
+  lines.push(
     `    <changefreq>${entry.changefreq}</changefreq>`,
     `    <priority>${entry.priority.toFixed(1)}</priority>`,
-  ];
+  );
   if (entry.hreflang) {
     Object.entries(entry.hreflang).forEach(([lang, href]) => {
       lines.push(
@@ -57,8 +70,6 @@ function buildUrlNode(entry: UrlEntry, defaultLastmod: string): string {
 
 export default async function handler(_req: VercelRequest, res: VercelResponse) {
   try {
-    const today = new Date().toISOString().slice(0, 10);
-
     // Phase 2 hook — uncomment when /insights ships:
     // const insightsUrls = await fetchInsightsUrls();
     const insightsUrls: UrlEntry[] = [];
@@ -69,7 +80,7 @@ export default async function handler(_req: VercelRequest, res: VercelResponse) 
       '<?xml version="1.0" encoding="UTF-8"?>\n' +
       '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"\n' +
       '        xmlns:xhtml="http://www.w3.org/1999/xhtml">\n' +
-      allEntries.map((e) => buildUrlNode(e, today)).join('\n') +
+      allEntries.map((e) => buildUrlNode(e)).join('\n') +
       '\n</urlset>\n';
 
     res.setHeader('Content-Type', 'application/xml; charset=utf-8');
