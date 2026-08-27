@@ -68,7 +68,11 @@ async function getAuthErrorMessage(response: Response, fallback: string): Promis
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  // Starts false under Node so the build-time prerender renders children
+  // instead of this provider's spinner — the session-restore effect that
+  // clears this flag never runs during renderToString. Browser behaviour is
+  // unchanged: it still starts true and waits for the refresh-cookie check.
+  const [isLoading, setIsLoading] = useState(typeof window !== 'undefined');
 
   // Restore session on mount using the HttpOnly refresh cookie.
   useEffect(() => {

@@ -46,3 +46,4 @@ blob-report/
 # Coverage reports — regenerated per run
 coverage/
 .gstack/
+dist-prerender
