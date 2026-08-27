@@ -127,6 +127,10 @@
       "destination": "https://smart-quote-insights.vercel.app/insights/$1"
     },
     {
+      "source": "/guide",
+      "destination": "/guide.html"
+    },
+    {
       "source": "/((?!api/|assets/|robots\\.txt|sitemap.*\\.xml|llms\\.txt|pricing\\.md|favicon|icon|manifest|sw\\.js|goodman-gls.*|naver.*\\.html|data/|insights).*)",
       "destination": "/index.html"
     }

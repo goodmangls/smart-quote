@@ -31,6 +31,8 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     if (isEnglishOnlyHost()) return 'en';
 
     // Other domains (vercel.app, localhost, etc.) respect the user's saved preference.
+    // Guarded for the build-time prerender (no localStorage under Node).
+    if (typeof localStorage === 'undefined') return 'en';
     const saved = localStorage.getItem('smartQuoteLanguage') as Language | null;
     if (saved) return saved;
     return 'en';
