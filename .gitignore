@@ -47,3 +47,10 @@ blob-report/
 coverage/
 .gstack/
 dist-prerender
+
+# Agent worktrees. These are throwaway checkouts, but because each one is a git
+# repo of its own, `git add .claude` recorded them as gitlinks (mode 160000) —
+# two of them sat in the tree until 2026-08-28. A gitlink whose branch is later
+# deleted points at an unreachable SHA, so anyone cloning gets a broken
+# submodule-shaped entry that `git submodule` can't resolve either.
+.claude/worktrees/
