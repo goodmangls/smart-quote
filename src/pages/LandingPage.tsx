@@ -56,17 +56,23 @@ export const LandingPage: React.FC = () => {
                 </p>
 
                 {!isAuthenticated && (
-                  <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+                  <div className="mt-10 flex flex-col sm:flex-row sm:flex-wrap gap-4 justify-center lg:justify-start">
                     <Link
                       to="/signup"
                       className="group inline-flex items-center justify-center gap-2 px-7 py-3.5 bg-cyan-500 hover:bg-cyan-400 text-gray-950 text-base font-semibold rounded-2xl shadow-lg shadow-cyan-500/25 hover:shadow-cyan-400/30 transition-all duration-200"
                     >
-                      {t('landing.getStarted')}
+                      {t('landing.cta.partnerAccess')}
                       <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
                     </Link>
                     <Link
-                      to="/login"
+                      to="/guide"
                       className="inline-flex items-center justify-center px-7 py-3.5 bg-white/10 hover:bg-white/15 border border-white/15 hover:border-white/25 text-gray-100 text-base font-semibold rounded-2xl backdrop-blur-xl shadow-[inset_0_1px_0_rgba(255,255,255,0.12)] transition-all duration-200"
+                    >
+                      {t('landing.cta.seeWorkflow')}
+                    </Link>
+                    <Link
+                      to="/login"
+                      className="inline-flex items-center justify-center px-7 py-3.5 bg-transparent hover:bg-white/10 border border-white/10 hover:border-white/20 text-gray-300 text-base font-semibold rounded-2xl transition-all duration-200"
                     >
                       {t('nav.login')}
                     </Link>
@@ -155,6 +161,91 @@ export const LandingPage: React.FC = () => {
                   <stat.icon className="w-8 h-8 text-cyan-500 mx-auto mb-3" />
                   <span className="text-3xl sm:text-4xl font-extrabold text-gray-900 dark:text-white block">{stat.value}</span>
                   <span className="text-sm text-gray-500 dark:text-gray-400">{stat.label}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Forwarder Dilemma Section */}
+        <section className="py-20 sm:py-24 bg-white dark:bg-gray-950">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="grid lg:grid-cols-[0.9fr_1.1fr] gap-10 lg:gap-16 items-start">
+              <div>
+                <p className="text-sm font-semibold text-cyan-600 dark:text-cyan-400 uppercase tracking-widest mb-3">
+                  {t('landing.dilemma.label')}
+                </p>
+                <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 dark:text-white leading-tight">
+                  {t('landing.dilemma.title')}
+                </h2>
+                <p className="mt-5 text-base text-gray-600 dark:text-gray-400 leading-relaxed">
+                  {t('landing.dilemma.body')}
+                </p>
+              </div>
+
+              <div className="grid sm:grid-cols-2 gap-4">
+                {[
+                  t('landing.dilemma.point1'),
+                  t('landing.dilemma.point2'),
+                  t('landing.dilemma.point3'),
+                  t('landing.dilemma.point4'),
+                ].map((point, index) => (
+                  <div key={point} className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 p-5 shadow-sm">
+                    <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-cyan-500/10 text-sm font-bold text-cyan-600 dark:text-cyan-300">
+                      {index + 1}
+                    </span>
+                    <p className="mt-4 text-sm font-semibold text-gray-800 dark:text-gray-100 leading-relaxed">{point}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Workflow + Trust Section */}
+        <section className="py-20 sm:py-24 bg-gray-100 dark:bg-gray-900">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center max-w-3xl mx-auto mb-14">
+              <p className="text-sm font-semibold text-cyan-600 dark:text-cyan-400 uppercase tracking-widest mb-3">
+                {t('landing.workflow.label')}
+              </p>
+              <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 dark:text-white">
+                {t('landing.workflow.title')}
+              </h2>
+              <p className="mt-4 text-base text-gray-600 dark:text-gray-400 leading-relaxed">
+                {t('landing.workflow.body')}
+              </p>
+            </div>
+
+            <div className="grid md:grid-cols-5 gap-4">
+              {[
+                t('landing.workflow.step1'),
+                t('landing.workflow.step2'),
+                t('landing.workflow.step3'),
+                t('landing.workflow.step4'),
+                t('landing.workflow.step5'),
+              ].map((step, index) => (
+                <div key={step} className="relative rounded-2xl bg-white dark:bg-gray-950 border border-gray-200 dark:border-gray-800 p-5 shadow-sm">
+                  <span className="text-xs font-bold uppercase tracking-[0.2em] text-cyan-600 dark:text-cyan-400">
+                    Step {index + 1}
+                  </span>
+                  <p className="mt-3 text-sm font-semibold text-gray-900 dark:text-white leading-relaxed">{step}</p>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-12 grid lg:grid-cols-3 gap-6">
+              {[
+                { title: t('landing.trust.margin.title'), body: t('landing.trust.margin.body'), icon: ShieldCheck },
+                { title: t('landing.trust.brand.title'), body: t('landing.trust.brand.body'), icon: PackageCheck },
+                { title: t('landing.trust.network.title'), body: t('landing.trust.network.body'), icon: Globe },
+              ].map((item) => (
+                <div key={item.title} className="rounded-3xl bg-white dark:bg-gray-950 border border-gray-200 dark:border-gray-800 p-7 shadow-sm">
+                  <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-cyan-500/10 text-cyan-600 dark:text-cyan-300 mb-5">
+                    <item.icon className="h-6 w-6" />
+                  </div>
+                  <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-3">{item.title}</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">{item.body}</p>
                 </div>
               ))}
             </div>
