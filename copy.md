@@ -33,8 +33,8 @@
 | Key | Korean | English |
 |-----|--------|---------|
 | `landing.badge.networks` | Global Freight Networks | Global Freight Networks |
-| `landing.title.main` | 250+개국 국제 운임, | Freight Quotes for |
-| `landing.title.sub` | 1초 만에 견적 완료. | 250+ Countries, Instantly. |
+| `landing.title.main` | 220+개국 국제 운임, | Freight Quotes for |
+| `landing.title.sub` | 1초 만에 견적 완료. | 220+ Countries, Instantly. |
 | `landing.subtitle` | 포워딩 파트너를 위한 국제 특송 견적 시스템. Door-to-Door 운임을 실시간 환율과 FSC를 반영하여 즉시 산출합니다. | The express freight quoting engine built for forwarding partners. Calculate Door-to-Door costs with real-time exchange rates and FSC — instantly. |
 
 ### Stats
@@ -42,7 +42,7 @@
 | Key | Value (LandingPage.tsx) | Korean Label | English Label |
 |-----|------|--------|---------|
 | `landing.stat.carriers` | `3` (UPS·DHL·FedEx) | 특송 캐리어 | Express Carriers |
-| `landing.stat.countries` | `250+` (UPS·DHL·FedEx 합산 최대 ~265) | 목적지 국가 | Destinations |
+| `landing.stat.countries` | `220+` (실측: 요율 합집합 237 · 선택 가능 192) | 목적지 국가 | Destinations |
 | `landing.stat.calculation` | `~3s` | 평균 견적 시간 | Avg. Quote Time |
 | `landing.stat.available` | `24/7` | 온라인 접속 | Always Online |
 
@@ -50,10 +50,32 @@
 
 | Key | Korean | English |
 |-----|--------|---------|
-| `landing.globalPorts` | 250+ 국가 커버리지 | 250+ Countries Covered |
+| `landing.globalPorts` | 220+ 국가 커버리지 | 220+ Countries Covered |
 
-> **정책**: 마케팅·랜딩 표기는 **250+**. UPS·DHL·FedEx 합산 가능 목적지는 최대 약 265개국이나,
-> 과장·세부 변동을 피하기 위해 대외 카피는 `250+`로 통일한다 (정확한 개수·ISO 목록은 요율표 기준).
+> **정책 (2026-08-31 실측 기준)**: 마케팅·랜딩 표기는 **`220+`** 로 통일한다.
+> 근거는 **UPS·DHL·FedEx 세 캐리어가 모두 자사 공식 표현으로 "220+ countries and territories" 를 쓴다**는 것이며,
+> 우리 요율 커버리지가 그보다 넓으므로 모순되지 않는다. smart-quote-emax 와 **같은 정책**이다 —
+> 한쪽만 바꾸면 두 사이트가 다른 숫자를 광고하게 된다.
+>
+> **`src/config/` 에서 직접 센 수치** (2026-08-31):
+>
+> | 구분 | main | emax |
+> |---|---|---|
+> | `UPS_ZONE_MAP` | 203 | 202 |
+> | `DHL_ZONE_MAP` | 228 | 227 |
+> | `FEDEX_ZONE_MAP` | 205 | 205 |
+> | **요율 합집합** (어느 캐리어로든 요율 존재) | **237** | 237 |
+> | **`COUNTRY_OPTIONS`** (드롭다운에서 고를 수 있음) | **192** | 191 |
+> | **실제 즉시 견적 가능** (둘의 교집합) | **191** | 190 |
+>
+> ⚠️ **이전 정책은 근거 숫자가 틀렸다.** "합산 가능 목적지 최대 약 265개국" 이라 적혀 있었으나 코드는 **237** 이고,
+> 그 틀린 전제 위에 세운 `250+` 는 **ISO 3166-1 전체 코드 수(249)보다 큰 주장**이었다 — 캐리어 본인들도 220+ 만 주장한다.
+> 이 문구가 emax 로 복사되면서 같은 과장이 번질 뻔했다. 숫자를 올릴 때는 반드시 위 표를 다시 세고 근거를 함께 적을 것.
+>
+> ⚠️ **요율은 있는데 고를 수 없는 국가가 46개 있다**(237 − 191). 대부분 소규모 속령과 제재 대상국이다.
+> 표기를 더 올리려면 `COUNTRY_OPTIONS` 를 먼저 넓혀야 하며, 그 전까지 "1초 만에 견적 완료" 가 실제로 성립하는 범위는 **191개국**이다.
+>
+> 숫자는 **한 곳에만** 둔다: 통계 타일은 `value` 에 `220+` 를 넣고 `landing.stat.countries` 라벨(4개 언어)은 숫자 없이 둔다.
 
 ### Feature Cards
 
@@ -250,7 +272,7 @@
 
 | Item | Current | Recommendation |
 |------|---------|---------------|
-| Country names (options.ts) | English only (250+) | 내부 도구이므로 EN 유지 가능 |
+| Country names (options.ts) | English only (192개) | 내부 도구이므로 EN 유지 가능 |
 | text.ts 전체 | Hardcoded KO+EN mix | translations.ts로 이전 |
 | SignUpPage placeholders | "Optional", "Select" hardcoded | 번역 키로 변경 |
 | Header aria-label | "Select language" EN only | 번역 키로 변경 |
@@ -264,7 +286,7 @@ USER_GUIDE_ADMIN, AI chatbot 시스템 프롬프트를 UPS/DHL/FedEx 3사 기준
 
 | Context | Tone | Example |
 |---------|------|---------|
-| Landing/Marketing | Professional, Confident | "250+개국 국제 운임, 1초 만에 견적 완료." |
+| Landing/Marketing | Professional, Confident | "220+개국 국제 운임, 1초 만에 견적 완료." |
 | Calculator UI | Clear, Functional | "배송 설정", "화물 정보를 입력하세요" |
 | Error Messages | Empathetic, Helpful | "문제가 발생했습니다. 다시 시도해주세요." |
 | Admin Interface | Technical, Precise | "Target Margin Rules", "Audit Log" |

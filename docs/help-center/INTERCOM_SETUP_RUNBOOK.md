@@ -27,7 +27,7 @@
 
 ### Subheading
 ```
-The express freight quoting platform trusted by forwarding partners in 250+ countries.
+The express freight quoting platform trusted by forwarding partners in 220+ countries.
 ```
 
 ### Body
