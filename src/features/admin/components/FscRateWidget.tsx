@@ -1,5 +1,5 @@
 import React from 'react';
-import { Fuel, RefreshCw, Loader2, Pencil, Check, X } from 'lucide-react';
+import { Fuel, RefreshCw, Loader2, Pencil, Check, X, AlertTriangle } from 'lucide-react';
 import { useFscRates } from '@/features/dashboard/hooks/useFscRates';
 import { useFscRateEdit, useFscHistory, FscRateDisplay, FscHistoryPanel } from './fsc';
 
@@ -8,9 +8,17 @@ interface FscRateWidgetProps {
 }
 
 export const FscRateWidget: React.FC<FscRateWidgetProps> = ({ readOnly = false }) => {
-  const { data, loading, retry: fetchRates } = useFscRates();
-  const { isEditing, saving, editRates, setEditRates, handleEditStart, handleSave, handleCancel } =
-    useFscRateEdit(data, fetchRates);
+  const { data, loading, error: ratesError, retry: fetchRates } = useFscRates();
+  const {
+    isEditing,
+    saving,
+    saveError,
+    editRates,
+    setEditRates,
+    handleEditStart,
+    handleSave,
+    handleCancel,
+  } = useFscRateEdit(data, fetchRates);
   const {
     history,
     showHistory,
@@ -46,6 +54,7 @@ export const FscRateWidget: React.FC<FscRateWidgetProps> = ({ readOnly = false }
                 disabled={saving}
                 className='flex items-center gap-1 text-[10px] font-semibold text-green-600 hover:text-green-700 dark:text-green-400 transition-colors disabled:opacity-50'
                 title='저장'
+                aria-label='FSC 요율 저장'
               >
                 {saving ? (
                   <Loader2 className='w-3.5 h-3.5 animate-spin' />
@@ -53,11 +62,26 @@ export const FscRateWidget: React.FC<FscRateWidgetProps> = ({ readOnly = false }
                   <Check className='w-3.5 h-3.5' />
                 )}
               </button>
+              {/* Only after a failed save. The recovery advice is "check 현재 DB", and
+                  the plain refresh control is hidden while editing — without this the
+                  admin would have to cancel (losing their input) to re-read the table. */}
+              {saveError && (
+                <button
+                  onClick={fetchRates}
+                  disabled={loading || saving}
+                  className='text-[10px] font-semibold text-gray-500 hover:text-brand-blue-600 dark:text-gray-400 transition-colors disabled:opacity-40'
+                  title='현재 DB 값 다시 읽기'
+                  aria-label='현재 DB 값 다시 읽기'
+                >
+                  <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
+                </button>
+              )}
               <button
                 onClick={handleCancel}
                 disabled={saving}
                 className='text-[10px] font-semibold text-gray-400 hover:text-red-500 dark:text-gray-500 transition-colors'
                 title='취소'
+                aria-label='FSC 요율 편집 취소'
               >
                 <X className='w-3.5 h-3.5' />
               </button>
@@ -70,6 +94,7 @@ export const FscRateWidget: React.FC<FscRateWidgetProps> = ({ readOnly = false }
                   disabled={loading || !data}
                   className='text-[10px] font-semibold text-gray-500 hover:text-brand-blue-600 dark:text-gray-400 transition-colors disabled:opacity-40'
                   title='FSC 요율 편집'
+                  aria-label='FSC 요율 편집'
                 >
                   <Pencil className='w-3.5 h-3.5' />
                 </button>
@@ -87,12 +112,24 @@ export const FscRateWidget: React.FC<FscRateWidgetProps> = ({ readOnly = false }
         </div>
       </div>
 
+      {saveError && (
+        <div
+          role='alert'
+          className='px-4 py-2 border-b border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-900/20 flex items-start gap-2'
+        >
+          <AlertTriangle className='w-3.5 h-3.5 mt-0.5 shrink-0 text-red-600 dark:text-red-400' />
+          <p className='text-[11px] leading-relaxed text-red-700 dark:text-red-300'>{saveError}</p>
+        </div>
+      )}
+
       <FscRateDisplay
         data={data}
         loading={loading}
         isEditing={!readOnly && isEditing}
         editRates={editRates}
         onEditRatesChange={setEditRates}
+        saveError={saveError}
+        ratesError={ratesError}
       />
 
       <FscHistoryPanel

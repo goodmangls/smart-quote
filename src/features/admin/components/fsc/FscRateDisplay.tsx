@@ -9,6 +9,10 @@ interface Props {
   isEditing: boolean;
   editRates: { UPS: string; DHL: string; FEDEX: string };
   onEditRatesChange: (next: { UPS: string; DHL: string; FEDEX: string }) => void;
+  /** Set only after a save failed; drives the "현재 DB" row under each input. */
+  saveError?: string | null;
+  /** useFscRates' read error, so a failed re-read is not rendered as a value. */
+  ratesError?: string | null;
 }
 
 export const FscRateDisplay: React.FC<Props> = ({
@@ -17,7 +21,25 @@ export const FscRateDisplay: React.FC<Props> = ({
   isEditing,
   editRates,
   onEditRatesChange,
+  saveError = null,
+  ratesError = null,
 }) => {
+  /**
+   * What the row under each input may honestly claim about `fsc_rates`.
+   *
+   * Three states, not two. `useFscRates` seeds `data` from rates.ts and only
+   * replaces it on a successful read, and it clears `error` the moment a read
+   * starts — so mid-request, and after a failed read, we are holding values we
+   * never got from the table. Printing those as "현재 DB" would present the
+   * CONSTANTS as the table's contents, which is the exact confusion this row
+   * exists to resolve.
+   */
+  const dbValueLabel = (rate: number | undefined): string => {
+    if (loading) return '현재 DB: 확인 중…';
+    if (ratesError) return '현재 DB: 읽지 못했습니다';
+    return `현재 DB: ${typeof rate === 'number' ? `${rate.toFixed(2)}%` : '—'}`;
+  };
+
   if (loading && !data) {
     return (
       <div className='p-6 text-center text-xs text-gray-400'>
@@ -51,17 +73,30 @@ export const FscRateDisplay: React.FC<Props> = ({
               </a>
             </div>
             {isEditing ? (
-              <div className='flex items-center justify-center gap-1.5'>
-                <input
-                  type='number'
-                  step='0.25'
-                  min={0}
-                  max={100}
-                  value={editRates[carrier]}
-                  onChange={(e) => onEditRatesChange({ ...editRates, [carrier]: e.target.value })}
-                  className='w-16 px-1.5 py-1 text-sm font-bold rounded border border-brand-blue-400 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-blue-500 text-center'
-                />
-                <span className='text-sm font-bold text-gray-500 dark:text-gray-400'>%</span>
+              <div className='flex flex-col items-center gap-1'>
+                <div className='flex items-center justify-center gap-1.5'>
+                  <input
+                    type='number'
+                    step='0.25'
+                    min={0}
+                    max={100}
+                    value={editRates[carrier]}
+                    onChange={(e) => onEditRatesChange({ ...editRates, [carrier]: e.target.value })}
+                    aria-label={`${carrier} FSC 요율 (%)`}
+                    className='w-16 px-1.5 py-1 text-sm font-bold rounded border border-brand-blue-400 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-blue-500 text-center'
+                  />
+                  <span className='text-sm font-bold text-gray-500 dark:text-gray-400'>%</span>
+                </div>
+                {/* After a failed save the cells still render what the admin typed, so
+                    without this the "check 현재 DB" advice points at nothing on screen. */}
+                {saveError && (
+                  <span
+                    className='text-[10px] text-gray-500 dark:text-gray-400'
+                    data-testid={`fsc-db-value-${carrier}`}
+                  >
+                    {dbValueLabel(rates?.international)}
+                  </span>
+                )}
               </div>
             ) : (
               <p className='text-xl font-bold text-gray-900 dark:text-white'>
