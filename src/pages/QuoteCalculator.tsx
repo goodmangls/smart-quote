@@ -27,7 +27,6 @@ import { Header } from '@/components/layout/Header';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { DEFAULT_EXCHANGE_RATE, DEFAULT_FSC_PERCENT } from '@/config/rates';
 import { useCarrierFscDefault } from '@/features/quote/hooks/useCarrierFscDefault';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { useResolvedMargin } from '@/features/dashboard/hooks/useResolvedMargin';
@@ -37,25 +36,9 @@ import { AdminWidgets } from './components/AdminWidgets';
 import { Footer } from '@/components/layout/Footer';
 import { MobileStickyBottomBar } from './components/MobileStickyBottomBar';
 import { getQuoteAccessFlags } from './quoteAccess';
+import { ADMIN_DEFAULT_MARGIN_PERCENT, INITIAL_INPUT, initialInputFor } from './quoteDefaults';
 
 const reportedCalculationErrors = new Set<string>();
-
-const INITIAL_INPUT: QuoteInput = {
-  originCountry: 'KR',
-  destinationCountry: 'US',
-  destinationZip: '',
-  shippingMode: 'Door-to-Door',
-  incoterm: Incoterm.DAP,
-  packingType: PackingType.NONE,
-  shippingItemType: ShippingItemType.NON_DOCUMENT,
-  items: [{ id: '1', width: 10, length: 10, height: 10, weight: 0.5, quantity: 1 }],
-  marginPercent: 15,
-  dutyTaxEstimate: 0,
-  exchangeRate: DEFAULT_EXCHANGE_RATE,
-  fscPercent: DEFAULT_FSC_PERCENT,
-  overseasCarrier: 'UPS',
-  manualPackingCost: undefined,
-};
 
 const QuoteCalculator: React.FC<{ isPublic?: boolean }> = ({ isPublic = false }) => {
   const [currentView, setCurrentView] = useState<AppView>('calculator');
@@ -157,11 +140,11 @@ const QuoteCalculator: React.FC<{ isPublic?: boolean }> = ({ isPublic = false })
     result?.billableWeight,
   );
 
-  // Set default margin to 24% for admin once user role is known
+  // See ADMIN_DEFAULT_MARGIN_PERCENT for why this is 0.
   React.useEffect(() => {
     if (!isAdmin) return;
     if (hasManuallyChangedMargin.current) return;
-    setInput((prev) => ({ ...prev, marginPercent: 24 }));
+    setInput((prev) => ({ ...prev, marginPercent: ADMIN_DEFAULT_MARGIN_PERCENT }));
   }, [isAdmin]);
 
   React.useEffect(() => {
@@ -297,6 +280,8 @@ const QuoteCalculator: React.FC<{ isPublic?: boolean }> = ({ isPublic = false })
                     onChange={setInput}
                     isMobileView={false}
                     effectiveMarginPercent={result?.profitMargin}
+                    marginAmount={result?.profitAmount}
+                    totalQuoteAmount={result?.totalQuoteAmount}
                     hideMargin={hideMargin}
                     intlBase={result?.breakdown.intlBase}
                     billableWeight={result?.billableWeight}
@@ -354,7 +339,10 @@ const QuoteCalculator: React.FC<{ isPublic?: boolean }> = ({ isPublic = false })
         variant='warning'
         onConfirm={() => {
           setShowResetConfirm(false);
-          setInput(INITIAL_INPUT);
+          // A reset is a real reset: drop the "admin typed a margin" flag so the
+          // role default (and, for members, rule auto-resolution) applies again.
+          hasManuallyChangedMargin.current = false;
+          setInput(initialInputFor(isAdmin));
         }}
         onCancel={() => setShowResetConfirm(false)}
       />
