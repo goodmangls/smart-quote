@@ -324,7 +324,7 @@ const QuoteCalculator: React.FC<{ isPublic?: boolean }> = ({ isPublic = false })
           )}
         </>
       ) : (
-        <QuoteHistoryPage onDuplicate={handleDuplicate} />
+        <QuoteHistoryPage onDuplicate={handleDuplicate} hideMargin={hideMargin} />
       )}
 
       <div className='hidden lg:block'>

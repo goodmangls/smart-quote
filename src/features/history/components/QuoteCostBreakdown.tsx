@@ -4,7 +4,13 @@ import { formatNum } from '@/lib/format';
 import { Section, BreakdownRow } from './QuoteDetailSubcomponents';
 
 interface Props {
-  breakdown: QuoteDetail['breakdown'];
+  /**
+   * Required, not `QuoteDetail['breakdown']` (now optional): the API withholds
+   * the breakdown from members, and the caller gates on that. Keeping it
+   * required here means a caller that forgets the guard fails to compile
+   * instead of rendering an empty cost table.
+   */
+  breakdown: NonNullable<QuoteDetail['breakdown']>;
 }
 
 export const QuoteCostBreakdown: React.FC<Props> = ({ breakdown }) => {

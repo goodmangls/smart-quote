@@ -15,6 +15,8 @@ interface Props {
   hasActiveFilters: boolean;
   onView: (id: number) => void;
   onDelete: (id: number, refNo: string) => void;
+  /** Margin and cost are admin-only; the API omits them for members. */
+  hideMargin?: boolean;
 }
 
 /**
@@ -62,6 +64,7 @@ function DesktopSkeletonRows() {
 export const DesktopQuoteTable: React.FC<Props> = ({
   quotes,
   isLoading,
+  hideMargin = true,
   hasActiveFilters,
   onView,
   onDelete,
@@ -83,9 +86,11 @@ export const DesktopQuoteTable: React.FC<Props> = ({
             Amount (KRW)
           </th>
           <th className='text-right px-4 py-3 font-medium text-gray-500 dark:text-gray-400'>USD</th>
-          <th className='text-right px-4 py-3 font-medium text-gray-500 dark:text-gray-400'>
-            Margin
-          </th>
+          {!hideMargin && (
+            <th className='text-right px-4 py-3 font-medium text-gray-500 dark:text-gray-400'>
+              Margin
+            </th>
+          )}
           <th className='text-center px-4 py-3 font-medium text-gray-500 dark:text-gray-400'>
             Status
           </th>
@@ -129,9 +134,11 @@ export const DesktopQuoteTable: React.FC<Props> = ({
               <td className='px-4 py-3 text-right text-gray-500 dark:text-gray-400 tabular-nums text-xs'>
                 ${q.totalQuoteAmountUsd.toLocaleString('en-US', { minimumFractionDigits: 2 })}
               </td>
-              <td className='px-4 py-3 text-right tabular-nums'>
-                <MarginText profitMargin={q.profitMargin} />
-              </td>
+              {!hideMargin && q.profitMargin !== undefined && (
+                <td className='px-4 py-3 text-right tabular-nums'>
+                  <MarginText profitMargin={q.profitMargin} />
+                </td>
+              )}
               <td className='px-4 py-3 text-center'>
                 <div className='flex flex-col items-center gap-0.5'>
                   <StatusPill status={q.status} />

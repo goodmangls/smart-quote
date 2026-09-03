@@ -1,12 +1,17 @@
 class QuoteSerializer
-  def self.summary(quote)
-    {
+  # `include_margin:` defaults to FALSE on purpose.
+  #
+  # Margin and cost are admin-only. Defaulting to deny means a call site that
+  # forgets the flag hides data from an admin — visible and annoying — rather
+  # than handing it to a partner, which is invisible and harmful. The share-link
+  # leak happened the other way round.
+  def self.summary(quote, include_margin: false)
+    base = {
       id: quote.id,
       referenceNo: quote.reference_no,
       destinationCountry: quote.destination_country,
       totalQuoteAmount: quote.total_quote_amount.to_i,
       totalQuoteAmountUsd: quote.total_quote_amount_usd.to_f.round(2),
-      profitMargin: quote.profit_margin.to_f,
       billableWeight: quote.billable_weight.to_f,
       domesticTruckType: quote.domestic_truck_type,
       status: quote.status,
@@ -15,10 +20,14 @@ class QuoteSerializer
       surchargeStale: surcharge_stale?(quote),
       createdAt: quote.created_at.iso8601
     }
+    return base unless include_margin
+
+    base.merge(profitMargin: quote.profit_margin.to_f)
   end
 
-  def self.detail(quote)
-    {
+  # See `summary` for why include_margin defaults to false.
+  def self.detail(quote, include_margin: false)
+    base = {
       id: quote.id,
       referenceNo: quote.reference_no,
       status: quote.status,
@@ -34,7 +43,6 @@ class QuoteSerializer
       incoterm: quote.incoterm,
       packingType: quote.packing_type,
       shippingItemType: quote.shipping_item_type,
-      marginPercent: quote.margin_percent.to_f,
       dutyTaxEstimate: quote.duty_tax_estimate.to_i,
       exchangeRate: quote.exchange_rate.to_f,
       fscPercent: quote.fsc_percent.to_f,
@@ -44,18 +52,25 @@ class QuoteSerializer
       # Result
       totalQuoteAmount: quote.total_quote_amount.to_i,
       totalQuoteAmountUSD: quote.total_quote_amount_usd.to_f.round(2),
-      totalCostAmount: quote.total_cost_amount.to_i,
-      profitAmount: quote.profit_amount.to_i,
-      profitMargin: quote.profit_margin.to_f,
       billableWeight: quote.billable_weight.to_f,
       appliedZone: quote.applied_zone,
       domesticTruckType: quote.domestic_truck_type,
       warnings: quote.warnings,
-      breakdown: quote.breakdown,
       customerId: quote.customer_id,
       customerName: quote.customer&.company_name,
       validityDate: quote.validity_date&.iso8601
     }
+    return base unless include_margin
+
+    # `breakdown` belongs here too: it ends in totalCost, and totalCost against
+    # totalQuoteAmount hands the reader the margin by arithmetic.
+    base.merge(
+      marginPercent: quote.margin_percent.to_f,
+      totalCostAmount: quote.total_cost_amount.to_i,
+      profitAmount: quote.profit_amount.to_i,
+      profitMargin: quote.profit_margin.to_f,
+      breakdown: quote.breakdown
+    )
   end
 
   # Payload for the PUBLIC share link (`GET /shared/:token`, no authentication).

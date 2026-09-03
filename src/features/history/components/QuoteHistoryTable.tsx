@@ -9,6 +9,8 @@ interface Props {
   hasActiveFilters: boolean;
   onView: (id: number) => void;
   onDelete: (id: number, refNo: string) => void;
+  /** Margin and cost are admin-only; the API omits them for members. */
+  hideMargin?: boolean;
 }
 
 /**

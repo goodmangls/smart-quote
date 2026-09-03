@@ -79,7 +79,7 @@ module Api
 
         if quote.save_with_reference_retry
           AuditLog.track!(user: current_user, action: "quote.created", resource: quote, ip_address: request.remote_ip)
-          render json: QuoteSerializer.detail(quote), status: :created
+          render json: QuoteSerializer.detail(quote, include_margin: current_user.admin?), status: :created
         else
           render json: { error: { code: "VALIDATION_ERROR", message: quote.errors.full_messages.join(", ") } }, status: :unprocessable_content
         end
@@ -142,7 +142,7 @@ module Api
                       .per([ (params[:per_page] || 20).to_i, 100 ].min)
 
         render json: {
-          quotes: quotes.map { |q| QuoteSerializer.summary(q) },
+          quotes: quotes.map { |q| QuoteSerializer.summary(q, include_margin: current_user.admin?) },
           pagination: {
             currentPage: quotes.current_page,
             totalPages: quotes.total_pages,
@@ -155,7 +155,7 @@ module Api
       # GET /api/v1/quotes/:id
       def show
         quote = scoped_quotes.find(params[:id])
-        render json: QuoteSerializer.detail(quote)
+        render json: QuoteSerializer.detail(quote, include_margin: current_user.admin?)
       rescue ActiveRecord::RecordNotFound
         render json: { error: { code: "NOT_FOUND", message: "Quote not found" } }, status: :not_found
       end
@@ -178,7 +178,7 @@ module Api
           metadata[:status_to] = quote.status if metadata[:status_from]
           action = metadata[:status_from] ? "quote.status_changed" : "quote.updated"
           AuditLog.track!(user: current_user, action: action, resource: quote, metadata: metadata, ip_address: request.remote_ip)
-          render json: QuoteSerializer.detail(quote)
+          render json: QuoteSerializer.detail(quote, include_margin: current_user.admin?)
         else
           render json: { error: { code: "VALIDATION_ERROR", message: quote.errors.full_messages.join(", ") } }, status: :unprocessable_content
         end
