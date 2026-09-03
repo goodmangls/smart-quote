@@ -22,6 +22,11 @@ const defaultProps = {
   hasActiveFilters: false,
   onView: vi.fn(),
   onDelete: vi.fn(),
+  // These cases cover the ADMIN view. `hideMargin` now defaults to true
+  // (deny by default), so the role has to be stated rather than assumed —
+  // margin and cost are admin-only. The member view is covered in
+  // MarginVisibility.test.tsx.
+  hideMargin: false,
 };
 
 describe('QuoteHistoryTable', () => {

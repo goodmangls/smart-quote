@@ -20,6 +20,12 @@ class User < ApplicationRecord
 
   before_save :downcase_email
 
+  # Roles are admin / user / member — anything that is not "admin" is a partner
+  # account, so predicate on admin rather than listing the others.
+  def admin?
+    role == "admin"
+  end
+
   def generate_magic_link_token!
     raw = SecureRandom.urlsafe_base64(32)
     self.magic_link_token_digest = Digest::SHA256.hexdigest(raw)

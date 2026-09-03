@@ -183,7 +183,8 @@ export interface QuoteSummary {
   destinationCountry: string;
   totalQuoteAmount: number;
   totalQuoteAmountUsd: number;
-  profitMargin: number;
+  /** Admin only — the API omits this for members. See QuoteSerializer#summary. */
+  profitMargin?: number;
   billableWeight: number;
   domesticTruckType?: string;
   status: QuoteStatus;
@@ -226,7 +227,8 @@ export interface QuoteDetail {
   appliedZone: string;
   domesticTruckType?: string;
   warnings: string[];
-  breakdown: CostBreakdown;
+  /** Admin only — the API omits this for members. See QuoteSerializer#detail. */
+  breakdown?: CostBreakdown;
   validityDate: string | null;
 }
 

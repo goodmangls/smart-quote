@@ -27,6 +27,8 @@ import { QuoteCostBreakdown } from './QuoteCostBreakdown';
 interface Props {
   quote: QuoteDetail;
   onClose: () => void;
+  /** Margin and cost are admin-only; the API omits them for members. */
+  hideMargin?: boolean;
   onDuplicate?: (quote: QuoteDetail) => void;
   onStatusChange?: (id: number, newStatus: QuoteStatus) => void;
 }
@@ -43,6 +45,7 @@ const STATUS_FLOW: QuoteStatus[] = [
 export const QuoteDetailModal: React.FC<Props> = ({
   quote,
   onClose,
+  hideMargin = true,
   onDuplicate,
   onStatusChange,
 }) => {
@@ -278,7 +281,9 @@ export const QuoteDetailModal: React.FC<Props> = ({
               value={`$${quote.totalQuoteAmountUSD.toLocaleString('en-US', { minimumFractionDigits: 2 })}`}
             />
             {/* The detail view carried no low-margin signal at all — a saved quote
-                below the approval threshold read exactly like a healthy one. */}
+                below the approval threshold read exactly like a healthy one.
+                Admin only: the API omits profitMargin for members entirely. */}
+            {!hideMargin && quote.profitMargin !== undefined && (
             <MetricCard
               icon={
                 <TrendingUp
@@ -295,6 +300,7 @@ export const QuoteDetailModal: React.FC<Props> = ({
                 </span>
               }
             />
+            )}
             <MetricCard
               icon={<Package className='w-4 h-4 text-amber-500' />}
               label='Billable Wt'
@@ -336,7 +342,11 @@ export const QuoteDetailModal: React.FC<Props> = ({
           <QuoteCargoTable items={quote.items} />
 
           {/* Cost Breakdown */}
-          <QuoteCostBreakdown breakdown={quote.breakdown} />
+          {/* The whole stack is internal cost and ends in Total Cost, which
+              against totalQuoteAmount yields the margin by arithmetic. */}
+          {!hideMargin && quote.breakdown && (
+            <QuoteCostBreakdown breakdown={quote.breakdown} />
+          )}
 
           {/* Warnings */}
           {quote.warnings && quote.warnings.length > 0 && (

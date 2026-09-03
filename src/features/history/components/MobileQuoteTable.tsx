@@ -15,6 +15,8 @@ interface Props {
   hasActiveFilters: boolean;
   onView: (id: number) => void;
   onDelete: (id: number, refNo: string) => void;
+  /** Margin and cost are admin-only; the API omits them for members. */
+  hideMargin?: boolean;
 }
 
 /**
@@ -56,6 +58,7 @@ function MobileSkeleton() {
 export const MobileQuoteTable: React.FC<Props> = ({
   quotes,
   isLoading,
+  hideMargin = true,
   hasActiveFilters,
   onView,
   onDelete,
@@ -110,7 +113,12 @@ export const MobileQuoteTable: React.FC<Props> = ({
           </div>
           {/* row 4: margin ↔ actions */}
           <div className='flex items-center justify-between'>
-            <MarginText profitMargin={q.profitMargin} className='text-xs tabular-nums' />
+            {!hideMargin && q.profitMargin !== undefined ? (
+              <MarginText profitMargin={q.profitMargin} className='text-xs tabular-nums' />
+            ) : (
+              /* Keeps the actions right-aligned when the margin is withheld. */
+              <span />
+            )}
             <RowActions
               id={q.id}
               refNo={q.referenceNo}

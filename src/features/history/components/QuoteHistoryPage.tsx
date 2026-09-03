@@ -29,9 +29,11 @@ import { QuoteDetailModal } from './QuoteDetailModal';
 
 interface QuoteHistoryPageProps {
   onDuplicate?: (quote: QuoteDetail) => void;
+  /** Margin and cost are admin-only; the API omits them for members. */
+  hideMargin?: boolean;
 }
 
-export const QuoteHistoryPage: React.FC<QuoteHistoryPageProps> = ({ onDuplicate }) => {
+export const QuoteHistoryPage: React.FC<QuoteHistoryPageProps> = ({ onDuplicate, hideMargin = true }) => {
   const [quotes, setQuotes] = useState<QuoteSummary[]>([]);
   const [pagination, setPagination] = useState<Pagination | null>(null);
   const [params, setParams] = useState<QuoteListParams>({
@@ -171,9 +173,12 @@ export const QuoteHistoryPage: React.FC<QuoteHistoryPageProps> = ({ onDuplicate 
       return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
     });
     const totalAmount = thisMonth.reduce((sum, q) => sum + q.totalQuoteAmount, 0);
+    // Members get no profitMargin from the API, so this would average
+    // undefined into NaN. Aggregate only over rows that actually carry one.
+    const withMargin = thisMonth.filter((q) => q.profitMargin !== undefined);
     const avgMargin =
-      thisMonth.length > 0
-        ? thisMonth.reduce((sum, q) => sum + q.profitMargin, 0) / thisMonth.length
+      withMargin.length > 0
+        ? withMargin.reduce((sum, q) => sum + (q.profitMargin ?? 0), 0) / withMargin.length
         : 0;
     const acceptedCount = quotes.filter((q) => q.status === 'accepted').length;
     const completedCount = quotes.filter(
@@ -199,11 +204,13 @@ export const QuoteHistoryPage: React.FC<QuoteHistoryPageProps> = ({ onDuplicate 
             value={`${formatNum(stats.totalAmount)}`}
             sub='KRW'
           />
-          <StatCard
-            icon={<TrendingUp className='w-4 h-4 text-blue-500' />}
-            label='Avg Margin'
-            value={`${stats.avgMargin.toFixed(1)}%`}
-          />
+          {!hideMargin && (
+            <StatCard
+              icon={<TrendingUp className='w-4 h-4 text-blue-500' />}
+              label='Avg Margin'
+              value={`${stats.avgMargin.toFixed(1)}%`}
+            />
+          )}
           <StatCard
             icon={<CheckCircle className='w-4 h-4 text-emerald-500' />}
             label='Win Rate'
@@ -311,6 +318,7 @@ export const QuoteHistoryPage: React.FC<QuoteHistoryPageProps> = ({ onDuplicate 
           hasActiveFilters={hasActiveFilters}
           onView={handleView}
           onDelete={handleDelete}
+          hideMargin={hideMargin}
         />
         {pagination && <QuotePagination pagination={pagination} onPageChange={handlePageChange} />}
       </div>
@@ -334,6 +342,7 @@ export const QuoteHistoryPage: React.FC<QuoteHistoryPageProps> = ({ onDuplicate 
           onClose={() => setSelectedQuote(null)}
           onDuplicate={onDuplicate}
           onStatusChange={() => fetchList()}
+          hideMargin={hideMargin}
         />
       )}
 
