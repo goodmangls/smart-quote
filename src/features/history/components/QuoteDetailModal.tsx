@@ -18,6 +18,8 @@ import { createShareLink } from '@/api/shareApi';
 import { STATUS_COLORS } from '../constants';
 import { useToast } from '@/components/ui/Toast';
 import { showNewMessage } from '@/lib/intercom';
+import { isLowMargin } from '@/config/business-rules';
+import { LowMarginBadge } from './QuoteHistoryTableParts';
 import { MetricCard, Section, Field } from './QuoteDetailSubcomponents';
 import { QuoteCargoTable } from './QuoteCargoTable';
 import { QuoteCostBreakdown } from './QuoteCostBreakdown';
@@ -275,10 +277,23 @@ export const QuoteDetailModal: React.FC<Props> = ({
               label='USD'
               value={`$${quote.totalQuoteAmountUSD.toLocaleString('en-US', { minimumFractionDigits: 2 })}`}
             />
+            {/* The detail view carried no low-margin signal at all — a saved quote
+                below the approval threshold read exactly like a healthy one. */}
             <MetricCard
-              icon={<TrendingUp className='w-4 h-4 text-green-500' />}
+              icon={
+                <TrendingUp
+                  className={`w-4 h-4 ${
+                    isLowMargin(quote.profitMargin) ? 'text-amber-500' : 'text-green-500'
+                  }`}
+                />
+              }
               label='Margin'
-              value={`${quote.profitMargin.toFixed(1)}%`}
+              value={
+                <span className='inline-flex items-center gap-1.5'>
+                  {quote.profitMargin.toFixed(1)}%
+                  {isLowMargin(quote.profitMargin) && <LowMarginBadge />}
+                </span>
+              }
             />
             <MetricCard
               icon={<Package className='w-4 h-4 text-amber-500' />}

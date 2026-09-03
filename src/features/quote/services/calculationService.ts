@@ -1,4 +1,5 @@
 import { QuoteInput, QuoteResult, Incoterm, ShippingItemType } from '@/types';
+import { LOW_MARGIN_THRESHOLD_PERCENT, isLowMargin } from '@/config/business-rules';
 import { computeQuotePricing } from './quotePricing';
 import { computeSystemSurcharges } from './quoteSurcharges';
 import { calculateDhlAddOnCosts } from './dhlAddonCalculator';
@@ -171,8 +172,10 @@ export const calculateQuote = (input: QuoteInput): QuoteResult => {
     );
   }
 
-  if (safeMarginPercent < 10) {
-    userWarnings.push('Low Margin Alert: Profit margin is below 10%. Approval required.');
+  if (isLowMargin(safeMarginPercent)) {
+    userWarnings.push(
+      `Low Margin Alert: Profit margin is below ${LOW_MARGIN_THRESHOLD_PERCENT}%. Approval required.`,
+    );
   }
 
   return {

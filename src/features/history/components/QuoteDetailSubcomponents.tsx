@@ -1,7 +1,12 @@
 import React from 'react';
 import { formatNum } from '@/lib/format';
 
-export const MetricCard: React.FC<{ icon: React.ReactNode; label: string; value: string }> = ({
+export const MetricCard: React.FC<{
+  icon: React.ReactNode;
+  label: string;
+  /** ReactNode, not string: the margin card renders a badge beside the figure. */
+  value: React.ReactNode;
+}> = ({
   icon,
   label,
   value,

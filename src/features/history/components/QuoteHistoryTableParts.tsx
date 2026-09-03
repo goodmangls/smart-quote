@@ -3,6 +3,7 @@ import { AlertTriangle, Clock, Eye, Trash2 } from 'lucide-react';
 import type { QuoteSummary } from '@/types';
 import { STATUS_COLORS } from '@/features/history/constants';
 import { getExpiryInfo } from '@/features/history/utils/expiry';
+import { LOW_MARGIN_THRESHOLD_PERCENT, isLowMargin } from '@/config/business-rules';
 
 /**
  * QuoteHistoryTable 의 모바일/데스크톱 뷰에서 공유하는 작은 presentational 컴포넌트들.
@@ -38,6 +39,27 @@ export function SurchargeStaleBadge() {
     <span className='inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-medium bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'>
       <AlertTriangle className='w-2.5 h-2.5' />
       재확인
+    </span>
+  );
+}
+
+// ─────────────────────────────────────────────────
+// LowMarginBadge — 저마진 배지 (amber, 승인 필요)
+// ─────────────────────────────────────────────────
+
+/**
+ * Saved quotes below the approval threshold used to be signalled by the margin
+ * text turning amber and nothing else — easy to miss in a dense table, and
+ * invisible to anyone who can't separate the two hues. This states it in words.
+ */
+export function LowMarginBadge() {
+  return (
+    <span
+      className='inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-medium bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
+      title={`Low margin — below ${LOW_MARGIN_THRESHOLD_PERCENT}%, approval required`}
+    >
+      <AlertTriangle className='w-2.5 h-2.5' aria-hidden='true' />
+      Low Margin
     </span>
   );
 }
@@ -98,12 +120,17 @@ export interface MarginTextProps {
 }
 
 export function MarginText({ profitMargin, className }: MarginTextProps) {
-  const color =
-    profitMargin >= 10
-      ? 'text-green-600 dark:text-green-400'
-      : 'text-amber-600 dark:text-amber-400';
+  const low = isLowMargin(profitMargin);
+  const color = low ? 'text-amber-600 dark:text-amber-400' : 'text-green-600 dark:text-green-400';
   const cls = className ? `${color} ${className}` : color;
-  return <span className={cls}>{profitMargin.toFixed(1)}%</span>;
+
+  // Colour alone carried this before, which is easy to miss in a dense table and
+  // invisible to anyone who can't separate the two hues. The badge states it.
+  return (
+    <span className={`${cls} inline-flex items-center gap-1 whitespace-nowrap`}>
+      {profitMargin.toFixed(1)}%{low && <LowMarginBadge />}
+    </span>
+  );
 }
 
 // ─────────────────────────────────────────────────

@@ -3,6 +3,7 @@ import { QuoteInput } from '@/types';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { UPS_FSC_URL, DHL_FSC_URL, FEDEX_FSC_URL, defaultFscFor } from '@/config/rates';
 import { TrendingUp, ExternalLink, Target } from 'lucide-react';
+import { formatKRW } from '@/lib/format';
 import { inputStyles } from './input-styles';
 import type { ResolvedMargin } from '@/api/marginRuleApi';
 
@@ -13,6 +14,10 @@ interface Props {
   effectiveMarginPercent?: number;
   hideMargin?: boolean;
   resolvedMargin?: ResolvedMargin | null;
+  /** Margin the current % actually produces (KRW), from the live calculation. */
+  marginAmount?: number;
+  /** Total the customer would be quoted (KRW), from the live calculation. */
+  totalQuoteAmount?: number;
   /**
    * FSC an emptied field falls back to — the DB rate the calculator resolved.
    * Omitted (tests, standalone use) means the shipped constant for the carrier.
@@ -27,6 +32,8 @@ export const FinancialSection: React.FC<Props> = ({
   hideMargin,
   resolvedMargin,
   carrierFscDefault,
+  marginAmount,
+  totalQuoteAmount,
 }) => {
   const { inputClass, labelClass, grayCardClass } = inputStyles;
   const ic = inputClass(isMobileView);
@@ -170,19 +177,45 @@ export const FinancialSection: React.FC<Props> = ({
                 <span className='text-gray-500 sm:text-sm font-bold'>%</span>
               </div>
             </div>
-            {resolvedMargin && (
+            {/* The margin is the admin's call, so the field says so and shows what
+                the current % is doing right now. The amounts come from the same
+                useMemo the result panel renders, so they move as the admin types —
+                that live movement is the point, not the prose. */}
+            <p className='mt-1.5 text-[9px] leading-relaxed text-gray-400 dark:text-gray-500'>
+              {input.marginPercent === 0
+                ? t('calc.financial.marginZero')
+                : t('calc.financial.marginHint')}
+            </p>
+            {marginAmount !== undefined && totalQuoteAmount !== undefined && (
               <div
-                className={`mt-1.5 flex items-start gap-1.5 text-[9px] leading-relaxed ${
-                  resolvedMargin.fallback
-                    ? 'text-gray-400 dark:text-gray-500'
+                className={`mt-1 flex items-start gap-1.5 text-[9px] leading-relaxed ${
+                  input.marginPercent === 0
+                    ? 'text-amber-600 dark:text-amber-400'
                     : 'text-emerald-600 dark:text-emerald-400'
                 }`}
               >
+                <TrendingUp className='w-3 h-3 flex-shrink-0 mt-0.5' />
+                <span>
+                  {t('calc.financial.marginLive')
+                    .replace('{amount}', formatKRW(marginAmount))
+                    .replace('{total}', formatKRW(totalQuoteAmount))}
+                </span>
+              </div>
+            )}
+            {/* Reference only. Admin quotes skip auto-resolution (QuoteCalculator),
+                so this rule is NOT what the field holds — labelling it "적용" would
+                contradict the 0 sitting in the input. */}
+            {resolvedMargin && (
+              <div className='mt-1 flex items-start gap-1.5 text-[9px] leading-relaxed text-gray-400 dark:text-gray-500'>
                 <Target className='w-3 h-3 flex-shrink-0 mt-0.5' />
                 <span>
-                  {resolvedMargin.matchedRule
-                    ? `${isKo ? '적용 룰' : 'Rule'}: ${resolvedMargin.matchedRule.name} → ${resolvedMargin.marginPercent}%`
-                    : `${isKo ? '기본값 적용' : 'Default fallback'}: ${resolvedMargin.marginPercent}%`}
+                  {`${isKo ? '참고 룰' : 'Reference rule'}: ${
+                    resolvedMargin.matchedRule
+                      ? resolvedMargin.matchedRule.name
+                      : isKo
+                        ? '기본값'
+                        : 'default'
+                  } → ${resolvedMargin.marginPercent}%`}
                 </span>
               </div>
             )}
