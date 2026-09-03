@@ -58,6 +58,34 @@ class QuoteSerializer
     }
   end
 
+  # Payload for the PUBLIC share link (`GET /shared/:token`, no authentication).
+  #
+  # Whitelisted on purpose. This used to render `detail`, which shipped
+  # `totalCostAmount`, `profitAmount`, `profitMargin` and `marginPercent` to
+  # whoever held the link — normally the customer being quoted. Nothing on the
+  # page displayed them, so the leak lived entirely in the response body.
+  #
+  # ⚠️ Never widen this by subtracting keys from `detail`: a field added there
+  # later would start leaking by default. Anything a customer may see has to be
+  # named here deliberately. Mirrors `SharedQuoteData` in `src/api/shareApi.ts`.
+  def self.shared(quote)
+    {
+      referenceNo: quote.reference_no,
+      originCountry: quote.origin_country,
+      destinationCountry: quote.destination_country,
+      destinationZip: quote.destination_zip,
+      overseasCarrier: quote.overseas_carrier,
+      totalQuoteAmount: quote.total_quote_amount.to_i,
+      totalQuoteAmountUsd: quote.total_quote_amount_usd.to_f.round(2),
+      appliedZone: quote.applied_zone,
+      transitTime: quote.transit_time,
+      incoterm: quote.incoterm,
+      billableWeight: quote.billable_weight.to_f,
+      createdAt: quote.created_at.iso8601,
+      validityDate: quote.validity_date&.iso8601
+    }
+  end
+
   def self.surcharge_stale?(quote)
     return false unless quote.status.in?(%w[draft sent])
     return false unless quote.breakdown.is_a?(Hash)

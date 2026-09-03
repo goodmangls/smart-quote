@@ -33,7 +33,9 @@ module Api
           return render json: { error: { message: "This share link has expired" } }, status: :gone
         end
 
-        render json: QuoteSerializer.detail(quote).merge(shared: true)
+        # Deliberately NOT `detail` — this endpoint is unauthenticated and its
+        # audience is the customer. See QuoteSerializer.shared.
+        render json: QuoteSerializer.shared(quote).merge(shared: true)
       rescue ActiveRecord::RecordNotFound
         render json: { error: { message: "Invalid or expired share link" } }, status: :not_found
       end
