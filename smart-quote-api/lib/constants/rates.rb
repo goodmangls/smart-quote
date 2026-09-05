@@ -5,7 +5,7 @@ module Constants
     WAR_RISK_SURCHARGE_RATE = 0  # DEC-006: War risk surcharge removed
     PACKING_MATERIAL_BASE_COST = 15000
     PACKING_LABOR_UNIT_COST = 50000
-    DEFAULT_EXCHANGE_RATE = 1320 # 적용 기준환율 (2026-09-02 확인)
+    DEFAULT_EXCHANGE_RATE = 1300 # 적용 기준환율 (2026-09-05 확인)
 
     # ============================================================
     # FSC 주간 업데이트 — 변경 시 아래 두 파일을 반드시 함께 수정
