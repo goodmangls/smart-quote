@@ -11,7 +11,7 @@ export const TRANSIT_TIMES = {
 } as const;
 
 // Market Defaults
-export const DEFAULT_EXCHANGE_RATE = 1320; // 적용 기준환율 (2026-09-02 확인)
+export const DEFAULT_EXCHANGE_RATE = 1300; // 적용 기준환율 (2026-09-05 확인)
 
 // ============================================================
 // FSC 주간 업데이트 — 변경 시 아래 두 파일을 반드시 함께 수정
