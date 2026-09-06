@@ -54,3 +54,9 @@ dist-prerender
 # deleted points at an unreachable SHA, so anyone cloning gets a broken
 # submodule-shaped entry that `git submodule` can't resolve either.
 .claude/worktrees/
+
+# Design canvas payload. `design/*.dc.html` + `design/canvas.json` are the
+# sources; the seeded page is a ~2.4 MB generated artefact that `seed-canvas.mjs`
+# rebuilds from them, so it never belongs in the tree.
+design/*.html
+!design/*.dc.html

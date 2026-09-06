@@ -180,6 +180,8 @@ Context providers wrap the app: `ThemeProvider > LanguageProvider > BrowserRoute
 | Currency toggle (KRW/USD) | O | X |
 | Flight Schedule (/schedule) | O | X |
 | Quote history | O | O |
+| Margin / cost fields in quote API responses | O | **X — 응답에 실리지 않음** |
+| Low Margin badge (<10%) in history | O | X |
 | Admin widgets panel (collapsible) | O | X |
 | Slack notification on save | X | O (auto) |
 
@@ -198,7 +200,7 @@ Frontend (`src/features/quote/services/calculationService.ts`) and backend (`sma
 
 1. **Item Costs** - Packing dimensions (+10/+10/+15cm), volumetric weight (L*W*H / 5000), packing material/labor, manual surge charges (all carriers)
 2. **Carrier Costs** - Zone lookup (country -> zone code), `rateTableResolver` selects tables per carrier + Document type (FedEx Document: Envelope ≤0.5kg / Pak ≤2.5kg / IP fallback with warning), shared `lookupCarrierRate()` engine (exact table 0.5-20kg -> range table >20kg -> fallback), FSC% surcharge
-3. **Margin** - Dynamic margin via `MarginRuleResolver` (priority-based: P100 per-user flat > P90 per-user weight > P50 nationality > P0 default), **Markup 방식**: `revenue = cost × (1 + margin%)`, rounded up to nearest KRW 100. Admin can manually override at any time. ⚠ 매출 대비 실효 마진율은 명목값보다 낮음 (예: 24% Markup → 실효 마진율 19.35% = margin / revenue).
+3. **Margin** - Dynamic margin via `MarginRuleResolver` (priority-based: P100 per-user flat > P90 per-user weight > P50 nationality > P0 default), **Markup 방식**: `revenue = cost × (1 + margin%)`, rounded up to nearest KRW 100. Admin can manually override at any time. ⚠ 매출 대비 실효 마진율은 명목값보다 낮음 (예: 24% Markup → 실효 마진율 19.35% = margin / revenue). ⚠️ **Admin 은 이 룰 해석을 건너뛰고 0% 에서 시작한다** (2026-09-06) — 아래 「Admin 마진 정책」 참조.
 4. **Warnings** - Low margin (<10%), high volumetric weight, surge charges, collect terms (EXW/FOB)
 
 ### 입력값 `0` 의 의미 (2026-08-21)
@@ -216,6 +218,22 @@ Frontend (`src/features/quote/services/calculationService.ts`) and backend (`sma
 - 게이트: 공유 픽스처 `ups_us_fsc_zero_explicit`(양쪽 원 단위 단언) + `spec/services/fsc_zero_semantics_spec.rb` + `FinancialSection.test.tsx`.
 - **범위 검증의 단일 출처는 `QuotesController::NUMERIC_INPUT_BOUNDS`** (2026-08-21 신설). 여기 값을 바꾸면 calculate·create·파트너 3경로에 동시 적용된다. ⚠️`"abc".to_f`·`"".to_f` 가 모두 `0.0` 이라 **범위 검사만으로는 문자열이 "유효한 0" 으로 통과한다** — 반드시 `NUMERIC_INPUT_PATTERN` 으로 숫자 여부부터 거를 것. `marginPercent`(계산기가 이미 clamp)와 품목 수(파트너 화물은 100개 초과가 정상)는 **의도적으로 제외**.
 - 이력: 2026-08-21 이전 FE 가 `||` 를 써서 `fscPercent: 0` 견적이 **화면 1,355,800 / 저장 1,020,600** 으로 갈렸다. 이미 저장된 견적의 금액은 재계산하지 않는다.
+
+### Admin 마진 정책 · 마진 노출 범위 (2026-09-06)
+
+**Admin 견적의 시작 마진은 무조건 0% 다.** 단일 출처는 `src/pages/quoteDefaults.ts` 의 `ADMIN_DEFAULT_MARGIN_PERCENT = 0` 이고, 초기 로드와 **Reset 이 둘 다** `initialInputFor(isAdmin)` 을 거친다. 마진은 관리자가 지정·조정하는 값이고, 그에 따라 Total Estimate Quote 가 즉시 다시 계산된다.
+
+- ⚠️ **Reset 이 이 규칙을 가장 쉽게 깬다.** 0% 는 `isAdmin` 을 키로 한 effect 가 적용하는데 리셋 시 역할은 바뀌지 않으므로 effect 가 재발화하지 않는다 — `setInput(INITIAL_INPUT)` 로 되돌리면 admin 이 member 기본값 15% 에 앉는다. 반드시 `initialInputFor(isAdmin)` 을 쓰고 `hasManuallyChangedMargin` ref 도 함께 비울 것(안 비우면 member 쪽 룰 자동 해석까지 막힌다).
+- Member 는 영향 없다. `INITIAL_INPUT.marginPercent`(15%)와 `MarginRuleResolver` 자동 해석을 그대로 쓴다.
+- 저마진 임계값의 단일 출처는 `src/config/business-rules.ts` 의 `LOW_MARGIN_THRESHOLD_PERCENT = 10` · `isLowMargin()` 이다. 계산 경고와 이력 배지가 같은 값을 본다.
+- 이력 화면의 **Low Margin 배지**는 색만으로 알리지 않는다 — 색은 색각 이상·흑백 출력에서 사라지므로 텍스트 배지를 함께 렌더한다(`QuoteHistoryTableParts.tsx`).
+
+**마진·원가는 Admin 에게만 나간다 — 화면에서 감추는 게 아니라 직렬화에서 뺀다.**
+
+- `QuoteSerializer.summary` / `.detail` 은 `include_margin:` **기본값이 `false`** 다(deny-by-default). 호출부가 `current_user.admin?` 일 때만 켠다 — 새 엔드포인트를 추가하면서 아무것도 안 하면 안전한 쪽으로 떨어진다.
+- 빠지는 필드: `marginPercent` · `totalCostAmount` · `profitAmount` · `profitMargin` · `breakdown`.
+- 공개 공유 링크(`GET /shared/:token`)는 별도 화이트리스트 `QuoteSerializer.shared` 를 쓴다. 미인증 경로라 **뺄 것을 고르는 방식이 아니라 담을 것을 고르는 방식**이어야 한다 — 필드가 새로 생겨도 자동으로 새지 않는다.
+- ⚠️ 프론트에서 마진 열·배지를 숨기는 것만으로는 부족하다. **응답에 값이 없어야** 개발자도구·공유 링크로도 안 보인다.
 
 ### UPS Zone Mapping (Z1-Z10) — per UPS 2026 Service Guide
 
@@ -298,7 +316,9 @@ Express shipments (UPS/DHL/FedEx) → **DAP only** (no exceptions). AI chatbot e
 
 ### Admin Widgets (visible at /admin only)
 
-- **FscRateWidget**: Tracks live UPS/DHL/FedEx fuel surcharges with external verification links and manual override
+- **FscRateWidget**: DB(`fsc_rates`) 요율을 표시하고 관리자가 UPS/DHL/FedEx 를 직접 편집·저장한다(연필 → 입력 → 체크). 저장은 캐리어당 `POST /api/v1/fsc/update` 로 나가고, 캐리어 공식 확인 링크를 함께 둔다.
+  - ⚠️ **부분 저장 실패를 뭉뚱그리지 말 것** (`fsc/useFscRateEdit.ts`). 저장된 캐리어 / 응답을 못 받아 **반영 여부가 불확실한** 캐리어 / **아예 시도되지 않은** 캐리어는 서로 다른 상태이고, 각각 다르게 알려야 관리자가 무엇을 다시 해야 할지 안다. 요청이 던져진 캐리어를 "이전 값 그대로"라고 단언하면 거짓말이 된다.
+  - ⚠️ 실패 후 판단 근거는 입력칸 아래 **`현재 DB`** 값이다. 재조회 중이거나 재조회가 실패했으면 **직전 값을 현재 DB 인 것처럼 보여주지 말 것** — `확인 중…` / `읽지 못했습니다` 로 구분한다.
 - **TargetMarginRulesWidget**: DB-driven margin rule CRUD, priority-based grouping (P100/P90/P50/P0), inline add/edit, soft delete
 - **SurchargeManagementWidget**: Carrier-specific surcharge CRUD (split into SurchargeForm, SurchargeTable, SurchargeCarrierLinks, SurchargeNotice sub-components)
 - **CustomerManagement**: Customer CRUD with quote count badges
@@ -373,13 +393,15 @@ POST   /api/v1/notifications/slack   # Slack webhook proxy
 - **Tailwind**: BridgeLogis brand palette (`brand-blue-*`, `cyan-*`, `navy`, `deep-blue`, `gold`) + Semantic (`success/warning/destructive/info`), class-based dark mode. Phase 2 완료 후 레거시 `jways-*`/`accent-*` 제거.
 - **Environment**: `VITE_API_URL`, `VITE_EIA_API_KEY`, `VITE_SENTRY_DSN`, `VITE_INTERCOM_APP_ID`, `VITE_GOOGLE_MAPS_API_KEY`
 - **Tariff sync**: Frontend tariff files in `src/config/` must stay in sync with backend `lib/constants/`
-- **Market defaults**: `DEFAULT_EXCHANGE_RATE` (하나은행 월요일 09시 송금환율) 과 캐리어별 `DEFAULT_FSC_PERCENT*` 는 `src/config/rates.ts` 에 있다. **현재 수치는 여기 옮겨 적지 않는다** — 매주 바뀌어서 문서가 곧 stale 해진다. 값이 필요하면 파일을 볼 것.
+- **Market defaults**: `DEFAULT_EXCHANGE_RATE` (적용 기준환율 — 산출 방식은 아래 **Exchange rate policy**) 과 캐리어별 `DEFAULT_FSC_PERCENT*` 는 `src/config/rates.ts` 에 있다. **현재 수치는 여기 옮겨 적지 않는다** — 매주 바뀌어서 문서가 곧 stale 해진다. 값이 필요하면 파일을 볼 것.
 - **FSC 업데이트 주기**: UPS/DHL/FedEx 모두 매주 월요일.
   - **평시 갱신은 Admin FSC 위젯(DB)만으로 끝난다** — 배포 불필요. 2026-08-24부터 계산기가 `useCarrierFscDefault` 로 DB 요율을 기본값으로 읽는다(백엔드는 이전부터 DB 우선). 그 전까지는 위젯 값이 견적에 반영되지 않아 관리자가 올려도 지난주 요율로 견적이 나갔다.
   - 코드 상수(`src/config/rates.ts` + `smart-quote-api/lib/constants/rates.rb` + `src/config/fsc-history.ts`)는 **DB 조회 실패·요청 대기 중 폴백**이자 이력 차트 시드다. 세 파일은 항상 같은 값으로 함께 수정하며, `fsc-history.test.ts` 가 시드↔상수 정합을 강제한다(부분 갱신 시 RED).
   - ⚠️ 사용자가 FSC 칸에 직접 입력한 값은 DB 응답이 늦게 와도 덮이지 않는다. 캐리어를 바꾸면 새 캐리어 기본값으로 초기화된다.
-- **Exchange rate policy**: Live API 자동세팅 비활성화. 매주 월요일 **하나은행 09시 송금환율을 50원 내림**(`floor(시장/50)×50`)해서 적용한다 — 낮은 환율은 `USD 견적 = KRW ÷ 환율` 기준으로 안전 버퍼가 된다.
-  - 갱신은 **`/fx-update` 스킬**이 한다(`/Users/jaehong/.claude/skills/fx-update/`). main+emax 를 같은 값으로 처리하고, 저장소별 `src/config/rates.ts`와 `smart-quote-api/lib/constants/rates.rb`를 함께 수정한 뒤 재읽기로 검증한다.
+- **Exchange rate policy** (2026-09-02 정책 변경): Live API 자동세팅 비활성화. **부르는 숫자를 반올림 없이 그대로 적용한다** — `/fx-update 1300` 이면 적용 환율이 1300 이다. 50원 단위 제약이 없어 1325·1337 도 그대로 들어간다.
+  - ⚠️ **입력값이 곧 마진이다.** 견적 USD = `KRW ÷ 환율` 이라 환율을 낮게 잡으면 USD 견적이 높아져 안전 버퍼가 된다 — 버퍼를 얼마나 둘지는 **숫자를 부르는 쪽의 판단**이고 스크립트는 아무것도 더하거나 빼지 않는다. 송금환율을 그대로 넣으면 버퍼는 0 이다.
+  - 구 정책 `floor(송금환율/50)×50`(2026-08-25~09-02)은 **버퍼가 시장 위치에 따라 1원~49원으로 들쭉날쭉**해서 폐기했다(1401 → 1400 이면 버퍼 1원). `--market` 플래그로만 남아 있고 명시할 때만 동작한다.
+  - 갱신은 **`/fx-update` 스킬**이 한다(`~/.claude/skills/fx-update/`). main+emax 를 같은 값으로 동시 처리하고, 저장소당 `src/config/rates.ts` + `smart-quote-api/lib/constants/rates.rb` 2파일을 쓴 뒤 재읽기로 검증한다.
   - ⚠️ **FSC와 달리 DB·Admin 위젯이 없다. 상수를 수정하고 배포해야 반영된다.** TS↔RB 불일치는 `fx-apply.py --check`로 검사한다.
   - ✅ `ExchangeRateWidget`은 `evaluateFxDrift`(`src/features/dashboard/lib/fxDrift.ts`)로 시장 USD/KRW와 적용값을 비교한다. 버킷 이탈 시 재검토, 경계 15원 이내면 근접 경고를 표시하며 임계값은 `FX_NEAR_BAND`에서 관리한다. **이게 없던 동안 smart-quote-emax 가 1450 으로 5개월 방치됐다**(2026-08-25 발견) — 위젯은 시장을 계속 보는데 상수는 사람이 갱신해야만 움직여서, 둘을 잇는 게 없으면 stale 이 화면에 안 보인다.
   - ⚠️ 임계값이 15원인 이유: **위젯은 시장(중간)환율이고 정책 입력은 송금환율이라 둘이 다른 숫자다.** TT 스프레드가 ~1%(약 14원)까지 가므로 그 폭에 맞췄다. 송금환율이 더 높아 시장만 보면 상승 이탈을 늦게 잡는데, 밴드가 그 지연을 메운다.
@@ -400,7 +422,7 @@ POST   /api/v1/notifications/slack   # Slack webhook proxy
   - 수동 배포(필요 시): `vercel --prod --scope goodman-ksways --yes` (repo 루트). `.vercel` 링크 stale 시 `vercel link --yes --scope goodman-ksways --project smart-quote-main`
   - ⚠️ Vercel **MCP(jlinsights 토큰)는 이 프로젝트 접근 불가** — `vercel` CLI(jlinsights 계정, goodman-ksways 스코프)로만. GitHub Deployments API도 이 팀 배포를 못 봄 → 배포 상태는 `vercel ls smart-quote-main --scope goodman-ksways --prod` 로 확인
 - **Backend**: Render.com (Singapore region, PostgreSQL) — `render.yaml` `rootDir: smart-quote-api` monorepo 모드 (migrated 2026-05-04)
-  - ⚠️ **자동배포 이력**: org 이전(jlinsights→goodmangls) 후 Render 가 구 repo 에 연결된 채 방치돼 **자동·수동배포가 모두 헛돌았음** (그 사이 백엔드 변경은 프로덕션 미반영). 2026-08-17 goodmangls/smart-quote 로 재연결했으나 **push 트리거 자동배포는 여전히 미발화** — 배포는 대시보드 **Manual Deploy** 로 실행하고, 반영 여부는 커밋 해시가 아니라 **프로덕션 응답의 코드 마커**로 검증할 것. 근본 복구는 GitHub org 의 Render App 설치 확인 필요
+  - ⚠️ **자동배포 이력**: org 이전(jlinsights→goodmangls) 후 Render 가 구 repo 에 연결된 채 방치돼 **자동·수동배포가 모두 헛돌았음** (그 사이 백엔드 변경은 프로덕션 미반영). 2026-08-17 goodmangls/smart-quote 로 재연결했지만 push 자동배포는 계속 미발화였고, **2026-09-06 배포 로그에서 원인을 확인했다 — `we don't have access to your repo`. goodmangls org 에 Render GitHub App 이 설치돼 있지 않았다**(`gh api /orgs/goodmangls/installations` 응답에 `render` 없음). App 설치 후 `render (all)` 로 확인됨. ⚠️ **다만 push 트리거가 실제로 발화하는지는 아직 관측되지 않았다** — 다음 백엔드 push 에서 확인할 것. 그때까지는 대시보드 **Manual Deploy** 로 실행하고, 반영 여부는 커밋 해시가 아니라 **프로덕션 응답의 코드 마커**로 검증한다. ⚠️ Manual Deploy 를 눌러도 **같은 커밋을 다시 배포**하는 경우가 있으니 배포 대상 커밋을 확인할 것
 - **Config**: `render.yaml` (repo root) for backend infrastructure; `healthCheckPath: /up` for zero-downtime deploys
 - **Seed**: After backend deploy, run `rails runner db/seeds/addon_rates.rb` in Render Shell for new add-on rates
 
@@ -415,6 +437,7 @@ POST   /api/v1/notifications/slack   # Slack webhook proxy
 - 토큰이 없으면 임의 값을 만들지 말고 DESIGN.md 를 먼저 수정한다
 - 차트·SVG 등 HEX 직접 사용 영역은 `src/lib/chartColors.ts` 의 `CHART_COLORS` 상수만 사용
 - Feature 단위 design 문서(`docs/02-design/features/*.design.md`)는 DESIGN.md 토큰을 참조
+- 화면 목업 아트보드는 `design/` 에 있다(`*.dc.html` + `canvas.json`). ⚠️ 시드된 `design/*.html` 은 `seed-canvas.mjs` 가 원본에서 다시 찍어내는 **2.4MB 생성물**이라 `.gitignore` 로 제외돼 있다 — 수정은 항상 원본을 고쳐 재시드한다
 
 ## User Guides
 
