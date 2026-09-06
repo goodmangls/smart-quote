@@ -1,0 +1,179 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;700&display=swap">
+  <style>
+    body { margin: 0; font-family: Geist, ui-sans-serif, system-ui, sans-serif; }
+    a { color: #1D6FD1; } a:hover { color: #1a5fb4; }
+    .card { background: #ffffff; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 2px rgba(10,22,40,.06); }
+    th { padding: 12px 16px; font-size: 12px; font-weight: 500; color: #6b7280; text-align: left; white-space: nowrap; }
+    td { padding: 14px 16px; font-size: 13px; color: #1f2937; border-bottom: 1px solid #f3f4f6; white-space: nowrap; }
+    .pill { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 9999px; font-size: 11px; font-weight: 500; }
+    .num { font-variant-numeric: tabular-nums; }
+  </style>
+</helmet>
+
+<div style="width: 1440px; min-height: 880px; background: #fafafa; color: #1f2937; padding: 28px; display: flex; flex-direction: column; gap: 18px;">
+
+  <div style="display: flex; align-items: flex-end; justify-content: space-between;">
+    <div>
+      <h1 style="margin: 0; font-size: 22px; font-weight: 700; letter-spacing: -.02em; color: #111827;">견적 이력</h1>
+      <p style="margin: 6px 0 0; font-size: 13px; color: #6b7280;">마진 열과 저마진 배지는 <strong>관리자에게만</strong> 보입니다. 일반 사용자 응답에는 원가·마진 필드가 아예 실리지 않습니다.</p>
+    </div>
+    <div style="display: flex; align-items: center; gap: 8px;">
+      <span style="display: inline-flex; align-items: center; gap: 6px; border: 1px solid #e5e7eb; background: #fff; border-radius: 8px; padding: 7px 12px; font-size: 12px; color: #6b7280;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        참조번호 · 국가 · 고객 검색
+      </span>
+      <span style="display: inline-flex; align-items: center; gap: 6px; background: #0A1628; color: #fff; border-radius: 8px; padding: 8px 14px; font-size: 12px; font-weight: 500;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>
+        CSV
+      </span>
+    </div>
+  </div>
+
+  <div class="card">
+    <table style="width: 100%; border-collapse: collapse;">
+      <thead>
+        <tr style="border-bottom: 1px solid #e5e7eb; background: #f9fafb;">
+          <th>참조번호</th>
+          <th>일자</th>
+          <th>구간</th>
+          <th>캐리어</th>
+          <th style="text-align: right;">청구중량</th>
+          <th style="text-align: right;">견적금액</th>
+          <th style="text-align: right;">
+            마진
+            <span class="pill" style="background: #eff6ff; color: #1D6FD1; margin-left: 6px;">Admin</span>
+          </th>
+          <th>상태</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="font-weight: 500; color: #1D6FD1;">SQ-2026-0148</td>
+          <td style="color: #6b7280;">[일자]</td>
+          <td>KR → [도착국] <span style="color: #9ca3af;">[우편번호]</span></td>
+          <td>UPS</td>
+          <td class="num" style="text-align: right;">[중량] kg</td>
+          <td class="num" style="text-align: right; font-weight: 700;">[금액]</td>
+          <td style="text-align: right;">
+            <span style="display: inline-flex; align-items: center; gap: 6px; justify-content: flex-end;">
+              <span class="num" style="font-weight: 700; color: #b45309;">7.4%</span>
+              <span class="pill" style="gap: 2px; background: #fef3c7; color: #b45309; font-size: 10px; padding: 2px 6px;">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m21.7 18-8-14a2 2 0 0 0-3.4 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.7-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+                Low Margin
+              </span>
+            </span>
+          </td>
+          <td><span class="pill" style="background: #dbeafe; color: #1d4ed8;">Sent</span></td>
+          <td style="text-align: right; color: #9ca3af;">⋯</td>
+        </tr>
+        <tr>
+          <td style="font-weight: 500; color: #1D6FD1;">SQ-2026-0147</td>
+          <td style="color: #6b7280;">[일자]</td>
+          <td>KR → [도착국] <span style="color: #9ca3af;">[우편번호]</span></td>
+          <td>DHL</td>
+          <td class="num" style="text-align: right;">[중량] kg</td>
+          <td class="num" style="text-align: right; font-weight: 700;">[금액]</td>
+          <td class="num" style="text-align: right; font-weight: 700; color: #374151;">[마진]%</td>
+          <td><span class="pill" style="background: #d1fae5; color: #047857;">Confirmed</span></td>
+          <td style="text-align: right; color: #9ca3af;">⋯</td>
+        </tr>
+        <tr>
+          <td style="font-weight: 500; color: #1D6FD1;">SQ-2026-0146</td>
+          <td style="color: #6b7280;">[일자]</td>
+          <td>KR → [도착국] <span style="color: #9ca3af;">[우편번호]</span></td>
+          <td>FEDEX</td>
+          <td class="num" style="text-align: right;">[중량] kg</td>
+          <td class="num" style="text-align: right; font-weight: 700;">[금액]</td>
+          <td style="text-align: right;">
+            <span style="display: inline-flex; align-items: center; gap: 6px; justify-content: flex-end;">
+              <span class="num" style="font-weight: 700; color: #b45309;">0.0%</span>
+              <span class="pill" style="gap: 2px; background: #fef3c7; color: #b45309; font-size: 10px; padding: 2px 6px;">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m21.7 18-8-14a2 2 0 0 0-3.4 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.7-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+                Low Margin
+              </span>
+            </span>
+          </td>
+          <td><span class="pill" style="background: #f3f4f6; color: #374151;">Draft</span></td>
+          <td style="text-align: right; color: #9ca3af;">⋯</td>
+        </tr>
+        <tr>
+          <td style="font-weight: 500; color: #1D6FD1;">SQ-2026-0145</td>
+          <td style="color: #6b7280;">[일자]</td>
+          <td>KR → [도착국] <span style="color: #9ca3af;">[우편번호]</span></td>
+          <td>UPS</td>
+          <td class="num" style="text-align: right;">[중량] kg</td>
+          <td class="num" style="text-align: right; font-weight: 700;">[금액]</td>
+          <td class="num" style="text-align: right; font-weight: 700; color: #374151;">[마진]%</td>
+          <td><span class="pill" style="background: #fee2e2; color: #b91c1c;">Rejected</span></td>
+          <td style="text-align: right; color: #9ca3af;">⋯</td>
+        </tr>
+        <tr>
+          <td style="font-weight: 500; color: #1D6FD1;">SQ-2026-0144</td>
+          <td style="color: #6b7280;">[일자]</td>
+          <td>KR → [도착국] <span style="color: #9ca3af;">[우편번호]</span></td>
+          <td>DHL</td>
+          <td class="num" style="text-align: right;">[중량] kg</td>
+          <td class="num" style="text-align: right; font-weight: 700;">[금액]</td>
+          <td class="num" style="text-align: right; font-weight: 700; color: #374151;">[마진]%</td>
+          <td><span class="pill" style="background: #ffedd5; color: #c2410c;">Expired</span></td>
+          <td style="text-align: right; color: #9ca3af;">⋯</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div style="padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; background: #fafafa;">
+      <span style="font-size: 12px; color: #6b7280;">총 [건수]건 중 1–5</span>
+      <div style="display: flex; align-items: center; gap: 6px;">
+        <span style="display: inline-flex; width: 28px; height: 28px; align-items: center; justify-content: center; border: 1px solid #e5e7eb; background: #fff; border-radius: 6px; font-size: 12px; color: #9ca3af;">‹</span>
+        <span style="display: inline-flex; width: 28px; height: 28px; align-items: center; justify-content: center; background: #0A1628; color: #fff; border-radius: 6px; font-size: 12px; font-weight: 500;">1</span>
+        <span style="display: inline-flex; width: 28px; height: 28px; align-items: center; justify-content: center; border: 1px solid #e5e7eb; background: #fff; border-radius: 6px; font-size: 12px; color: #4b5563;">2</span>
+        <span style="display: inline-flex; width: 28px; height: 28px; align-items: center; justify-content: center; border: 1px solid #e5e7eb; background: #fff; border-radius: 6px; font-size: 12px; color: #4b5563;">3</span>
+        <span style="display: inline-flex; width: 28px; height: 28px; align-items: center; justify-content: center; border: 1px solid #e5e7eb; background: #fff; border-radius: 6px; font-size: 12px; color: #4b5563;">›</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Member view contrast -->
+  <div class="card" style="border-style: dashed; background: #fbfbfb;">
+    <div style="padding: 12px 16px; border-bottom: 1px solid #f3f4f6; display: flex; align-items: center; gap: 8px;">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+      <span style="font-size: 12px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: #374151;">같은 화면 · 일반 사용자</span>
+    </div>
+    <table style="width: 100%; border-collapse: collapse;">
+      <thead>
+        <tr style="border-bottom: 1px solid #e5e7eb; background: #f9fafb;">
+          <th>참조번호</th><th>일자</th><th>구간</th><th>캐리어</th>
+          <th style="text-align: right;">청구중량</th><th style="text-align: right;">견적금액</th><th>상태</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="font-weight: 500; color: #1D6FD1;">SQ-2026-0148</td>
+          <td style="color: #6b7280;">[일자]</td>
+          <td>KR → [도착국]</td>
+          <td>UPS</td>
+          <td class="num" style="text-align: right;">[중량] kg</td>
+          <td class="num" style="text-align: right; font-weight: 700;">[금액]</td>
+          <td><span class="pill" style="background: #dbeafe; color: #1d4ed8;">Sent</span></td>
+        </tr>
+      </tbody>
+    </table>
+    <div style="padding: 10px 16px; background: #f9fafb;">
+      <p style="margin: 0; font-size: 11px; color: #6b7280;">마진 열이 숨겨진 것이 아니라 <strong>응답에 없습니다</strong> — 직렬화가 기본 차단이라 공유 링크에도 원가가 실리지 않습니다.</p>
+    </div>
+  </div>
+
+</div>
+</x-dc>
+</body>
+</html>
