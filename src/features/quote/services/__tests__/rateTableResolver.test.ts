@@ -85,8 +85,13 @@ describe('rateTableResolver', () => {
 });
 
 describe('Document vs Non-Document rate lookup', () => {
+  // Literals, deliberately: reading the expected value back out of the tariff
+  // module would pass whatever the table happens to say, so a mis-entered rate
+  // would ship silently. Spelled out, a tariff update turns this red and has to
+  // be re-confirmed against the carrier's sheet — which is how the 2026-09-08
+  // UPS Document update was caught. Mirrored in spec/services/rate_table_resolver_spec.rb.
   it('UPS Document 1kg Z2 (JP) uses Document rate', () => {
-    expect(calculateUpsCosts(1, 'JP', ShippingItemType.DOCUMENT).intlBase).toBe(30134);
+    expect(calculateUpsCosts(1, 'JP', ShippingItemType.DOCUMENT).intlBase).toBe(38064);
     expect(calculateUpsCosts(1, 'JP', ShippingItemType.NON_DOCUMENT).intlBase).toBe(55784);
   });
 

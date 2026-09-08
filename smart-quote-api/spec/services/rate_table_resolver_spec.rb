@@ -65,13 +65,18 @@ RSpec.describe Calculators::RateTableResolver do
 end
 
 RSpec.describe Calculators::UpsCost, "document rates" do
+  # Literal, deliberately: reading the expected value back out of UPS_DOC_EXACT_RATES
+  # would pass whatever the table happens to say, so a mis-entered rate would ship
+  # silently. Spelled out, a tariff update turns this red and has to be re-confirmed
+  # against the carrier's sheet — which is how the 2026-09-08 UPS Document update was
+  # caught. Mirrored in src/features/quote/services/__tests__/rateTableResolver.test.ts.
   it "returns Document rate for JP 1kg" do
     result = described_class.call(
       billable_weight: 1,
       country: "JP",
       shipping_item_type: "DOCUMENT"
     )
-    expect(result[:intl_base]).to eq(30_134)
+    expect(result[:intl_base]).to eq(38_064)
   end
 
   it "returns Non-Document rate when type omitted" do
