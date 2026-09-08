@@ -392,7 +392,11 @@ POST   /api/v1/notifications/slack   # Slack webhook proxy
 - **Path alias**: `@/` -> `src/` (both vite.config.ts and tsconfig.json)
 - **Tailwind**: BridgeLogis brand palette (`brand-blue-*`, `cyan-*`, `navy`, `deep-blue`, `gold`) + Semantic (`success/warning/destructive/info`), class-based dark mode. Phase 2 완료 후 레거시 `jways-*`/`accent-*` 제거.
 - **Environment**: `VITE_API_URL`, `VITE_EIA_API_KEY`, `VITE_SENTRY_DSN`, `VITE_INTERCOM_APP_ID`, `VITE_GOOGLE_MAPS_API_KEY`
-- **Tariff sync**: Frontend tariff files in `src/config/` must stay in sync with backend `lib/constants/`
+- **Tariff sync**: `src/config/*_tariff.ts` 와 백엔드 `lib/constants/*_tariff.rb` 는 항상 같아야 하며, `shared/tariff-snapshots/tariffs.json` 이 둘을 잇는 게이트다 — `tariffParity.test.ts` 와 `spec/lib/tariff_snapshot_parity_spec.rb` 가 **모든 셀**을 단언하므로 한쪽 셀 하나만 고쳐도 CI 가 죽는다.
+  - **갱신은 순서가 있다**: `.rb` 수정 → `bin/rails tariff:snapshot` → `.ts` 미러링. 스냅샷을 건너뛰면 게이트가 옛 값을 들고 있어 양쪽 다 빨개진다
+  - ⚠️ **100셀짜리 표를 손으로 옮기지 말 것.** PDF 에서 파싱해 `.rb`·`.ts` 를 **같은 결과로 생성**하고, 존·중량 구조가 기존 표와 다르면 멈추게 한다. 타이핑은 고객에게 틀린 금액이 나가는 경로를 셀 수만큼 만든다
+  - ⚠️ **요율 테스트의 기대값 리터럴을 상수 참조로 "정리"하지 말 것**(`rateTableResolver.test.ts` · `rate_table_resolver_spec.rb`). 리터럴이라야 요율이 바뀔 때 RED 가 되어 사람이 캐리어 시트와 재확인한다 — 2026-09-08 UPS Document 교체를 실제로 이 리터럴이 잡았다. 같은 파일의 DHL 단언은 `DHL_DOC_EXACT_RATES.Z1[1]` 을 **참조**해서 표가 틀리게 바뀌어도 통과한다
+  - **UPS Document 요율표는 smart-quote-emax 와 의도적으로 다르다**(2026-09-08 확인, #113). emax 가 2026-08-03 에 이 표를 복사해 갔고 이후 main 만 새 시트로 교체됐다 — 다르다고 맞추지 말 것
 - **Market defaults**: `DEFAULT_EXCHANGE_RATE` (적용 기준환율 — 산출 방식은 아래 **Exchange rate policy**) 과 캐리어별 `DEFAULT_FSC_PERCENT*` 는 `src/config/rates.ts` 에 있다. **현재 수치는 여기 옮겨 적지 않는다** — 매주 바뀌어서 문서가 곧 stale 해진다(실제로 2026-08-25 까지 UPS 45.50·DHL 48.00·FedEx 39.75 라는 넉 달 묵은 값이 이 줄에 남아 있었다). 값이 필요하면 파일을 볼 것.
 - **FSC 업데이트 주기**: UPS/DHL/FedEx 모두 매주 월요일.
   - **평시 갱신은 Admin FSC 위젯(DB)만으로 끝난다** — 배포 불필요. 2026-08-24부터 계산기가 `useCarrierFscDefault` 로 DB 요율을 기본값으로 읽는다(백엔드는 이전부터 DB 우선). 그 전까지는 위젯 값이 견적에 반영되지 않아 관리자가 올려도 지난주 요율로 견적이 나갔다.
@@ -414,6 +418,8 @@ POST   /api/v1/notifications/slack   # Slack webhook proxy
   - Tests use `vitest/globals` (no imports needed for `describe`, `it`, `expect`)
   - 전체 실행은 `npx vitest run`, 커버리지는 `npm run test:coverage`, E2E는 `npm run test:e2e`
   - ⚠️ 테스트 **개수를 문서에 적지 않는다** — 커밋마다 바뀌어 반드시 stale 해진다. 실제로 이 줄에 박혀 있던 수치가 2026-08 기준 260 여 건 어긋나 있었다. 개수가 필요하면 위 명령을 돌릴 것
+  - ⚠️ **큰 목록에 `getAllByRole` 을 쓰지 말 것.** 역할 질의는 문서의 모든 요소에 ARIA role 계산과 접근성 가시성 검사를 돌아, 206개 `<option>` 기준 **400ms~2.6초로 6배 요동**한다(같은 결과를 주는 `querySelectorAll` 은 0.5ms). 이게 `RouteSection.test.tsx` 를 5초 기본 타임아웃으로 산발 실패시켰고, **단독 실행과 CI 에서는 재현되지 않아** 오래 방치됐다(#112). 대상을 좁힌 DOM 질의를 쓰고, 위치로 잡을 땐 개수 가드를 붙여 마크업이 바뀌면 조용히 엉뚱한 요소를 검사하지 않게 할 것
+  - ⚠️ **비결정 실패는 한 번의 green/red 로 판정하지 말 것.** 같은 트리에서 실패→실패→통과가 나온다. 원인 귀속은 **HEAD 를 반복 실행**해 거기서도 실패하는지로 가른다(#112 에서 이 방법으로 "내 변경 탓"이라는 오판을 정정했다)
 - **Backend**: RSpec + FactoryBot + Shoulda Matchers, factories in `spec/factories/`
 
 ## Deployment
