@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 namespace :tariff do
-  desc "Regenerate shared/tariff-snapshots/tariffs.json from lib/constants/*_tariff.rb"
+  desc "Regenerate shared/tariff-snapshots/tariffs.json from lib/constants/*_tariff.rb and rates.rb"
   task snapshot: :environment do
     require "json"
     require "fileutils"

@@ -15,7 +15,7 @@ module Calculators
       zone_key = zone_info[:rate_key]
 
       dhl_base = calculate_base_rate(zone_key)
-      dhl_war_risk = dhl_base * Constants::Rates::WAR_RISK_SURCHARGE_RATE
+      dhl_war_risk = dhl_base * (Constants::Rates::WAR_RISK_SURCHARGE_RATE / 100.0)
 
       {
         intl_base: dhl_base,

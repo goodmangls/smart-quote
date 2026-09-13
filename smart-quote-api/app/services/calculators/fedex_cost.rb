@@ -17,7 +17,7 @@ module Calculators
       zone_key = zone_info[:rate_key]
 
       fedex_base = calculate_base_rate(zone_key)
-      fedex_war_risk = fedex_base * Constants::Rates::WAR_RISK_SURCHARGE_RATE
+      fedex_war_risk = fedex_base * (Constants::Rates::WAR_RISK_SURCHARGE_RATE / 100.0)
 
       {
         intl_base: fedex_base,
