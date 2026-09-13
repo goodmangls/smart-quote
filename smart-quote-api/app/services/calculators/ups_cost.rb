@@ -15,7 +15,7 @@ module Calculators
       zone_key = zone_info[:rate_key]
 
       ups_base = calculate_base_rate(zone_key)
-      ups_war_risk = ups_base * Constants::Rates::WAR_RISK_SURCHARGE_RATE
+      ups_war_risk = ups_base * (Constants::Rates::WAR_RISK_SURCHARGE_RATE / 100.0)
 
       {
         intl_base: ups_base,
