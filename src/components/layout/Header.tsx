@@ -169,7 +169,7 @@ export const Header: React.FC = () => {
               {/* Dark Mode Toggle */}
               <button
                 onClick={toggleDarkMode}
-                className='p-2 text-gray-600 dark:text-gray-300 hover:text-cyan-600 dark:hover:text-cyan-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-all'
+                className='p-2 min-h-[44px] min-w-[44px] inline-flex items-center justify-center text-gray-600 dark:text-gray-300 hover:text-cyan-600 dark:hover:text-cyan-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-all'
                 aria-label={isDarkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
               >
                 {isDarkMode ? <Sun className='w-5 h-5' /> : <Moon className='w-5 h-5' />}
@@ -186,10 +186,13 @@ export const Header: React.FC = () => {
                 </button>
               )}
 
-              {/* Mobile Hamburger */}
+              {/* Mobile Hamburger. 44px is pinned as an explicit min size, not
+                  extra padding, so it survives an icon-size change: p-2 around a
+                  20px icon left this at 36x36, and on a phone this button is the
+                  only way to reach navigation at all. */}
               <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className='sm:hidden p-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-all'
+                className='sm:hidden p-2 min-h-[44px] min-w-[44px] inline-flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-all'
                 aria-label='Toggle menu'
               >
                 {isMobileMenuOpen ? <X className='w-5 h-5' /> : <Menu className='w-5 h-5' />}
