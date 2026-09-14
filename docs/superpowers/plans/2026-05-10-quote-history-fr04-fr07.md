@@ -1,3 +1,18 @@
+> # ✅ 이 계획은 완료됐습니다 — 실행하지 마세요 (2026-09-14 확인)
+>
+> **아래 체크박스 52개는 미완이 아니라 미갱신입니다.** 작업은 끝났는데
+> 체크박스를 표시하지 않은 채 남았습니다.
+>
+> **완료 보고서:** [`docs/04-report/features/quote-history-fr04-fr07.report.md`](../../04-report/features/quote-history-fr04-fr07.report.md)
+>
+> **코드로 확인한 근거:**
+> - FR-04 amount-range 필터 → `smart-quote-api/app/models/quote.rb` 의
+>   `by_amount_range` scope 실재
+> - FR-07 xlsx export → `src/features/history` 에 xlsx 경로 실재
+>
+> ⚠️ 위 "For agentic workers" 지시는 **무시하세요.** 이 계획을 실행하면
+> 이미 배포된 기능을 다시 만들거나 충돌시킵니다.
+
 # Quote History FR-04 + FR-07 Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
