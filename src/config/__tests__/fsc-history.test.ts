@@ -171,9 +171,9 @@ describe('fsc-history', () => {
 
   describe('DEFAULT_FSC_HISTORY', () => {
     it('includes the latest confirmed FSC seed entries for UPS, DHL, and FedEx', () => {
-      expect(DEFAULT_FSC_HISTORY.ups.at(-1)).toEqual({ date: '2026-09-07', rate: 46.75 });
-      expect(DEFAULT_FSC_HISTORY.dhl.at(-1)).toEqual({ date: '2026-09-07', rate: 43.5 });
-      expect(DEFAULT_FSC_HISTORY.fedex.at(-1)).toEqual({ date: '2026-09-07', rate: 46.0 });
+      expect(DEFAULT_FSC_HISTORY.ups.at(-1)).toEqual({ date: '2026-09-14', rate: 49.75 });
+      expect(DEFAULT_FSC_HISTORY.dhl.at(-1)).toEqual({ date: '2026-09-14', rate: 43.75 });
+      expect(DEFAULT_FSC_HISTORY.fedex.at(-1)).toEqual({ date: '2026-09-14', rate: 49.0 });
     });
 
     // The seed and the fallback constants are two copies of the same weekly
