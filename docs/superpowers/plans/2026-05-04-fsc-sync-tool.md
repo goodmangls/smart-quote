@@ -11,7 +11,7 @@
 >
 > **확인 근거:** `tools/fsc-sync` 부재 · `fsc-apply.py` 존재 · 완료 보고서 없음
 >
-> ⚠️ 위 "For agentic workers" 지시는 **무시하세요.** 이 계획을 실행하면
+> ⚠️ **아래 "For agentic workers" 지시는 무시하세요.** 이 계획을 실행하면
 > 이미 다른 방식으로 충족된 기능을 중복 구축하게 됩니다.
 
 # fsc-sync Tool Implementation Plan

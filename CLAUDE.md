@@ -262,7 +262,7 @@ Two rules are FedEx-specific and easy to get wrong:
 
 ⚠️ **DB 요율(`resolvedAddonRates`)은 all-or-nothing 이다.** FEDEX 행이 하나라도 있으면 **DB 만** 쓰고 하드코딩 표로 폴백하지 않는다 — 프론트·백엔드 모두 동일. 따라서 **시드는 18행 전부 적용해야 한다.** 일부만 넣으면 빠진 코드가 조용히 미청구된다. (UPS/DHL 에서 물려받은 의미이며 양쪽이 같게 동작하도록 맞춰 둠)
 
-✅ **UPS·DHL·FedEx 애드온 모두 백엔드에 미러됨** (2026-08-17, `calculators/ups_addon.rb`·`dhl_addon.rb`·`fedex_addon.rb`) — 저장 견적이 화면과 원 단위로 일치한다. parity fixture 23건 전부 expected 블록으로 양쪽 단언. UPS SGF(급증수수료)는 FE 와 같은 **애드온 버킷**에 있다(구 `UpsSurgeFee` 서비스의 surge 버킷 방식·2권역 구요율은 제거됨). 이 전환 이전에 저장된 UPS/DHL 견적의 금액은 재계산되지 않는다.
+✅ **UPS·DHL·FedEx 애드온 모두 백엔드에 미러됨** (2026-08-17, `calculators/ups_addon.rb`·`dhl_addon.rb`·`fedex_addon.rb`) — 저장 견적이 화면과 원 단위로 일치한다. parity fixture 는 `expected` 블록으로 양쪽을 원 단위 단언한다 — **개수는 여기 적지 않는다**(`shared/test-fixtures/calculation-parity.json` 의 `fixtures` 를 볼 것. 이 줄에 박혀 있던 "23건"은 실제 24건과 어긋나 있었다). UPS SGF(급증수수료)는 FE 와 같은 **애드온 버킷**에 있다(구 `UpsSurgeFee` 서비스의 surge 버킷 방식·2권역 구요율은 제거됨). 이 전환 이전에 저장된 UPS/DHL 견적의 금액은 재계산되지 않는다.
 
 ### UPS Surge Fee (2026-03-15~)
 
@@ -407,8 +407,8 @@ POST   /api/v1/notifications/slack   # Slack webhook proxy
   - 구 정책 `floor(송금환율/50)×50`(2026-08-25~09-02)은 **버퍼가 시장 위치에 따라 1원~49원으로 들쭉날쭉**해서 폐기했다(1401 → 1400 이면 버퍼 1원). `--market` 플래그로만 남아 있고 명시할 때만 동작한다.
   - 갱신은 **`/fx-update` 스킬**이 한다(`~/.claude/skills/fx-update/`). main+emax 를 같은 값으로 동시 처리하고, 저장소당 `src/config/rates.ts` + `smart-quote-api/lib/constants/rates.rb` 2파일을 쓴 뒤 재읽기로 검증한다.
   - ⚠️ **FSC 와 달리 DB·Admin 위젯이 없다. 상수뿐이라 반드시 배포해야 반영된다.** TS↔RB 를 교차 검증하는 게 없어 한쪽만 고치면 조용히 어긋난다 — `fx-apply.py --check` 가 유일한 감지 장치다.
-  - ✅ **대시보드가 이탈을 경고한다**(2026-08-25). `ExchangeRateWidget` 이 `evaluateFxDrift`(`src/features/dashboard/lib/fxDrift.ts`)로 시장 USD/KRW 를 적용값과 비교해, 버킷을 벗어나면 🔴 재검토·경계 15원 이내면 ⚠️ 근접 배너를 띄운다. 이게 없던 동안 emax 가 1450 으로 5개월 방치됐다.
-  - ⚠️ 임계값 15원은 **위젯이 시장(중간)환율이고 정책 입력은 송금환율**이라 둘이 다르기 때문이다(TT 스프레드 최대 ~1%). 조정은 `FX_NEAR_BAND` 상수 하나.
+  - ✅ **대시보드가 이탈을 경고한다**(2026-08-25). `ExchangeRateWidget` 이 `evaluateFxDrift`(`src/features/dashboard/lib/fxDrift.ts`)로 시장 USD/KRW 를 적용값과 비교해, 버킷을 벗어나면 🔴 재검토·경계 15원 이내면 ⚠️ 근접 배너를 띄운다. **이게 없던 동안 smart-quote-emax 가 1450 으로 5개월 방치됐다** — 위젯은 시장을 계속 보는데 상수는 사람이 갱신해야만 움직여서, 둘을 잇는 게 없으면 stale 이 화면에 안 보인다.
+  - ⚠️ 임계값이 15원인 이유: **위젯은 시장(중간)환율이고 정책 입력은 송금환율이라 둘이 다른 숫자다.** TT 스프레드가 ~1%(약 14원)까지 가므로 그 폭에 맞췄다. 송금환율이 더 높아 시장만 보면 상승 이탈을 늦게 잡는데, 밴드가 그 지연을 메운다. 조정은 `FX_NEAR_BAND` 상수 하나.
   - ⚠️ **위젯 테스트에서 `DEFAULT_EXCHANGE_RATE` 실값을 읽지 말 것.** `vi.hoisted` + `@/config/rates` 부분 mock 으로 고정한다 — 안 그러면 `/fx-update` 가 값을 바꾸는 주에 무관한 테스트가 깨진다. 그 mock 은 실제 상수와 값이 같으면 무력해도 통과하므로, 다른 값 주입으로 RED 를 확인해야 유효성이 증명된다.
 - **Error tracking**: Sentry (`@sentry/browser`) integrated across all catch blocks
 
@@ -457,6 +457,45 @@ When adding, modifying, or removing user-facing features, **always update the co
 
 Update the "Last Updated" date and version in the guide header when making changes.
 
+## 계획 문서 — 체크박스는 진행 상태가 아니다
+
+🔴 **`docs/superpowers/plans/` 의 미완 체크박스를 "남은 일"로 읽지 말 것.** 작업이 끝나도 아무도 돌아가서 체크하지 않는다.
+
+두 파일이 실제로 이 함정이었다(2026-09-14 해소). 체크박스 **129개가 전부 미완**인 채, 상단에 이런 실행 지시까지 달고 있었다:
+
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development … to implement this plan task-by-task.
+
+- `2026-05-04-fsc-sync-tool` — **대체됨.** 만들려던 CLI `tools/fsc-sync` 는 끝내 안 만들어졌고, 같은 일을 개인 스킬 `/fsc-update`(`fsc-apply.py`)가 두 저장소에 동시 적용한다
+- `2026-05-10-quote-history-fr04-fr07` — **이미 구현됨.** 완료 보고서가 `docs/04-report/features/` 에 있고 `by_amount_range` scope·xlsx 경로가 코드에 실재한다
+
+둘 다 **정지 헤더**를 달아 뒀다. 새 계획을 실행하기 전에 그 헤더부터 볼 것.
+
+⚠️ **계획 파일을 `docs/archive/` 로 옮기지 말 것.** 완료 보고서가 계획 경로를 직접 링크하고 있어 이동하면 깨진다 — 제자리에 헤더를 다는 이유다.
+
+## 문서에 개수를 적지 않는다
+
+숫자는 반드시 썩고, 대개 두 군데 이상에 중복돼 조용히 갈라진다. 이 파일에서 실제로 썩은 것들:
+
+| 적혀 있던 값 | 실제 | 발견 |
+|---|---|---|
+| UPS 45.50 · DHL 48.00 · FedEx 39.75 (FSC) | 매주 바뀜 | 넉 달 묵음 |
+| parity fixture "23건" | 24건 | 2026-09-14 |
+| 테스트 개수 | — | 2026-08 기준 260여 건 어긋남 |
+
+개수가 필요하면 **출처를 가리킨다**: 요율은 `src/config/rates.ts`, fixture 는 `shared/test-fixtures/calculation-parity.json`, 테스트 수는 `npx vitest run`. 여기 남아도 되는 숫자는 **설정 파일이 강제하는 정책값**(존 이름, 18행 all-or-nothing 같은 불변 규칙)뿐이다.
+
+## CLAUDE.md ↔ AGENTS.md 동기화
+
+두 파일은 1·3·5행(제목·대상 독자·상호참조)만 다르고 **나머지는 한 글자도 달라선 안 된다.**
+
+⚠️ 2026-09-14 에 실제로 갈라져 있었다 — 400행과 409~412행이 **같은 사실을 각자 다른 문장으로** 쓰고 있었다(내용 손실은 아니었지만, 한쪽에만 있는 근거가 생겼다). 검사법:
+
+```bash
+diff <(tail -n +6 CLAUDE.md) <(tail -n +6 AGENTS.md)   # 출력이 비어야 정상
+```
+
 ## Commit Messages
 
 Always record a one-line Korean description with emoji in `.commit_message.txt` after code changes.
+
+⚠️ **이 파일은 최근 50 커밋 전부에 등장한다**(모든 커밋이 통째로 덮어쓴다). 브랜치가 둘 이상이면 충돌이 구조적으로 필연이고, 2026-09-14 하루에만 세 번 났다. `.gitattributes` 의 `merge=ours` 는 **부분 해결뿐**이다 — 커스텀 merge driver 는 로컬 `.git/config` 에 정의되고 `.gitattributes` 는 이름만 가리키므로 **GitHub 이 계산하는 PR 충돌 상태는 그대로**다. 충돌이 나면 `git merge origin/main` 후 `--ours` 로 푼다.
