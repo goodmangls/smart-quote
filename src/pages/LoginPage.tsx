@@ -107,9 +107,11 @@ export const LoginPage: React.FC = () => {
             <Sparkles className="w-7 h-7 text-cyan-400" />
           </div>
 
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-white text-center mb-2">
+          {/* h1, not h2: this is the page's own title and no h1 existed above
+              it, so a screen reader landed here with no page heading. */}
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-white text-center mb-2">
             {mode === 'password' ? t('auth.signinTitle') : t('auth.magicLink.panelTitle')}
-          </h2>
+          </h1>
           <p className="text-sm text-gray-400 text-center max-w-sm">
             {mode === 'password' ? t('auth.signinSubtitle') : t('auth.magicLink.panelSubtitle')}
           </p>

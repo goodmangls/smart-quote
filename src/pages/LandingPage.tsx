@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Zap, TrendingUp, ShieldCheck, ArrowRight, Globe, Truck, Plane, PackageCheck, Calculator } from 'lucide-react';
 import { Header } from '../components/layout/Header';
+import { Footer } from '../components/layout/Footer';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -214,6 +215,12 @@ export const LandingPage: React.FC = () => {
           </div>
         </section>
       </main>
+      {/* The page had no footer at all — it ended on the third feature card with
+          no company identity, no copyright and nowhere to go. The component
+          already existed and its copy key is literally `landing.footer`; it was
+          just never mounted here. It is also the only place the BridgeLogis name
+          appears on screen. */}
+      <Footer />
     </div>
   );
 };
