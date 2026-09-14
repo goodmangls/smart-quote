@@ -1,3 +1,19 @@
+> # ⛔ 이 계획은 실행하지 마세요 — 대체됨 (2026-09-14 확인)
+>
+> **아래 체크박스 77개는 미완이 아니라 무효입니다.** 이 계획이 만들려던 CLI
+> (`tools/fsc-sync`)는 끝내 만들어지지 않았고, 만들 필요도 없어졌습니다.
+>
+> **무엇이 대신하고 있나:** 개인 스킬 `/fsc-update`
+> (`~/.claude/skills/fsc-update/bin/fsc-apply.py`)가 같은 일을 합니다 —
+> smart-quote-main + smart-quote-emax 두 저장소의 FSC 4파일씩을 한 번에
+> 동기화합니다. 2026-09-14 주간 갱신도 이걸로 처리했습니다.
+> (차이: 커밋·푸시는 스킬이 대신하지 않고 호출자가 합니다.)
+>
+> **확인 근거:** `tools/fsc-sync` 부재 · `fsc-apply.py` 존재 · 완료 보고서 없음
+>
+> ⚠️ 위 "For agentic workers" 지시는 **무시하세요.** 이 계획을 실행하면
+> 이미 다른 방식으로 충족된 기능을 중복 구축하게 됩니다.
+
 # fsc-sync Tool Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
