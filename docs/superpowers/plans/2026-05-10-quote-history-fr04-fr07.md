@@ -10,7 +10,7 @@
 >   `by_amount_range` scope 실재
 > - FR-07 xlsx export → `src/features/history` 에 xlsx 경로 실재
 >
-> ⚠️ 위 "For agentic workers" 지시는 **무시하세요.** 이 계획을 실행하면
+> ⚠️ **아래 "For agentic workers" 지시는 무시하세요.** 이 계획을 실행하면
 > 이미 배포된 기능을 다시 만들거나 충돌시킵니다.
 
 # Quote History FR-04 + FR-07 Implementation Plan
