@@ -122,16 +122,15 @@ smart-quote-api/               # Backend (Rails 8 API-only, Ruby 3.4, PostgreSQL
     quote_exporter.rb          # CSV export with 10K limit
     quote_serializer.rb        # Quote summary/detail serialization
     margin_rule_resolver.rb    # Priority-based margin resolution (5min cache, first-match-wins)
+    surcharge_resolver.rb      # System surcharge(War Risk/PSS/EBS) 해석 — calculators/ 가 아니라 services/ 바로 아래에 있다
     calculators/
       item_cost.rb             # Packing dimensions, volumetric weight, material/labor
-      surge_cost.rb            # Surcharge logic
-      ups_cost.rb / ups_zone.rb
-      ups_surge_fee.rb         # UPS Surge Fee auto-calc (Israel/Middle East)
-      dhl_cost.rb / dhl_zone.rb
-      fedex_cost.rb / fedex_zone.rb  # FedEx cost + letter zone mapping (mirror of FE)
-      fedex_addon.rb           # FedEx add-on calculator (mirror of fedexAddonCalculator.ts)
+      ups_cost.rb / ups_zone.rb / ups_addon.rb        # UPS 비용·존·애드온. SGF(급증수수료)는 ups_addon.rb 의 SURGE_REGIONS 에 있다
+      dhl_cost.rb / dhl_zone.rb / dhl_addon.rb
+      fedex_cost.rb / fedex_zone.rb / fedex_addon.rb  # FedEx cost + letter zone mapping (mirror of FE)
+      carrier_addon_support.rb # 3 애드온 미러의 캐리어 공통부 (packed_dimensions · calc_addon_fee · normalize_db_rate)
       rate_table_resolver.rb   # Carrier/document rate table selection (Envelope/Pak/IP)
-      domestic_cost.rb         # Domestic pickup cost
+      zone_not_found_error.rb  # 존 미매핑 → 422 ZONE_NOT_FOUND
   app/controllers/api/v1/
     quotes_controller.rb       # Quote CRUD (uses QuoteSearcher, QuoteExporter, QuoteSerializer)
     margin_rules_controller.rb # CRUD + resolve endpoint (admin guard, audit log)
@@ -195,6 +194,37 @@ Context providers wrap the app: `ThemeProvider > LanguageProvider > BrowserRoute
 ### Mirrored Calculation Logic
 
 Frontend (`src/features/quote/services/calculationService.ts`) and backend (`smart-quote-api/app/services/`) implement **identical** calculation logic. The frontend runs calculations instantly for UI responsiveness; the Rails API is the source of truth for saved quotes.
+
+#### 미러가 실제로 보장하는 범위 (2026-09-19 점검)
+
+**두 구현을 잇는 계약은 `shared/test-fixtures/calculation-parity.json` 의 `expected` 블록 하나뿐이고, 그 블록은 금액 6개만 단언한다**(`totalQuoteAmount` · `totalCostAmount` · `billableWeight` · `intlBase` · `carrierAddOnTotal` · `carrierAddOnCodes`). 금액 parity 자체는 원 단위로 견고하다. 문제는 **결과의 나머지가 계약 밖**이라는 것이다. 아래는 전부 실측으로 확인했고 **아직 고치지 않았다.**
+
+- 🔴 **`resolvedSurcharges` 를 쓰는 픽스처가 0 건이다.** DB 기반 시스템 부가요금(War Risk·PSS·EBS) 경로는 교차 언어 검증이 **얇은 게 아니라 아예 없다.**
+- 🔴 **요율 조회 실패 시 동작이 갈린다.** `carrierRateEngine.ts` 는 **throw** 하고, `ups_cost.rb`·`dhl_cost.rb`·`fedex_cost.rb` 의 `calculate_base_rate` 는 **`0` 을 반환**한다 — 화면은 견적을 거부하는데 저장은 국제구간 base 0 으로 넘어간다. **현재는 도달 불가**다(존 맵이 내놓는 모든 `rateKey` 가 모든 해당 테이블에 존재함을 확인). 존 맵에 국가를 추가하면서 요율 행을 빠뜨리는 순간 살아난다.
+- 🔴 **`transitTime` 은 이미 어긋나 있다.** FE 는 DHL 을 `2-4 Business Days` 로 보여주고 BE 는 `DHL Express 3-7 Days` 를 저장한다. 이력·공유 링크·PDF·파트너 API 가 전부 BE 값을 쓰므로 **고객이 본 일수와 저장된 일수가 다르다.** 금액이 아니라서 픽스처가 못 잡는다.
+- ⚠️ **`profitAmount`·`profitMargin`·`totalQuoteAmountUSD` 는 양쪽을 대조하지 않는다.** FE 스냅샷만 있고 Ruby 와 비교하는 장치가 없다.
+- ⚠️ **`*_cost_spec.rb` 가 하나도 없다.** `spec/services/calculators/` 에는 애드온 스펙과 `war_risk_unit_spec.rb` 만 있다. 위 `0` 반환이 오래 눈에 안 띈 이유가 이것이다.
+
+#### Ruby 는 TS 가 공유 모듈로 뽑아낸 것을 캐리어별로 복사해 뒀다
+
+**한 군데만 고치면 조용히 갈라진다.**
+
+| 로직 | TS | Ruby |
+|---|---|---|
+| 요율 조회 엔진 | `carrierRateEngine.ts` 하나 | `*_cost.rb` 세 곳에 복붙 |
+| 코드로 요율 찾기 | `addon-utils.ts` 의 `findRate` 하나 | 애드온 3개가 각자 구현 |
+| 애드온 요금 공식 | `calcAddonFee` 하나 | `carrier_addon_support` 2곳 + FedEx 는 자체 `greater_of` |
+| 마진·FSC·반올림 | `quotePricing.ts` 별도 모듈 | `QuoteCalculator#calculate_totals` 안에 인라인 |
+
+🔴 **가장 위험한 건 포장 버퍼다.** `carrier_addon_support.rb` 는 주석으로 "여기가 어긋나면 어떤 화물이 애드온 임계값을 넘는지가 조용히 바뀐다"고 경고하는데, **정작 청구중량을 계산하는 `item_cost.rb` 가 그 공용 헬퍼를 안 쓰고 버퍼를 다시 인라인한다.** TS 는 `applyPackingDimensions` 하나를 여러 곳이 공유한다.
+
+⚠️ **Document 무게 상한 경고문이 Ruby 에선 하드코딩이다.** `quote_calculator.rb` 는 비교는 상수로 하면서 메시지 문자열에는 `"2.0kg"`·`"2.5kg"`·`"5.0kg"` 를 박아 뒀다. TS 는 `${docCapKg}` 로 보간해 못 어긋난다 — 상한을 바꾸면 **Ruby 경고문만 거짓말**이 된다.
+
+#### 화면 표시와 실제 견적이 갈리는 곳 (미러와 별개, 전부 FE 내부)
+
+- 🔴 **마진 입력칸과 계산 엔진의 상한이 다르다.** `FinancialSection.tsx` 는 `Math.min(v, 99.9)` 로 받고, 엔진은 FE·BE 모두 `MAX_MARGIN_PERCENT = 80` 으로 clamp 한다. **95 를 입력하면 칸에는 95 가 보이는데 견적은 80 으로 계산된다** — 경고도 없다. 미수정. ⚠️ **고치기 전에 어느 쪽이 정책값인지부터 정할 것.** 증거는 `80` 쪽이다 — 이름 붙은 상수이고, FE·BE 양쪽에 미러돼 있고, 스냅샷 게이트가 물고 있고, `rates.rb` 주석이 "admin 수동 조정 여유분"이라고 용도를 적어 뒀다. `99.9` 는 컴포넌트 안의 인라인 리터럴이다. 다만 **사용자 확인을 받은 적은 없다** — 입력칸을 80 으로 내리는 게 기본 방향이되, 상한 자체를 올릴 생각이라면 상수를 움직여야 한다.
+- ⚠️ **애드온 패널이 서비스 계산기를 다시 구현한다.** 3개 패널(`UpsAddOnPanel`·`DhlAddOnPanel`·`FedExAddOnPanel`)이 `*AddonCalculator.ts` 를 호출하지 않고 자체 `totalSelected` 를 돌린다. UPS AHS 자동감지 게이트가 이미 다르다 — 패널은 `autoDetect && detectRules`, 서비스는 `useDb && detectRules`. 하드코딩 경로에선 둘 다 폴백으로 떨어져 일치하지만(하드코딩 AHS 항목에 `detectRules` 가 없음), **`detectRules` 는 있고 `autoDetect` 는 꺼진 DB 행이 들어오면 갈린다.** 코드 변경이 아니라 **관리자 입력으로 도달**한다. 세 패널 모두 테스트 파일이 없다.
+- ⚠️ **`manualDomesticCost`·`domesticTruckType` 은 죽은 배선이다.** 파라미터·DB 컬럼·시리얼라이저에 양쪽 다 있지만 **어느 계산기도 읽지 않는다**(FE 에선 `types.ts` 에만 등장). 배선돼 있으니 동작한다고 가정하지 말 것.
 
 ### Calculation Pipeline
 
@@ -269,7 +299,7 @@ Two rules are FedEx-specific and easy to get wrong:
 - Israel (IL): KRW 4,722/kg + FSC
 - Middle East (AF/BH/BD/EG/IQ/JO/KW/LB/NP/OM/PK/QA/SA/LK/AE): KRW 2,004/kg + FSC
 - Auto-detected in `ups_addons.ts` → applied as UPS Add-on (code: SGF)
-- Backend: `calculators/ups_surge_fee.rb`
+- Backend: `calculators/ups_addon.rb` 의 `SURGE_REGIONS` — 전용 `ups_surge_fee.rb` 는 **없다**(애드온 버킷으로 흡수됨)
 
 ### EAS/RAS Auto-Detection
 
@@ -344,6 +374,8 @@ Express shipments (UPS/DHL/FedEx) → **DAP only** (no exceptions). AI chatbot e
 - **Hook**: `useLanguage()` from `LanguageContext` returns `{ language, setLanguage, t }`
 - **Persistence**: localStorage key `'language'`
 - **Usage**: `t('key.name')` in all components
+
+⚠️ **로케일 키 정합을 강제하는 장치가 없고, 이미 갈라져 있다** (2026-09-19 확인). `cn`·`ja`·`ko` 가 `en` 보다 키가 적다. `LanguageContext` 의 `t()` 가 없는 키를 **영어로 폴백**하므로 아무것도 실패하지 않는다 — 일본어 화면 중간에 영어 문장이 섞여 나올 뿐이라 **눈으로 보기 전에는 모른다.** i18n 을 건드리는 테스트는 저장소에 하나도 없다. 키를 추가할 때 4개 파일을 함께 고칠 것. 어긋난 키 목록이 필요하면 네 JSON 의 키 집합을 직접 비교할 것(개수는 여기 적지 않는다 — 바뀐다).
 
 ## API Endpoints
 
@@ -421,6 +453,8 @@ POST   /api/v1/notifications/slack   # Slack webhook proxy
   - ⚠️ **큰 목록에 `getAllByRole` 을 쓰지 말 것.** 역할 질의는 문서의 모든 요소에 ARIA role 계산과 접근성 가시성 검사를 돌아, 206개 `<option>` 기준 **400ms~2.6초로 6배 요동**한다(같은 결과를 주는 `querySelectorAll` 은 0.5ms). 이게 `RouteSection.test.tsx` 를 5초 기본 타임아웃으로 산발 실패시켰고, **단독 실행과 CI 에서는 재현되지 않아** 오래 방치됐다(#112). 대상을 좁힌 DOM 질의를 쓰고, 위치로 잡을 땐 개수 가드를 붙여 마크업이 바뀌면 조용히 엉뚱한 요소를 검사하지 않게 할 것
   - ⚠️ **비결정 실패는 한 번의 green/red 로 판정하지 말 것.** 같은 트리에서 실패→실패→통과가 나온다. 원인 귀속은 **HEAD 를 반복 실행**해 거기서도 실패하는지로 가른다(#112 에서 이 방법으로 "내 변경 탓"이라는 오판을 정정했다)
 - **Backend**: RSpec + FactoryBot + Shoulda Matchers, factories in `spec/factories/`
+  - ⚠️ **`spec/services/calculators/` 에 `*_cost_spec.rb` 가 없다.** 애드온 3개와 `war_risk_unit_spec.rb` 뿐이다. 즉 `UpsCost`·`DhlCost`·`FedexCost` — 요율 조회 엔진이 세 번 복붙돼 있고 조회 실패 시 `0` 을 반환하는 바로 그 모듈들 — 은 요청 스펙과 parity 스펙으로만 간접 커버된다. 위 「미러가 실제로 보장하는 범위」 참조
+  - ⚠️ **요율 기대값을 테이블에서 읽어오지 말 것.** `rateTableResolver.test.ts` 의 DHL 단언은 `DHL_DOC_EXACT_RATES.Z1[1]` 을 **참조**해서 표가 틀리게 바뀌어도 통과한다. 같은 블록의 UPS·FedEx 는 리터럴이라 잡아낸다 — 리터럴이 정상이고 참조가 예외다
 
 ## Deployment
 
@@ -483,6 +517,8 @@ Update the "Last Updated" date and version in the guide header when making chang
 | 테스트 개수 | — | 2026-08 기준 260여 건 어긋남 |
 
 개수가 필요하면 **출처를 가리킨다**: 요율은 `src/config/rates.ts`, fixture 는 `shared/test-fixtures/calculation-parity.json`, 테스트 수는 `npx vitest run`. 여기 남아도 되는 숫자는 **설정 파일이 강제하는 정책값**(존 이름, 18행 all-or-nothing 같은 불변 규칙)뿐이다.
+
+⚠️ **썩는 건 숫자만이 아니다 — 파일 이름도 썩는다.** 2026-09-19 에 위 Monorepo Structure 가 존재하지 않는 백엔드 파일을 가리키고 있었다: `surge_cost.rb`(실제는 `app/services/surcharge_resolver.rb`, 디렉토리부터 다름) · `ups_surge_fee.rb`(`ups_addon.rb` 로 흡수됨) · `domestic_cost.rb`(애초에 없음). 동시에 실재하는 `ups_addon.rb`·`dhl_addon.rb`·`carrier_addon_support.rb`·`zone_not_found_error.rb` 는 목록에 빠져 있었다. **구조 블록을 고칠 때는 `ls` 와 대조할 것** — 에이전트는 이 목록을 읽고 없는 파일을 찾으러 간다.
 
 ## CLAUDE.md ↔ AGENTS.md 동기화
 
