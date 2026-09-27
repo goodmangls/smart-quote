@@ -24,9 +24,9 @@ export const DEFAULT_EXCHANGE_RATE = 1320; // 적용 기준환율 (2026-09-16 �
 //   출처: https://mydhl.express.dhl/kr/ko/ship/surcharges.html#/fuel_surcharge
 // FedEx FSC : 주간 업데이트 (EMAX 공지)
 // ============================================================
-export const DEFAULT_FSC_PERCENT = 52.5; // UPS FSC, effective 2026-09-21
-export const DEFAULT_FSC_PERCENT_DHL = 45.0; // DHL FSC, effective 2026-09-21
-export const DEFAULT_FSC_PERCENT_FEDEX = 51.75; // FedEx FSC, effective 2026-09-21
+export const DEFAULT_FSC_PERCENT = 53.75; // UPS FSC, effective 2026-09-28
+export const DEFAULT_FSC_PERCENT_DHL = 46.25; // DHL FSC, effective 2026-09-28
+export const DEFAULT_FSC_PERCENT_FEDEX = 53.25; // FedEx FSC, effective 2026-09-28
 
 /**
  * The fuel surcharge to apply when the request carries no fscPercent at all.
