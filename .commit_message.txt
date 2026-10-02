@@ -1,1 +1,1 @@
-📝 `fsc_percent = 0` DB 감사 종결 반영 — 2026-08-22 에 이미 0건으로 확인됐는데 문서만 "미확인"으로 낡아 있었다 (재실행 시 배포시점 범위 필수)
+🧹 실수로 커밋된 smart-quote-api/vendor/bundle 9,075개 파일 추적 해제 (2026-02-24 혼입, .gitignore 는 이미 있었으나 추적 중이라 무효 — Render·Docker 는 bundle install 로 설치하므로 영향 없음)
