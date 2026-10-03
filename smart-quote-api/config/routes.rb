@@ -79,6 +79,9 @@ Rails.application.routes.draw do
 
       # AI Chat
       post "chat", to: "chat#create"
+
+      # Slack alert after a member saves a quote (authenticated)
+      post "notifications/slack", to: "notifications#slack"
     end
   end
 end

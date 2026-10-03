@@ -8,6 +8,8 @@ class Quote < ApplicationRecord
   VALID_PACKING_TYPES = %w[NONE WOODEN_BOX SKID VACUUM].freeze
   VALID_SHIPPING_ITEM_TYPES = %w[NON_DOCUMENT DOCUMENT].freeze
   VALID_STATUSES = %w[draft sent accepted rejected confirmed expired].freeze
+  # QuoteCalculator 는 이 밖의 값을 UPS 요율로 계산해 버리므로 저장 단계에서 거른다.
+  VALID_CARRIERS = %w[UPS DHL FEDEX].freeze
   DEFAULT_VALIDITY_DAYS = 7
 
   validates :reference_no, presence: true, uniqueness: true
@@ -15,6 +17,7 @@ class Quote < ApplicationRecord
   validates :incoterm, presence: true, inclusion: { in: VALID_INCOTERMS }
   validates :packing_type, presence: true, inclusion: { in: VALID_PACKING_TYPES }
   validates :shipping_item_type, presence: true, inclusion: { in: VALID_SHIPPING_ITEM_TYPES }
+  validates :overseas_carrier, inclusion: { in: VALID_CARRIERS }
   validates :margin_percent, presence: true, numericality: { greater_than_or_equal_to: 0 }
   validates :total_quote_amount, presence: true
   validates :total_cost_amount, presence: true

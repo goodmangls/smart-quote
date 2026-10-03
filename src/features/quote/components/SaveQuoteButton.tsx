@@ -52,12 +52,8 @@ export const SaveQuoteButton: React.FC<Props> = ({ input, result, onSaved }) => 
         total_krw: result?.totalQuoteAmount ?? 0,
         is_duplicate: isDuplicate,
       });
-      if (result && user && user.role === 'member' && !isDuplicate) {
-        sendQuoteSlackNotification(input, result, detail.referenceNo, {
-          name: user.name || user.email,
-          email: user.email,
-          company: user.company,
-        });
+      if (user && user.role === 'member' && !isDuplicate) {
+        sendQuoteSlackNotification(detail.referenceNo);
       }
       setTimeout(() => {
         setState('idle');

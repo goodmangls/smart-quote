@@ -555,6 +555,15 @@ RSpec.describe "Api::V1::Quotes", type: :request do
         expect(response).to have_http_status(:unprocessable_content)
         expect(json["error"]["code"]).to eq("VALIDATION_ERROR")
       end
+
+      it "rejects a carrier outside UPS/DHL/FEDEX instead of saving it verbatim" do
+        expect {
+          post "/api/v1/quotes", params: valid_params.merge(overseasCarrier: "<!channel>"), headers: user_headers, as: :json
+        }.not_to change(Quote, :count)
+
+        expect(response).to have_http_status(:unprocessable_content)
+        expect(json["error"]["code"]).to eq("VALIDATION_ERROR")
+      end
     end
 
     context "input validation" do

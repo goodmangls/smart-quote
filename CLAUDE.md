@@ -434,6 +434,11 @@ POST   /api/v1/notifications/slack   # Slack webhook proxy
   - ⚠️ Manual Deploy 를 눌러도 **같은 커밋을 다시 배포**하는 경우가 있으니 배포 대상 커밋을 확인할 것
 - **Config**: `render.yaml` (repo root) for backend infrastructure; `healthCheckPath: /up` for zero-downtime deploys
 - **Seed**: After backend deploy, run `rails runner db/seeds/addon_rates.rb` in Render Shell for new add-on rates
+- **Slack 알림**: 웹훅 URL 은 **Render 의 `SLACK_WEBHOOK_URL` 에만** 둔다. 없으면 `POST /api/v1/notifications/slack` 이 503 `SLACK_NOT_CONFIGURED` 를 돌려주고 프론트가 Sentry 로 올린다.
+  - ⚠️ **2026-10-02 까지 이 엔드포인트는 존재하지 않았다.** 프론트는 출시 이래 매 멤버 저장마다 호출했지만 404 를 "best-effort" 로 삼켜 알림이 한 번도 안 갔다. 그동안 웹훅은 Vercel 의 `VITE_SLACK_WEBHOOK_URL` 에 있었는데, `VITE_` 변수는 코드가 참조하는 순간 공개 번들에 박힌다 — 같은 날 삭제했다.
+  - 서버가 메시지를 만든다. 클라이언트는 `referenceNo` 만 보내고, 백엔드가 **본인 소유 견적**을 찾아 DB 값으로 문구를 짓는다. 클라이언트 문자열을 그대로 넘기면 로그인 사용자 누구나 회사 채널에 `<!channel>` 을 포함한 임의 문구를 쏠 수 있다. 메시지에 들어가는 **문자열 필드는 전부**(이름·회사·캐리어·목적지·참조번호) `SlackNotifier.escape` 로 `&`·`<`·`>` 를 이스케이프한다.
+  - ⚠️ **"DB 값이니 안전하다"는 틀렸다.** DB 값도 원래 사용자 입력이다. 2026-10-03 리뷰에서 실증: 계산기가 모르는 캐리어를 UPS 요율로 계산하고 값은 그대로 저장해서, `overseasCarrier: "<!channel>"`(정확히 10자 = 컬럼 한도)로 저장한 견적이 알림에 `Carrier: <!channel>` 을 실었다. 지금은 두 겹으로 막는다 — `Quote::VALID_CARRIERS`(UPS·DHL·FEDEX) 모델 검증이 저장을 422 로 거부하고, 검증 이전에 저장된 행에 대비해 알림 쪽도 이스케이프한다. 한 겹만 남기지 말 것.
+  - 견적당 1회(`Rails.cache`, 1일). 캐시가 `memory_store` 라 **프로세스별** 이므로 엄밀한 보장은 아니다 — 재전송은 rack-attack 10/분/IP 가 상한.
 
 ## Design System (DESIGN.md)
 

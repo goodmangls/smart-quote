@@ -55,6 +55,12 @@ class Rack::Attack
     req.ip if req.path == "/api/v1/quotes/calculate" && req.post?
   end
 
+  # Slack alerts post into the company channel: 10 per minute per IP.
+  # Per-quote dedupe in the controller stops replays; this caps fan-out.
+  throttle("notifications/slack", limit: 10, period: 60) do |req|
+    req.ip if req.path == "/api/v1/notifications/slack" && req.post?
+  end
+
   # General API throttle: 300 requests per minute per IP
   throttle("api/general", limit: 300, period: 60) do |req|
     req.ip if req.path.start_with?("/api/")

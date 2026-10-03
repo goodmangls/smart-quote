@@ -13,6 +13,9 @@ RSpec.describe Quote, type: :model do
     it { is_expected.to validate_inclusion_of(:incoterm).in_array(Quote::VALID_INCOTERMS) }
     it { is_expected.to validate_presence_of(:packing_type) }
     it { is_expected.to validate_inclusion_of(:packing_type).in_array(Quote::VALID_PACKING_TYPES) }
+    # 계산기는 모르는 캐리어를 UPS 요율로 계산하고 값은 그대로 저장했다 — 10자 컬럼에
+    # "<!channel>" 이 들어가 Slack 알림에 실렸다. 저장 경로 전부를 모델에서 막는다.
+    it { is_expected.to validate_inclusion_of(:overseas_carrier).in_array(Quote::VALID_CARRIERS) }
     it { is_expected.to validate_presence_of(:margin_percent) }
 
     it {
