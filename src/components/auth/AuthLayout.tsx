@@ -5,7 +5,11 @@ import { Header } from '../layout/Header';
 import { useLanguage } from '../../contexts/LanguageContext';
 
 const CARRIERS = ['UPS', 'DHL', 'FedEx'] as const;
-const PANEL_POINTS = ['landing.instantQuotes', 'landing.accurateBreakdown', 'landing.liveRates'] as const;
+const PANEL_POINTS = [
+  'landing.instantQuotes',
+  'landing.accurateBreakdown',
+  'landing.liveRates',
+] as const;
 
 const dotGridStyle: React.CSSProperties = {
   backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.07) 1px, transparent 1px)',
