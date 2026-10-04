@@ -45,7 +45,10 @@ export const SignUpPage: React.FC = () => {
       try {
         const result = await signup(
           email.trim(),
-          password.trim(),
+          // Sent as typed. Login and password change send it untouched and the
+          // backend never strips it, so trimming here alone made "abc123 "
+          // unusable at login. The trim() above is only a non-blank check.
+          password,
           company.trim(),
           name.trim(),
           nationality.trim(),
