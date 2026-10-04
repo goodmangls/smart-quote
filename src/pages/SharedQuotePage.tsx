@@ -2,7 +2,37 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { getSharedQuote, SharedQuoteData } from '@/api/shareApi';
 import { COUNTRY_OPTIONS } from '@/config/options';
-import { Plane, MapPin, Clock, Shield, Package, AlertTriangle } from 'lucide-react';
+import { AlertTriangle, Plane } from 'lucide-react';
+
+// Public page a partner opens from a share link. Styled as a document — a paper
+// card on a neutral background (DESIGN.md §8.9; Mobbin: Midday, Xero, Bonsai) —
+// rather than an app screen. Copy stays English on purpose: the audience is
+// external partners. Only fields in QuoteSerializer.shared exist here.
+
+const SHARE_PRIMARY_LINK_CLASS =
+  'inline-flex items-center justify-center px-5 py-2.5 rounded-lg bg-brand-blue hover:bg-brand-blue-600 text-white text-sm font-semibold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue/50 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-950';
+
+const Wordmark: React.FC = () => (
+  <Link
+    to='/'
+    className='text-base font-semibold tracking-tight text-gray-900 dark:text-white focus:outline-none focus-visible:underline'
+  >
+    BridgeLogis
+  </Link>
+);
+
+const Field: React.FC<{ label: string; children: React.ReactNode; align?: 'left' | 'right' }> = ({
+  label,
+  children,
+  align = 'left',
+}) => (
+  <div className={align === 'right' ? 'text-right' : undefined}>
+    <dt className='text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400'>
+      {label}
+    </dt>
+    <dd className='mt-1 text-sm font-semibold text-gray-900 dark:text-white'>{children}</dd>
+  </div>
+);
 
 const SharedQuotePage: React.FC = () => {
   const { token } = useParams<{ token: string }>();
@@ -19,29 +49,34 @@ const SharedQuotePage: React.FC = () => {
   }, [token]);
 
   const countryName = (code: string) =>
-    COUNTRY_OPTIONS.find((c) => c.code === code)?.name?.replace(/[^\x20-\x7E]/g, '').trim() || code;
+    COUNTRY_OPTIONS.find((c) => c.code === code)
+      ?.name?.replace(/[^\x20-\x7E]/g, '')
+      .trim() || code;
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="w-8 h-8 border-3 border-gray-300 border-t-blue-500 rounded-full animate-spin" />
+      <div className='min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-950'>
+        <div role='status' aria-label='Loading quote'>
+          <div className='w-8 h-8 rounded-full border-2 border-gray-300 border-t-brand-blue dark:border-gray-700 dark:border-t-brand-blue-300 animate-spin motion-reduce:animate-none' />
+        </div>
       </div>
     );
   }
 
   if (error || !data) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 p-6">
-        <div className="max-w-md w-full bg-white rounded-2xl shadow-lg p-8 text-center">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-red-100 flex items-center justify-center">
-            <AlertTriangle className="w-8 h-8 text-red-500" />
-          </div>
-          <h2 className="text-xl font-bold text-gray-900 mb-2">Quote Unavailable</h2>
-          <p className="text-gray-500 text-sm mb-6">{error || 'This share link is invalid or has expired.'}</p>
-          <Link
-            to="/"
-            className="inline-flex items-center px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm"
-          >
+      <div className='min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-950 p-4'>
+        <div className='max-w-md w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm p-8 text-center'>
+          <span className='mx-auto inline-flex h-12 w-12 items-center justify-center rounded-full bg-destructive-50 text-destructive-600 ring-1 ring-destructive-200 dark:bg-destructive-900/20 dark:text-destructive-300 dark:ring-destructive-800'>
+            <AlertTriangle aria-hidden='true' className='h-6 w-6' />
+          </span>
+          <h1 className='mt-5 text-xl font-semibold text-gray-900 dark:text-white'>
+            Quote Unavailable
+          </h1>
+          <p className='mt-2 text-sm text-gray-500 dark:text-gray-400'>
+            {error || 'This share link is invalid or has expired.'}
+          </p>
+          <Link to='/' className={`mt-6 ${SHARE_PRIMARY_LINK_CLASS}`}>
             Go to BridgeLogis
           </Link>
         </div>
@@ -58,107 +93,96 @@ const SharedQuotePage: React.FC = () => {
     : `$${data.totalQuoteAmountUsd.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 flex items-center justify-center p-4">
-      <div className="max-w-lg w-full">
-        {/* Header */}
-        <div className="text-center mb-6">
-          <h1 className="text-2xl font-bold text-gray-900">BridgeLogis</h1>
-          <p className="text-sm text-gray-500">Freight Quotation</p>
+    <div className='min-h-screen bg-gray-100 dark:bg-gray-950 px-4 py-8 sm:py-12'>
+      <div className='mx-auto max-w-3xl'>
+        <div className='flex items-center justify-between mb-4'>
+          <Wordmark />
+          <span className='text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400'>
+            Freight Quotation
+          </span>
         </div>
 
-        {/* Main Card */}
-        <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
-          {/* Reference Header */}
-          <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4 text-white">
-            <div className="flex justify-between items-center">
-              <div>
-                <p className="text-xs text-blue-200 uppercase tracking-wider">Quotation</p>
-                <p className="text-lg font-bold">{data.referenceNo}</p>
-              </div>
-              <div className="text-right text-xs text-blue-200">
-                <p>Issued: {new Date(data.createdAt).toLocaleDateString('en-US')}</p>
-                {data.validityDate && (
-                  <p>Valid until: {new Date(data.validityDate).toLocaleDateString('en-US')}</p>
-                )}
-              </div>
+        <article className='rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm overflow-hidden'>
+          {/* Head: reference + dates */}
+          <header className='px-6 sm:px-8 pt-6 sm:pt-8 pb-6 flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between'>
+            <div>
+              <p className='text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400'>
+                Quotation
+              </p>
+              <h1 className='mt-1 text-2xl font-semibold tracking-tight text-gray-900 dark:text-white tabular-nums'>
+                {data.referenceNo}
+              </h1>
             </div>
-          </div>
+            <dl className='grid grid-cols-2 gap-x-8 gap-y-3 sm:text-right'>
+              <Field label='Issued'>{new Date(data.createdAt).toLocaleDateString('en-US')}</Field>
+              {data.validityDate && (
+                <Field label='Valid until'>
+                  {new Date(data.validityDate).toLocaleDateString('en-US')}
+                </Field>
+              )}
+            </dl>
+          </header>
 
           {/* Route */}
-          <div className="px-6 py-4 border-b border-gray-100">
-            <div className="flex items-center gap-4">
-              <div className="flex-1">
-                <p className="text-xs text-gray-400 uppercase">Origin</p>
-                <p className="font-semibold text-gray-900">{countryName(data.originCountry)}</p>
-              </div>
-              <div className="flex items-center gap-2 text-gray-300">
-                <div className="w-8 h-px bg-gray-300" />
-                <Plane className="w-4 h-4" />
-                <div className="w-8 h-px bg-gray-300" />
-              </div>
-              <div className="flex-1 text-right">
-                <p className="text-xs text-gray-400 uppercase">Destination</p>
-                <p className="font-semibold text-gray-900">
-                  {countryName(data.destinationCountry)}
-                  {data.destinationZip ? ` (${data.destinationZip})` : ''}
-                </p>
-              </div>
+          <div className='mx-6 sm:mx-8 flex items-center gap-4 rounded-lg bg-gray-50 dark:bg-gray-800/50 px-4 py-4'>
+            <dl className='flex-1 min-w-0'>
+              <Field label='Origin'>{countryName(data.originCountry)}</Field>
+            </dl>
+            <div
+              className='flex items-center gap-2 text-gray-400 dark:text-gray-500'
+              aria-hidden='true'
+            >
+              <div className='w-6 sm:w-10 h-px bg-gray-300 dark:bg-gray-700' />
+              <Plane className='w-4 h-4' />
+              <div className='w-6 sm:w-10 h-px bg-gray-300 dark:bg-gray-700' />
             </div>
+            <dl className='flex-1 min-w-0'>
+              <Field label='Destination' align='right'>
+                {countryName(data.destinationCountry)}
+                {data.destinationZip ? ` (${data.destinationZip})` : ''}
+              </Field>
+            </dl>
           </div>
 
-          {/* Details Grid */}
-          <div className="px-6 py-4 grid grid-cols-2 gap-4 border-b border-gray-100">
-            <div className="flex items-center gap-2">
-              <Package className="w-4 h-4 text-gray-400" />
-              <div>
-                <p className="text-xs text-gray-400">Carrier</p>
-                <p className="text-sm font-semibold text-gray-900">{data.overseasCarrier}</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <MapPin className="w-4 h-4 text-gray-400" />
-              <div>
-                <p className="text-xs text-gray-400">Zone</p>
-                <p className="text-sm font-semibold text-gray-900">{data.appliedZone}</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <Clock className="w-4 h-4 text-gray-400" />
-              <div>
-                <p className="text-xs text-gray-400">Transit</p>
-                <p className="text-sm font-semibold text-gray-900">{data.transitTime}</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <Shield className="w-4 h-4 text-gray-400" />
-              <div>
-                <p className="text-xs text-gray-400">Incoterm</p>
-                <p className="text-sm font-semibold text-gray-900">{data.incoterm}</p>
-              </div>
-            </div>
-          </div>
+          {/* Details */}
+          <dl className='px-6 sm:px-8 py-6 grid grid-cols-2 sm:grid-cols-5 gap-x-6 gap-y-5'>
+            <Field label='Carrier'>{data.overseasCarrier}</Field>
+            <Field label='Zone'>{data.appliedZone}</Field>
+            <Field label='Transit'>{data.transitTime}</Field>
+            <Field label='Incoterm'>{data.incoterm}</Field>
+            <Field label='Billable Weight'>
+              <span className='tabular-nums'>{data.billableWeight} kg</span>
+            </Field>
+          </dl>
 
-          {/* Weight */}
-          <div className="px-6 py-3 border-b border-gray-100 text-sm text-gray-500">
-            Billable Weight: <span className="font-semibold text-gray-900">{data.billableWeight} kg</span>
-          </div>
-
-          {/* Total Quote */}
-          <div className="px-6 py-6 bg-gradient-to-r from-blue-50 to-blue-100">
-            <p className="text-xs text-blue-600 uppercase tracking-wider mb-1">Total Quote</p>
-            <p className="text-3xl font-extrabold text-blue-900">{totalDisplay}</p>
-            <p className="text-sm text-blue-600 mt-1">Approx. {secondaryDisplay}</p>
+          {/* Total */}
+          <div className='mx-6 sm:mx-8 border-t border-gray-200 dark:border-gray-800 py-6 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between'>
+            <p className='text-sm font-semibold text-gray-700 dark:text-gray-300'>Total Quote</p>
+            <div className='sm:text-right'>
+              <p className='text-3xl sm:text-4xl font-semibold tracking-tight text-gray-900 dark:text-white tabular-nums'>
+                {totalDisplay}
+              </p>
+              <p className='mt-1 text-sm text-gray-500 dark:text-gray-400 tabular-nums'>
+                Approx. {secondaryDisplay}
+              </p>
+            </div>
           </div>
 
           {/* Disclaimer */}
-          <div className="px-6 py-3 bg-gray-50 text-xs text-gray-400">
-            This quotation is valid within the stated period. Surcharges are subject to change at time of booking.
-          </div>
-        </div>
+          <footer className='px-6 sm:px-8 py-4 bg-gray-50 dark:bg-gray-800/50 border-t border-gray-200 dark:border-gray-800 text-xs text-gray-500 dark:text-gray-400'>
+            This quotation is valid within the stated period. Surcharges are subject to change at
+            time of booking.
+          </footer>
+        </article>
 
-        {/* Footer */}
-        <p className="text-center text-xs text-gray-400 mt-4">
-          Powered by BridgeLogis
+        <p className='mt-6 text-center text-xs text-gray-500 dark:text-gray-400'>
+          Powered by{' '}
+          <Link
+            to='/'
+            className='font-medium text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white focus:outline-none focus-visible:underline'
+          >
+            BridgeLogis
+          </Link>
         </p>
       </div>
     </div>

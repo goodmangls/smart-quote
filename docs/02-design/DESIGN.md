@@ -1,6 +1,6 @@
 ---
 name: BridgeLogis Design System (smart-quote-main)
-version: 1.3.0
+version: 1.4.0
 description: >-
   BridgeLogis by KS Ways 웹 애플리케이션의 디자인 시스템 명세.
   외부 운영 중인 SaaS(bridgelogis.com)의 단일 진실 공급원(SSOT).
@@ -222,11 +222,15 @@ Tailwind 기본 shadow scale 사용 (`shadow-sm` · `shadow-md` · `shadow-lg` �
 
 ### 8.2 Primary Button
 ```tsx
-<button className="bg-brand-blue hover:bg-brand-blue-600 dark:bg-brand-blue dark:hover:bg-brand-blue-400
+<button className="bg-brand-blue hover:bg-brand-blue-600 dark:bg-brand-blue dark:hover:bg-brand-blue-600
   text-white px-4 py-2 rounded-lg font-medium transition-colors">
   Action
 </button>
 ```
+
+- ⚠️ **다크 hover 는 `brand-blue-600`** (흰 글자 대비 6.95:1). 1.3.0 까지 이 예제는
+  `dark:hover:bg-brand-blue-400` 였는데 흰 글자 대비가 **2.80:1 로 AA 미달**이었다 —
+  hover 는 "더 밝게"가 아니라 "더 진하게" 간다. 라이트·다크 같은 값이라 `dark:hover:` 는 생략해도 된다.
 
 ### 8.3 Status Badge
 ```tsx
@@ -291,6 +295,40 @@ Semantic `warning`(amber) 계열을 쓰되, 오류(destructive)와 구분한다 
 2. 토큰이 부족하면 이 문서를 먼저 수정 후 구현
 3. Legacy 토큰(jways/accent/blue/sky)은 **기존 컴포넌트 수정 시에만** 유지, 신규 금지
 
+### 8.8 인증 화면 (Login · SignUp · Magic-link verify)
+
+세 화면은 **`src/components/auth/AuthLayout.tsx`** 셸을 공유한다 — 헤더 + 왼쪽 폼 열(흰/`gray-950` 면) +
+오른쪽 navy 브랜드 패널(`lg` 미만 숨김). Mobbin 의 B2B 분할 레이아웃(Airtable·Remote·Airwallex) 패턴.
+
+- 클래스는 **`src/components/auth/authStyles.ts`** 상수만 쓴다: `authInputClass`(인풋 `rounded-md`, `py-3` = 44px)
+  · `authLabelClass` · `authPrimaryButtonClass` · `authSecondaryButtonClass`(테두리 버튼) · `authTextLinkClass`
+  · `authFieldIconClass`. 화면마다 문자열을 복사하지 말 것.
+- 오류는 `ErrorAlert`(`role="alert"`, destructive 토큰), 성공 안내는 success 토큰 + `role="status"`.
+- 페이지 제목은 **`h1`** 하나. 섹션당 primary 버튼 1개 — 대체 경로(매직 링크 등)는 secondary.
+- 링크 색은 `text-brand-blue-600 dark:text-brand-blue-300` (cyan 은 본문 텍스트 금지 §11).
+- `select` 는 `appearance-none` + lucide `ChevronDown`(`pointer-events-none`). 인라인 data-URI 화살표(HEX 하드코딩) 금지.
+- 헤더의 계정 메뉴(`AccountMenu.tsx`)는 로그아웃을 **마지막 항목**으로 두고 destructive 색을 쓴다.
+
+### 8.9 문서형 카드 (공유 견적 `/q/:token`)
+
+외부 파트너가 링크로 받는 견적은 **종이 문서처럼** 보이게 한다(Mobbin: Midday·Xero·Bonsai).
+
+```tsx
+<div className="min-h-screen bg-gray-100 dark:bg-gray-950">          {/* 중립 배경 */}
+  <article className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200
+    dark:border-gray-800 shadow-sm overflow-hidden">                   {/* 문서 */}
+    {/* 머리: eyebrow + 참조번호(h1) + 발행일/유효기간 <dl> */}
+    {/* 본문: 구간 → 상세 <dl> 그리드 */}
+    {/* 합계: 라벨 왼쪽 · 금액 오른쪽 text-3xl tabular-nums */}
+    {/* 꼬리: 면책 문구 bg-gray-50 dark:bg-gray-800/50 */}
+  </article>
+</div>
+```
+
+- 라벨/값은 **`<dl>` 시맨틱**. 라벨 `text-xs uppercase tracking-wider text-gray-500`, 값 `text-sm font-semibold`.
+- 금액은 `tabular-nums`. 강조색 그라디언트 배경 금지 — 합계는 크기와 위계로 강조한다.
+- 데이터는 `QuoteSerializer.shared` 화이트리스트에 있는 필드만. 디자인이 필드를 늘리지 않는다.
+
 ## 9. Charts — HEX 직접 사용 영역
 
 SVG `stroke`/`fill` 등 Tailwind 클래스로 접근 불가한 곳은 `src/lib/chartColors.ts` 의
@@ -349,6 +387,9 @@ import { CHART_COLORS } from '@/lib/chartColors';
 
 ### Changelog
 
+- **1.4.0** (2026-10-04) — §8.2 Primary Button 다크 hover 를 `brand-blue-400` → `brand-blue-600` 으로 수정
+  (흰 글자 대비 2.80:1 → 6.95:1, AA 미달 해소). §8.8 인증 화면(공용 `AuthLayout`·`authStyles`) ·
+  §8.9 문서형 카드(공유 견적) 패턴 신설. Mobbin 레퍼런스 기반 전 화면 단계적 개선의 1단계.
 - **1.3.0** (2026-08-19) — 존 폴백 제거 UI 반영. §8.6 Zone 미지정 상태 패턴 신설
   (ZoneUnavailableNotice amber 카드 · CarrierComparisonCard NoZoneColumn dashed
   보더 — 컬럼 숨김 대신 자리 유지). 기존 §8.6(미구현 컴포넌트)은 §8.7 로 이동.

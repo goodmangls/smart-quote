@@ -45,6 +45,8 @@
   "auth.signinTitle": "登录您的账户",
   "auth.signinSubtitle": "输入邮箱和密码以继续。",
   "auth.signupTitle": "创建账户",
+  "auth.signupSubtitle": "在一个地方比较 UPS、DHL 和 FedEx 报价。",
+  "auth.creatingAccount": "正在创建账户...",
   "auth.optional": "可选",
   "auth.noAccount": "没有账户？",
   "auth.haveAccount": "已有账户？",

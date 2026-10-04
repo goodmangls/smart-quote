@@ -17,6 +17,10 @@ vi.mock('@/contexts/LanguageContext', () => ({
   }),
 }));
 
+// AuthLayout renders the app Header, which needs Theme/Auth providers this
+// test doesn't mount — the page under test is the verify logic, not the header.
+vi.mock('@/components/layout/Header', () => ({ Header: () => null }));
+
 function renderPage(initialEntry: string) {
   return render(
     <MemoryRouter initialEntries={[initialEntry]}>

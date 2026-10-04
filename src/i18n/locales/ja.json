@@ -45,6 +45,8 @@
   "auth.signinTitle": "アカウントにログイン",
   "auth.signinSubtitle": "メールとパスワードを入力して続行してください。",
   "auth.signupTitle": "アカウント作成",
+  "auth.signupSubtitle": "UPS・DHL・FedEx の見積もりを一か所で比較できます。",
+  "auth.creatingAccount": "アカウントを作成中...",
   "auth.optional": "任意",
   "auth.noAccount": "アカウントをお持ちでないですか？",
   "auth.haveAccount": "既にアカウントをお持ちですか？",
