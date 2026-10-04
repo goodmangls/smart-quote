@@ -4,7 +4,7 @@ import { Analytics } from '@vercel/analytics/react';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { AuthProvider } from './contexts/AuthContext';
-import { LanguageProvider } from './contexts/LanguageContext';
+import { EnglishOnly, LanguageProvider } from './contexts/LanguageContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { ToastProvider } from './components/ui/Toast';
 import { Intercom } from './components/Intercom';
@@ -43,10 +43,32 @@ function App() {
                     {/* Public Landing Page */}
                     <Route path='/' element={<LandingPage />} />
 
-                    {/* Authentication Routes */}
-                    <Route path='/login' element={<LoginPage />} />
-                    <Route path='/signup' element={<SignUpPage />} />
-                    <Route path='/auth/verify' element={<MagicLinkVerifyPage />} />
+                    {/* Authentication Routes — always English: overseas partners
+                        land here first and there is no language switch yet. */}
+                    <Route
+                      path='/login'
+                      element={
+                        <EnglishOnly>
+                          <LoginPage />
+                        </EnglishOnly>
+                      }
+                    />
+                    <Route
+                      path='/signup'
+                      element={
+                        <EnglishOnly>
+                          <SignUpPage />
+                        </EnglishOnly>
+                      }
+                    />
+                    <Route
+                      path='/auth/verify'
+                      element={
+                        <EnglishOnly>
+                          <MagicLinkVerifyPage />
+                        </EnglishOnly>
+                      }
+                    />
 
                     {/* Customer Dashboard - Weather, News, Recent Quotes */}
                     <Route
