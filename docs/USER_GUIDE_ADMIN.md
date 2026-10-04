@@ -2,7 +2,7 @@
 
 > **KS Ways** Internal Logistics Quoting System
 >
-> Version 3.7 | Last Updated: 2026-08-19
+> Version 3.8 | Last Updated: 2026-10-04
 
 ---
 
@@ -32,6 +32,10 @@
 1. Navigate to `/login`
 2. Sign in with your admin credentials
 3. You will see the **Admin** link in the header navigation
+
+If your session expired on an admin page (e.g. `/admin`), signing in returns you to that page.
+
+To log out, click your **name** in the top-right of the header and choose **Logout** — the login screen then confirms you have been signed out.
 
 ### Admin vs Member Access
 
@@ -394,7 +398,7 @@ When a **Member** saves a quote, a Slack notification is automatically sent to t
 
 ### Change Password
 
-1. Click gear icon in header
+1. Click your name in the header → **Account Settings**
 2. Enter current → new → confirm password
 3. Minimum 6 characters
 

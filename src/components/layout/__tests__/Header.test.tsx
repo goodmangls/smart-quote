@@ -35,7 +35,7 @@ function renderHeader() {
   return render(
     <MemoryRouter>
       <Header />
-    </MemoryRouter>
+    </MemoryRouter>,
   );
 }
 
@@ -101,5 +101,39 @@ describe('Header', () => {
     fireEvent.click(screen.getByLabelText('Toggle menu'));
     fireEvent.click(screen.getByText('nav.logout'));
     expect(mockLogout).toHaveBeenCalled();
+  });
+
+  // The notice must be armed before anything can redirect: a ProtectedRoute
+  // still mounted during the transition redirects on its own once `user` is
+  // null, and router state would not survive that (see loginRedirect.ts).
+  it('arms the signed-out flag, then leaves for /login, then clears the session', () => {
+    sessionStorage.clear();
+    const calls: string[] = [];
+    mockNavigate.mockImplementation(() =>
+      calls.push(`navigate(flag=${sessionStorage.getItem('bl.auth.signedOut')})`),
+    );
+    mockLogout.mockImplementation(async () => {
+      calls.push('logout');
+    });
+
+    renderHeader();
+    fireEvent.click(screen.getByLabelText('Toggle menu'));
+    fireEvent.click(screen.getByText('nav.logout'));
+
+    expect(mockNavigate).toHaveBeenCalledWith('/login', { replace: true });
+    expect(calls).toEqual(['navigate(flag=1)', 'logout']);
+  });
+
+  it('logs out from the desktop account menu', () => {
+    renderHeader();
+    fireEvent.click(screen.getByRole('button', { name: 'nav.accountMenu' }));
+    fireEvent.click(screen.getByRole('menuitem', { name: 'nav.logout' }));
+    expect(mockLogout).toHaveBeenCalled();
+    expect(mockNavigate).toHaveBeenCalledWith('/login', expect.anything());
+  });
+
+  it('no longer renders a standalone logout icon button', () => {
+    renderHeader();
+    expect(screen.queryByRole('button', { name: 'nav.logout' })).not.toBeInTheDocument();
   });
 });
