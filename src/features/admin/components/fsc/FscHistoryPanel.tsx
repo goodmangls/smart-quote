@@ -68,18 +68,30 @@ export const FscHistoryPanel: React.FC<Props> = ({
         </div>
 
         <div className='flex flex-wrap items-center gap-4 text-[10px] text-gray-500 dark:text-gray-400'>
-          <div className='flex items-center gap-1.5'>
-            <span className='inline-block w-2.5 h-2.5 rounded-full bg-blue-500' />
-            <span>UPS{latestUps !== null ? ` — ${latestUps}%` : ''}</span>
-          </div>
-          <div className='flex items-center gap-1.5'>
-            <span className='inline-block w-2.5 h-2.5 rounded-full bg-amber-500' />
-            <span>DHL{latestDhl !== null ? ` — ${latestDhl}%` : ''}</span>
-          </div>
-          <div className='flex items-center gap-1.5'>
-            <span className='inline-block w-2.5 h-2.5 rounded-full bg-emerald-500' />
-            <span>FEDEX{latestFedex !== null ? ` — ${latestFedex}%` : ''}</span>
-          </div>
+          {/* Legend dots take the line colour from chartLines itself. They used
+              to be separate Tailwind classes (blue-500 / amber-500) that no
+              longer matched the CHART_COLORS lines they label. */}
+          {chartLines.map((line) => {
+            const latestByLabel: Record<string, number | null> = {
+              UPS: latestUps,
+              DHL: latestDhl,
+              FEDEX: latestFedex,
+            };
+            const latest = latestByLabel[line.label] ?? null;
+            return (
+              <div key={line.label} className='flex items-center gap-1.5'>
+                <span
+                  aria-hidden='true'
+                  className='inline-block w-2.5 h-2.5 rounded-full'
+                  style={{ backgroundColor: line.color }}
+                />
+                <span>
+                  {line.label}
+                  {latest !== null ? ` — ${latest}%` : ''}
+                </span>
+              </div>
+            );
+          })}
         </div>
 
         <div className='text-[10px] text-gray-400 dark:text-gray-500 space-y-0.5'>

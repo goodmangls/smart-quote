@@ -34,16 +34,16 @@ export function priorityColor(p: number) {
   }
   if (p >= 90) {
     return {
-      bg: 'bg-purple-50 dark:bg-purple-900/20',
-      text: 'text-purple-600 dark:text-purple-400',
-      icon: 'text-purple-500',
+      bg: 'bg-brand-blue-50 dark:bg-brand-blue-900/20',
+      text: 'text-brand-blue-600 dark:text-brand-blue-300',
+      icon: 'text-brand-blue-500',
     };
   }
   if (p >= 50) {
     return {
-      bg: 'bg-blue-50 dark:bg-blue-900/20',
-      text: 'text-blue-600 dark:text-blue-400',
-      icon: 'text-blue-500',
+      bg: 'bg-cyan-50 dark:bg-cyan-900/20',
+      text: 'text-cyan-700 dark:text-cyan-300',
+      icon: 'text-cyan-600',
     };
   }
   return {

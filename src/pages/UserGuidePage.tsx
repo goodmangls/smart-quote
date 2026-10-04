@@ -104,13 +104,13 @@ const UserGuidePage: React.FC = () => {
   };
 
   const renderTipBox = (text: string) => (
-    <div className="flex items-start gap-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 my-4">
-      <Lightbulb className="w-5 h-5 text-blue-500 dark:text-blue-400 flex-shrink-0 mt-0.5" />
+    <div className="flex items-start gap-3 bg-info-50 dark:bg-info-900/20 border border-info-200 dark:border-info-800 rounded-lg p-4 my-4">
+      <Lightbulb className="w-5 h-5 text-info-500 dark:text-info-400 flex-shrink-0 mt-0.5" />
       <div>
-        <span className="text-xs font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider">
+        <span className="text-xs font-bold text-info-600 dark:text-info-400 uppercase tracking-wider">
           {guide.tipLabel}
         </span>
-        <p className="text-sm text-blue-800 dark:text-blue-200 mt-1">{text}</p>
+        <p className="text-sm text-info-800 dark:text-info-200 mt-1">{text}</p>
       </div>
     </div>
   );
@@ -136,7 +136,7 @@ const UserGuidePage: React.FC = () => {
         id={`guide-section-${key}`}
         className="scroll-mt-20"
       >
-        <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden transition-colors duration-200">
+        <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden transition-colors duration-200">
           {/* Section Header */}
           <div className="px-6 py-5 border-b border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/50">
             <div className="flex items-center gap-3">
@@ -354,7 +354,7 @@ const UserGuidePage: React.FC = () => {
           {/* Desktop Sidebar TOC */}
           <aside className="hidden lg:block w-64 flex-shrink-0">
             <div className="sticky top-20">
-              <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden">
+              <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden">
                 <div className="px-5 py-4 border-b border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/50">
                   <h3 className="text-sm font-bold text-gray-700 dark:text-gray-200">
                     {guide.tocTitle}
