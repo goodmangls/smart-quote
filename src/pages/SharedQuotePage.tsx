@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { getSharedQuote, SharedQuoteData } from '@/api/shareApi';
-import { COUNTRY_OPTIONS } from '@/config/options';
+import { COUNTRY_OPTIONS, ORIGIN_COUNTRY_OPTIONS } from '@/config/options';
 import { AlertTriangle, Plane } from 'lucide-react';
 
 // Public page a partner opens from a share link. Styled as a document — a paper
@@ -48,8 +48,10 @@ const SharedQuotePage: React.FC = () => {
       .finally(() => setLoading(false));
   }, [token]);
 
-  const countryName = (code: string) =>
-    COUNTRY_OPTIONS.find((c) => c.code === code)
+  // Origins and destinations are separate lists: Korea is only ever an origin,
+  // so a destination-only lookup printed the origin as the bare code "KR".
+  const countryName = (code: string, options = COUNTRY_OPTIONS) =>
+    options.find((c) => c.code === code)
       ?.name?.replace(/[^\x20-\x7E]/g, '')
       .trim() || code;
 
@@ -126,7 +128,7 @@ const SharedQuotePage: React.FC = () => {
           {/* Route */}
           <div className='mx-6 sm:mx-8 flex items-center gap-4 rounded-lg bg-gray-50 dark:bg-gray-800/50 px-4 py-4'>
             <dl className='flex-1 min-w-0'>
-              <Field label='Origin'>{countryName(data.originCountry)}</Field>
+              <Field label='Origin'>{countryName(data.originCountry, ORIGIN_COUNTRY_OPTIONS)}</Field>
             </dl>
             <div
               className='flex items-center gap-2 text-gray-400 dark:text-gray-500'

@@ -73,6 +73,16 @@ describe('SharedQuotePage', () => {
     }
   });
 
+  // Origins live in ORIGIN_COUNTRY_OPTIONS. Korea is never a destination, so
+  // looking the origin up in the destination list fell back to the bare code.
+  it('names the origin country instead of printing its code', async () => {
+    renderPage();
+    await screen.findByText('SQ-2026-0042');
+    expect(screen.getByText('South Korea')).toBeInTheDocument();
+    expect(screen.queryByText('KR')).not.toBeInTheDocument();
+    expect(document.body.textContent).not.toMatch(/\u{1F1F0}\u{1F1F7}/u);
+  });
+
   it('strips the flag emoji from country names', async () => {
     renderPage();
     await screen.findByText('SQ-2026-0042');
