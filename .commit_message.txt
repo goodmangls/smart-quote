@@ -1,1 +1,1 @@
-📝 CLAUDE.md·AGENTS.md: 낡은 i18n 정합 문단을 #132~#135 기준으로 갱신하고 중복 테스트 항목 제거
+⛽ UPS·DHL·FedEx FSC 2026-10-05 주간 요율 반영 (UPS 52.00% / DHL 48.00% / FedEx 51.25%)
