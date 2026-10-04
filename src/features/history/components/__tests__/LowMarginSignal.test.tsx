@@ -1,6 +1,12 @@
-import { render, screen } from '@testing-library/react';
+import { render as rtlRender, screen } from '@testing-library/react';
+import type { ReactElement } from 'react';
+import { LanguageProvider } from '@/contexts/LanguageContext';
 import { MarginText, LowMarginBadge } from '../QuoteHistoryTableParts';
 import { LOW_MARGIN_THRESHOLD_PERCENT, isLowMargin } from '@/config/business-rules';
+
+// Components read labels through useLanguage(); the real provider defaults to
+// English, so the assertions below still read the English strings.
+const render = (ui: ReactElement) => rtlRender(ui, { wrapper: LanguageProvider });
 
 /**
  * A saved quote below the approval threshold used to be signalled only by the

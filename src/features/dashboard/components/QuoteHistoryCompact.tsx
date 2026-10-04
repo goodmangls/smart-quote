@@ -13,6 +13,13 @@ import { STATUS_COLORS } from '@/features/history/constants';
 
 export const QuoteHistoryCompact: React.FC = () => {
   const { t } = useLanguage();
+  // Same labels as the history page. An unknown status from the API would make
+  // t() echo its key, so fall back to the raw value as before.
+  const statusLabel = (status: string) => {
+    const key = `quote.status.${status}`;
+    const label = t(key as Parameters<typeof t>[0]);
+    return label === key ? status : label;
+  };
   const [quotes, setQuotes] = useState<QuoteSummary[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -69,7 +76,7 @@ export const QuoteHistoryCompact: React.FC = () => {
               <span
                 className={`inline-flex shrink-0 px-2 py-0.5 rounded-full text-xs font-medium capitalize ${STATUS_COLORS[quote.status] ?? STATUS_COLORS.draft}`}
               >
-                {quote.status}
+                {statusLabel(quote.status)}
               </span>
             </div>
           </div>

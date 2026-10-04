@@ -22,10 +22,18 @@ import {
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { useToast } from '@/components/ui/Toast';
 import { formatNum } from '@/lib/format';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { QuoteSearchBar } from './QuoteSearchBar';
 import { QuoteHistoryTable } from './QuoteHistoryTable';
 import { QuotePagination } from './QuotePagination';
 import { QuoteDetailModal } from './QuoteDetailModal';
+
+// A server message is shown as sent; our own fallbacks are stored as keys and
+// translated at render, so fetchList needn't depend on `t` (its identity would
+// re-run the fetch) and a switched language re-translates a visible error.
+type ListError =
+  | { key: 'history.error.load' | 'history.error.loadDetail' | 'history.error.delete' }
+  | { text: string };
 
 interface QuoteHistoryPageProps {
   onDuplicate?: (quote: QuoteDetail) => void;
@@ -43,7 +51,7 @@ export const QuoteHistoryPage: React.FC<QuoteHistoryPageProps> = ({ onDuplicate,
   });
   const [searchInput, setSearchInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<ListError | null>(null);
   const [selectedQuote, setSelectedQuote] = useState<QuoteDetail | null>(null);
   const [isLoadingDetail, setIsLoadingDetail] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
@@ -51,6 +59,7 @@ export const QuoteHistoryPage: React.FC<QuoteHistoryPageProps> = ({ onDuplicate,
   const [exportMenuOpen, setExportMenuOpen] = useState(false);
   const exportMenuRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
+  const { t } = useLanguage();
 
   useEffect(() => {
     if (!exportMenuOpen) return;
@@ -72,7 +81,7 @@ export const QuoteHistoryPage: React.FC<QuoteHistoryPageProps> = ({ onDuplicate,
       setPagination(data.pagination);
     } catch (err) {
       Sentry.captureException(err);
-      setError(err instanceof Error ? err.message : 'Failed to load quotes');
+      setError(err instanceof Error ? { text: err.message } : { key: 'history.error.load' });
     } finally {
       setIsLoading(false);
     }
@@ -102,7 +111,7 @@ export const QuoteHistoryPage: React.FC<QuoteHistoryPageProps> = ({ onDuplicate,
       setSelectedQuote(detail);
     } catch (e) {
       Sentry.captureException(e);
-      setError('Failed to load quote detail');
+      setError({ key: 'history.error.loadDetail' });
     } finally {
       setIsLoadingDetail(false);
     }
@@ -116,11 +125,11 @@ export const QuoteHistoryPage: React.FC<QuoteHistoryPageProps> = ({ onDuplicate,
     if (!deleteTarget) return;
     try {
       await deleteQuote(deleteTarget.id);
-      toast('success', `Quote ${deleteTarget.refNo} deleted`);
+      toast('success', t('history.toast.deleted').replace('{refNo}', deleteTarget.refNo));
       fetchList();
     } catch (e) {
       Sentry.captureException(e);
-      setError('Failed to delete quote');
+      setError({ key: 'history.error.delete' });
     } finally {
       setDeleteTarget(null);
     }
@@ -129,10 +138,11 @@ export const QuoteHistoryPage: React.FC<QuoteHistoryPageProps> = ({ onDuplicate,
   const handleExport = async (format: 'csv' | 'xlsx') => {
     try {
       await exportQuotes(params, format);
-      toast('success', `${format.toUpperCase()} exported successfully`);
+      toast('success', t('history.toast.exported').replace('{format}', format.toUpperCase()));
     } catch (e) {
       Sentry.captureException(e);
-      const message = e instanceof Error ? e.message : `Failed to export ${format.toUpperCase()}`;
+      const message = e instanceof Error ? e.message
+          : t('history.error.export').replace('{format}', format.toUpperCase());
       toast('error', message);
     }
   };
@@ -195,25 +205,25 @@ export const QuoteHistoryPage: React.FC<QuoteHistoryPageProps> = ({ onDuplicate,
         <div className='grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6'>
           <StatCard
             icon={<FileText className='w-4 h-4 text-brand-blue-500' />}
-            label='This Month'
+            label={t('history.stat.thisMonth')}
             value={String(stats.count)}
           />
           <StatCard
             icon={<DollarSign className='w-4 h-4 text-green-500' />}
-            label='Total Amount'
+            label={t('history.stat.totalAmount')}
             value={`${formatNum(stats.totalAmount)}`}
             sub='KRW'
           />
           {!hideMargin && (
             <StatCard
               icon={<TrendingUp className='w-4 h-4 text-brand-blue-500' />}
-              label='Avg Margin'
+              label={t('history.stat.avgMargin')}
               value={`${stats.avgMargin.toFixed(1)}%`}
             />
           )}
           <StatCard
             icon={<CheckCircle className='w-4 h-4 text-emerald-500' />}
-            label='Win Rate'
+            label={t('history.stat.winRate')}
             value={`${stats.winRate.toFixed(0)}%`}
           />
         </div>
@@ -222,9 +232,11 @@ export const QuoteHistoryPage: React.FC<QuoteHistoryPageProps> = ({ onDuplicate,
       {/* Header */}
       <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4'>
         <div>
-          <h2 className='text-xl font-bold text-gray-900 dark:text-white'>Quote History</h2>
+          <h2 className='text-xl font-bold text-gray-900 dark:text-white'>{t('history.title')}</h2>
           <p className='text-sm text-gray-500 dark:text-gray-400'>
-            {pagination ? `${pagination.totalCount} quotes total` : 'Loading...'}
+            {pagination
+              ? t('history.totalCount').replace('{count}', String(pagination.totalCount))
+              : t('history.loading')}
           </p>
         </div>
         <div className='flex items-center gap-2'>
@@ -237,7 +249,7 @@ export const QuoteHistoryPage: React.FC<QuoteHistoryPageProps> = ({ onDuplicate,
             }`}
           >
             <Filter className='w-4 h-4' />
-            Filters
+            {t('history.filters')}
             {hasActiveFilters && <span className='w-2 h-2 bg-brand-blue-500 rounded-full' />}
           </button>
           <div className='relative' ref={exportMenuRef}>
@@ -249,7 +261,7 @@ export const QuoteHistoryPage: React.FC<QuoteHistoryPageProps> = ({ onDuplicate,
               className='flex items-center gap-1.5 px-3 py-2 text-sm rounded-lg border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors'
             >
               <Download className='w-4 h-4' />
-              Export
+              {t('history.export')}
               <ChevronDown className='w-3.5 h-3.5' />
             </button>
             {exportMenuOpen && (
@@ -306,7 +318,7 @@ export const QuoteHistoryPage: React.FC<QuoteHistoryPageProps> = ({ onDuplicate,
       {/* Error */}
       {error && (
         <div className='mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-sm text-red-700 dark:text-red-300'>
-          {error}
+          {'key' in error ? t(error.key) : error.text}
         </div>
       )}
 
@@ -329,7 +341,7 @@ export const QuoteHistoryPage: React.FC<QuoteHistoryPageProps> = ({ onDuplicate,
           <div className='flex items-center gap-3 bg-white dark:bg-gray-800 rounded-xl px-6 py-4 shadow-lg'>
             <Loader2 className='w-5 h-5 animate-spin text-brand-blue-500' />
             <span className='text-sm font-medium text-gray-700 dark:text-gray-300'>
-              Loading quote...
+              {t('history.loadingQuote')}
             </span>
           </div>
         </div>
@@ -348,9 +360,10 @@ export const QuoteHistoryPage: React.FC<QuoteHistoryPageProps> = ({ onDuplicate,
 
       <ConfirmDialog
         open={!!deleteTarget}
-        title='Delete Quote'
-        message={`Delete quote ${deleteTarget?.refNo}? This cannot be undone.`}
-        confirmLabel='Delete'
+        title={t('history.delete.title')}
+        message={t('history.delete.message').replace('{refNo}', deleteTarget?.refNo ?? '')}
+        confirmLabel={t('history.delete.confirm')}
+        cancelLabel={t('history.delete.cancel')}
         onConfirm={handleDeleteConfirm}
         onCancel={() => setDeleteTarget(null)}
       />

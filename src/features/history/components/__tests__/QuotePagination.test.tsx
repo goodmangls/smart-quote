@@ -1,7 +1,13 @@
-import { render, screen } from '@testing-library/react';
+import { render as rtlRender, screen } from '@testing-library/react';
+import type { ReactElement } from 'react';
+import { LanguageProvider } from '@/contexts/LanguageContext';
 import userEvent from '@testing-library/user-event';
 import { QuotePagination } from '../QuotePagination';
 import { Pagination } from '@/types';
+
+// Components read labels through useLanguage(); the real provider defaults to
+// English, so the assertions below still read the English strings.
+const render = (ui: ReactElement) => rtlRender(ui, { wrapper: LanguageProvider });
 
 const defaultPagination: Pagination = {
   currentPage: 1,

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Pagination } from '@/types';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface Props {
   pagination: Pagination;
@@ -8,6 +9,7 @@ interface Props {
 }
 
 export const QuotePagination: React.FC<Props> = ({ pagination, onPageChange }) => {
+  const { t } = useLanguage();
   if (pagination.totalPages <= 1) return null;
 
   const start = Math.max(1, Math.min(pagination.currentPage - 2, pagination.totalPages - 4));
@@ -15,12 +17,15 @@ export const QuotePagination: React.FC<Props> = ({ pagination, onPageChange }) =
   return (
     <div className="flex items-center justify-between px-4 py-3 border-t border-gray-200 dark:border-gray-700">
       <p className="text-xs text-gray-500 dark:text-gray-400">
-        Page {pagination.currentPage} of {pagination.totalPages}
+        {t('history.page.of')
+          .replace('{current}', String(pagination.currentPage))
+          .replace('{total}', String(pagination.totalPages))}
       </p>
       <div className="flex items-center gap-1">
         <button
           onClick={() => onPageChange(pagination.currentPage - 1)}
           disabled={pagination.currentPage <= 1}
+          aria-label={t('history.page.prev')}
           className="p-1.5 rounded-md text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
         >
           <ChevronLeft className="w-4 h-4" />
@@ -45,6 +50,7 @@ export const QuotePagination: React.FC<Props> = ({ pagination, onPageChange }) =
         <button
           onClick={() => onPageChange(pagination.currentPage + 1)}
           disabled={pagination.currentPage >= pagination.totalPages}
+          aria-label={t('history.page.next')}
           className="p-1.5 rounded-md text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
         >
           <ChevronRight className="w-4 h-4" />
