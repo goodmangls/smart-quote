@@ -343,10 +343,10 @@ Semantic `warning`(amber) 계열을 쓰되, 오류(destructive)와 구분한다 
 
 ### 8.10 랜딩 히어로 (`/`)
 
-히어로는 인증 화면 브랜드 패널(§8.8)과 **같은 `bg-navy` + 점 격자**를 쓴다 — 랜딩에서 로그인으로 넘어가도
-같은 제품으로 읽히게. Mobbin: Railway·Dovetail(왼쪽 정렬 헤드라인 + 정직한 제품 카드 하나)·Notion(버튼 쌍).
+히어로는 라이트 `bg-gray-50` / 다크 `bg-navy` + 점 격자를 쓴다. navy 제품 카드와 브랜드 토큰으로
+인증 화면 브랜드 패널(§8.8)과 연결한다. Mobbin: Railway·Dovetail(왼쪽 정렬 헤드라인 + 정직한 제품 카드 하나)·Notion(버튼 쌍).
 
-- 헤드라인 강조 줄은 `text-cyan-300` 단색. **그라디언트 텍스트·블러 광원·글래스(`backdrop-blur`) 층 금지.**
+- 헤드라인 강조 줄은 `text-brand-blue-600 dark:text-cyan-300` 단색. **그라디언트 텍스트·블러 광원·글래스(`backdrop-blur`) 층 금지.**
   cyan 은 navy 위의 큰 제목에서만 허용(본문 금지 §11 은 흰 배경 기준 대비 문제).
 - CTA 는 primary(`bg-brand-blue`) 1개 + 테두리 secondary 1개, `rounded-lg`. cyan 배경 버튼 금지.
 - 제품 미리보기는 `<figure>` + `figcaption` 으로 **"견적 예시"임을 밝힌다**(`bg-deep-blue rounded-xl`).
@@ -355,6 +355,11 @@ Semantic `warning`(amber) 계열을 쓰되, 오류(destructive)와 구분한다 
   아이콘 칩은 `bg-brand-blue-50 text-brand-blue-600 dark:bg-brand-blue-900/40 dark:text-brand-blue-300` 한 가지.
 - ⚠️ 배지 문구 `landing.badge.networks` 는 **prerender 게이트**(`scripts/prerender.tsx` 의 `expect`)가 찾는
   문자열이다. 바꾸면 빌드가 실패하므로 두 곳을 함께 고칠 것.
+- 점 격자는 `InteractiveDotGrid` 로 렌더한다. BlindChoice의 커서 반응 패턴을 참고해 자체 구현:
+  기본 점(24px 간격)이 커서 주변 120px 안에서 최대 28px 밀려나며 강조되고, 커서가 떠나면 제자리로 복귀한다.
+  라이트 점은 `brand-blue-600`, 다크는 흰 점 + `cyan-300` 강조. 기존 Tailwind 토큰에서 색을 읽고 테마 전환 시 즉시 갱신한다.
+  장식은 `aria-hidden` · `pointer-events-none`; 모바일/터치 및 `prefers-reduced-motion` 은 정적 CSS 격자.
+  SSR/Canvas 미지원도 정적 격자를 유지한다. 움직임이 멎으면 RAF를 종료하고 화면 밖·숨긴 탭에서는 중지한다.
 
 ### 8.11 범주 배지 · 범례 (관리자 위젯 · 가이드)
 
@@ -436,6 +441,8 @@ import { CHART_COLORS } from '@/lib/chartColors';
 - **1.8.0** (2026-10-04) — §8.11 범주 배지·범례 규칙 신설. 관리자 위젯(마진 우선순위·사용자 역할·네트워크·감사 로그·
   할증 요율)과 사용자 가이드의 `blue`·`sky`·`purple` 을 brand-blue/cyan/info/gray 로 정리, FSC 이력 범례를 선 색에
   바인딩(범례 파랑 vs 선 brand-blue 불일치 수정), 남은 `rounded-2xl` → `xl`. 단계적 개선의 5단계(마지막).
+- **1.7.1** (2026-10-04) — 랜딩 히어로에 커서 반응형 점 격자 추가. 모바일·동작 줄이기·SSR 정적 대체,
+  화면 밖 애니메이션 중지. 라이트 배경·브랜드 블루 점 / 다크 navy·white·cyan 점 및 제목·버튼 대비 조정.
 - **1.7.0** (2026-10-04) — §8.5 캐리어 색을 Add-on 패널·비용 내역까지 확장(UPS 파랑→amber, FedEx 보라→cyan,
   FedEx 가 DHL 노랑으로 보이던 버그 수정). 계산기·이력의 `blue-*` 51곳을 의미별로 정리 — 버튼·링크·편집 컨트롤은
   `brand-blue`, 안내 배지·알림·아이콘은 `info`(같은 blue 스케일이라 렌더 색 동일). 메인 견적 카드 그라디언트 →
