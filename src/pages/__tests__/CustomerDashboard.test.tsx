@@ -189,14 +189,15 @@ describe('CustomerDashboard', () => {
     expect(screen.getByText('dashboard.viewAll')).toBeInTheDocument();
   });
 
-  it('navigates to /quote when View All clicked', async () => {
-    const user = userEvent.setup();
+  it('View All is a real link to /quote (opens in a new tab, survives no-JS)', async () => {
     await act(async () => {
       renderDashboard();
     });
 
-    await user.click(screen.getByText('dashboard.viewAll'));
-    expect(mockNavigate).toHaveBeenCalledWith('/quote');
+    expect(screen.getByRole('link', { name: 'dashboard.viewAll' })).toHaveAttribute(
+      'href',
+      '/quote',
+    );
   });
 
   it('shows empty state when no quotes', async () => {

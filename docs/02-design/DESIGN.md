@@ -1,6 +1,6 @@
 ---
 name: BridgeLogis Design System (smart-quote-main)
-version: 1.5.0
+version: 1.6.0
 description: >-
   BridgeLogis by KS Ways 웹 애플리케이션의 디자인 시스템 명세.
   외부 운영 중인 SaaS(bridgelogis.com)의 단일 진실 공급원(SSOT).
@@ -211,14 +211,22 @@ Tailwind 기본 shadow scale 사용 (`shadow-sm` · `shadow-md` · `shadow-lg` �
 ### 8.1 Widget 카드 (대시보드 표준)
 ```tsx
 <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm">
-  <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/30">
-    <h4 className="text-xs font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
-      Widget Title
-    </h4>
+  <div className="px-5 py-4 border-b border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/30">
+    <h3 className="text-sm font-bold text-gray-700 dark:text-gray-200 flex items-center">
+      <Icon className="w-4 h-4 mr-2" /> Widget Title
+    </h3>
   </div>
   <div className="p-4">{/* content */}</div>
 </div>
 ```
+
+- **다크 서피스는 중립 회색**(`dark:bg-gray-800` · `dark:border-gray-700` · 내부 면 `dark:bg-gray-900`).
+  `dark:bg-brand-blue-800/900` 같은 **파란 서피스 금지** — 페이지 배경(`gray-950`)과 색상이 갈려 한 화면에서
+  카드마다 온도가 달라진다. brand-blue 는 강조(아이콘·링크·수치)에만.
+- 대시보드 위젯 헤더는 위처럼 **아이콘 + `text-sm font-bold` 제목**(대시보드 전 위젯 공통). 관리자 위젯의
+  `text-xs uppercase` 헤더는 5단계에서 정리한다.
+- 상태값 색은 `src/features/history/constants.ts` 의 `STATUS_COLORS` 단일 출처 — 대시보드 최근 견적도 이것을 쓴다.
+- 클릭할 수 없는 행에 화살표(›, →) 아이콘을 두지 않는다 — 열리지 않는 걸 약속하는 셈이다.
 
 ### 8.2 Primary Button
 ```tsx
@@ -402,6 +410,10 @@ import { CHART_COLORS } from '@/lib/chartColors';
 
 ### Changelog
 
+- **1.6.0** (2026-10-04) — §8.1 위젯 카드를 실제 대시보드 위젯 헤더(아이콘 + `text-sm font-bold`)에 맞추고
+  다크 서피스 중립 회색 규칙·`STATUS_COLORS` 단일 출처·가짜 화살표 금지 추가. 대시보드 위젯 5종의
+  `dark:bg-brand-blue-800` 서피스·`rounded-2xl`·`blue/sky` 를 정리하고 red/amber/green 을 Semantic 토큰
+  (destructive/warning/success/info)으로 전환. 단계적 개선의 3단계.
 - **1.5.0** (2026-10-04) — §8.10 랜딩 히어로 패턴 신설. 랜딩의 `rounded-2xl/3xl`·임의 반경·`blue-300`
   그라디언트 텍스트·블러 광원·글래스 층·cyan CTA 제거, 예시 견적 합계 오류($612 → 항목 합 $550.50) 수정.
   단계적 개선의 2단계.

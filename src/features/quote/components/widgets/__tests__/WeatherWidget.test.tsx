@@ -162,11 +162,11 @@ describe('WeatherWidget', () => {
     const { container } = render(<WeatherWidget />);
 
     // Ship icon for port (lucide Ship has a specific SVG structure)
-    const shipIcons = container.querySelectorAll('.text-blue-500.w-5.h-5');
+    const shipIcons = container.querySelectorAll('.text-info-500.w-5.h-5');
     expect(shipIcons.length).toBeGreaterThanOrEqual(1);
 
     // Plane icon for airport
-    const planeIcons = container.querySelectorAll('.text-sky-500.w-5.h-5');
+    const planeIcons = container.querySelectorAll('.text-cyan-500.w-5.h-5');
     expect(planeIcons.length).toBeGreaterThanOrEqual(1);
   });
 });

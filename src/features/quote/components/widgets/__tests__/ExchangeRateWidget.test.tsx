@@ -159,7 +159,7 @@ describe('ExchangeRateWidget', () => {
       expect(screen.getByText('+12.5')).toBeInTheDocument();
     });
     // Red badge for up trend (KRW perspective: higher = red)
-    const badge = container.querySelector('.text-red-600');
+    const badge = container.querySelector('.text-destructive-600');
     expect(badge).toBeInTheDocument();
   });
 
@@ -171,7 +171,7 @@ describe('ExchangeRateWidget', () => {
     await waitFor(() => {
       expect(screen.getByText('-3.1')).toBeInTheDocument();
     });
-    const badge = container.querySelector('.text-blue-600');
+    const badge = container.querySelector('.text-info-600');
     expect(badge).toBeInTheDocument();
   });
 
