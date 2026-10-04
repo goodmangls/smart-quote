@@ -19,8 +19,14 @@ describe('locale parity', () => {
 
     it(`${lang} has exactly the English keys`, () => {
       const keys = Object.keys(table);
-      expect(enKeys.filter((k) => !(k in table)), `missing in ${lang}`).toEqual([]);
-      expect(keys.filter((k) => !(k in en)), `only in ${lang}`).toEqual([]);
+      expect(
+        enKeys.filter((k) => !(k in table)),
+        `missing in ${lang}`,
+      ).toEqual([]);
+      expect(
+        keys.filter((k) => !(k in en)),
+        `only in ${lang}`,
+      ).toEqual([]);
     });
 
     it(`${lang} keeps every {placeholder}`, () => {
