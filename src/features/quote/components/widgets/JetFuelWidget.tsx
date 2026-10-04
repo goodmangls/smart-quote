@@ -126,18 +126,18 @@ export const JetFuelWidget: React.FC = () => {
   const TrendIcon = trend === 'up' ? TrendingUp : trend === 'down' ? TrendingDown : Minus;
   const trendColor =
     trend === 'up'
-      ? 'text-red-600 bg-red-50 dark:text-red-400 dark:bg-red-900/20'
+      ? 'text-destructive-600 bg-destructive-50 dark:text-destructive-400 dark:bg-destructive-900/20'
       : trend === 'down'
-        ? 'text-blue-600 bg-blue-50 dark:text-blue-400 dark:bg-blue-900/20'
+        ? 'text-info-600 bg-info-50 dark:text-info-400 dark:bg-info-900/20'
         : 'text-gray-500 bg-gray-50 dark:text-gray-400 dark:bg-gray-800';
 
   return (
-    <div className='bg-white dark:bg-brand-blue-800 rounded-2xl shadow-sm border border-gray-100 dark:border-brand-blue-700 overflow-hidden transition-colors duration-200'>
+    <div className='bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden transition-colors duration-200'>
       {/* Header */}
       <div className='px-5 py-4 border-b border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/30 flex justify-between items-center'>
         <div>
           <h3 className='font-bold text-gray-700 dark:text-gray-200 flex items-center text-sm'>
-            <Fuel className='w-4 h-4 mr-2 text-amber-500' />
+            <Fuel className='w-4 h-4 mr-2 text-warning-500' />
             {t('dashboard.jetFuel.title')}
           </h3>
           <p className='text-[10px] text-gray-400 dark:text-gray-500 mt-0.5 ml-6'>
@@ -201,8 +201,8 @@ export const JetFuelWidget: React.FC = () => {
             {data.length >= 2 && <PriceChart prices={data} />}
 
             {/* FSC Correlation Note */}
-            <div className='bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-800/30 rounded-lg px-3 py-2'>
-              <p className='text-[11px] text-amber-700 dark:text-amber-400 leading-relaxed'>
+            <div className='bg-warning-50 dark:bg-warning-900/10 border border-warning-200 dark:border-warning-800/30 rounded-lg px-3 py-2'>
+              <p className='text-[11px] text-warning-700 dark:text-warning-400 leading-relaxed'>
                 {t('dashboard.jetFuel.fscNote')}
               </p>
             </div>

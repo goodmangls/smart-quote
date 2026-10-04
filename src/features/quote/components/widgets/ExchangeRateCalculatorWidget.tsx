@@ -38,7 +38,7 @@ export const ExchangeRateCalculatorWidget: React.FC = () => {
   }, [amount, fromCurrency, toCurrency, currencies]);
 
   return (
-    <div className="bg-white dark:bg-brand-blue-800 rounded-2xl shadow-sm border border-gray-100 dark:border-brand-blue-700 overflow-hidden transition-colors duration-200">
+    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden transition-colors duration-200">
       <div className="px-5 py-4 border-b border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/30 flex justify-between items-center">
         <h3 className="font-bold text-gray-700 dark:text-gray-200 flex items-center text-sm">
           <Calculator className="w-4 h-4 mr-2 text-brand-blue-500" />
@@ -57,7 +57,7 @@ export const ExchangeRateCalculatorWidget: React.FC = () => {
               type="number"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
-              className="w-full bg-gray-50 dark:bg-brand-blue-900 border border-gray-200 dark:border-brand-blue-700 rounded-xl px-4 py-2.5 text-gray-900 dark:text-white font-semibold focus:ring-2 focus:ring-brand-blue-500 focus:border-transparent transition-all outline-none"
+              className="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-md px-4 py-2.5 text-gray-900 dark:text-white font-semibold focus:ring-2 focus:ring-brand-blue-500 focus:border-transparent transition-all outline-none"
               placeholder="0.00"
               min="0"
             />
@@ -73,7 +73,7 @@ export const ExchangeRateCalculatorWidget: React.FC = () => {
                 <select
                   value={fromCurrency}
                   onChange={(e) => setFromCurrency(e.target.value)}
-                  className="w-full bg-gray-50 dark:bg-brand-blue-900 border border-gray-200 dark:border-brand-blue-700 rounded-xl pl-3 pr-8 py-2.5 text-gray-900 dark:text-white font-bold focus:ring-2 focus:ring-brand-blue-500 focus:border-transparent transition-all outline-none appearance-none"
+                  className="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-md pl-3 pr-8 py-2.5 text-gray-900 dark:text-white font-bold focus:ring-2 focus:ring-brand-blue-500 focus:border-transparent transition-all outline-none appearance-none"
                   disabled={loading}
                 >
                   {currencies.map(c => (
@@ -95,7 +95,7 @@ export const ExchangeRateCalculatorWidget: React.FC = () => {
               <button
                 type="button"
                 onClick={handleSwap}
-                className="p-2.5 rounded-full bg-gray-100 hover:bg-gray-200 dark:bg-brand-blue-700 dark:hover:bg-brand-blue-600 text-gray-600 dark:text-gray-300 transition-colors"
+                className="p-2.5 rounded-full bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-300 transition-colors"
                 aria-label="Swap currencies"
               >
                 <ArrowRightLeft className="w-4 h-4" />
@@ -111,7 +111,7 @@ export const ExchangeRateCalculatorWidget: React.FC = () => {
                 <select
                   value={toCurrency}
                   onChange={(e) => setToCurrency(e.target.value)}
-                  className="w-full bg-gray-50 dark:bg-brand-blue-900 border border-gray-200 dark:border-brand-blue-700 rounded-xl pl-3 pr-8 py-2.5 text-gray-900 dark:text-white font-bold focus:ring-2 focus:ring-brand-blue-500 focus:border-transparent transition-all outline-none appearance-none"
+                  className="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-md pl-3 pr-8 py-2.5 text-gray-900 dark:text-white font-bold focus:ring-2 focus:ring-brand-blue-500 focus:border-transparent transition-all outline-none appearance-none"
                   disabled={loading}
                 >
                   {currencies.map(c => (
@@ -130,10 +130,10 @@ export const ExchangeRateCalculatorWidget: React.FC = () => {
           </div>
 
           {/* Result */}
-          <div className="mt-4 pt-4 border-t border-gray-100 dark:border-brand-blue-700">
-            <div className="bg-brand-blue-50 dark:bg-brand-blue-900/30 rounded-xl p-4 border border-brand-blue-100 dark:border-brand-blue-800 flex flex-col items-center justify-center min-h-[80px]">
+          <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
+            <div className="bg-brand-blue-50 dark:bg-gray-900/30 rounded-xl p-4 border border-brand-blue-100 dark:border-gray-700 flex flex-col items-center justify-center min-h-[80px]">
               {loading && currencies.length === 1 ? (
-                <div className="animate-pulse bg-brand-blue-200 dark:bg-brand-blue-700 h-8 w-3/4 rounded"></div>
+                <div className="animate-pulse bg-gray-200 dark:bg-gray-700 h-8 w-3/4 rounded"></div>
               ) : (
                 <>
                   <span className="text-sm text-gray-500 dark:text-gray-400 font-medium mb-1">

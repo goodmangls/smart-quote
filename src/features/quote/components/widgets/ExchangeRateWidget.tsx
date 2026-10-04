@@ -46,8 +46,9 @@ export const ExchangeRateWidget: React.FC = () => {
   };
 
   const trendColors = (trend: 'up' | 'down' | 'flat') => {
-    if (trend === 'up') return 'text-red-600 bg-red-50 dark:text-red-400 dark:bg-red-900/20';
-    if (trend === 'down') return 'text-blue-600 bg-blue-50 dark:text-blue-400 dark:bg-blue-900/20';
+    if (trend === 'up')
+      return 'text-destructive-600 bg-destructive-50 dark:text-destructive-400 dark:bg-destructive-900/20';
+    if (trend === 'down') return 'text-info-600 bg-info-50 dark:text-info-400 dark:bg-info-900/20';
     return 'text-gray-500 bg-gray-50 dark:text-gray-400 dark:bg-gray-800';
   };
 
@@ -58,11 +59,11 @@ export const ExchangeRateWidget: React.FC = () => {
   const fxDrift = evaluateFxDrift({ market: usdRate, applied: DEFAULT_EXCHANGE_RATE });
 
   return (
-    <div className='bg-white dark:bg-brand-blue-800 rounded-2xl shadow-sm border border-gray-100 dark:border-brand-blue-700 overflow-hidden transition-colors duration-200 h-full flex flex-col'>
+    <div className='bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden transition-colors duration-200 h-full flex flex-col'>
       {/* Header */}
       <div className='px-5 py-4 border-b border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/30 flex justify-between items-center'>
         <h3 className='font-bold text-gray-700 dark:text-gray-200 flex items-center text-sm'>
-          <DollarSign className='w-4 h-4 mr-2 text-green-500' />
+          <DollarSign className='w-4 h-4 mr-2 text-success-500' />
           {t('widget.exchange')}
         </h3>
         <div className='flex items-center gap-2'>
@@ -99,8 +100,8 @@ export const ExchangeRateWidget: React.FC = () => {
                 role='status'
                 className={`flex items-start gap-2.5 rounded-lg px-3 py-2.5 text-[11px] leading-relaxed ${
                   fxDrift.level === 'drift'
-                    ? 'bg-red-50 text-red-800 dark:bg-red-900/20 dark:text-red-300'
-                    : 'bg-amber-50 text-amber-800 dark:bg-amber-900/20 dark:text-amber-300'
+                    ? 'bg-destructive-50 text-destructive-800 dark:bg-destructive-900/20 dark:text-destructive-300'
+                    : 'bg-warning-50 text-warning-800 dark:bg-warning-900/20 dark:text-warning-300'
                 }`}
               >
                 <AlertTriangle className='w-3.5 h-3.5 flex-shrink-0 mt-0.5' />
@@ -147,7 +148,7 @@ export const ExchangeRateWidget: React.FC = () => {
                 {exchangeData.map((rate) => (
                   <div
                     key={rate.currency}
-                    className='flex items-center justify-between py-1.5 px-2 rounded-lg hover:bg-gray-50 dark:hover:bg-brand-blue-900/30 transition-colors group'
+                    className='flex items-center justify-between py-1.5 px-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors group'
                   >
                     <div className='flex items-center gap-2.5 min-w-0'>
                       <span className='text-lg leading-none' role='img' aria-label={rate.currency}>
@@ -213,7 +214,7 @@ export const ExchangeRateWidget: React.FC = () => {
                   return (
                     <div
                       key={carrier.name}
-                      className='flex items-center justify-between py-1.5 px-2 rounded-lg hover:bg-gray-50 dark:hover:bg-brand-blue-900/30 transition-colors group'
+                      className='flex items-center justify-between py-1.5 px-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors group'
                     >
                       <div className='flex items-center gap-2'>
                         <a

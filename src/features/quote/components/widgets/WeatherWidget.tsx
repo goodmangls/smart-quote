@@ -8,12 +8,12 @@ import { PORTS_PER_PAGE } from '@/config/ports';
 import type { PortWeather } from '@/types/dashboard';
 
 const iconMap: Record<string, React.ReactNode> = {
-  Sun: <Sun className="w-5 h-5 text-amber-500" />,
+  Sun: <Sun className="w-5 h-5 text-warning-500" />,
   Cloud: <Cloud className="w-5 h-5 text-gray-400" />,
-  CloudRain: <CloudRain className="w-5 h-5 text-blue-500" />,
-  CloudDrizzle: <CloudDrizzle className="w-5 h-5 text-blue-400" />,
+  CloudRain: <CloudRain className="w-5 h-5 text-info-500" />,
+  CloudDrizzle: <CloudDrizzle className="w-5 h-5 text-info-400" />,
   CloudSnow: <CloudSnow className="w-5 h-5 text-cyan-400" />,
-  CloudLightning: <CloudLightning className="w-5 h-5 text-purple-500" />,
+  CloudLightning: <CloudLightning className="w-5 h-5 text-warning-600" />,
   CloudFog: <CloudFog className="w-5 h-5 text-gray-300" />,
   Wind: <Wind className="w-5 h-5 text-teal-400" />,
 };
@@ -32,9 +32,9 @@ function getIcon(weather: PortWeather): React.ReactNode {
 }
 
 const statusBadge: Record<string, string> = {
-  Normal: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
-  Delay: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
-  Warning: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
+  Normal: 'bg-success-100 text-success-700 dark:bg-success-900/30 dark:text-success-400',
+  Delay: 'bg-destructive-100 text-destructive-700 dark:bg-destructive-900/30 dark:text-destructive-400',
+  Warning: 'bg-warning-100 text-warning-700 dark:bg-warning-900/30 dark:text-warning-400',
 };
 
 const AUTO_ROTATE_MS = 5000;
@@ -71,7 +71,7 @@ export const WeatherWidget: React.FC = () => {
   }, [totalPages]);
 
   return (
-    <div className="bg-white dark:bg-brand-blue-800 rounded-2xl shadow-sm border border-gray-100 dark:border-brand-blue-700 overflow-hidden transition-colors duration-200">
+    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden transition-colors duration-200">
         <div className="px-5 py-4 border-b border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/30 flex justify-between items-center">
             <h3 className="font-bold text-gray-700 dark:text-gray-200 flex items-center text-sm">
                 <Sun className="w-4 h-4 mr-2 text-brand-blue-500" />
@@ -90,12 +90,12 @@ export const WeatherWidget: React.FC = () => {
               <>
                 <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
                     {pageData.map((weather) => (
-                        <div key={weather.code} className="flex flex-col bg-gray-50 dark:bg-brand-blue-900/40 p-3 rounded-xl border border-gray-100 dark:border-brand-blue-700/50">
+                        <div key={weather.code} className="flex flex-col bg-gray-50 dark:bg-gray-900/40 p-3 rounded-xl border border-gray-100 dark:border-gray-700/60">
                             <div className="flex justify-between items-start mb-2">
                                 <span className="text-xs font-bold text-gray-700 dark:text-gray-300 flex items-center gap-1">
                                   {weather.type === 'airport'
-                                    ? <Plane className="w-5 h-5 text-sky-500 shrink-0" />
-                                    : <Ship className="w-5 h-5 text-blue-500 shrink-0" />}
+                                    ? <Plane className="w-5 h-5 text-cyan-500 shrink-0" />
+                                    : <Ship className="w-5 h-5 text-info-500 shrink-0" />}
                                   {weather.port}
                                 </span>
                                 {getIcon(weather)}
@@ -110,11 +110,11 @@ export const WeatherWidget: React.FC = () => {
                     ))}
                 </div>
                 {needsPagination && (
-                  <div className="flex items-center justify-center gap-2 mt-4 pt-3 border-t border-gray-100 dark:border-brand-blue-700">
+                  <div className="flex items-center justify-center gap-2 mt-4 pt-3 border-t border-gray-100 dark:border-gray-700">
                     <button
                       type="button"
                       onClick={prevPage}
-                      className="p-2 sm:p-1 rounded-full hover:bg-gray-100 dark:hover:bg-brand-blue-700 text-gray-400 dark:text-gray-400 transition-colors"
+                      className="p-2 sm:p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-400 dark:text-gray-400 transition-colors"
                       aria-label="Previous page"
                     >
                       <ChevronLeft className="w-5 h-5 sm:w-4 sm:h-4" />
@@ -137,7 +137,7 @@ export const WeatherWidget: React.FC = () => {
                     <button
                       type="button"
                       onClick={nextPage}
-                      className="p-2 sm:p-1 rounded-full hover:bg-gray-100 dark:hover:bg-brand-blue-700 text-gray-400 dark:text-gray-400 transition-colors"
+                      className="p-2 sm:p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-400 dark:text-gray-400 transition-colors"
                       aria-label="Next page"
                     >
                       <ChevronRight className="w-5 h-5 sm:w-4 sm:h-4" />

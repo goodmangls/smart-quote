@@ -41,7 +41,7 @@ export const NoticeWidget: React.FC = () => {
   }, [totalPages]);
 
   return (
-    <div className="bg-white dark:bg-brand-blue-800 rounded-2xl shadow-sm border border-gray-100 dark:border-brand-blue-700 overflow-hidden transition-colors duration-200">
+    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden transition-colors duration-200">
         <div className="px-5 py-4 border-b border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/30 flex justify-between items-center">
             <h3 className="font-bold text-gray-700 dark:text-gray-200 flex items-center text-sm">
                 <Bell className="w-4 h-4 mr-2 text-brand-blue-500" />
@@ -58,7 +58,7 @@ export const NoticeWidget: React.FC = () => {
             {error && <WidgetError message={error} onRetry={retry} />}
             {!loading && !error && (
               <>
-                <ul className="divide-y divide-gray-100 dark:divide-brand-blue-700">
+                <ul className="divide-y divide-gray-100 dark:divide-gray-700">
                     {data.length === 0 ? (
                       <li className="px-5 py-6 text-center text-sm text-gray-400 dark:text-gray-400">
                         {t('dashboard.noNews')}
@@ -70,7 +70,7 @@ export const NoticeWidget: React.FC = () => {
                             href={safeExternalHref(item.link)}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex items-start px-5 py-4 hover:bg-gray-50 dark:hover:bg-brand-blue-700/50 transition-colors group"
+                            className="flex items-start px-5 py-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors group"
                           >
                             <div className="mt-0.5 mr-3 flex-shrink-0">
                               <Newspaper className="w-4 h-4 text-brand-blue-500" />
@@ -90,11 +90,11 @@ export const NoticeWidget: React.FC = () => {
                     )}
                 </ul>
                 {needsPagination && (
-                  <div className="flex items-center justify-center gap-2 py-3 border-t border-gray-100 dark:border-brand-blue-700 bg-gray-50 dark:bg-gray-700/30">
+                  <div className="flex items-center justify-center gap-2 py-3 border-t border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/30">
                     <button
                       type="button"
                       onClick={prevPage}
-                      className="p-2 sm:p-1 rounded-full hover:bg-gray-200 dark:hover:bg-brand-blue-600 text-gray-400 dark:text-gray-400 transition-colors"
+                      className="p-2 sm:p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-400 dark:text-gray-400 transition-colors"
                       aria-label="Previous page"
                     >
                       <ChevronLeft className="w-5 h-5 sm:w-4 sm:h-4" />
@@ -117,7 +117,7 @@ export const NoticeWidget: React.FC = () => {
                     <button
                       type="button"
                       onClick={nextPage}
-                      className="p-2 sm:p-1 rounded-full hover:bg-gray-200 dark:hover:bg-brand-blue-600 text-gray-400 dark:text-gray-400 transition-colors"
+                      className="p-2 sm:p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-400 dark:text-gray-400 transition-colors"
                       aria-label="Next page"
                     >
                       <ChevronRight className="w-5 h-5 sm:w-4 sm:h-4" />
