@@ -1,6 +1,6 @@
 ---
 name: BridgeLogis Design System (smart-quote-main)
-version: 1.6.0
+version: 1.7.0
 description: >-
   BridgeLogis by KS Ways 웹 애플리케이션의 디자인 시스템 명세.
   외부 운영 중인 SaaS(bridgelogis.com)의 단일 진실 공급원(SSOT).
@@ -268,6 +268,10 @@ Tailwind 기본 shadow scale 사용 (`shadow-sm` · `shadow-md` · `shadow-lg` �
 | FEDEX | `bg-cyan-50 border-cyan-200` | `dark:bg-cyan-900/20 dark:border-cyan-800` |
 
 - FedEx 는 브랜드 `cyan-*` 커스텀 스케일을 사용한다 (Tailwind 기본 `blue-*`/`sky-*` 금지 원칙 준수).
+- **같은 매핑을 비교 카드 밖에서도 쓴다** — Add-on 패널 테마(`addon/addOnPanelTheme.ts`)와 비용 내역의 캐리어 Add-on 행
+  (`CostBreakdownCard` 의 `CARRIER_ADDON_*`). 한 화면에서 같은 캐리어의 색이 바뀌면 안 된다.
+  ⚠️ 2026-10-04 이전: Add-on 패널이 UPS 파랑·FedEx 보라였고, 비용 내역은 `UPS ? 파랑 : 노랑` 삼항이라 FedEx 가 DHL 노랑으로 칠해졌다.
+  캐리어 분기는 삼항 대신 **3사 전부를 적은 맵**으로 — 새 캐리어가 조용히 남의 색을 물려받지 않게.
 - 배지 행은 배지가 없는 캐리어도 `min-h-[20px]` 로 높이를 맞춰 3장 카드의 수직 정렬을 유지한다.
 - Zone / Transit / CO₂ 정보는 2-col grid 가 아닌 **세로 스택** (`space-y-1` + `flex justify-between`) 으로 배치한다 (가독성 이슈로 2026-07-22 변경).
 
@@ -410,6 +414,10 @@ import { CHART_COLORS } from '@/lib/chartColors';
 
 ### Changelog
 
+- **1.7.0** (2026-10-04) — §8.5 캐리어 색을 Add-on 패널·비용 내역까지 확장(UPS 파랑→amber, FedEx 보라→cyan,
+  FedEx 가 DHL 노랑으로 보이던 버그 수정). 계산기·이력의 `blue-*` 51곳을 의미별로 정리 — 버튼·링크·편집 컨트롤은
+  `brand-blue`, 안내 배지·알림·아이콘은 `info`(같은 blue 스케일이라 렌더 색 동일). 메인 견적 카드 그라디언트 →
+  `bg-navy`, 상세 모달 `rounded-2xl` → `xl`. 단계적 개선의 4단계.
 - **1.6.0** (2026-10-04) — §8.1 위젯 카드를 실제 대시보드 위젯 헤더(아이콘 + `text-sm font-bold`)에 맞추고
   다크 서피스 중립 회색 규칙·`STATUS_COLORS` 단일 출처·가짜 화살표 금지 추가. 대시보드 위젯 5종의
   `dark:bg-brand-blue-800` 서피스·`rounded-2xl`·`blue/sky` 를 정리하고 red/amber/green 을 Semantic 토큰

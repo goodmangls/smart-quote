@@ -1,1 +1,1 @@
-🎨 디자인 3단계 — 대시보드를 랜딩·인증과 같은 언어로 (Mobbin 참고 — 환영 배너 navy 단색·그라디언트/블러 제거, 위젯 5종 다크 서피스를 brand-blue-800 → 중립 gray 로·rounded-2xl·blue/sky 제거·red/amber/green → Semantic 토큰, 최근 견적 행의 가짜 화살표 제거·상태색 STATUS_COLORS 단일 출처·모바일에서 목적지가 잘리던 문제 수정, '전체 보기'를 실제 링크로, DESIGN.md 1.6.0 §8.1)
+🎨 디자인 4단계 — 계산기·이력 일관성 (캐리어 색을 Add-on 패널·비용 내역까지 §8.5 로 통일 — UPS 파랑→amber·FedEx 보라→cyan, FedEx Add-on 이 DHL 노랑으로 보이던 버그 수정, blue-* 51곳을 버튼·링크=brand-blue / 안내=info 로 정리, 메인 견적 카드 그라디언트→navy, 상세 모달 rounded-xl, DESIGN.md 1.7.0)

@@ -31,7 +31,7 @@ export const QuoteSummaryCard: React.FC<Props> = ({ result, onDownloadPdf, hideM
 
   return (
       <div className={resultStyles.mainQuoteCardClass}>
-        <div className="absolute top-0 right-0 p-4 opacity-10">
+        <div aria-hidden="true" className="absolute top-0 right-0 p-4 opacity-10">
             <Anchor className="w-32 h-32 transform rotate-12" />
         </div>
 
@@ -112,7 +112,7 @@ export const QuoteSummaryCard: React.FC<Props> = ({ result, onDownloadPdf, hideM
               </div>
             )}
 
-            <div className="grid grid-cols-2 gap-3 text-sm bg-white/10 p-4 rounded-xl backdrop-blur-md border border-white/10">
+            <div className="grid grid-cols-2 gap-3 text-sm bg-white/10 p-4 rounded-xl border border-white/10">
                 <div>
                     <span className="block text-brand-blue-200 text-xs mb-0.5">Transit Time</span>
                     <span className="font-semibold text-white">{result.transitTime}</span>

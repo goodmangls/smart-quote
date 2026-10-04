@@ -206,7 +206,7 @@ export const QuoteHistoryPage: React.FC<QuoteHistoryPageProps> = ({ onDuplicate,
           />
           {!hideMargin && (
             <StatCard
-              icon={<TrendingUp className='w-4 h-4 text-blue-500' />}
+              icon={<TrendingUp className='w-4 h-4 text-brand-blue-500' />}
               label='Avg Margin'
               value={`${stats.avgMargin.toFixed(1)}%`}
             />

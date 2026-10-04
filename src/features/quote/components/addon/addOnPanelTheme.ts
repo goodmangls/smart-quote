@@ -1,6 +1,9 @@
 /**
  * Carrier-specific visual theme for Add-on panels.
  * Pricing/rates stay in each carrier's normalize*Rates + config — theme is UI only.
+ *
+ * Colours follow DESIGN.md §8.5 (UPS amber · DHL yellow · FedEx cyan) — the same
+ * carrier must not change colour between the comparison card and its add-on panel.
  */
 export type AddOnCarrierTheme = 'ups' | 'dhl' | 'fedex';
 
@@ -19,17 +22,17 @@ export interface AddOnPanelThemeClasses {
 export const ADDON_PANEL_THEMES: Record<AddOnCarrierTheme, AddOnPanelThemeClasses> = {
   ups: {
     panel:
-      'rounded-xl border border-blue-200 dark:border-blue-800 bg-blue-50/50 dark:bg-blue-900/10 p-3',
-    icon: 'w-4 h-4 text-blue-600 dark:text-blue-400',
-    title: 'font-semibold text-blue-700 dark:text-blue-300',
+      'rounded-xl border border-amber-200 dark:border-amber-800 bg-amber-50/50 dark:bg-amber-900/10 p-3',
+    icon: 'w-4 h-4 text-amber-600 dark:text-amber-400',
+    title: 'font-semibold text-amber-700 dark:text-amber-300',
     totalPill:
-      'ml-auto text-xs font-bold text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-900/40 px-2 py-0.5 rounded-full',
-    selectedCard: 'bg-blue-100 dark:bg-blue-900/30 border border-blue-300 dark:border-blue-700',
+      'ml-auto text-xs font-bold text-amber-700 dark:text-amber-300 bg-amber-100 dark:bg-amber-900/40 px-2 py-0.5 rounded-full',
+    selectedCard: 'bg-amber-100 dark:bg-amber-900/30 border border-amber-300 dark:border-amber-700',
     unselectedCard:
-      'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-700',
-    checkbox: 'rounded border-gray-300 text-blue-600 focus:ring-blue-500 w-3.5 h-3.5',
-    selectedName: 'text-blue-800 dark:text-blue-200',
-    selectedAmount: 'text-blue-700 dark:text-blue-300 font-semibold',
+      'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-amber-300 dark:hover:border-amber-700',
+    checkbox: 'rounded border-gray-300 text-amber-600 focus:ring-amber-500 w-3.5 h-3.5',
+    selectedName: 'text-amber-800 dark:text-amber-200',
+    selectedAmount: 'text-amber-700 dark:text-amber-300 font-semibold',
   },
   dhl: {
     panel:
@@ -48,17 +51,17 @@ export const ADDON_PANEL_THEMES: Record<AddOnCarrierTheme, AddOnPanelThemeClasse
   },
   fedex: {
     panel:
-      'rounded-xl border border-purple-200 dark:border-purple-800 bg-purple-50/50 dark:bg-purple-900/10 p-3',
-    icon: 'w-4 h-4 text-purple-600 dark:text-purple-400',
-    title: 'font-semibold text-purple-700 dark:text-purple-300',
+      'rounded-xl border border-cyan-200 dark:border-cyan-800 bg-cyan-50/50 dark:bg-cyan-900/10 p-3',
+    icon: 'w-4 h-4 text-cyan-600 dark:text-cyan-400',
+    title: 'font-semibold text-cyan-700 dark:text-cyan-300',
     totalPill:
-      'ml-auto text-xs font-bold text-purple-700 dark:text-purple-300 bg-purple-100 dark:bg-purple-900/40 px-2 py-0.5 rounded-full',
+      'ml-auto text-xs font-bold text-cyan-700 dark:text-cyan-300 bg-cyan-100 dark:bg-cyan-900/40 px-2 py-0.5 rounded-full',
     selectedCard:
-      'bg-purple-100 dark:bg-purple-900/30 border border-purple-300 dark:border-purple-700',
+      'bg-cyan-100 dark:bg-cyan-900/30 border border-cyan-300 dark:border-cyan-700',
     unselectedCard:
-      'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-purple-300 dark:hover:border-purple-700',
-    checkbox: 'rounded border-gray-300 text-purple-600 focus:ring-purple-500 w-3.5 h-3.5',
-    selectedName: 'text-purple-800 dark:text-purple-200',
-    selectedAmount: 'text-purple-700 dark:text-purple-300 font-semibold',
+      'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-cyan-300 dark:hover:border-cyan-700',
+    checkbox: 'rounded border-gray-300 text-cyan-600 focus:ring-cyan-500 w-3.5 h-3.5',
+    selectedName: 'text-cyan-800 dark:text-cyan-200',
+    selectedAmount: 'text-cyan-700 dark:text-cyan-300 font-semibold',
   },
 };

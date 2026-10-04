@@ -160,7 +160,7 @@ export const UpsAddOnPanel: React.FC<Props> = ({
 
   const notices = (
     <>
-      <div className='flex items-center gap-1.5 text-xs text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 rounded-lg px-2.5 py-1.5'>
+      <div className='flex items-center gap-1.5 text-xs text-info-600 dark:text-info-400 bg-info-50 dark:bg-info-900/20 rounded-lg px-2.5 py-1.5'>
         <Info className='w-3.5 h-3.5 shrink-0' />
         <span>
           <b>{isEn ? 'International Processing Fee' : '국제 처리 수수료'}</b>{' '}
@@ -210,7 +210,7 @@ export const UpsAddOnPanel: React.FC<Props> = ({
       )}
 
       {isDDP && (
-        <div className='flex items-center gap-1.5 text-xs text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 rounded-lg px-2.5 py-1.5'>
+        <div className='flex items-center gap-1.5 text-xs text-info-600 dark:text-info-400 bg-info-50 dark:bg-info-900/20 rounded-lg px-2.5 py-1.5'>
           <Info className='w-3.5 h-3.5 shrink-0' />
           <span>
             <b>DDP Service Fee</b> {isEn ? 'auto-applied' : '자동 적용'}:{' '}
