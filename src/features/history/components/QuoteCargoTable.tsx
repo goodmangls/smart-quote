@@ -1,14 +1,16 @@
 import React from 'react';
 import { QuoteDetail } from '@/types';
 import { Section } from './QuoteDetailSubcomponents';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface Props {
   items: QuoteDetail['items'];
 }
 
 export const QuoteCargoTable: React.FC<Props> = ({ items }) => {
+  const { t } = useLanguage();
   return (
-    <Section title='Cargo Items'>
+    <Section title={t('history.section.cargo')}>
       <div className='overflow-x-auto'>
         <table className='w-full text-xs'>
           <thead>
@@ -18,7 +20,7 @@ export const QuoteCargoTable: React.FC<Props> = ({ items }) => {
               <th className='text-right py-2 px-2'>L(cm)</th>
               <th className='text-right py-2 px-2'>H(cm)</th>
               <th className='text-right py-2 px-2'>Wt(kg)</th>
-              <th className='text-right py-2 pl-2'>Qty</th>
+              <th className='text-right py-2 pl-2'>{t('history.cargo.qty')}</th>
             </tr>
           </thead>
           <tbody>

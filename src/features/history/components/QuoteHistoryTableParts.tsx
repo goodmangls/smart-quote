@@ -4,6 +4,7 @@ import type { QuoteSummary } from '@/types';
 import { STATUS_COLORS } from '@/features/history/constants';
 import { getExpiryInfo } from '@/features/history/utils/expiry';
 import { LOW_MARGIN_THRESHOLD_PERCENT, isLowMargin } from '@/config/business-rules';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 /**
  * QuoteHistoryTable 의 모바일/데스크톱 뷰에서 공유하는 작은 presentational 컴포넌트들.
@@ -21,11 +22,12 @@ export interface StatusPillProps {
 }
 
 export function StatusPill({ status }: StatusPillProps) {
+  const { t } = useLanguage();
   return (
     <span
-      className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium capitalize ${STATUS_COLORS[status]}`}
+      className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_COLORS[status]}`}
     >
-      {status}
+      {t(`quote.status.${status}`)}
     </span>
   );
 }
@@ -35,10 +37,11 @@ export function StatusPill({ status }: StatusPillProps) {
 // ─────────────────────────────────────────────────
 
 export function SurchargeStaleBadge() {
+  const { t } = useLanguage();
   return (
     <span className='inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-medium bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'>
       <AlertTriangle className='w-2.5 h-2.5' />
-      재확인
+      {t('history.badge.recheck')}
     </span>
   );
 }
@@ -53,13 +56,14 @@ export function SurchargeStaleBadge() {
  * invisible to anyone who can't separate the two hues. This states it in words.
  */
 export function LowMarginBadge() {
+  const { t } = useLanguage();
   return (
     <span
       className='inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-medium bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
-      title={`Low margin — below ${LOW_MARGIN_THRESHOLD_PERCENT}%, approval required`}
+      title={t('history.badge.lowMarginTitle').replace('{pct}', String(LOW_MARGIN_THRESHOLD_PERCENT))}
     >
       <AlertTriangle className='w-2.5 h-2.5' aria-hidden='true' />
-      Low Margin
+      {t('history.badge.lowMargin')}
     </span>
   );
 }
@@ -81,6 +85,7 @@ export interface ExpiryBadgeProps {
 }
 
 export function ExpiryBadge({ validityDate, status, variant = 'mobile' }: ExpiryBadgeProps) {
+  const { t } = useLanguage();
   if (!validityDate || (status !== 'draft' && status !== 'sent')) return null;
   const { daysLeft, expired, severity } = getExpiryInfo(validityDate);
   const colorClass =
@@ -92,7 +97,9 @@ export function ExpiryBadge({ validityDate, status, variant = 'mobile' }: Expiry
   const content = (
     <>
       <Clock className='w-2.5 h-2.5' />
-      {expired ? 'Expired' : `${daysLeft}d left`}
+      {expired
+        ? t('quote.status.expired')
+        : t('history.expiry.daysLeft').replace('{days}', String(daysLeft))}
     </>
   );
   if (variant === 'mobile') {
@@ -155,6 +162,7 @@ export interface RowActionsProps {
 }
 
 export function RowActions({ id, refNo, onView, onDelete, variant = 'mobile' }: RowActionsProps) {
+  const { t } = useLanguage();
   const isDesktop = variant === 'desktop';
   const btnSize = isDesktop ? 'p-2.5 sm:p-1.5' : 'p-2.5';
   const iconSize = isDesktop ? 'w-5 h-5 sm:w-4 sm:h-4' : 'w-5 h-5';
@@ -167,14 +175,14 @@ export function RowActions({ id, refNo, onView, onDelete, variant = 'mobile' }: 
       <button
         onClick={() => onView(id)}
         className={`${btnSize} rounded-md text-gray-400 hover:text-brand-blue-600 hover:bg-brand-blue-50 dark:hover:bg-brand-blue-900/20 transition-colors`}
-        aria-label='View detail'
+        aria-label={t('history.action.view')}
       >
         <Eye className={iconSize} />
       </button>
       <button
         onClick={() => onDelete(id, refNo)}
         className={`${btnSize} rounded-md text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors`}
-        aria-label='Delete'
+        aria-label={t('history.delete.confirm')}
       >
         <Trash2 className={iconSize} />
       </button>

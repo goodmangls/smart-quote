@@ -1,6 +1,7 @@
 import React from 'react';
 import { QuoteSummary } from '@/types';
 import { formatNum } from '@/lib/format';
+import { useLanguage } from '@/contexts/LanguageContext';
 import {
   ExpiryBadge,
   MarginText,
@@ -63,9 +64,8 @@ export const MobileQuoteTable: React.FC<Props> = ({
   onView,
   onDelete,
 }) => {
-  const emptyMessage = hasActiveFilters
-    ? 'No quotes match your filters.'
-    : 'No quotes saved yet. Calculate a quote and save it!';
+  const { t } = useLanguage();
+  const emptyMessage = hasActiveFilters ? t('history.empty.filtered') : t('history.empty.none');
 
   if (isLoading) {
     return <MobileSkeleton />;

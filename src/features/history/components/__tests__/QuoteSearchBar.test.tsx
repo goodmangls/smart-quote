@@ -1,6 +1,12 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render as rtlRender, screen, fireEvent } from '@testing-library/react';
+import type { ReactElement } from 'react';
+import { LanguageProvider } from '@/contexts/LanguageContext';
 import userEvent from '@testing-library/user-event';
 import { QuoteSearchBar } from '../QuoteSearchBar';
+
+// Components read labels through useLanguage(); the real provider defaults to
+// English, so the assertions below still read the English strings.
+const render = (ui: ReactElement) => rtlRender(ui, { wrapper: LanguageProvider });
 
 const defaultProps = {
   searchInput: '',
@@ -51,17 +57,17 @@ describe('QuoteSearchBar', () => {
   it('shows status filter buttons when showFilters is true', () => {
     render(<QuoteSearchBar {...defaultProps} showFilters={true} />);
 
-    expect(screen.getByText('draft')).toBeInTheDocument();
-    expect(screen.getByText('sent')).toBeInTheDocument();
-    expect(screen.getByText('accepted')).toBeInTheDocument();
-    expect(screen.getByText('rejected')).toBeInTheDocument();
+    expect(screen.getByText('Draft')).toBeInTheDocument();
+    expect(screen.getByText('Sent')).toBeInTheDocument();
+    expect(screen.getByText('Accepted')).toBeInTheDocument();
+    expect(screen.getByText('Rejected')).toBeInTheDocument();
   });
 
   it('calls onStatusFilter when status button clicked', async () => {
     const onStatusFilter = vi.fn();
     render(<QuoteSearchBar {...defaultProps} showFilters={true} onStatusFilter={onStatusFilter} />);
 
-    await userEvent.click(screen.getByText('draft'));
+    await userEvent.click(screen.getByText('Draft'));
 
     expect(onStatusFilter).toHaveBeenCalledWith('draft');
   });

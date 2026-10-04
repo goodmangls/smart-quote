@@ -1,6 +1,7 @@
 import React from 'react';
 import { QuoteSummary } from '@/types';
 import { formatNum } from '@/lib/format';
+import { useLanguage } from '@/contexts/LanguageContext';
 import {
   ExpiryBadge,
   MarginText,
@@ -69,33 +70,32 @@ export const DesktopQuoteTable: React.FC<Props> = ({
   onView,
   onDelete,
 }) => {
-  const emptyMessage = hasActiveFilters
-    ? 'No quotes match your filters.'
-    : 'No quotes saved yet. Calculate a quote and save it!';
+  const { t } = useLanguage();
+  const emptyMessage = hasActiveFilters ? t('history.empty.filtered') : t('history.empty.none');
 
   return (
     <table className='w-full text-sm'>
       <thead>
         <tr className='border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50'>
           <th className='text-left px-4 py-3 font-medium text-gray-500 dark:text-gray-400'>
-            Ref No
+            {t('history.col.refNo')}
           </th>
-          <th className='text-left px-4 py-3 font-medium text-gray-500 dark:text-gray-400'>Date</th>
-          <th className='text-left px-4 py-3 font-medium text-gray-500 dark:text-gray-400'>Dest</th>
+          <th className='text-left px-4 py-3 font-medium text-gray-500 dark:text-gray-400'>{t('history.col.date')}</th>
+          <th className='text-left px-4 py-3 font-medium text-gray-500 dark:text-gray-400'>{t('history.col.dest')}</th>
           <th className='text-right px-4 py-3 font-medium text-gray-500 dark:text-gray-400'>
-            Amount (KRW)
+            {t('history.col.amountKrw')}
           </th>
           <th className='text-right px-4 py-3 font-medium text-gray-500 dark:text-gray-400'>USD</th>
           {!hideMargin && (
             <th className='text-right px-4 py-3 font-medium text-gray-500 dark:text-gray-400'>
-              Margin
+              {t('history.col.margin')}
             </th>
           )}
           <th className='text-center px-4 py-3 font-medium text-gray-500 dark:text-gray-400'>
-            Status
+            {t('history.col.status')}
           </th>
           <th className='text-center px-4 py-3 font-medium text-gray-500 dark:text-gray-400'>
-            Actions
+            {t('history.col.actions')}
           </th>
         </tr>
       </thead>
