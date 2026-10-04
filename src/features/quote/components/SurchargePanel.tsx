@@ -97,7 +97,7 @@ export const SurchargePanel: React.FC<Props> = ({
                   <td className="px-2 py-1.5 text-center">
                     <span className={`inline-block px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wide ${
                       s.chargeType === 'rate'
-                        ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
+                        ? 'bg-info-100 dark:bg-info-900/30 text-info-700 dark:text-info-300'
                         : 'bg-gray-100 dark:bg-gray-600 text-gray-600 dark:text-gray-300'
                     }`}>
                       {s.chargeType === 'rate' ? `${s.amount}%` : 'Fixed'}

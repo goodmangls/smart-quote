@@ -82,7 +82,7 @@ export const FinancialSection: React.FC<Props> = ({
             href={UPS_FSC_URL}
             target='_blank'
             rel='noopener noreferrer'
-            className='text-[10px] sm:text-xs text-gray-500 hover:text-blue-600 flex items-center transition-colors'
+            className='text-[10px] sm:text-xs text-gray-500 hover:text-brand-blue-600 flex items-center transition-colors'
             title='Check Official UPS FSC'
           >
             UPS FSC <ExternalLink className='w-3 h-3 ml-1' />

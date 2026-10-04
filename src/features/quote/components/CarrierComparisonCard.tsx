@@ -219,7 +219,7 @@ const BADGE_STYLE: Record<
   fastest: {
     icon: '⚡',
     i18nKey: 'badge.fastest',
-    className: 'text-blue-700 bg-blue-50 dark:text-blue-300 dark:bg-blue-900/30',
+    className: 'text-info-700 bg-info-50 dark:text-info-300 dark:bg-info-900/30',
   },
   greenest: {
     icon: '🌱',

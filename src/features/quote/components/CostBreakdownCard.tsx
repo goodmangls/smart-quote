@@ -17,6 +17,19 @@ import { formatKRW, formatUSD } from '@/lib/format';
 import { DEFAULT_EXCHANGE_RATE } from '@/config/rates';
 import { resultStyles } from './result-styles';
 
+// DESIGN.md §8.5 carrier colours. Before this map the add-on rows used a UPS-or-
+// else ternary, so FedEx add-ons were painted DHL yellow.
+const CARRIER_ADDON_ICON: Record<string, string> = {
+  UPS: 'text-amber-500',
+  DHL: 'text-yellow-500',
+  FEDEX: 'text-cyan-500',
+};
+const CARRIER_ADDON_TEXT: Record<string, string> = {
+  UPS: 'text-amber-700 dark:text-amber-400',
+  DHL: 'text-yellow-700 dark:text-yellow-400',
+  FEDEX: 'text-cyan-700 dark:text-cyan-300',
+};
+
 interface Props {
   result: QuoteResult;
   onMarginChange: (newMargin: number) => void;
@@ -270,7 +283,7 @@ export const CostBreakdownCard: React.FC<Props> = ({
                     <div className='flex justify-between items-center text-gray-700 dark:text-gray-300'>
                       <div className='flex items-center'>
                         <Package
-                          className={`w-4 h-4 mr-2 flex-shrink-0 ${result.carrier === 'UPS' ? 'text-blue-500' : 'text-yellow-500'}`}
+                          className={`w-4 h-4 mr-2 flex-shrink-0 ${CARRIER_ADDON_ICON[result.carrier] ?? 'text-gray-400'}`}
                         />
                         <span>
                           {t('quote.cost.carrierAddOns').replace('{carrier}', result.carrier)}
@@ -284,7 +297,7 @@ export const CostBreakdownCard: React.FC<Props> = ({
                       {result.breakdown.carrierAddOnDetails.map((d) => (
                         <div
                           key={d.code}
-                          className={`flex justify-between ${result.carrier === 'UPS' ? 'text-blue-700 dark:text-blue-400' : 'text-yellow-700 dark:text-yellow-400'}`}
+                          className={`flex justify-between ${CARRIER_ADDON_TEXT[result.carrier] ?? 'text-gray-600 dark:text-gray-300'}`}
                         >
                           <span>
                             {localizeCarrierAddOnName(d)} ({d.code})

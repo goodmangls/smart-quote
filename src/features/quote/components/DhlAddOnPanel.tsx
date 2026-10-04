@@ -165,7 +165,7 @@ export const DhlAddOnPanel: React.FC<Props> = ({
   const insRate = rates.find((r) => r.code === 'INS');
   const footer = selectedAddOns.includes('INS') ? (
     <div className='mt-2 flex items-center gap-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2'>
-      <Shield className='w-3.5 h-3.5 text-blue-500 shrink-0' />
+      <Shield className='w-3.5 h-3.5 text-info-500 shrink-0' />
       <label className='text-xs text-gray-600 dark:text-gray-400 whitespace-nowrap'>
         {isEn ? 'Declared Value' : '물품 신고가'}:
       </label>
@@ -180,7 +180,7 @@ export const DhlAddOnPanel: React.FC<Props> = ({
         inputMode='numeric'
       />
       {declaredValue && declaredValue > 0 && insRate && (
-        <span className='text-[10px] text-blue-600 dark:text-blue-400 font-medium whitespace-nowrap'>
+        <span className='text-[10px] text-info-600 dark:text-info-400 font-medium whitespace-nowrap'>
           = {calcAddonFee(insRate, 0, declaredValue).toLocaleString()} KRW
         </span>
       )}
