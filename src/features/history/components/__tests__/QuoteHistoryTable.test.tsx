@@ -1,7 +1,13 @@
-import { render, screen } from '@testing-library/react';
+import { render as rtlRender, screen } from '@testing-library/react';
+import type { ReactElement } from 'react';
+import { LanguageProvider } from '@/contexts/LanguageContext';
 import userEvent from '@testing-library/user-event';
 import { QuoteHistoryTable } from '../QuoteHistoryTable';
 import { QuoteSummary } from '@/types';
+
+// Components read labels through useLanguage(); the real provider defaults to
+// English, so the assertions below still read the English strings.
+const render = (ui: ReactElement) => rtlRender(ui, { wrapper: LanguageProvider });
 
 const mockQuote: QuoteSummary = {
   id: 1,
@@ -52,7 +58,7 @@ describe('QuoteHistoryTable', () => {
     expect(screen.getAllByText('1,500,000').length).toBeGreaterThan(0);
     expect(screen.getAllByText('$1,150.50').length).toBeGreaterThan(0);
     expect(screen.getAllByText('20.0%').length).toBeGreaterThan(0);
-    expect(screen.getAllByText('draft').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Draft').length).toBeGreaterThan(0);
   });
 
   it('shows loading skeletons when isLoading is true', () => {
@@ -109,5 +115,30 @@ describe('QuoteHistoryTable', () => {
     await userEvent.click(deleteButtons[0]);
 
     expect(onDelete).toHaveBeenCalledWith(1, 'SQ-2026-0001');
+  });
+});
+
+describe('QuoteHistoryTable language', () => {
+  afterEach(() => localStorage.removeItem('smartQuoteLanguage'));
+
+  // The whole history screen used to be hard-coded English, so an admin who
+  // switched to Korean saw Korean everywhere else and English here.
+  it('follows the selected language', () => {
+    localStorage.setItem('smartQuoteLanguage', 'ko');
+    render(<QuoteHistoryTable {...defaultProps} quotes={[{ ...mockQuote, surchargeStale: true }]} />);
+
+    expect(screen.getAllByText('견적번호').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('초안').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('재확인').length).toBeGreaterThan(0);
+    expect(screen.queryByText('Ref No')).not.toBeInTheDocument();
+    expect(screen.queryByText('Draft')).not.toBeInTheDocument();
+  });
+
+  // The stale-surcharge badge was the reverse case: Korean "재확인" for everyone.
+  it('no longer shows Korean to an English reader', () => {
+    render(<QuoteHistoryTable {...defaultProps} quotes={[{ ...mockQuote, surchargeStale: true }]} />);
+
+    expect(screen.getAllByText('Recheck').length).toBeGreaterThan(0);
+    expect(screen.queryByText('재확인')).not.toBeInTheDocument();
   });
 });

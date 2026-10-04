@@ -30,9 +30,11 @@ export const Section: React.FC<{ title: string; children: React.ReactNode }> = (
 );
 
 export const Field: React.FC<{ label: string; value: string }> = ({ label, value }) => (
-  <div className='flex justify-between py-1'>
-    <span className='text-gray-500 dark:text-gray-400'>{label}</span>
-    <span className='font-medium text-gray-900 dark:text-white'>{value}</span>
+  <div className='flex justify-between gap-2 py-1'>
+    {/* Korean labels may break between any two characters; keep the label whole
+        and let the value wrap instead. */}
+    <span className='shrink-0 whitespace-nowrap text-gray-500 dark:text-gray-400'>{label}</span>
+    <span className='text-right font-medium text-gray-900 dark:text-white'>{value}</span>
   </div>
 );
 

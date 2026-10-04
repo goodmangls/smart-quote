@@ -1,7 +1,13 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { render as rtlRender, screen, waitFor } from '@testing-library/react';
+import type { ReactElement } from 'react';
+import { LanguageProvider } from '@/contexts/LanguageContext';
 import userEvent from '@testing-library/user-event';
 import { QuoteHistoryPage } from '../QuoteHistoryPage';
 import * as quoteApi from '@/api/quoteApi';
+
+// Components read labels through useLanguage(); the real provider defaults to
+// English, so the assertions below still read the English strings.
+const render = (ui: ReactElement) => rtlRender(ui, { wrapper: LanguageProvider });
 
 vi.mock('@/api/quoteApi', () => ({
   listQuotes: vi.fn().mockResolvedValue({
