@@ -4,9 +4,9 @@ export const NETWORK_OPTIONS: FreightNetwork[] = ['WCA', 'MPL', 'EAN', 'JCtrans'
 
 export const NETWORK_STYLES: Record<string, { bg: string; text: string; border: string }> = {
   WCA: {
-    bg: 'bg-blue-100 dark:bg-blue-500/20',
-    text: 'text-blue-700 dark:text-blue-300',
-    border: 'border-blue-300 dark:border-blue-500/40',
+    bg: 'bg-brand-blue-100 dark:bg-brand-blue-500/20',
+    text: 'text-brand-blue-700 dark:text-brand-blue-300',
+    border: 'border-brand-blue-300 dark:border-brand-blue-500/40',
   },
   MPL: {
     bg: 'bg-emerald-100 dark:bg-emerald-500/20',

@@ -25,7 +25,7 @@ export const UserManagementWidget: React.FC = () => {
   } = useUserManagement();
 
   return (
-    <div className='bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden mt-6'>
+    <div className='bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden mt-6'>
       <div className='px-6 py-5 border-b border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50 flex items-center justify-between'>
         <div className='flex items-center space-x-3'>
           <div className='p-2 bg-brand-blue-100 dark:bg-brand-blue-500/20 rounded-lg'>

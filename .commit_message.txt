@@ -1,1 +1,1 @@
-🎨 디자인 4단계 — 계산기·이력 일관성 (캐리어 색을 Add-on 패널·비용 내역까지 §8.5 로 통일 — UPS 파랑→amber·FedEx 보라→cyan, FedEx Add-on 이 DHL 노랑으로 보이던 버그 수정, blue-* 51곳을 버튼·링크=brand-blue / 안내=info 로 정리, 메인 견적 카드 그라디언트→navy, 상세 모달 rounded-xl, DESIGN.md 1.7.0)
+🎨 관리자 위젯·사용자 가이드의 blue·sky·purple 색을 브랜드 토큰으로 정리하고 FSC 이력 범례를 차트 선 색에 바인딩

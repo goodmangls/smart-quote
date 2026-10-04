@@ -121,15 +121,15 @@ export const DashboardLayoutDiagram: React.FC<VisualProps> = ({ lang }) => {
               {t(labels.recentQuotes, lang)}
             </span>
           </div>
-          <div className="flex items-center gap-2 px-3 py-2.5 rounded-lg bg-sky-50 dark:bg-sky-900/20 border border-sky-200 dark:border-sky-800">
-            <Cloud className="w-3.5 h-3.5 text-sky-500 dark:text-sky-400" />
-            <span className="text-xs font-medium text-sky-700 dark:text-sky-300">
+          <div className="flex items-center gap-2 px-3 py-2.5 rounded-lg bg-cyan-50 dark:bg-cyan-900/20 border border-cyan-200 dark:border-cyan-800">
+            <Cloud className="w-3.5 h-3.5 text-cyan-600 dark:text-cyan-400" />
+            <span className="text-xs font-medium text-cyan-700 dark:text-cyan-300">
               {t(labels.weather, lang)}
             </span>
           </div>
-          <div className="flex items-center gap-2 px-3 py-2.5 rounded-lg bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800">
-            <Newspaper className="w-3.5 h-3.5 text-purple-500 dark:text-purple-400" />
-            <span className="text-xs font-medium text-purple-700 dark:text-purple-300">
+          <div className="flex items-center gap-2 px-3 py-2.5 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+            <Newspaper className="w-3.5 h-3.5 text-gray-500 dark:text-gray-400" />
+            <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
               {t(labels.news, lang)}
             </span>
           </div>
@@ -314,8 +314,8 @@ export const VolWeightFormula: React.FC<VisualProps> = ({ lang }) => {
         <div className="flex items-center gap-1.5 flex-wrap justify-center">
           {/* L */}
           <div className="flex flex-col items-center">
-            <div className="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 border border-blue-300 dark:border-blue-700 flex items-center justify-center">
-              <span className="text-sm font-bold text-blue-700 dark:text-blue-300">L</span>
+            <div className="w-10 h-10 rounded-lg bg-brand-blue-100 dark:bg-brand-blue-900/30 border border-brand-blue-300 dark:border-brand-blue-700 flex items-center justify-center">
+              <span className="text-sm font-bold text-brand-blue-700 dark:text-brand-blue-300">L</span>
             </div>
             <Ruler className="w-3 h-3 text-gray-400 mt-0.5" />
           </div>
@@ -330,8 +330,8 @@ export const VolWeightFormula: React.FC<VisualProps> = ({ lang }) => {
           <span className="text-lg font-bold text-gray-400 dark:text-gray-500">&times;</span>
           {/* H */}
           <div className="flex flex-col items-center">
-            <div className="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-900/30 border border-purple-300 dark:border-purple-700 flex items-center justify-center">
-              <span className="text-sm font-bold text-purple-700 dark:text-purple-300">H</span>
+            <div className="w-10 h-10 rounded-lg bg-cyan-100 dark:bg-cyan-900/30 border border-cyan-300 dark:border-cyan-700 flex items-center justify-center">
+              <span className="text-sm font-bold text-cyan-700 dark:text-cyan-300">H</span>
             </div>
             <Ruler className="w-3 h-3 text-gray-400 mt-0.5" />
           </div>

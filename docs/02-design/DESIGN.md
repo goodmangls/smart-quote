@@ -1,6 +1,6 @@
 ---
 name: BridgeLogis Design System (smart-quote-main)
-version: 1.7.0
+version: 1.8.0
 description: >-
   BridgeLogis by KS Ways 웹 애플리케이션의 디자인 시스템 명세.
   외부 운영 중인 SaaS(bridgelogis.com)의 단일 진실 공급원(SSOT).
@@ -356,6 +356,25 @@ Semantic `warning`(amber) 계열을 쓰되, 오류(destructive)와 구분한다 
 - ⚠️ 배지 문구 `landing.badge.networks` 는 **prerender 게이트**(`scripts/prerender.tsx` 의 `expect`)가 찾는
   문자열이다. 바꾸면 빌드가 실패하므로 두 곳을 함께 고칠 것.
 
+### 8.11 범주 배지 · 범례 (관리자 위젯 · 가이드)
+
+역할·우선순위·네트워크·감사 액션처럼 **값이 "종류"를 뜻하는 배지**는 아래 토큰 안에서 서로 다른 색을 고른다.
+`purple`·`indigo`·`violet`·`pink`·`blue`·`sky` 는 쓰지 않는다 — 브랜드 팔레트 밖이라 화면마다 제각각이 된다.
+
+| 순서 | 토큰 | 라이트 | 다크 |
+|---|---|---|---|
+| 1 | `brand-blue` | `bg-brand-blue-100 text-brand-blue-700/800` | `bg-brand-blue-900/30 text-brand-blue-300` |
+| 2 | `cyan` | `bg-cyan-50/100 text-cyan-700` | `bg-cyan-900/20~30 text-cyan-300` |
+| 3 | `emerald` | `bg-emerald-50/100 text-emerald-700` | `bg-emerald-900/20 text-emerald-300` |
+| 4 | `amber` | `bg-amber-50/100 text-amber-700` | `bg-amber-900/20 text-amber-300` |
+| 5 | `red` | `bg-red-50/100 text-red-700` | `bg-red-900/20 text-red-300` |
+| 기타 | `gray` | `bg-gray-100 text-gray-700` | `bg-gray-700 text-gray-300` |
+
+- 정보성 상태(예: "수정됨", "요율")는 `info`. 범주가 6개를 넘으면 색을 늘리지 말고 텍스트로 구분한다.
+- 배지 텍스트는 **-700 이상**(라이트). cyan 도 배지 텍스트는 `cyan-700` 이라 §11 본문 금지와 충돌하지 않는다.
+- **차트 범례 점은 선 색을 그대로 읽는다**(`style={{ backgroundColor: line.color }}`). 범례만 Tailwind 클래스로
+  따로 칠하면 `CHART_COLORS` 가 바뀔 때 범례와 선이 조용히 어긋난다 — FSC 이력 차트가 실제로 그랬다.
+
 ## 9. Charts — HEX 직접 사용 영역
 
 SVG `stroke`/`fill` 등 Tailwind 클래스로 접근 불가한 곳은 `src/lib/chartColors.ts` 의
@@ -414,6 +433,9 @@ import { CHART_COLORS } from '@/lib/chartColors';
 
 ### Changelog
 
+- **1.8.0** (2026-10-04) — §8.11 범주 배지·범례 규칙 신설. 관리자 위젯(마진 우선순위·사용자 역할·네트워크·감사 로그·
+  할증 요율)과 사용자 가이드의 `blue`·`sky`·`purple` 을 brand-blue/cyan/info/gray 로 정리, FSC 이력 범례를 선 색에
+  바인딩(범례 파랑 vs 선 brand-blue 불일치 수정), 남은 `rounded-2xl` → `xl`. 단계적 개선의 5단계(마지막).
 - **1.7.0** (2026-10-04) — §8.5 캐리어 색을 Add-on 패널·비용 내역까지 확장(UPS 파랑→amber, FedEx 보라→cyan,
   FedEx 가 DHL 노랑으로 보이던 버그 수정). 계산기·이력의 `blue-*` 51곳을 의미별로 정리 — 버튼·링크·편집 컨트롤은
   `brand-blue`, 안내 배지·알림·아이콘은 `info`(같은 blue 스케일이라 렌더 색 동일). 메인 견적 카드 그라디언트 →

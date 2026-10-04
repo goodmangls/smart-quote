@@ -5,10 +5,10 @@ import { Search, ChevronLeft, ChevronRight, FileText, Trash2, Mail, RefreshCw, E
 
 const ACTION_LABELS: Record<string, { label: string; icon: React.ReactNode; color: string }> = {
   'quote.created': { label: 'Created', icon: <FileText className="w-3.5 h-3.5" />, color: 'text-green-600 bg-green-50 dark:text-green-400 dark:bg-green-900/30' },
-  'quote.updated': { label: 'Updated', icon: <Edit className="w-3.5 h-3.5" />, color: 'text-blue-600 bg-blue-50 dark:text-blue-400 dark:bg-blue-900/30' },
+  'quote.updated': { label: 'Updated', icon: <Edit className="w-3.5 h-3.5" />, color: 'text-info-600 bg-info-50 dark:text-info-400 dark:bg-info-900/30' },
   'quote.status_changed': { label: 'Status', icon: <RefreshCw className="w-3.5 h-3.5" />, color: 'text-amber-600 bg-amber-50 dark:text-amber-400 dark:bg-amber-900/30' },
   'quote.deleted': { label: 'Deleted', icon: <Trash2 className="w-3.5 h-3.5" />, color: 'text-red-600 bg-red-50 dark:text-red-400 dark:bg-red-900/30' },
-  'quote.email_sent': { label: 'Emailed', icon: <Mail className="w-3.5 h-3.5" />, color: 'text-purple-600 bg-purple-50 dark:text-purple-400 dark:bg-purple-900/30' },
+  'quote.email_sent': { label: 'Emailed', icon: <Mail className="w-3.5 h-3.5" />, color: 'text-cyan-700 bg-cyan-50 dark:text-cyan-300 dark:bg-cyan-900/30' },
   'quote.exported': { label: 'Exported', icon: <Download className="w-3.5 h-3.5" />, color: 'text-gray-600 bg-gray-50 dark:text-gray-400 dark:bg-gray-800' },
 };
 
