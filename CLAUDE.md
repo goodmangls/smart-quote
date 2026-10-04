@@ -372,10 +372,12 @@ Express shipments (UPS/DHL/FedEx) → **DAP only** (no exceptions). AI chatbot e
 
 - **Languages**: `en | ko | cn | ja` (defined in `src/i18n/translations.ts`)
 - **Hook**: `useLanguage()` from `LanguageContext` returns `{ language, setLanguage, t }`
-- **Persistence**: localStorage key `'language'`
+- **Persistence**: localStorage key `smartQuoteLanguage` (`bridgelogis.com` 같은 영어 전용 호스트는 새 방문마다 `en` 으로 시작)
 - **Usage**: `t('key.name')` in all components
 
-⚠️ **로케일 키 정합을 강제하는 장치가 없고, 이미 갈라져 있다** (2026-09-19 확인). `cn`·`ja`·`ko` 가 `en` 보다 키가 적다. `LanguageContext` 의 `t()` 가 없는 키를 **영어로 폴백**하므로 아무것도 실패하지 않는다 — 일본어 화면 중간에 영어 문장이 섞여 나올 뿐이라 **눈으로 보기 전에는 모른다.** i18n 을 건드리는 테스트는 저장소에 하나도 없다. 키를 추가할 때 4개 파일을 함께 고칠 것. 어긋난 키 목록이 필요하면 네 JSON 의 키 집합을 직접 비교할 것(개수는 여기 적지 않는다 — 바뀐다).
+✅ **로케일 키 정합은 테스트가 강제한다** (2026-10-04, #133). `src/i18n/__tests__/localeParity.test.ts` 가 `ko`·`ja`·`cn` 의 키 집합이 `en` 과 **정확히 같은지**, `{placeholder}` 가 보존되는지, 값이 비어 있지 않은지를 단언한다(빈 값 예외는 `MAY_BE_EMPTY` 에만). 이 테스트 전에는 `t()` 가 없는 키를 **영어로 조용히 폴백**해서 ko·ja·cn 이 실제로 갈라져 있었고 아무것도 실패하지 않았다 — 키를 추가하면 4개 JSON 을 함께 고칠 것. 화면 단위 키 목록은 `historyKeys.test.ts`(#132) 처럼 따로 고정할 수 있다.
+
+**파트너가 처음 보는 공개 화면은 영어로 고정한다** (#134·#135). `EnglishOnly` 래퍼(`LanguageContext.tsx`)가 `/`·`/login`·`/signup`·`/auth/verify` 를 감싸 컨텍스트만 `en` 으로 바꾼다 — **저장된 언어 설정은 건드리지 않으므로** 로그인 후에는 원래 언어로 돌아간다. 라우트 배선은 `LanguageContext.test.tsx` 가 실제 `App` 을 렌더해 검증한다. 새 공개 라우트를 추가하면 감쌀지 판단할 것.
 
 ## API Endpoints
 
@@ -454,7 +456,6 @@ POST   /api/v1/notifications/slack   # Slack webhook proxy
   - ⚠️ **비결정 실패는 한 번의 green/red 로 판정하지 말 것.** 같은 트리에서 실패→실패→통과가 나온다. 원인 귀속은 **HEAD 를 반복 실행**해 거기서도 실패하는지로 가른다(#112 에서 이 방법으로 "내 변경 탓"이라는 오판을 정정했다)
 - **Backend**: RSpec + FactoryBot + Shoulda Matchers, factories in `spec/factories/`
   - ⚠️ **`spec/services/calculators/` 에 `*_cost_spec.rb` 가 없다.** 애드온 3개와 `war_risk_unit_spec.rb` 뿐이다. 즉 `UpsCost`·`DhlCost`·`FedexCost` — 요율 조회 엔진이 세 번 복붙돼 있고 조회 실패 시 `0` 을 반환하는 바로 그 모듈들 — 은 요청 스펙과 parity 스펙으로만 간접 커버된다. 위 「미러가 실제로 보장하는 범위」 참조
-  - ⚠️ **요율 기대값을 테이블에서 읽어오지 말 것.** `rateTableResolver.test.ts` 의 DHL 단언은 `DHL_DOC_EXACT_RATES.Z1[1]` 을 **참조**해서 표가 틀리게 바뀌어도 통과한다. 같은 블록의 UPS·FedEx 는 리터럴이라 잡아낸다 — 리터럴이 정상이고 참조가 예외다
 
 ## Deployment
 
