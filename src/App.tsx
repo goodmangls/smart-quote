@@ -40,8 +40,16 @@ function App() {
                   }
                 >
                   <Routes>
-                    {/* Public Landing Page */}
-                    <Route path='/' element={<LandingPage />} />
+                    {/* Public Landing Page — always English, like the sign-in
+                        routes: it is the first page an overseas partner sees. */}
+                    <Route
+                      path='/'
+                      element={
+                        <EnglishOnly>
+                          <LandingPage />
+                        </EnglishOnly>
+                      }
+                    />
 
                     {/* Authentication Routes — always English: overseas partners
                         land here first and there is no language switch yet. */}

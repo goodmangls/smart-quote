@@ -45,24 +45,28 @@ describe('EnglishOnly', () => {
   });
 });
 
-// Route wiring: the wrapper is useless if a sign-in route forgets it.
-describe('sign-in routes', () => {
-  it.each(['/login', '/signup'])('%s is English for a Korean-preferring visitor', async (path) => {
-    localStorage.setItem('smartQuoteLanguage', 'ko');
-    // Signed out: the session refresh is rejected.
-    vi.stubGlobal(
-      'fetch',
-      vi.fn(async () => new Response(JSON.stringify({ error: 'unauthorized' }), { status: 401 })),
-    );
-    window.history.pushState({}, '', path);
-    const { default: App } = await import('../../App');
+// Route wiring: the wrapper is useless if a route forgets it. The landing page
+// is included: like sign-in, it is what an overseas partner sees first.
+describe('partner-facing public routes', () => {
+  it.each(['/', '/login', '/signup'])(
+    '%s is English for a Korean-preferring visitor',
+    async (path) => {
+      localStorage.setItem('smartQuoteLanguage', 'ko');
+      // Signed out: the session refresh is rejected.
+      vi.stubGlobal(
+        'fetch',
+        vi.fn(async () => new Response(JSON.stringify({ error: 'unauthorized' }), { status: 401 })),
+      );
+      window.history.pushState({}, '', path);
+      const { default: App } = await import('../../App');
 
-    await act(async () => {
-      render(<App />);
-    });
+      await act(async () => {
+        render(<App />);
+      });
 
-    const heading = await screen.findByRole('heading', { level: 1 }, { timeout: 5000 });
-    expect(heading.textContent).not.toMatch(/[가-힣]/);
-    expect(document.body.textContent ?? '').not.toContain(translations.ko['auth.signin']);
-  });
+      const heading = await screen.findByRole('heading', { level: 1 }, { timeout: 5000 });
+      expect(heading.textContent).not.toMatch(/[가-힣]/);
+      expect(document.body.textContent ?? '').not.toContain(translations.ko['auth.signin']);
+    },
+  );
 });
