@@ -81,10 +81,10 @@ describe('InteractiveDotGrid', () => {
     document.documentElement.classList.remove('dark');
   });
 
-  function mount() {
+  function mount(props: Parameters<typeof InteractiveDotGrid>[0] = {}) {
     const view = render(
       <section>
-        <InteractiveDotGrid />
+        <InteractiveDotGrid {...props} />
       </section>,
     );
     return {
@@ -188,5 +188,41 @@ describe('InteractiveDotGrid', () => {
     const { canvas } = mount();
     expect(canvas.style.opacity).toBe('0');
     expect(frames.size).toBe(0);
+  });
+
+  it('uses the bounded background geometry rather than a long page geometry', () => {
+    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function (this: HTMLElement) {
+      return {
+        left: 80,
+        top: 40,
+        right: 320,
+        bottom: this.tagName === 'SECTION' ? 2440 : 160,
+        x: 80,
+        y: 40,
+        width: 240,
+        height: this.tagName === 'SECTION' ? 2400 : 120,
+        toJSON: () => ({}),
+      };
+    });
+    const { hero, canvas } = mount({ maxHeight: 120 });
+    expect(canvas.height).toBe(120);
+    vi.mocked(context.arc).mockClear();
+    hero.dispatchEvent(new MouseEvent('pointermove', { clientX: 92, clientY: 52, bubbles: true }));
+    tick();
+    expect(vi.mocked(context.arc).mock.calls[0][0]).toBeGreaterThan(12);
+    hero.dispatchEvent(
+      new MouseEvent('pointermove', { clientX: 92, clientY: 1000, bubbles: true }),
+    );
+    for (let i = 0; i < 60 && frames.size; i++) tick();
+    expect(vi.mocked(context.arc).mock.calls.at(-50)?.slice(0, 2)).toEqual([12, 12]);
+    expect(frames.size).toBe(0);
+  });
+
+  it('keeps the navy panel colors in light mode and uses a calmer static form background', () => {
+    reducedMotion = true;
+    const { canvas } = mount({ tone: 'navy', subtle: true });
+    expect(canvas).toHaveClass('text-cyan-300');
+    expect(canvas.parentElement).toHaveClass('text-white');
+    expect(canvas.previousElementSibling).toHaveStyle({ opacity: '0.07' });
   });
 });

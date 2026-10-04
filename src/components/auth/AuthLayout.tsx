@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { ArrowLeft, Check } from 'lucide-react';
 import { Header } from '../layout/Header';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { InteractiveDotGrid } from '../ui/InteractiveDotGrid';
 
 const CARRIERS = ['UPS', 'DHL', 'FedEx'] as const;
 const PANEL_POINTS = [
@@ -10,11 +11,6 @@ const PANEL_POINTS = [
   'landing.accurateBreakdown',
   'landing.liveRates',
 ] as const;
-
-const dotGridStyle: React.CSSProperties = {
-  backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.07) 1px, transparent 1px)',
-  backgroundSize: '24px 24px',
-};
 
 // The right half of the split layout (Airtable / Remote / Airwallex pattern on
 // Mobbin): the form gets a calm surface of its own, and the brand moves here
@@ -24,7 +20,7 @@ const BrandPanel: React.FC = () => {
   const { t } = useLanguage();
   return (
     <aside className='relative hidden lg:flex overflow-hidden bg-navy'>
-      <div className='absolute inset-0 pointer-events-none' style={dotGridStyle} />
+      <InteractiveDotGrid tone='navy' />
       <div className='absolute -top-32 -right-32 w-96 h-96 rounded-full bg-cyan/20 blur-3xl pointer-events-none' />
       <div className='absolute -bottom-32 -left-32 w-80 h-80 rounded-full bg-brand-blue/25 blur-3xl pointer-events-none' />
 
@@ -74,8 +70,9 @@ export const AuthLayout: React.FC<AuthLayoutProps> = ({ children, showBackLink =
       <Header />
 
       <main className='flex-1 grid lg:grid-cols-2'>
-        <section className='flex flex-col justify-center px-4 py-12 sm:px-8 lg:px-16'>
-          <div className='mx-auto w-full max-w-sm'>
+        <section className='relative overflow-hidden flex flex-col justify-center px-4 py-12 sm:px-8 lg:px-16'>
+          <InteractiveDotGrid subtle />
+          <div className='relative mx-auto w-full max-w-sm'>
             {showBackLink && (
               <Link
                 to='/'

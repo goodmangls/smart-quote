@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { getSharedQuote, SharedQuoteData } from '@/api/shareApi';
 import { COUNTRY_OPTIONS, ORIGIN_COUNTRY_OPTIONS } from '@/config/options';
 import { AlertTriangle, Plane } from 'lucide-react';
+import { InteractiveDotGrid } from '@/components/ui/InteractiveDotGrid';
 
 // Public page a partner opens from a share link. Styled as a document — a paper
 // card on a neutral background (DESIGN.md §8.9; Mobbin: Midday, Xero, Bonsai) —
@@ -51,14 +52,16 @@ const SharedQuotePage: React.FC = () => {
   // Origins and destinations are separate lists: Korea is only ever an origin,
   // so a destination-only lookup printed the origin as the bare code "KR".
   const countryName = (code: string, options = COUNTRY_OPTIONS) =>
-    options.find((c) => c.code === code)
+    options
+      .find((c) => c.code === code)
       ?.name?.replace(/[^\x20-\x7E]/g, '')
       .trim() || code;
 
   if (loading) {
     return (
-      <div className='min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-950'>
-        <div role='status' aria-label='Loading quote'>
+      <div className='relative min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-950'>
+        <InteractiveDotGrid subtle maxHeight={720} />
+        <div className='relative' role='status' aria-label='Loading quote'>
           <div className='w-8 h-8 rounded-full border-2 border-gray-300 border-t-brand-blue dark:border-gray-700 dark:border-t-brand-blue-300 animate-spin motion-reduce:animate-none' />
         </div>
       </div>
@@ -67,8 +70,9 @@ const SharedQuotePage: React.FC = () => {
 
   if (error || !data) {
     return (
-      <div className='min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-950 p-4'>
-        <div className='max-w-md w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm p-8 text-center'>
+      <div className='relative min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-950 p-4'>
+        <InteractiveDotGrid subtle maxHeight={720} />
+        <div className='relative max-w-md w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm p-8 text-center'>
           <span className='mx-auto inline-flex h-12 w-12 items-center justify-center rounded-full bg-destructive-50 text-destructive-600 ring-1 ring-destructive-200 dark:bg-destructive-900/20 dark:text-destructive-300 dark:ring-destructive-800'>
             <AlertTriangle aria-hidden='true' className='h-6 w-6' />
           </span>
@@ -95,8 +99,9 @@ const SharedQuotePage: React.FC = () => {
     : `$${data.totalQuoteAmountUsd.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
 
   return (
-    <div className='min-h-screen bg-gray-100 dark:bg-gray-950 px-4 py-8 sm:py-12'>
-      <div className='mx-auto max-w-3xl'>
+    <div className='relative min-h-screen bg-gray-100 dark:bg-gray-950 px-4 py-8 sm:py-12'>
+      <InteractiveDotGrid subtle maxHeight={720} />
+      <div className='relative mx-auto max-w-3xl'>
         <div className='flex items-center justify-between mb-4'>
           <Wordmark />
           <span className='text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400'>
@@ -128,7 +133,9 @@ const SharedQuotePage: React.FC = () => {
           {/* Route */}
           <div className='mx-6 sm:mx-8 flex items-center gap-4 rounded-lg bg-gray-50 dark:bg-gray-800/50 px-4 py-4'>
             <dl className='flex-1 min-w-0'>
-              <Field label='Origin'>{countryName(data.originCountry, ORIGIN_COUNTRY_OPTIONS)}</Field>
+              <Field label='Origin'>
+                {countryName(data.originCountry, ORIGIN_COUNTRY_OPTIONS)}
+              </Field>
             </dl>
             <div
               className='flex items-center gap-2 text-gray-400 dark:text-gray-500'

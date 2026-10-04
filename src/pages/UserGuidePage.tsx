@@ -3,6 +3,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
+import { InteractiveDotGrid } from '@/components/ui/InteractiveDotGrid';
 import {
   BookOpen,
   Rocket,
@@ -281,8 +282,9 @@ const UserGuidePage: React.FC = () => {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {/* Page Title */}
-        <div className="mb-8">
-          <div className="flex items-center gap-3 mb-2">
+        <div className="relative overflow-hidden mb-8 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-5 sm:p-6">
+          <InteractiveDotGrid subtle />
+          <div className="relative flex items-center gap-3">
             <BookOpen className="w-7 h-7 text-brand-blue-600 dark:text-brand-blue-400" />
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
               {guide.pageTitle}

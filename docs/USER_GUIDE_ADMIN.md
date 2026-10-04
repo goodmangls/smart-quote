@@ -2,7 +2,7 @@
 
 > **KS Ways** Internal Logistics Quoting System
 >
-> Version 3.8.1 | Last Updated: 2026-10-04
+> Version 3.8.2 | Last Updated: 2026-10-04
 
 ---
 
@@ -26,6 +26,10 @@
 ---
 
 ## 1. Getting Started
+
+Sign-in screens, the dashboard welcome banner, calculator/history toolbar and guide heading
+share a subtle mouse-responsive dot background. The dots adapt to the surface and theme,
+stay still on touch devices or with **Reduce Motion** enabled, and are hidden when printing.
 
 ### Admin Login
 

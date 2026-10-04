@@ -2,7 +2,7 @@
 
 > **KS Ways** International Logistics Quoting System
 >
-> Version 3.9.2 | Last Updated: 2026-10-04
+> Version 3.9.3 | Last Updated: 2026-10-04
 
 ---
 
@@ -21,9 +21,11 @@
 
 ## 1. Getting Started
 
-The landing page (`/`) has a subtle dot background that responds to your mouse in the top section.
-The background and dot colors adapt when you switch between light and dark mode.
+The landing page, sign-in screens, dashboard welcome banner, calculator/history toolbar,
+guide heading and the area outside shared quotations have a subtle dot background that responds to your mouse.
+Dot colors adapt to light and dark mode; navy panels keep their white dots and cyan highlights.
 On touch devices, or with your system's **Reduce Motion** setting enabled, the dots stay still.
+The decoration is hidden when printing and does not affect form fields or quote information.
 
 ### Login
 

@@ -5,7 +5,7 @@ import { Header } from '../components/layout/Header';
 import { Footer } from '../components/layout/Footer';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
-import { InteractiveDotGrid } from '../components/landing/InteractiveDotGrid';
+import { InteractiveDotGrid } from '../components/ui/InteractiveDotGrid';
 
 // A light surface / dark navy hero with a reactive dot grid (DESIGN.md §8.10).
 // Mobbin: Railway, Dovetail (left-aligned hero,

@@ -1,6 +1,6 @@
 ---
 name: BridgeLogis Design System (smart-quote-main)
-version: 1.8.0
+version: 1.8.1
 description: >-
   BridgeLogis by KS Ways 웹 애플리케이션의 디자인 시스템 명세.
   외부 운영 중인 SaaS(bridgelogis.com)의 단일 진실 공급원(SSOT).
@@ -361,6 +361,16 @@ Semantic `warning`(amber) 계열을 쓰되, 오류(destructive)와 구분한다 
   장식은 `aria-hidden` · `pointer-events-none`; 모바일/터치 및 `prefers-reduced-motion` 은 정적 CSS 격자.
   SSR/Canvas 미지원도 정적 격자를 유지한다. 움직임이 멎으면 RAF를 종료하고 화면 밖·숨긴 탭에서는 중지한다.
 
+#### 공통 반응형 점 배경
+
+- 구현은 `src/components/ui/InteractiveDotGrid.tsx` 하나를 재사용한다. 부모는 `relative`/`sticky` 등 위치 기준을 제공하고,
+  내용은 `relative` 로 점 위에 배치한다. 배경은 `pointer-events-none`, `aria-hidden`, `print:hidden`.
+- `tone="navy"`: 인증 브랜드 패널과 대시보드 환영 배너처럼 항상 navy인 면에서는 테마와 무관하게 흰 점·cyan 강조.
+- `subtle`: 인증 폼, 계산기·이력 상단 바, 가이드 제목, 공유 견적 바깥면에서는 기본 불투명도 0.07로 낮춘다.
+  필드·문서·데이터 카드의 불투명 면과 기존 포커스/클릭 동작을 유지한다.
+- 긴 공유 견적은 `maxHeight={720}` 으로 배경 캔버스 높이를 제한한다. 실제 배경 영역을 기준으로 좌표와 가시성을 계산하고,
+  그 영역 밖 포인터 이동은 복귀 후 애니메이션을 종료한다. 모바일·동작 줄이기·SSR 정적 대체 규칙은 모든 화면에 동일하다.
+
 ### 8.11 범주 배지 · 범례 (관리자 위젯 · 가이드)
 
 역할·우선순위·네트워크·감사 액션처럼 **값이 "종류"를 뜻하는 배지**는 아래 토큰 안에서 서로 다른 색을 고른다.
@@ -438,6 +448,8 @@ import { CHART_COLORS } from '@/lib/chartColors';
 
 ### Changelog
 
+- **1.8.1** (2026-10-04) — 반응형 점 배경을 공통 UI 컴포넌트로 이동하고 인증 3종·대시보드 환영 배너·
+  계산기/이력 상단 바·가이드 제목·공유 견적 바깥면으로 확장. navy 고정 색과 낮은 밝기 옵션, 문서 캔버스 높이 제한 추가.
 - **1.8.0** (2026-10-04) — §8.11 범주 배지·범례 규칙 신설. 관리자 위젯(마진 우선순위·사용자 역할·네트워크·감사 로그·
   할증 요율)과 사용자 가이드의 `blue`·`sky`·`purple` 을 brand-blue/cyan/info/gray 로 정리, FSC 이력 범례를 선 색에
   바인딩(범례 파랑 vs 선 brand-blue 불일치 수정), 남은 `rounded-2xl` → `xl`. 단계적 개선의 5단계(마지막).

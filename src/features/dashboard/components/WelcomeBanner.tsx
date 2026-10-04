@@ -3,15 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { PlusCircle } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { InteractiveDotGrid } from '@/components/ui/InteractiveDotGrid';
 
 // Same navy + dot grid as the landing hero and auth brand panel (DESIGN.md
 // §8.8/§8.10) — signing in lands on a page that still looks like the product
 // you signed up for. Solid surface; no gradient or blur glows.
-const bannerGridStyle: React.CSSProperties = {
-  backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.07) 1px, transparent 1px)',
-  backgroundSize: '24px 24px',
-};
-
 export const WelcomeBanner: React.FC = () => {
   const { user } = useAuth();
   const { t } = useLanguage();
@@ -19,11 +15,7 @@ export const WelcomeBanner: React.FC = () => {
 
   return (
     <div className='relative overflow-hidden bg-navy rounded-xl p-6 sm:p-8 text-white ring-1 ring-white/5'>
-      <div
-        aria-hidden='true'
-        className='absolute inset-0 pointer-events-none'
-        style={bannerGridStyle}
-      />
+      <InteractiveDotGrid tone='navy' />
 
       <div className='relative flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4'>
         <div className='min-w-0'>
