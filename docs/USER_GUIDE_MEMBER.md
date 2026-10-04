@@ -2,7 +2,7 @@
 
 > **KS Ways** International Logistics Quoting System
 >
-> Version 3.9.0 | Last Updated: 2026-10-04
+> Version 3.9.1 | Last Updated: 2026-10-04
 
 ---
 
@@ -20,6 +20,10 @@
 ---
 
 ## 1. Getting Started
+
+The landing page (`/`) has a subtle dot background that responds to your mouse in the top section.
+The background and dot colors adapt when you switch between light and dark mode.
+On touch devices, or with your system's **Reduce Motion** setting enabled, the dots stay still.
 
 ### Login
 

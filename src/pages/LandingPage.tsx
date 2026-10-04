@@ -5,15 +5,11 @@ import { Header } from '../components/layout/Header';
 import { Footer } from '../components/layout/Footer';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
+import { InteractiveDotGrid } from '../components/landing/InteractiveDotGrid';
 
-// Same navy + dot grid as the auth brand panel (DESIGN.md §8.8), so landing →
-// login reads as one product. Mobbin: Railway, Dovetail (left-aligned hero,
+// A light surface / dark navy hero with a reactive dot grid (DESIGN.md §8.10).
+// Mobbin: Railway, Dovetail (left-aligned hero,
 // one honest product card instead of glass layers), Notion (button pair).
-
-const dotGridStyle: React.CSSProperties = {
-  backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.07) 1px, transparent 1px)',
-  backgroundSize: '24px 24px',
-};
 
 // Illustrative numbers only. They must add up — a preview whose total doesn't
 // match its own lines undermines the one claim the page makes (accuracy).
@@ -105,33 +101,31 @@ export const LandingPage: React.FC = () => {
 
       <main>
         {/* Hero */}
-        <section className='relative overflow-hidden bg-navy'>
-          <div
-            aria-hidden='true'
-            className='absolute inset-0 pointer-events-none'
-            style={dotGridStyle}
-          />
+        <section className='relative overflow-hidden bg-gray-50 dark:bg-navy'>
+          <InteractiveDotGrid />
 
           <div className='relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-28 lg:py-32'>
             <div className='grid lg:grid-cols-[minmax(0,1fr)_minmax(360px,440px)] gap-14 lg:gap-16 items-center'>
               <div>
-                <p className='inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1 mb-8'>
+                <p className='inline-flex items-center gap-2 rounded-full border border-brand-blue-200 dark:border-white/15 bg-white dark:bg-white/5 px-3 py-1 mb-8'>
                   <span aria-hidden='true' className='relative flex h-2 w-2'>
                     <span className='absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75 animate-ping motion-reduce:animate-none' />
                     <span className='relative inline-flex h-2 w-2 rounded-full bg-cyan-400' />
                   </span>
-                  <span className='text-xs sm:text-sm font-medium text-gray-200'>
+                  <span className='text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-200'>
                     {t('landing.badge.networks')}
                   </span>
                 </p>
 
-                <h1 className='text-4xl sm:text-5xl lg:text-6xl font-semibold tracking-tight text-white leading-tight'>
+                <h1 className='text-4xl sm:text-5xl lg:text-6xl font-semibold tracking-tight text-gray-900 dark:text-white leading-tight'>
                   {t('landing.title.main')}
                   <br />
-                  <span className='text-cyan-300'>{t('landing.title.sub')}</span>
+                  <span className='text-brand-blue-600 dark:text-cyan-300'>
+                    {t('landing.title.sub')}
+                  </span>
                 </h1>
 
-                <p className='mt-6 text-base sm:text-lg text-gray-300 max-w-xl leading-relaxed'>
+                <p className='mt-6 text-base sm:text-lg text-gray-600 dark:text-gray-300 max-w-xl leading-relaxed'>
                   {t('landing.subtitle')}
                 </p>
 
@@ -139,7 +133,7 @@ export const LandingPage: React.FC = () => {
                   <div className='mt-10 flex flex-col sm:flex-row gap-3'>
                     <Link
                       to='/signup'
-                      className='group inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg bg-brand-blue hover:bg-brand-blue-600 text-white text-base font-semibold shadow-sm transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300 focus-visible:ring-offset-2 focus-visible:ring-offset-navy'
+                      className='group inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg bg-brand-blue hover:bg-brand-blue-600 text-white text-base font-semibold shadow-sm transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue-600 dark:focus-visible:ring-cyan-300 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-50 dark:focus-visible:ring-offset-navy'
                     >
                       {t('landing.getStarted')}
                       <ArrowRight
@@ -149,7 +143,7 @@ export const LandingPage: React.FC = () => {
                     </Link>
                     <Link
                       to='/login'
-                      className='inline-flex items-center justify-center px-6 py-3 rounded-lg border border-white/20 hover:border-white/40 hover:bg-white/5 text-white text-base font-semibold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300 focus-visible:ring-offset-2 focus-visible:ring-offset-navy'
+                      className='inline-flex items-center justify-center px-6 py-3 rounded-lg border border-gray-300 dark:border-white/20 hover:border-gray-400 dark:hover:border-white/40 hover:bg-gray-100 dark:hover:bg-white/5 text-gray-900 dark:text-white text-base font-semibold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue-600 dark:focus-visible:ring-cyan-300 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-50 dark:focus-visible:ring-offset-navy'
                     >
                       {t('nav.login')}
                     </Link>
