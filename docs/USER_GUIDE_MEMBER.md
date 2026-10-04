@@ -2,7 +2,7 @@
 
 > **KS Ways** International Logistics Quoting System
 >
-> Version 3.9.1 | Last Updated: 2026-10-04
+> Version 3.9.2 | Last Updated: 2026-10-04
 
 ---
 
@@ -50,6 +50,8 @@ You land on the login screen with a **"You've been signed out"** notice, so you 
 ### Supported Languages
 
 The system supports **4 languages**: English, Korean, Chinese, Japanese. Toggle via the language selector in the header.
+
+The sign-in screens (login, sign-up and the magic-link page) are always shown in English.
 
 ### Dark Mode
 

@@ -2,7 +2,7 @@
 
 > **KS Ways** Internal Logistics Quoting System
 >
-> Version 3.8 | Last Updated: 2026-10-04
+> Version 3.8.1 | Last Updated: 2026-10-04
 
 ---
 
@@ -406,6 +406,7 @@ When a **Member** saves a quote, a Slack notification is automatically sent to t
 
 - Dark/light mode toggle in header
 - 4 languages: EN, KO, CN, JA
+- Sign-in screens (login, sign-up, magic-link) are always English — overseas partners see them first. Your saved language applies again after you sign in
 
 ---
 

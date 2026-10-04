@@ -13,6 +13,12 @@ interface LanguageContextType {
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
+type TranslationKey = keyof (typeof translations)['en'];
+
+// One lookup for every provider: the chosen language, then English, then the key.
+const translate = (language: Language, key: TranslationKey): string =>
+  translations[language][key] ?? translations.en[key] ?? key;
+
 // Domains that should always initialize in English regardless of saved preference.
 // Global-facing marketing/partner domains default to English for international visitors.
 // Users can still manually switch via the language selector; the selection is saved,
@@ -43,19 +49,31 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     localStorage.setItem('smartQuoteLanguage', lang);
   };
 
-  const t = (key: keyof (typeof translations)['en']): string => {
-    const val = translations[language][key];
-    if (val != null) return val;
-    const fallback = translations['en'][key];
-    if (fallback != null) return fallback;
-    return key;
-  };
+  const t = (key: TranslationKey): string => translate(language, key);
 
   return (
     <LanguageContext.Provider value={{ language, setLanguage, t }}>
       {children}
     </LanguageContext.Provider>
   );
+};
+
+/**
+ * Renders its children in English whatever language is selected. Used for the
+ * sign-in screens (/login, /signup, /auth/verify): they are the first thing an
+ * overseas partner sees, and there is no language switch before sign-in.
+ *
+ * The saved preference is left alone — an admin who chose Korean gets Korean
+ * again once signed in. setLanguage still reaches the outer provider.
+ */
+export const EnglishOnly: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const outer = useContext(LanguageContext);
+  const value: LanguageContextType = {
+    language: 'en',
+    setLanguage: outer?.setLanguage ?? (() => {}),
+    t: (key) => translate('en', key),
+  };
+  return <LanguageContext.Provider value={value}>{children}</LanguageContext.Provider>;
 };
 
 // eslint-disable-next-line react-refresh/only-export-components
