@@ -1,16 +1,74 @@
 import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Zap, TrendingUp, ShieldCheck, ArrowRight, Globe, Truck, Plane, PackageCheck, Calculator } from 'lucide-react';
+import { Zap, TrendingUp, ShieldCheck, ArrowRight, Globe, Truck, Plane } from 'lucide-react';
 import { Header } from '../components/layout/Header';
 import { Footer } from '../components/layout/Footer';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
 
+// Same navy + dot grid as the auth brand panel (DESIGN.md §8.8), so landing →
+// login reads as one product. Mobbin: Railway, Dovetail (left-aligned hero,
+// one honest product card instead of glass layers), Notion (button pair).
+
 const dotGridStyle: React.CSSProperties = {
-  backgroundImage:
-    'radial-gradient(circle, rgba(255,255,255,0.07) 1px, transparent 1px)',
+  backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.07) 1px, transparent 1px)',
   backgroundSize: '24px 24px',
 };
+
+// Illustrative numbers only. They must add up — a preview whose total doesn't
+// match its own lines undermines the one claim the page makes (accuracy).
+const SAMPLE_LINES = [
+  { key: 'landing.mock.freight', usd: 386.2 },
+  { key: 'landing.mock.fsc', usd: 96.2 },
+  { key: 'landing.mock.packing', usd: 68.1 },
+] as const;
+const SAMPLE_TOTAL = SAMPLE_LINES.reduce((sum, line) => sum + line.usd, 0);
+
+const usd = (n: number) =>
+  `$${n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+const SampleQuoteCard: React.FC<{ t: (key: string) => string }> = ({ t }) => (
+  <figure className='relative w-full max-w-md mx-auto lg:mx-0 lg:ml-auto rounded-xl border border-white/10 bg-deep-blue shadow-xl overflow-hidden'>
+    <figcaption className='flex items-center justify-between px-5 py-3 border-b border-white/10'>
+      <span className='text-xs font-medium uppercase tracking-wider text-gray-400'>
+        {t('landing.mock.sample')}
+      </span>
+      <span className='rounded-full bg-white/10 px-2.5 py-0.5 text-xs font-semibold text-white'>
+        DHL Express
+      </span>
+    </figcaption>
+
+    <dl className='px-5 py-4 grid grid-cols-2 gap-4 border-b border-white/10'>
+      <div className='col-span-2'>
+        <dt className='text-xs text-gray-400'>{t('landing.mock.routeLabel')}</dt>
+        <dd className='mt-1 flex items-center gap-2 text-sm font-semibold text-white'>
+          <Plane aria-hidden='true' className='w-4 h-4 text-cyan-300 shrink-0' />
+          {t('landing.mock.route')}
+        </dd>
+      </div>
+      <div className='col-span-2'>
+        <dt className='text-xs text-gray-400'>{t('landing.mock.cargo')}</dt>
+        <dd className='mt-1 text-sm font-semibold text-white'>{t('landing.mock.cargoValue')}</dd>
+      </div>
+    </dl>
+
+    <dl className='px-5 py-4 space-y-2.5 text-sm'>
+      {SAMPLE_LINES.map((line) => (
+        <div key={line.key} className='flex items-center justify-between'>
+          <dt className='text-gray-300'>{t(line.key)}</dt>
+          <dd className='font-medium text-white tabular-nums'>{usd(line.usd)}</dd>
+        </div>
+      ))}
+    </dl>
+
+    <div className='mx-5 mb-5 flex items-end justify-between rounded-lg bg-navy px-4 py-3 ring-1 ring-white/10'>
+      <span className='text-sm font-medium text-gray-300'>{t('landing.mock.total')}</span>
+      <span className='text-2xl font-semibold tracking-tight text-white tabular-nums'>
+        {usd(SAMPLE_TOTAL)}
+      </span>
+    </div>
+  </figure>
+);
 
 export const LandingPage: React.FC = () => {
   const { t } = useLanguage();
@@ -20,54 +78,78 @@ export const LandingPage: React.FC = () => {
     document.title = 'BridgeLogis — Global Express Freight Quoting Platform';
   }, []);
 
+  const stats = [
+    { value: '3', label: t('landing.stat.carriers'), icon: Truck },
+    { value: '220+', label: t('landing.stat.countries'), icon: Globe },
+    { value: '~3s', label: t('landing.stat.calculation'), icon: Zap },
+    { value: '24/7', label: t('landing.stat.available'), icon: ShieldCheck },
+  ];
+
+  const features = [
+    { icon: Zap, title: t('landing.instantQuotes'), desc: t('landing.instantQuotes.desc') },
+    {
+      icon: TrendingUp,
+      title: t('landing.accurateBreakdown'),
+      desc: t('landing.accurateBreakdown.desc'),
+    },
+    {
+      icon: ShieldCheck,
+      title: t('landing.verifiedCarriers'),
+      desc: t('landing.verifiedCarriers.desc'),
+    },
+  ];
+
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 transition-colors duration-200">
+    <div className='min-h-screen bg-gray-50 dark:bg-gray-950 transition-colors duration-200'>
       <Header />
 
       <main>
-        {/* Hero Section */}
-        <section className="relative overflow-hidden bg-gradient-to-br from-gray-900 via-gray-950 to-black">
-          <div className="absolute inset-0 pointer-events-none" style={dotGridStyle} />
-          <div className="absolute -top-40 -left-40 w-[500px] h-[500px] rounded-full bg-cyan-600/20 blur-[120px] pointer-events-none" />
-          <div className="absolute -bottom-40 -right-40 w-[400px] h-[400px] rounded-full bg-cyan-500/15 blur-[100px] pointer-events-none" />
+        {/* Hero */}
+        <section className='relative overflow-hidden bg-navy'>
+          <div
+            aria-hidden='true'
+            className='absolute inset-0 pointer-events-none'
+            style={dotGridStyle}
+          />
 
-          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-24 sm:pt-32 sm:pb-32 lg:pt-36 lg:pb-40">
-            <div className="grid lg:grid-cols-[minmax(0,1fr)_minmax(380px,520px)] gap-14 lg:gap-20 items-center">
-              <div className="text-center lg:text-left">
-                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 border border-white/15 shadow-[inset_0_1px_0_rgba(255,255,255,0.18)] backdrop-blur-xl mb-8">
-                  <span className="relative flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75" />
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-500" />
+          <div className='relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-28 lg:py-32'>
+            <div className='grid lg:grid-cols-[minmax(0,1fr)_minmax(360px,440px)] gap-14 lg:gap-16 items-center'>
+              <div>
+                <p className='inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1 mb-8'>
+                  <span aria-hidden='true' className='relative flex h-2 w-2'>
+                    <span className='absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75 animate-ping motion-reduce:animate-none' />
+                    <span className='relative inline-flex h-2 w-2 rounded-full bg-cyan-400' />
                   </span>
-                  <span className="text-xs sm:text-sm font-medium text-cyan-100 tracking-wide">
+                  <span className='text-xs sm:text-sm font-medium text-gray-200'>
                     {t('landing.badge.networks')}
                   </span>
-                </div>
+                </p>
 
-                <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-extrabold tracking-tight text-white leading-tight">
+                <h1 className='text-4xl sm:text-5xl lg:text-6xl font-semibold tracking-tight text-white leading-tight'>
                   {t('landing.title.main')}
                   <br />
-                  <span className="bg-gradient-to-r from-cyan-200 via-cyan-400 to-blue-300 bg-clip-text text-transparent">
-                    {t('landing.title.sub')}
-                  </span>
+                  <span className='text-cyan-300'>{t('landing.title.sub')}</span>
                 </h1>
 
-                <p className="mt-6 text-base sm:text-lg text-gray-300 max-w-2xl mx-auto lg:mx-0 leading-relaxed">
+                <p className='mt-6 text-base sm:text-lg text-gray-300 max-w-xl leading-relaxed'>
                   {t('landing.subtitle')}
                 </p>
 
                 {!isAuthenticated && (
-                  <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+                  <div className='mt-10 flex flex-col sm:flex-row gap-3'>
                     <Link
-                      to="/signup"
-                      className="group inline-flex items-center justify-center gap-2 px-7 py-3.5 bg-cyan-500 hover:bg-cyan-400 text-gray-950 text-base font-semibold rounded-2xl shadow-lg shadow-cyan-500/25 hover:shadow-cyan-400/30 transition-all duration-200"
+                      to='/signup'
+                      className='group inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg bg-brand-blue hover:bg-brand-blue-600 text-white text-base font-semibold shadow-sm transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300 focus-visible:ring-offset-2 focus-visible:ring-offset-navy'
                     >
                       {t('landing.getStarted')}
-                      <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+                      <ArrowRight
+                        aria-hidden='true'
+                        className='w-4 h-4 transition-transform group-hover:translate-x-0.5 motion-reduce:transition-none'
+                      />
                     </Link>
                     <Link
-                      to="/login"
-                      className="inline-flex items-center justify-center px-7 py-3.5 bg-white/10 hover:bg-white/15 border border-white/15 hover:border-white/25 text-gray-100 text-base font-semibold rounded-2xl backdrop-blur-xl shadow-[inset_0_1px_0_rgba(255,255,255,0.12)] transition-all duration-200"
+                      to='/login'
+                      className='inline-flex items-center justify-center px-6 py-3 rounded-lg border border-white/20 hover:border-white/40 hover:bg-white/5 text-white text-base font-semibold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300 focus-visible:ring-offset-2 focus-visible:ring-offset-navy'
                     >
                       {t('nav.login')}
                     </Link>
@@ -75,143 +157,61 @@ export const LandingPage: React.FC = () => {
                 )}
               </div>
 
-              <div className="relative mx-auto w-full max-w-[520px] lg:max-w-none" aria-label="Smart quote glass interface preview">
-                <div className="absolute -inset-6 rounded-[2.5rem] bg-cyan-400/10 blur-3xl" />
-                <div className="relative overflow-hidden rounded-[2rem] border border-white/20 bg-white/[0.08] p-4 sm:p-5 shadow-2xl shadow-black/40 backdrop-blur-2xl [box-shadow:0_24px_80px_rgba(8,145,178,0.18),inset_0_1px_0_rgba(255,255,255,0.22)]">
-                  <div className="absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-white/50 to-transparent" />
-                  <div className="flex items-center justify-between gap-3 rounded-3xl border border-white/12 bg-black/25 px-4 py-3 text-white/80 backdrop-blur-xl">
-                    <div className="flex items-center gap-2">
-                      <span className="h-2.5 w-2.5 rounded-full bg-emerald-400 shadow-[0_0_18px_rgba(52,211,153,0.9)]" />
-                      <span className="text-xs font-semibold uppercase tracking-[0.22em]">Live Quote Desk</span>
-                    </div>
-                    <span className="rounded-full bg-cyan-400/15 px-3 py-1 text-xs font-semibold text-cyan-100 ring-1 ring-cyan-200/15">~3s</span>
-                  </div>
+              <SampleQuoteCard t={t} />
+            </div>
+          </div>
+        </section>
 
-                  <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                    <div className="rounded-3xl border border-white/12 bg-white/[0.09] p-4 backdrop-blur-xl">
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-cyan-100/70">Route</p>
-                      <div className="mt-3 flex items-center gap-3 text-white">
-                        <Plane className="h-5 w-5 text-cyan-200" />
-                        <span className="text-sm font-semibold">{t('landing.mock.route')}</span>
-                      </div>
-                    </div>
-                    <div className="rounded-3xl border border-white/12 bg-white/[0.09] p-4 backdrop-blur-xl">
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-cyan-100/70">Cargo</p>
-                      <div className="mt-3 flex items-center gap-3 text-white">
-                        <PackageCheck className="h-5 w-5 text-emerald-200" />
-                        <span className="text-sm font-semibold">38 kg / 3 boxes</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="mt-4 rounded-[1.75rem] border border-white/15 bg-gray-950/45 p-4 sm:p-5 backdrop-blur-2xl">
-                    <div className="flex items-center justify-between gap-3">
-                      <div>
-                        <p className="text-xs font-semibold uppercase tracking-[0.22em] text-cyan-100/70">Best option</p>
-                        <p className="mt-1 text-2xl font-extrabold text-white">DHL Express</p>
-                      </div>
-                      <div className="rounded-2xl border border-cyan-200/20 bg-cyan-300/10 p-3 text-cyan-100">
-                        <Calculator className="h-6 w-6" />
-                      </div>
-                    </div>
-
-                    <div className="mt-5 space-y-3">
-                      {[
-                        [t('landing.mock.freight'), '$386.20'],
-                        [t('landing.mock.fsc'), '$96.20'],
-                        ['Packing + handling', '$68.10'],
-                      ].map(([label, value]) => (
-                        <div key={label} className="flex items-center justify-between rounded-2xl bg-white/[0.06] px-4 py-3 text-sm ring-1 ring-white/10">
-                          <span className="text-gray-300">{label}</span>
-                          <span className="font-semibold text-white">{value}</span>
-                        </div>
-                      ))}
-                    </div>
-
-                    <div className="mt-5 flex items-end justify-between gap-3 rounded-3xl bg-gradient-to-r from-cyan-300/20 to-blue-400/12 px-5 py-4 ring-1 ring-cyan-100/15">
-                      <div>
-                        <p className="text-xs font-medium text-cyan-100/75">Estimated quote</p>
-                        <p className="mt-1 text-3xl font-black tracking-tight text-white">$612</p>
-                      </div>
-                      <span className="rounded-full bg-emerald-400/15 px-3 py-1 text-xs font-bold text-emerald-100 ring-1 ring-emerald-200/20">Ready</span>
-                    </div>
-                  </div>
-                </div>
+        {/* Stats */}
+        <section className='border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900'>
+          <dl className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-2 md:grid-cols-4 divide-gray-200 dark:divide-gray-800 md:divide-x'>
+            {stats.map((stat) => (
+              <div
+                key={stat.label}
+                className='flex flex-col-reverse gap-1 py-8 md:px-8 first:md:pl-0'
+              >
+                <dt className='flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400'>
+                  <stat.icon aria-hidden='true' className='w-4 h-4 text-cyan-500' />
+                  {stat.label}
+                </dt>
+                <dd className='text-3xl sm:text-4xl font-semibold tracking-tight text-gray-900 dark:text-white tabular-nums'>
+                  {stat.value}
+                </dd>
               </div>
-            </div>
-          </div>
+            ))}
+          </dl>
         </section>
 
-        {/* Stats Section */}
-        <section className="bg-gray-100 dark:bg-gray-900 py-16 sm:py-20">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-              {[
-                { value: '3', label: t('landing.stat.carriers'), icon: Truck },
-                { value: '220+', label: t('landing.stat.countries'), icon: Globe },
-                { value: '~3s', label: t('landing.stat.calculation'), icon: Zap },
-                { value: '24/7', label: t('landing.stat.available'), icon: ShieldCheck },
-              ].map((stat) => (
-                <div key={stat.label} className="text-center">
-                  <stat.icon className="w-8 h-8 text-cyan-500 mx-auto mb-3" />
-                  <span className="text-3xl sm:text-4xl font-extrabold text-gray-900 dark:text-white block">{stat.value}</span>
-                  <span className="text-sm text-gray-500 dark:text-gray-400">{stat.label}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Features Section */}
-        <section className="py-20 sm:py-28">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-16">
-              <p className="text-sm font-semibold text-cyan-600 dark:text-cyan-400 uppercase tracking-widest mb-3">{t('landing.featuresLabel')}</p>
-              <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 dark:text-white">
+        {/* Features */}
+        <section className='py-20 sm:py-28'>
+          <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
+            <div className='max-w-2xl mb-14'>
+              <p className='text-sm font-semibold text-brand-blue-600 dark:text-brand-blue-300 uppercase tracking-wider mb-3'>
+                {t('landing.featuresLabel')}
+              </p>
+              <h2 className='text-3xl sm:text-4xl font-semibold tracking-tight text-gray-900 dark:text-white'>
                 {t('landing.featuresTitle')}
               </h2>
             </div>
 
-            <div className="grid md:grid-cols-3 gap-8">
-              {[
-                {
-                  icon: Zap,
-                  color: 'text-amber-500',
-                  bg: 'bg-amber-500/10',
-                  title: t('landing.instantQuotes'),
-                  desc: t('landing.instantQuotes.desc'),
-                },
-                {
-                  icon: TrendingUp,
-                  color: 'text-cyan-500',
-                  bg: 'bg-cyan-500/10',
-                  title: t('landing.accurateBreakdown'),
-                  desc: t('landing.accurateBreakdown.desc'),
-                },
-                {
-                  icon: ShieldCheck,
-                  color: 'text-emerald-500',
-                  bg: 'bg-emerald-500/10',
-                  title: t('landing.verifiedCarriers'),
-                  desc: t('landing.verifiedCarriers.desc'),
-                },
-              ].map((feat) => (
-                <div
+            <ul className='grid md:grid-cols-3 gap-x-10 gap-y-12'>
+              {features.map((feat) => (
+                <li
                   key={feat.title}
-                  className="group bg-white dark:bg-gray-900 rounded-2xl p-8 border border-gray-200 dark:border-gray-800 hover:border-cyan-300 dark:hover:border-cyan-700 shadow-sm hover:shadow-lg transition-all duration-300"
+                  className='border-t-2 border-gray-900 dark:border-gray-100 pt-6'
                 >
-                  <div className={`inline-flex items-center justify-center w-12 h-12 rounded-xl ${feat.bg} mb-6`}>
-                    <feat.icon className={`w-6 h-6 ${feat.color}`} />
-                  </div>
-                  <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
+                  <span className='inline-flex items-center justify-center w-10 h-10 rounded-lg bg-brand-blue-50 text-brand-blue-600 dark:bg-brand-blue-900/40 dark:text-brand-blue-300 mb-5'>
+                    <feat.icon aria-hidden='true' className='w-5 h-5' />
+                  </span>
+                  <h3 className='text-lg font-semibold text-gray-900 dark:text-white mb-2'>
                     {feat.title}
                   </h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+                  <p className='text-sm text-gray-600 dark:text-gray-400 leading-relaxed'>
                     {feat.desc}
                   </p>
-                </div>
+                </li>
               ))}
-            </div>
+            </ul>
           </div>
         </section>
       </main>
