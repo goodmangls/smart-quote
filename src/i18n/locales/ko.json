@@ -44,6 +44,8 @@
   "auth.signinTitle": "계정에 로그인하세요",
   "auth.signinSubtitle": "이메일과 비밀번호를 입력해 계속하세요.",
   "auth.signupTitle": "새 계정 만들기",
+  "auth.signupSubtitle": "UPS·DHL·FedEx 견적을 한곳에서 비교하세요.",
+  "auth.creatingAccount": "계정을 만드는 중...",
   "auth.optional": "선택사항",
   "auth.noAccount": "계정이 없으신가요?",
   "auth.haveAccount": "이미 계정이 있으신가요?",

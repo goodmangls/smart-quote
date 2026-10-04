@@ -45,6 +45,8 @@
   "auth.signinTitle": "Log in to your account",
   "auth.signinSubtitle": "Enter your email and password to continue.",
   "auth.signupTitle": "Create a new account",
+  "auth.signupSubtitle": "Compare UPS, DHL and FedEx quotes in one place.",
+  "auth.creatingAccount": "Creating account...",
   "auth.optional": "Optional",
   "auth.noAccount": "Don't have an account?",
   "auth.haveAccount": "Already have an account?",

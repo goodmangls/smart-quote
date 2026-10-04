@@ -2,6 +2,9 @@ import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { ArrowLeft, XCircle } from 'lucide-react';
+import { AuthLayout, ErrorAlert } from '@/components/auth/AuthLayout';
+import { authPrimaryButtonClass } from '@/components/auth/authStyles';
 
 export default function MagicLinkVerifyPage() {
   const [searchParams] = useSearchParams();
@@ -36,44 +39,36 @@ export default function MagicLinkVerifyPage() {
 
   if (error) {
     return (
-      <div className='min-h-screen flex items-center justify-center bg-white dark:bg-gray-950 px-4'>
-        <div className='text-center max-w-md'>
-          <div className='w-12 h-12 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center mx-auto mb-4'>
-            <svg
-              className='w-6 h-6 text-red-600 dark:text-red-400'
-              fill='none'
-              viewBox='0 0 24 24'
-              stroke='currentColor'
-            >
-              <path
-                strokeLinecap='round'
-                strokeLinejoin='round'
-                strokeWidth={2}
-                d='M6 18L18 6M6 6l12 12'
-              />
-            </svg>
-          </div>
-          <h2 className='text-lg font-semibold text-gray-900 dark:text-white mb-2'>
-            {t('auth.magicLink.failed')}
-          </h2>
-          <p className='text-sm text-gray-600 dark:text-gray-400 mb-6'>{error}</p>
-          <button
-            onClick={() => navigate('/login', { replace: true })}
-            className='inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-brand-blue-600 hover:bg-brand-blue-700 rounded-lg transition-colors'
-          >
-            {t('auth.magicLink.backToLogin')}
-          </button>
+      <AuthLayout showBackLink={false}>
+        <span className='inline-flex h-12 w-12 items-center justify-center rounded-full bg-destructive-50 text-destructive-600 ring-1 ring-destructive-200 dark:bg-destructive-900/20 dark:text-destructive-300 dark:ring-destructive-800'>
+          <XCircle aria-hidden='true' className='h-6 w-6' />
+        </span>
+        <h1 className='mt-6 text-2xl sm:text-3xl font-semibold tracking-tight text-gray-900 dark:text-white'>
+          {t('auth.magicLink.failed')}
+        </h1>
+        <div className='mt-6'>
+          <ErrorAlert message={error} />
         </div>
-      </div>
+        <button
+          type='button'
+          onClick={() => navigate('/login', { replace: true })}
+          className={`mt-8 ${authPrimaryButtonClass}`}
+        >
+          <ArrowLeft aria-hidden='true' className='h-4 w-4' />
+          {t('auth.magicLink.backToLogin')}
+        </button>
+      </AuthLayout>
     );
   }
 
   return (
-    <div className='min-h-screen flex items-center justify-center bg-white dark:bg-gray-950'>
-      <div className='text-center'>
-        <div className='w-8 h-8 border-2 border-gray-300 border-t-brand-blue-500 rounded-full animate-spin mx-auto mb-4' />
-        <p className='text-sm text-gray-600 dark:text-gray-400'>{t('auth.magicLink.verifying')}</p>
+    <AuthLayout showBackLink={false}>
+      <div role='status' className='flex flex-col items-center text-center'>
+        <div className='h-10 w-10 rounded-full border-2 border-gray-200 border-t-brand-blue dark:border-gray-700 dark:border-t-brand-blue-300 animate-spin motion-reduce:animate-none' />
+        <p className='mt-4 text-sm font-medium text-gray-700 dark:text-gray-300'>
+          {t('auth.magicLink.verifying')}
+        </p>
       </div>
-    </div>
+    </AuthLayout>
   );
 }
