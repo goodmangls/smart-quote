@@ -77,7 +77,7 @@ export const LandingPage: React.FC = () => {
   const stats = [
     { value: '3', label: t('landing.stat.carriers'), icon: Truck },
     { value: '220+', label: t('landing.stat.countries'), icon: Globe },
-    { value: '~3s', label: t('landing.stat.calculation'), icon: Zap },
+    { value: '~1s', label: t('landing.stat.calculation'), icon: Zap },
     { value: '24/7', label: t('landing.stat.available'), icon: ShieldCheck },
   ];
 
