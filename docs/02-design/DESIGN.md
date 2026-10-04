@@ -1,6 +1,6 @@
 ---
 name: BridgeLogis Design System (smart-quote-main)
-version: 1.4.0
+version: 1.5.0
 description: >-
   BridgeLogis by KS Ways 웹 애플리케이션의 디자인 시스템 명세.
   외부 운영 중인 SaaS(bridgelogis.com)의 단일 진실 공급원(SSOT).
@@ -329,6 +329,21 @@ Semantic `warning`(amber) 계열을 쓰되, 오류(destructive)와 구분한다 
 - 금액은 `tabular-nums`. 강조색 그라디언트 배경 금지 — 합계는 크기와 위계로 강조한다.
 - 데이터는 `QuoteSerializer.shared` 화이트리스트에 있는 필드만. 디자인이 필드를 늘리지 않는다.
 
+### 8.10 랜딩 히어로 (`/`)
+
+히어로는 인증 화면 브랜드 패널(§8.8)과 **같은 `bg-navy` + 점 격자**를 쓴다 — 랜딩에서 로그인으로 넘어가도
+같은 제품으로 읽히게. Mobbin: Railway·Dovetail(왼쪽 정렬 헤드라인 + 정직한 제품 카드 하나)·Notion(버튼 쌍).
+
+- 헤드라인 강조 줄은 `text-cyan-300` 단색. **그라디언트 텍스트·블러 광원·글래스(`backdrop-blur`) 층 금지.**
+  cyan 은 navy 위의 큰 제목에서만 허용(본문 금지 §11 은 흰 배경 기준 대비 문제).
+- CTA 는 primary(`bg-brand-blue`) 1개 + 테두리 secondary 1개, `rounded-lg`. cyan 배경 버튼 금지.
+- 제품 미리보기는 `<figure>` + `figcaption` 으로 **"견적 예시"임을 밝힌다**(`bg-deep-blue rounded-xl`).
+  예시 금액도 **항목 합 = 합계**가 맞아야 한다 — 정확성을 파는 페이지에서 틀린 덧셈은 역효과.
+- 통계 띠는 `<dl>` + `md:divide-x`, 기능 소개는 카드 대신 굵은 상단 선(`border-t-2`)의 3열 목록.
+  아이콘 칩은 `bg-brand-blue-50 text-brand-blue-600 dark:bg-brand-blue-900/40 dark:text-brand-blue-300` 한 가지.
+- ⚠️ 배지 문구 `landing.badge.networks` 는 **prerender 게이트**(`scripts/prerender.tsx` 의 `expect`)가 찾는
+  문자열이다. 바꾸면 빌드가 실패하므로 두 곳을 함께 고칠 것.
+
 ## 9. Charts — HEX 직접 사용 영역
 
 SVG `stroke`/`fill` 등 Tailwind 클래스로 접근 불가한 곳은 `src/lib/chartColors.ts` 의
@@ -387,6 +402,9 @@ import { CHART_COLORS } from '@/lib/chartColors';
 
 ### Changelog
 
+- **1.5.0** (2026-10-04) — §8.10 랜딩 히어로 패턴 신설. 랜딩의 `rounded-2xl/3xl`·임의 반경·`blue-300`
+  그라디언트 텍스트·블러 광원·글래스 층·cyan CTA 제거, 예시 견적 합계 오류($612 → 항목 합 $550.50) 수정.
+  단계적 개선의 2단계.
 - **1.4.0** (2026-10-04) — §8.2 Primary Button 다크 hover 를 `brand-blue-400` → `brand-blue-600` 으로 수정
   (흰 글자 대비 2.80:1 → 6.95:1, AA 미달 해소). §8.8 인증 화면(공용 `AuthLayout`·`authStyles`) ·
   §8.9 문서형 카드(공유 견적) 패턴 신설. Mobbin 레퍼런스 기반 전 화면 단계적 개선의 1단계.
