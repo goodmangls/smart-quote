@@ -3,8 +3,10 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useTheme } from '../../contexts/ThemeContext';
-import { Globe, Moon, Sun, LogOut, Settings, Menu, X, BookOpen } from 'lucide-react';
+import { Globe, Moon, Sun, LogOut, Menu, X, BookOpen } from 'lucide-react';
 import { AccountSettingsModal } from '@/features/dashboard/components/AccountSettingsModal';
+import { AccountMenu } from './AccountMenu';
+import { markSignedOut } from '@/pages/loginRedirect';
 
 const LANGUAGES = [
   { code: 'en' as const, label: 'English', flag: '🇺🇸' },
@@ -34,9 +36,17 @@ export const Header: React.FC = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handleLogout = () => {
-    logout();
-    navigate('/');
+  const displayName = user?.name || user?.email.split('@')[0] || '';
+
+  // The "signed out" notice is a sessionStorage flag, not router state: a
+  // ProtectedRoute still mounted during the navigation transition redirects on
+  // its own once `user` turns null and would overwrite any state we pass (see
+  // loginRedirect.ts). `replace` drops the protected page from history — Back
+  // would only bounce through ProtectedRoute again.
+  const handleLogout = async () => {
+    markSignedOut();
+    navigate('/login', { replace: true });
+    await logout();
   };
 
   return (
@@ -56,14 +66,6 @@ export const Header: React.FC = () => {
               {/* Desktop Auth Buttons */}
               {isAuthenticated ? (
                 <div className='hidden sm:flex items-center space-x-3'>
-                  <div className='flex flex-col items-end mr-2'>
-                    <span className='text-sm font-medium text-gray-900 dark:text-white'>
-                      {user?.name || user?.email.split('@')[0]}
-                    </span>
-                    <span className='text-xs text-cyan-600 dark:text-cyan-400 font-semibold uppercase tracking-wider'>
-                      {user?.role}
-                    </span>
-                  </div>
                   {user?.role === 'admin' && (
                     <Link
                       to='/admin'
@@ -86,13 +88,6 @@ export const Header: React.FC = () => {
                     <BookOpen className='w-4 h-4' />
                     {t('nav.guide')}
                   </Link>
-                  <button
-                    onClick={() => setIsSettingsOpen(true)}
-                    className='p-2 text-gray-600 dark:text-gray-300 hover:text-cyan-600 dark:hover:text-cyan-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg flex items-center transition-all'
-                    aria-label={t('settings.account.title')}
-                  >
-                    <Settings className='w-5 h-5' />
-                  </button>
                 </div>
               ) : (
                 <div className='hidden sm:flex space-x-2 items-center'>
@@ -175,15 +170,17 @@ export const Header: React.FC = () => {
                 {isDarkMode ? <Sun className='w-5 h-5' /> : <Moon className='w-5 h-5' />}
               </button>
 
-              {/* Logout — last icon */}
-              {isAuthenticated && (
-                <button
-                  onClick={handleLogout}
-                  className='hidden sm:flex p-2 text-gray-600 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/20 rounded-lg items-center transition-all'
-                  aria-label={t('nav.logout')}
-                >
-                  <LogOut className='w-5 h-5' />
-                </button>
+              {/* Account menu — settings + logout live here on desktop */}
+              {isAuthenticated && user && (
+                <div className='hidden sm:block'>
+                  <AccountMenu
+                    name={displayName}
+                    email={user.email}
+                    userRole={user.role}
+                    onOpenSettings={() => setIsSettingsOpen(true)}
+                    onLogout={handleLogout}
+                  />
+                </div>
               )}
 
               {/* Mobile Hamburger. 44px is pinned as an explicit min size, not
@@ -207,10 +204,9 @@ export const Header: React.FC = () => {
             {isAuthenticated ? (
               <>
                 <div className='pb-2 mb-2 border-b border-gray-200 dark:border-gray-800'>
-                  <p className='text-sm font-medium text-gray-900 dark:text-white'>
-                    {user?.name || user?.email.split('@')[0]}
-                  </p>
-                  <p className='text-xs text-cyan-600 dark:text-cyan-400 font-semibold uppercase'>
+                  <p className='text-sm font-medium text-gray-900 dark:text-white'>{displayName}</p>
+                  <p className='text-xs text-gray-500 dark:text-gray-400 truncate'>{user?.email}</p>
+                  <p className='text-xs text-brand-blue-600 dark:text-brand-blue-300 font-semibold uppercase tracking-wider'>
                     {user?.role}
                   </p>
                 </div>
@@ -248,15 +244,18 @@ export const Header: React.FC = () => {
                 >
                   {t('settings.account.title')}
                 </button>
-                <button
-                  onClick={() => {
-                    handleLogout();
-                    setIsMobileMenuOpen(false);
-                  }}
-                  className='block w-full text-left py-2 text-sm text-red-600 dark:text-red-400 hover:text-red-700'
-                >
-                  {t('nav.logout')}
-                </button>
+                <div className='pt-2 mt-2 border-t border-gray-200 dark:border-gray-800'>
+                  <button
+                    onClick={() => {
+                      setIsMobileMenuOpen(false);
+                      void handleLogout();
+                    }}
+                    className='flex w-full items-center gap-2 min-h-[44px] text-left text-sm font-medium text-destructive-700 dark:text-destructive-300 hover:text-destructive-800 dark:hover:text-destructive-200'
+                  >
+                    <LogOut aria-hidden='true' className='w-4 h-4' />
+                    {t('nav.logout')}
+                  </button>
+                </div>
               </>
             ) : (
               <>

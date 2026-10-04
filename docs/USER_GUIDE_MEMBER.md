@@ -2,7 +2,7 @@
 
 > **KS Ways** International Logistics Quoting System
 >
-> Version 3.8.0 | Last Updated: 2026-08-19
+> Version 3.9.0 | Last Updated: 2026-10-04
 
 ---
 
@@ -27,11 +27,19 @@
 2. Enter your email and password
 3. Click **Sign In**
 
+If your session expired while you were on a page, signing in takes you back to that page instead of the dashboard.
+
 Forgot your password? On the login screen you can:
-- Click **Forgot password?** next to the password field, or
+- Click **Forgot password? Get a sign-in link** under the password field, or
 - Choose **Email me a password-free sign-in link**
 
 We'll email a one-time secure link (expires in 15 minutes). After you open it, you're signed in without a password.
+
+### Log Out
+
+Click your **name** in the top-right corner of the header to open the account menu, then choose **Logout** (the last item). On a phone, open the ☰ menu — **Logout** is at the bottom.
+
+You land on the login screen with a **"You've been signed out"** notice, so you know the session on that device has ended.
 
 > First time? Click **Sign Up** at `/signup` to create an account with your company info and **required** nationality.
 
@@ -65,7 +73,7 @@ After login, you land on the **Customer Dashboard** (`/dashboard`).
 
 - **New Quote** button navigates to `/quote`
 - **View All** link opens full quote history
-- Header menu provides access to Dashboard, Quote Calculator, and Account Settings
+- Header provides access to Dashboard and the Guide; **Account Settings** and **Logout** are in the account menu under your name
 
 ---
 
@@ -228,7 +236,7 @@ Access via the **History** tab in the quote calculator.
 
 ## 7. Account Settings
 
-Click the gear icon in the header or your profile avatar.
+Click your name in the header to open the account menu, then choose **Account Settings** (on a phone, it is in the ☰ menu).
 
 ### Change Password
 
