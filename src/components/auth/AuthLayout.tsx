@@ -4,7 +4,7 @@ import { ArrowLeft, Check } from 'lucide-react';
 import { Header } from '../layout/Header';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { InteractiveDotGrid } from '../ui/InteractiveDotGrid';
-import { DeliveryPhoto } from '../ui/DeliveryPhoto';
+import { PhotoCarousel } from '../ui/PhotoCarousel';
 
 const CARRIERS = ['UPS', 'DHL', 'FedEx'] as const;
 const PANEL_POINTS = [
@@ -21,11 +21,11 @@ const BrandPanel: React.FC = () => {
   const { t } = useLanguage();
   return (
     <aside className='relative hidden lg:flex flex-col overflow-hidden bg-navy'>
-      {/* Photo band, fading into the navy below so the copy never sits on the
-          image. The source is 2:1 at 1440px — 2× this half-screen band — and
-          lazy, so phones (panel hidden) never download it. */}
+      {/* Rotating photo band, fading into the navy below so the copy never
+          sits on an image. Starts on a different photo than the landing hero.
+          Photos are lazy, so phones (panel hidden) never download them. */}
       <div className='relative h-2/5 min-h-56 shrink-0'>
-        <DeliveryPhoto photo='courier' className='absolute inset-0' imgClassName='object-left' />
+        <PhotoCarousel startIndex={2} sizes='50vw' className='absolute inset-0' />
         <div
           aria-hidden='true'
           className='absolute inset-0 bg-gradient-to-b from-navy/20 via-navy/10 to-navy pointer-events-none'

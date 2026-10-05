@@ -1,5 +1,7 @@
 {
-  "nav.smartQuote": "スマート見積",
+  "nav.smartQuote": "BridgeLogis",
+  "photos.pause": "スライドショーを一時停止",
+  "photos.play": "スライドショーを再生",
   "nav.login": "ログイン",
   "nav.signup": "新規登録",
   "nav.logout": "ログアウト",
@@ -46,7 +48,6 @@
   "auth.selectNationality": "国籍を選択してください",
   "auth.signin": "ログイン",
   "auth.signup": "登録",
-  "auth.systemName": "Smart Quote System",
   "auth.signinTitle": "アカウントにログイン",
   "auth.signinSubtitle": "メールとパスワードを入力して続行してください。",
   "auth.signupTitle": "アカウント作成",

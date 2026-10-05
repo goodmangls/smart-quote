@@ -1,5 +1,7 @@
 {
-  "nav.smartQuote": "스마트 견적",
+  "nav.smartQuote": "BridgeLogis",
+  "photos.pause": "슬라이드쇼 일시정지",
+  "photos.play": "슬라이드쇼 재생",
   "nav.login": "로그인",
   "nav.signup": "회원가입",
   "nav.logout": "로그아웃",
@@ -46,7 +48,6 @@
   "auth.selectNationality": "국적을 선택하세요",
   "auth.signin": "로그인",
   "auth.signup": "가입하기",
-  "auth.systemName": "Smart Quote System",
   "auth.signinTitle": "계정에 로그인하세요",
   "auth.signinSubtitle": "이메일과 비밀번호를 입력해 계속하세요.",
   "auth.signupTitle": "새 계정 만들기",

@@ -320,7 +320,7 @@ Semantic `warning`(amber) 계열을 쓰되, 오류(destructive)와 구분한다 
 - 링크 색은 `text-brand-blue-600 dark:text-brand-blue-300` (cyan 은 본문 텍스트 금지 §11).
 - `select` 는 `appearance-none` + lucide `ChevronDown`(`pointer-events-none`). 인라인 data-URI 화살표(HEX 하드코딩) 금지.
 - 헤더의 계정 메뉴(`AccountMenu.tsx`)는 로그아웃을 **마지막 항목**으로 두고 destructive 색을 쓴다.
-- 브랜드 패널 상단은 사진 띠(`DeliveryPhoto photo="courier"`, 높이 40%)이고 아래 navy 로 그라디언트가 이어진다.
+- 브랜드 패널 상단은 사진 슬라이드쇼 띠(`PhotoCarousel`, 높이 40%, §8.10)이고 아래 navy 로 그라디언트가 이어진다.
   **문구는 사진 위에 올리지 않는다** — 대비 측정 없이도 AA 를 유지하는 방법이다. 점 격자는 문구 영역에만 깐다.
 
 ### 8.9 문서형 카드 (공유 견적 `/q/:token`)
@@ -353,12 +353,15 @@ Semantic `warning`(amber) 계열을 쓰되, 오류(destructive)와 구분한다 
 - CTA 는 primary(`bg-brand-blue`) 1개 + 테두리 secondary 1개, `rounded-lg`. cyan 배경 버튼 금지.
 - 제품 미리보기는 `<figure>` + `figcaption` 으로 **"견적 예시"임을 밝힌다**(`bg-deep-blue rounded-xl`).
   예시 금액도 **항목 합 = 합계**가 맞아야 한다 — 정확성을 파는 페이지에서 틀린 덧셈은 역효과.
-- 오른쪽 열은 사진(`DeliveryPhoto photo="signature"`, `aspect-video rounded-xl` + ring) 위에 예시 견적 카드가
+- 오른쪽 열은 사진 슬라이드쇼(`PhotoCarousel`, `aspect-video rounded-xl` + ring) 위에 예시 견적 카드가
   아래 가장자리를 겹쳐 얹힌다. 카드가 주인공이고 사진은 맥락이다 — 사진을 카드 뒤 배경으로 흐리게 깔지 않는다(글래스 금지와 같은 이유).
-- **사진 규칙** (`src/components/ui/DeliveryPhoto.tsx`): 출처는 Getty Images via **Unsplash+**(구독 라이선스).
-  `<picture>` WebP + JPEG, `width`/`height` 명시, 장식이므로 `alt=""`. **원본보다 크게 늘리지 않는다** —
-  번들 파일은 표시 폭의 2배로 줄여 넣는다(히어로 880px, 인증 패널 1440px). 원본은 Dropbox `KS WAYS/WCA LOGO/Unsp/`.
-  히어로만 `priority`(eager·high), 나머지는 lazy.
+- **사진 슬라이드쇼** (`src/components/ui/PhotoCarousel.tsx` · 목록 `deliveryPhotos.ts`): 6초마다 1초 crossfade(`opacity`만).
+  - 출처는 Getty Images via **Unsplash+**(구독 라이선스). 원본은 Dropbox `KS WAYS/WCA LOGO/Unsp/`. **빨간 유니폼 사진은 제외** — DHL 로 읽힌다.
+  - 사진마다 WebP 880w·1440w(`srcset` + `sizes`) + 880w JPEG 폴백. **원본보다 크게 늘리지 않는다.** 장식이므로 `alt=""`(이것으로 보조기기에서 숨겨진다 — `<picture>` 에 `aria-hidden` 은 lint 오류).
+  - **처음엔 한 장만 받는다.** 다음 사진은 현재 사진이 로드된 뒤에 1장만 미리 받고, 다음 사진이 로드돼야 전환한다(빈 프레임으로 페이드 금지).
+    히어로 첫 장만 `priority`(eager·high).
+  - 멈춤: `prefers-reduced-motion`(첫 장 고정·미리받기 없음·버튼 숨김) · 화면 밖 · 숨긴 탭 · 일시정지 버튼(WCAG 2.2.2, `photos.pause/play`).
+  - 인증 패널은 `startIndex` 를 달리 줘 랜딩과 다른 사진으로 시작한다.
 - 통계 띠는 `<dl>` + `md:divide-x`, 기능 소개는 카드 대신 굵은 상단 선(`border-t-2`)의 3열 목록.
   아이콘 칩은 `bg-brand-blue-50 text-brand-blue-600 dark:bg-brand-blue-900/40 dark:text-brand-blue-300` 한 가지.
 - ⚠️ 배지 문구 `landing.badge.networks` 는 **prerender 게이트**(`scripts/prerender.tsx` 의 `expect`)가 찾는
@@ -466,6 +469,8 @@ import { CHART_COLORS } from '@/lib/chartColors';
 ### Changelog
 
 - **1.11.0** (2026-10-05) — §10.3 접기·탭·캐러셀 규칙 신설. 관리자 위젯 접기에 APG Disclosure(제목 안 버튼·`aria-expanded`·패널별 Suspense — 열 때 포커스가 `<body>` 로 떨어지던 버그 수정), 계산기/이력 탭에 roving tabindex·화살표 키·tabpanel, 날씨 캐러셀에 정지 버튼·호버/포커스 정지·동작 줄이기 정지 시작(WCAG 2.2.2). 진입 모션 `animate-enter-fade` 토큰 추가.
+- **1.10.0** (2026-10-05) — 단일 사진을 5장 슬라이드쇼(`PhotoCarousel`)로 교체. 반응형 `srcset`(880w/1440w),
+  1장씩 지연 로드, 감속 모션·화면 밖·숨긴 탭 정지, 일시정지 버튼. `DeliveryPhoto` 제거.
 - **1.9.0** (2026-10-05) — 배송 사진 도입. 랜딩 히어로(사진 + 겹친 예시 견적 카드)와 인증 브랜드 패널(상단 사진 띠)에
   공용 `DeliveryPhoto` 적용. 사진 출처·해상도·로딩 규칙을 §8.10 에 명시.
 - **1.8.1** (2026-10-04) — 반응형 점 배경을 공통 UI 컴포넌트로 이동하고 인증 3종·대시보드 환영 배너·
