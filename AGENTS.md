@@ -14,7 +14,7 @@ Smart Quote System for **KS Ways** - an internal logistics quoting tool that cal
 
 ```bash
 npm run dev          # Dev server on http://localhost:5173
-npm run build        # tsc + vite build
+npm run build        # tsc + vite build + prerender (/, /guide)
 npm run lint         # ESLint (--max-warnings 0)
 npm run test         # Vitest in watch mode
 npx vitest run       # Run frontend tests once
@@ -101,8 +101,10 @@ bundle exec rspec spec/requests/api/v1/quotes_spec.rb
       components/              # CalculatorActionBar, AdminWidgets, MobileStickyBottomBar
     components/
       layout/                  # Header, MobileLayout, NavigationTabs, Footer
+      auth/AuthLayout.tsx      # Shared sign-in layout (form + navy brand panel)
       ui/CollapsibleSection.tsx # Reusable collapsible wrapper for admin widgets
-      ProtectedRoute.tsx       # Auth guard (requireAdmin prop for /admin, /schedule)
+      ui/InteractiveDotGrid.tsx # Shared cursor-responsive decorative background
+      ProtectedRoute.tsx       # Auth guard (requireAdmin prop for /admin)
       ErrorBoundary.tsx        # React error boundary with Sentry
       ChannelTalk.tsx          # ChannelTalk chat widget
     lib/
@@ -150,13 +152,14 @@ smart-quote-api/               # Backend (Rails 8 API-only, Ruby 3.4, PostgreSQL
 ### Routing (src/App.tsx)
 
 ```
-/              → LandingPage (public)
-/login         → LoginPage (public)
-/signup        → SignUpPage (public)
+/              → LandingPage (public, EnglishOnly)
+/login         → LoginPage (public, EnglishOnly)
+/signup        → SignUpPage (public, EnglishOnly)
+/auth/verify   → MagicLinkVerifyPage (public, EnglishOnly)
+/q/:token      → SharedQuotePage (public)
 /dashboard     → CustomerDashboard (ProtectedRoute)
 /quote         → QuoteCalculator isPublic=true (ProtectedRoute)
 /admin         → QuoteCalculator isPublic=false (ProtectedRoute requireAdmin)
-/schedule      → FlightSchedulePage (ProtectedRoute requireAdmin)
 /guide         → UserGuidePage (public)
 *              → redirect to /
 ```
@@ -372,8 +375,9 @@ Express shipments (UPS/DHL/FedEx) → **DAP only** (no exceptions). AI chatbot e
 
 - **Languages**: `en | ko | cn | ja` (defined in `src/i18n/translations.ts`)
 - **Hook**: `useLanguage()` from `LanguageContext` returns `{ language, setLanguage, t }`
-- **Persistence**: localStorage key `smartQuoteLanguage` (`bridgelogis.com` 같은 영어 전용 호스트는 새 방문마다 `en` 으로 시작)
+- **Persistence**: localStorage key `smartQuoteLanguage`
 - **Usage**: `t('key.name')` in all components
+- **Host default**: `bridgelogis.com` 및 하위 도메인은 방문 시 영어로 초기화한다. 그 밖의 호스트는 저장 언어를 읽고, 저장값이 없으면 영어로 시작한다.
 
 ✅ **로케일 키 정합은 테스트가 강제한다** (2026-10-04, #133). `src/i18n/__tests__/localeParity.test.ts` 가 `ko`·`ja`·`cn` 의 키 집합이 `en` 과 **정확히 같은지**, `{placeholder}` 가 보존되는지, 값이 비어 있지 않은지를 단언한다(빈 값 예외는 `MAY_BE_EMPTY` 에만). 이 테스트 전에는 `t()` 가 없는 키를 **영어로 조용히 폴백**해서 ko·ja·cn 이 실제로 갈라져 있었고 아무것도 실패하지 않았다 — 키를 추가하면 4개 JSON 을 함께 고칠 것. 화면 단위 키 목록은 `historyKeys.test.ts`(#132) 처럼 따로 고정할 수 있다.
 
@@ -487,6 +491,14 @@ POST   /api/v1/notifications/slack   # Slack webhook proxy
 - 차트·SVG 등 HEX 직접 사용 영역은 `src/lib/chartColors.ts` 의 `CHART_COLORS` 상수만 사용
 - Feature 단위 design 문서(`docs/02-design/features/*.design.md`)는 DESIGN.md 토큰을 참조
 - 화면 목업 아트보드는 `design/` 에 있다(`*.dc.html` + `canvas.json`). ⚠️ 시드된 `design/*.html` 은 `seed-canvas.mjs` 가 원본에서 다시 찍어내는 **2.4MB 생성물**이라 `.gitignore` 로 제외돼 있다 — 수정은 항상 원본을 고쳐 재시드한다
+
+### 공통 반응형 점 배경
+
+- `src/components/ui/InteractiveDotGrid.tsx` 를 재사용한다. 랜딩 상단, `AuthLayout`, `WelcomeBanner`, `CalculatorActionBar`, 가이드 제목, 공유 견적 바깥면에 적용한다. 상세 시각 규칙은 DESIGN.md §8.10 참조.
+- 기본 `tone='adaptive'` 는 라이트/다크 토큰에 맞춘다. 항상 navy인 브랜드 패널·환영 배너는 `tone='navy'`, 폼·툴바·문서 주변은 `subtle` 을 사용한다. 긴 공유 견적은 `maxHeight` 로 캔버스 영역을 제한한다.
+- 부모는 `relative`/`sticky` 등 위치 기준을 제공하고 내용은 `relative` 로 배경 위에 둔다. 입력 필드·데이터 카드·견적 본문의 불투명 면을 유지한다. 장식의 `aria-hidden`, `pointer-events-none`, `print:hidden` 을 유지한다.
+- 터치·동작 줄이기·SSR·Canvas 미지원은 정적 CSS 격자를 사용한다. 점이 안정되면 RAF를 종료하고, 화면 밖·숨긴 탭에서는 중지한다. 좌표·크기·가시성은 부모 전체가 아닌 실제 배경 영역으로 계산한다.
+- 변경 시 `src/components/ui/__tests__/InteractiveDotGrid.test.tsx` 와 영향받는 페이지 테스트를 실행하고 `npm run lint` · `npm run build` 로 검사한다. 브라우저에서는 양 테마, 모바일, 동작 줄이기와 입력·클릭 동작을 확인한다. API fixture를 사용한 화면 검증은 실제 백엔드 인증 E2E 통과로 기록하지 않는다.
 
 ## User Guides
 
