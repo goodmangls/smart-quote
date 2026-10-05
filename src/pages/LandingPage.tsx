@@ -6,7 +6,7 @@ import { Footer } from '../components/layout/Footer';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
 import { InteractiveDotGrid } from '../components/ui/InteractiveDotGrid';
-import { DeliveryPhoto } from '../components/ui/DeliveryPhoto';
+import { PhotoCarousel } from '../components/ui/PhotoCarousel';
 
 // A light surface / dark navy hero with a reactive dot grid (DESIGN.md §8.10).
 // Mobbin: Railway, Dovetail (left-aligned hero,
@@ -155,10 +155,10 @@ export const LandingPage: React.FC = () => {
               {/* Photo first, the quote card overlapping its lower edge: the
                   people make it a delivery business, the card stays the claim. */}
               <div className='w-full max-w-md mx-auto lg:mx-0 lg:ml-auto'>
-                <DeliveryPhoto
-                  photo='signature'
+                <PhotoCarousel
                   priority
-                  className='aspect-video rounded-xl ring-1 ring-gray-200 dark:ring-white/10 shadow-lg'
+                  sizes='(min-width: 1024px) 440px, (min-width: 640px) 448px, 100vw'
+                  className='relative aspect-video rounded-xl ring-1 ring-gray-200 dark:ring-white/10 shadow-lg'
                 />
                 <div className='relative -mt-16 ml-6 sm:ml-12 lg:-ml-10'>
                   <SampleQuoteCard t={t} />
