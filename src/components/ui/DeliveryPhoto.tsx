@@ -8,9 +8,8 @@ import courierWebp from '@/assets/photos/courier-trunk.webp';
 // keeps the size of the file we ship so width/height reserve the right box
 // and nobody frames a photo larger than its source can carry.
 const PHOTOS = {
-  // BcJ2daQRfxU — the only copy is 640×427. Keep it framed at ≤ ~480 CSS px;
-  // full-bleed would upscale it ~3.5× on retina.
-  signature: { jpg: signatureJpg, webp: signatureWebp, width: 640, height: 427 },
+  // BcJ2daQRfxU — downscaled from 4896×3264 to 880 wide (2× the ≤440px hero frame).
+  signature: { jpg: signatureJpg, webp: signatureWebp, width: 880, height: 587 },
   // gOkE757c1oI — downscaled from 7200×3580 to 1440 wide (2× of a 720px panel).
   courier: { jpg: courierJpg, webp: courierWebp, width: 1440, height: 716 },
 } as const;

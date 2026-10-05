@@ -357,7 +357,8 @@ Semantic `warning`(amber) 계열을 쓰되, 오류(destructive)와 구분한다 
   아래 가장자리를 겹쳐 얹힌다. 카드가 주인공이고 사진은 맥락이다 — 사진을 카드 뒤 배경으로 흐리게 깔지 않는다(글래스 금지와 같은 이유).
 - **사진 규칙** (`src/components/ui/DeliveryPhoto.tsx`): 출처는 Getty Images via **Unsplash+**(구독 라이선스).
   `<picture>` WebP + JPEG, `width`/`height` 명시, 장식이므로 `alt=""`. **원본보다 크게 늘리지 않는다** —
-  `signature` 원본은 640px 뿐이라 ~480 CSS px 이하 액자로만 쓴다. 히어로만 `priority`(eager·high), 나머지는 lazy.
+  번들 파일은 표시 폭의 2배로 줄여 넣는다(히어로 880px, 인증 패널 1440px). 원본은 Dropbox `KS WAYS/WCA LOGO/Unsp/`.
+  히어로만 `priority`(eager·high), 나머지는 lazy.
 - 통계 띠는 `<dl>` + `md:divide-x`, 기능 소개는 카드 대신 굵은 상단 선(`border-t-2`)의 3열 목록.
   아이콘 칩은 `bg-brand-blue-50 text-brand-blue-600 dark:bg-brand-blue-900/40 dark:text-brand-blue-300` 한 가지.
 - ⚠️ 배지 문구 `landing.badge.networks` 는 **prerender 게이트**(`scripts/prerender.tsx` 의 `expect`)가 찾는
