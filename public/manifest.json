@@ -1,6 +1,6 @@
 {
-  "name": "Smart Quote System",
-  "short_name": "SmartQuote",
+  "name": "BridgeLogis",
+  "short_name": "BridgeLogis",
   "description": "International shipping cost calculator for KS Ways",
   "start_url": "/",
   "display": "standalone",

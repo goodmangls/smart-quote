@@ -1,1 +1,1 @@
-🖼️ 랜딩·인증 패널 사진을 5장 crossfade 슬라이드쇼로 교체하고 헤더 제목을 BridgeLogis로 변경
+🏷️ 앱 매니페스트 이름을 BridgeLogis로 변경하고 미사용 i18n 키 auth.systemName 제거

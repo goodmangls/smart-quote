@@ -48,7 +48,6 @@
   "auth.selectNationality": "请选择国籍",
   "auth.signin": "登录",
   "auth.signup": "注册",
-  "auth.systemName": "Smart Quote System",
   "auth.signinTitle": "登录您的账户",
   "auth.signinSubtitle": "输入邮箱和密码以继续。",
   "auth.signupTitle": "创建账户",
