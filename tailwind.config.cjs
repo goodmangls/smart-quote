@@ -23,6 +23,17 @@ module.exports = {
       fontFamily: {
         sans: ['Geist', ...fontFamily.sans],
       },
+      // 진입 전용 모션 (DESIGN.md §10.3) — 펼친 패널·바뀐 캐러셀 페이지가 살짝 내려앉으며 나타난다.
+      // 닫힘·퇴장에는 쓰지 않는다. 사용처는 반드시 motion-reduce:animate-none 을 함께 건다.
+      keyframes: {
+        'enter-fade': {
+          from: { opacity: '0', transform: 'translateY(-4px)' },
+          to: { opacity: '1', transform: 'translateY(0)' },
+        },
+      },
+      animation: {
+        'enter-fade': 'enter-fade 200ms ease-out both',
+      },
       colors: {
         // ─── Neutral ───
         gray: {
