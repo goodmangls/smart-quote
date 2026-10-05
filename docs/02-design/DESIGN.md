@@ -1,6 +1,6 @@
 ---
 name: BridgeLogis Design System (smart-quote-main)
-version: 1.8.1
+version: 1.9.0
 description: >-
   BridgeLogis by KS Ways 웹 애플리케이션의 디자인 시스템 명세.
   외부 운영 중인 SaaS(bridgelogis.com)의 단일 진실 공급원(SSOT).
@@ -409,6 +409,31 @@ import { CHART_COLORS } from '@/lib/chartColors';
 - 호버 상승: `hover:-translate-y-0.5` (카드), `hover:scale-105` 금지 (1.02 이하 유지)
 - `prefers-reduced-motion` 대응 필요 시 `motion-safe:` 접두사 활용
 
+### 10.1 스크롤 진입 모션 (카운트업 · 등장)
+
+Mobbin: Fluz·Base·Givingli 통계 띠(큰 숫자 + 작은 라벨, 셀이 일부만 숫자). 21st.dev "Count Up"(unlumen)을 의존성 없이 이식.
+
+- 단일 출처: `src/hooks/useEnterOnScroll.ts` · `src/components/ui/CountUp.tsx`. 새 의존성(`motion` 등)을 들이지 않는다.
+- **첫 렌더는 항상 최종 상태다.** `/`·`/guide` 는 prerender 되므로 숫자는 실제 값, 등장 요소는 보이는 상태로 HTML 에 실린다.
+  애니메이션은 마운트 후 effect 에서만 시작한다.
+- **로드 시점에 이미 화면 안이면 움직이지 않는다.** 최종값 → 0 → 최종값 깜박임을 막기 위해, 처음 화면 밖에 있던 요소만
+  숨김(`opacity-0`·0)에서 출발한다. IntersectionObserver 미지원·동작 줄이기도 정적 유지.
+- **건너뛰어도 진입으로 친다.** 관찰 루트를 위쪽으로 크게 넓혀(`rootMargin` 상단 100000%) "도달했거나 이미 지나침"을 교차로 본다.
+  앵커 이동·End 키·빠른 스크롤로 요소를 건너뛰면 교차가 한 번도 일어나지 않아 0·숨김에 영원히 멈추기 때문이다.
+- **실제 수량만 센다.** `3`·`220+` 는 카운트업, `~1s`·`24/7` 는 0 에서 자라는 양이 아니므로 그대로 둔다.
+- 스크린리더는 `sr-only` 최종값만 읽고, 움직이는 숫자는 `aria-hidden`. 블러·글로우 전환 금지(§11) — 투명도·이동만.
+- 등장: `opacity` + `translate-y-3`, `duration-500 ease-out`, 항목당 80ms 지연, `motion-reduce:transition-none`. 전환은 들어올 때만 건다(화면 밖에서 숨길 때는 즉시).
+
+### 10.2 문서 목차 스크롤 스파이 (`/guide`)
+
+Mobbin: Mintlify·fal 의 "On this page" — 읽는 위치의 섹션을 목차에서 강조. 21st.dev "Table of Contents"(inference-sh)의
+IntersectionObserver 훅을 `src/hooks/useScrollSpy.ts` 로 이식하면서 고친 점:
+
+- 관찰 기준선은 고정 헤더(64px) 아래 96px 부터. 섹션은 `scroll-mt-20` 으로 도착한다.
+- 목차 클릭 후 smooth 스크롤이 지나가는 섹션이 강조를 가로채지 않도록 `scrollend`(최대 1초)까지 클릭 대상을 고정한다.
+- 짧은 마지막 섹션은 기준선에 닿지 못하므로 페이지 바닥에서는 마지막 섹션을 활성화한다.
+- 활성 항목에 `aria-current="location"`. 미지원 환경에서는 클릭으로만 바뀐다.
+
 ## 11. Do's and Don'ts
 
 ### ✅ Do
@@ -448,6 +473,8 @@ import { CHART_COLORS } from '@/lib/chartColors';
 
 ### Changelog
 
+- **1.9.0** (2026-10-05) — §10.1 스크롤 진입 모션(랜딩 통계 카운트업·기능 목록 등장) · §10.2 가이드 목차 스크롤 스파이 신설.
+  Mobbin 참고 + 21st.dev 컴포넌트를 새 의존성 없이 이식. prerender·이미 보이는 요소·동작 줄이기는 정적 유지.
 - **1.8.1** (2026-10-04) — 반응형 점 배경을 공통 UI 컴포넌트로 이동하고 인증 3종·대시보드 환영 배너·
   계산기/이력 상단 바·가이드 제목·공유 견적 바깥면으로 확장. navy 고정 색과 낮은 밝기 옵션, 문서 캔버스 높이 제한 추가.
 - **1.8.0** (2026-10-04) — §8.11 범주 배지·범례 규칙 신설. 관리자 위젯(마진 우선순위·사용자 역할·네트워크·감사 로그·

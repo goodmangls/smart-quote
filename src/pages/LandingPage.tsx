@@ -6,10 +6,26 @@ import { Footer } from '../components/layout/Footer';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
 import { InteractiveDotGrid } from '../components/ui/InteractiveDotGrid';
+import { CountUp } from '../components/ui/CountUp';
+import { useEnterOnScroll } from '../hooks/useEnterOnScroll';
 
 // A light surface / dark navy hero with a reactive dot grid (DESIGN.md §8.10).
 // Mobbin: Railway, Dovetail (left-aligned hero,
 // one honest product card instead of glass layers), Notion (button pair).
+// Scroll motion (DESIGN.md §10): stats count up and features fade in only when
+// they start below the fold — Mobbin: Fluz, Base, Givingli stat bands.
+
+interface LandingStat {
+  /** Shown as-is when there is nothing to count. */
+  value: string;
+  /** Present only for real quantities, which count up from zero. */
+  count?: number;
+  suffix?: string;
+  label: string;
+  icon: React.ComponentType<{ className?: string; 'aria-hidden'?: 'true' }>;
+}
+
+const REVEAL_STAGGER_MS = 80;
 
 // Illustrative numbers only. They must add up — a preview whose total doesn't
 // match its own lines undermines the one claim the page makes (accuracy).
@@ -69,14 +85,17 @@ const SampleQuoteCard: React.FC<{ t: (key: string) => string }> = ({ t }) => (
 export const LandingPage: React.FC = () => {
   const { t } = useLanguage();
   const { isAuthenticated } = useAuth();
+  const { ref: featuresRef, phase: featuresPhase } = useEnterOnScroll<HTMLUListElement>();
 
   useEffect(() => {
     document.title = 'BridgeLogis — Global Express Freight Quoting Platform';
   }, []);
 
-  const stats = [
-    { value: '3', label: t('landing.stat.carriers'), icon: Truck },
-    { value: '220+', label: t('landing.stat.countries'), icon: Globe },
+  // Only true counts animate. "~1s" and "24/7" are not quantities that grow
+  // from zero, so counting them up would misstate what they mean.
+  const stats: LandingStat[] = [
+    { count: 3, value: '3', label: t('landing.stat.carriers'), icon: Truck },
+    { count: 220, suffix: '+', value: '220+', label: t('landing.stat.countries'), icon: Globe },
     { value: '~1s', label: t('landing.stat.calculation'), icon: Zap },
     { value: '24/7', label: t('landing.stat.available'), icon: ShieldCheck },
   ];
@@ -169,7 +188,11 @@ export const LandingPage: React.FC = () => {
                   {stat.label}
                 </dt>
                 <dd className='text-3xl sm:text-4xl font-semibold tracking-tight text-gray-900 dark:text-white tabular-nums'>
-                  {stat.value}
+                  {stat.count === undefined ? (
+                    stat.value
+                  ) : (
+                    <CountUp value={stat.count} suffix={stat.suffix} />
+                  )}
                 </dd>
               </div>
             ))}
@@ -188,11 +211,17 @@ export const LandingPage: React.FC = () => {
               </h2>
             </div>
 
-            <ul className='grid md:grid-cols-3 gap-x-10 gap-y-12'>
-              {features.map((feat) => (
+            <ul ref={featuresRef} className='grid md:grid-cols-3 gap-x-10 gap-y-12'>
+              {features.map((feat, index) => (
                 <li
                   key={feat.title}
-                  className='border-t-2 border-gray-900 dark:border-gray-100 pt-6'
+                  style={{ transitionDelay: `${index * REVEAL_STAGGER_MS}ms` }}
+                  className={`border-t-2 border-gray-900 dark:border-gray-100 pt-6 ${
+                    featuresPhase === 'pending'
+                      ? 'opacity-0 translate-y-3'
+                      : // Transition only on the way in; hiding off screen should be instant.
+                        'opacity-100 translate-y-0 transition-[opacity,transform] duration-500 ease-out motion-reduce:transition-none'
+                  }`}
                 >
                   <span className='inline-flex items-center justify-center w-10 h-10 rounded-lg bg-brand-blue-50 text-brand-blue-600 dark:bg-brand-blue-900/40 dark:text-brand-blue-300 mb-5'>
                     <feat.icon aria-hidden='true' className='w-5 h-5' />
