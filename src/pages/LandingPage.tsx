@@ -7,6 +7,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
 import { InteractiveDotGrid } from '../components/ui/InteractiveDotGrid';
 import { CountUp } from '../components/ui/CountUp';
+import { DeliveryPhoto } from '../components/ui/DeliveryPhoto';
 import { useEnterOnScroll } from '../hooks/useEnterOnScroll';
 
 // A light surface / dark navy hero with a reactive dot grid (DESIGN.md §8.10).
@@ -170,7 +171,18 @@ export const LandingPage: React.FC = () => {
                 )}
               </div>
 
-              <SampleQuoteCard t={t} />
+              {/* Photo first, the quote card overlapping its lower edge: the
+                  people make it a delivery business, the card stays the claim. */}
+              <div className='w-full max-w-md mx-auto lg:mx-0 lg:ml-auto'>
+                <DeliveryPhoto
+                  photo='signature'
+                  priority
+                  className='aspect-video rounded-xl ring-1 ring-gray-200 dark:ring-white/10 shadow-lg'
+                />
+                <div className='relative -mt-16 ml-6 sm:ml-12 lg:-ml-10'>
+                  <SampleQuoteCard t={t} />
+                </div>
+              </div>
             </div>
           </div>
         </section>
