@@ -320,6 +320,8 @@ Semantic `warning`(amber) 계열을 쓰되, 오류(destructive)와 구분한다 
 - 링크 색은 `text-brand-blue-600 dark:text-brand-blue-300` (cyan 은 본문 텍스트 금지 §11).
 - `select` 는 `appearance-none` + lucide `ChevronDown`(`pointer-events-none`). 인라인 data-URI 화살표(HEX 하드코딩) 금지.
 - 헤더의 계정 메뉴(`AccountMenu.tsx`)는 로그아웃을 **마지막 항목**으로 두고 destructive 색을 쓴다.
+- 브랜드 패널 상단은 사진 띠(`DeliveryPhoto photo="courier"`, 높이 40%)이고 아래 navy 로 그라디언트가 이어진다.
+  **문구는 사진 위에 올리지 않는다** — 대비 측정 없이도 AA 를 유지하는 방법이다. 점 격자는 문구 영역에만 깐다.
 
 ### 8.9 문서형 카드 (공유 견적 `/q/:token`)
 
@@ -351,6 +353,11 @@ Semantic `warning`(amber) 계열을 쓰되, 오류(destructive)와 구분한다 
 - CTA 는 primary(`bg-brand-blue`) 1개 + 테두리 secondary 1개, `rounded-lg`. cyan 배경 버튼 금지.
 - 제품 미리보기는 `<figure>` + `figcaption` 으로 **"견적 예시"임을 밝힌다**(`bg-deep-blue rounded-xl`).
   예시 금액도 **항목 합 = 합계**가 맞아야 한다 — 정확성을 파는 페이지에서 틀린 덧셈은 역효과.
+- 오른쪽 열은 사진(`DeliveryPhoto photo="signature"`, `aspect-video rounded-xl` + ring) 위에 예시 견적 카드가
+  아래 가장자리를 겹쳐 얹힌다. 카드가 주인공이고 사진은 맥락이다 — 사진을 카드 뒤 배경으로 흐리게 깔지 않는다(글래스 금지와 같은 이유).
+- **사진 규칙** (`src/components/ui/DeliveryPhoto.tsx`): 출처는 Getty Images via **Unsplash+**(구독 라이선스).
+  `<picture>` WebP + JPEG, `width`/`height` 명시, 장식이므로 `alt=""`. **원본보다 크게 늘리지 않는다** —
+  `signature` 원본은 640px 뿐이라 ~480 CSS px 이하 액자로만 쓴다. 히어로만 `priority`(eager·high), 나머지는 lazy.
 - 통계 띠는 `<dl>` + `md:divide-x`, 기능 소개는 카드 대신 굵은 상단 선(`border-t-2`)의 3열 목록.
   아이콘 칩은 `bg-brand-blue-50 text-brand-blue-600 dark:bg-brand-blue-900/40 dark:text-brand-blue-300` 한 가지.
 - ⚠️ 배지 문구 `landing.badge.networks` 는 **prerender 게이트**(`scripts/prerender.tsx` 의 `expect`)가 찾는
@@ -448,6 +455,8 @@ import { CHART_COLORS } from '@/lib/chartColors';
 
 ### Changelog
 
+- **1.9.0** (2026-10-05) — 배송 사진 도입. 랜딩 히어로(사진 + 겹친 예시 견적 카드)와 인증 브랜드 패널(상단 사진 띠)에
+  공용 `DeliveryPhoto` 적용. 사진 출처·해상도·로딩 규칙을 §8.10 에 명시.
 - **1.8.1** (2026-10-04) — 반응형 점 배경을 공통 UI 컴포넌트로 이동하고 인증 3종·대시보드 환영 배너·
   계산기/이력 상단 바·가이드 제목·공유 견적 바깥면으로 확장. navy 고정 색과 낮은 밝기 옵션, 문서 캔버스 높이 제한 추가.
 - **1.8.0** (2026-10-04) — §8.11 범주 배지·범례 규칙 신설. 관리자 위젯(마진 우선순위·사용자 역할·네트워크·감사 로그·
