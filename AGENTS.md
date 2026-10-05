@@ -57,7 +57,7 @@ bundle exec rspec spec/requests/api/v1/quotes_spec.rb
       weatherApi.ts            # Open-Meteo API (47 global ports/airports)
       noticeApi.ts             # Company announcements
     types.ts                   # Core TypeScript types & enums (QuoteInput, QuoteResult, Incoterm, etc.)
-    types/dashboard.ts         # Dashboard types (ExchangeRate, PortWeather, LogisticsNews, AccountManager)
+    types/dashboard.ts         # Dashboard types (ExchangeRate, PortWeather, LogisticsNews)
     i18n/translations.ts       # 4-language dictionary (en/ko/cn/ja, 390+ keys)
     config/                    # Rate tables, business rules, UI constants
       ups_tariff.ts            # UPS Z1-Z10 rate tables (synced with backend)
@@ -79,7 +79,7 @@ bundle exec rspec spec/requests/api/v1/quotes_spec.rb
     features/
       quote/
         components/            # InputSection, ResultSection, SaveQuoteButton, CarrierComparisonCard
-        components/widgets/    # ExchangeRateWidget, WeatherWidget, NoticeWidget, AccountManagerWidget, ExchangeRateCalculatorWidget
+        components/widgets/    # ExchangeRateWidget, WeatherWidget, NoticeWidget, JetFuelWidget, ExchangeRateCalculatorWidget
         services/              # calculationService.ts (orchestrator), rateTableResolver.ts (carrier/document table select), fedexCalculation.ts, fedexAddonCalculator.ts, dhlAddonCalculator.ts, upsAddonCalculator.ts
         hooks/                 # useSyncToInput (generic data sync hook)
         components/PackingTypeInfo.tsx  # Packing type info panel with live cost preview
@@ -342,10 +342,9 @@ Express shipments (UPS/DHL/FedEx) → **DAP only** (no exceptions). AI chatbot e
 - **API**: US Energy Information Administration (EIA) via `VITE_EIA_API_KEY`
 - **Dashboard**: Real-time USGC Jet Fuel spot prices and trend chart
 
-### NoticeWidget / AccountManagerWidget
+### NoticeWidget
 
 - NoticeWidget dynamically fetches real-time logistics news via a Vite proxy / edge function pulling from RSS feeds.
-- AccountManagerWidget displays static/mock contact information with a paginated carousel display
 
 ### Admin Widgets (visible at /admin only)
 
