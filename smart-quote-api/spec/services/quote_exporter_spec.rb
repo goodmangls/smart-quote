@@ -43,4 +43,24 @@ RSpec.describe QuoteExporter do
       expect { described_class.call(scope, format: :xlsx) }.to raise_error(QuoteExporter::TooLargeError)
     end
   end
+
+  describe "margin columns" do
+    let(:header) { ->(result) { CSV.parse(result[:csv_data]).first } }
+
+    it "are left out unless the caller opts in" do
+      result = described_class.call(scope)
+
+      expect(header.call(result)).not_to include("Total Cost (KRW)", "Margin %")
+      expect(result[:csv_data]).not_to include("800000")
+    end
+
+    it "are included, in place, for include_margin: true" do
+      result = described_class.call(scope, include_margin: true)
+      row = CSV.parse(result[:csv_data])[1]
+
+      expect(header.call(result)).to eq(QuoteExporter::COLUMNS.map(&:first))
+      expect(row[5]).to eq("800000")
+      expect(row[8]).to eq("20.0")
+    end
+  end
 end

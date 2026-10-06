@@ -266,6 +266,10 @@ Frontend (`src/features/quote/services/calculationService.ts`) and backend (`sma
 - `QuoteSerializer.summary` / `.detail` 은 `include_margin:` **기본값이 `false`** 다(deny-by-default). 호출부가 `current_user.admin?` 일 때만 켠다 — 새 엔드포인트를 추가하면서 아무것도 안 하면 안전한 쪽으로 떨어진다.
 - 빠지는 필드: `marginPercent` · `totalCostAmount` · `profitAmount` · `profitMargin` · `breakdown`.
 - 공개 공유 링크(`GET /shared/:token`)는 별도 화이트리스트 `QuoteSerializer.shared` 를 쓴다. 미인증 경로라 **뺄 것을 고르는 방식이 아니라 담을 것을 고르는 방식**이어야 한다 — 필드가 새로 생겨도 자동으로 새지 않는다.
+- **export(CSV·xlsx)도 같은 규칙이다.** `QuoteExporter` 의 `include_margin:` 기본값은 `false` — 원가(`Total Cost`)·`Margin %` 열은 admin 에게만 나간다. 2026-10-06 까지 이 경로만 멤버에게 두 열을 내보내고 있었다.
+- **견적에 붙이는 고객도 소유권을 검사한다.** create·update 의 `customerId` 는 `customer_assignable?`(멤버=본인 고객, admin=전체)를 통과해야 하고, 없는 id 와 남의 id 는 똑같이 `422 INVALID_CUSTOMER` 로 답한다. 응답의 `customerName` 이 열거 오라클이 되기 때문이다.
+- 🔴 **JWT 서명 비밀은 credentials 에서 읽지 않는다.** `config/master.key` 가 공개 저장소에 커밋돼 있었으므로 `credentials.yml.enc` 는 공개된 것으로 본다(2026-10-06 추적 해제·삭제). 서명은 `JwtAuthenticatable.signing_secret` — 프로덕션은 `SECRET_KEY_BASE` 환경변수만 쓰고, 없으면 credentials 로 폴백하지 않고 실패한다.
+- **JWT 폐기 목록(jti denylist)은 DB `revoked_tokens` 에 둔다 — `Rails.cache` 금지.** 프로덕션 캐시는 `memory_store`(프로세스 메모리)라 재배포·spin-down 마다 비워져, 2026-10-06 까지 로그아웃·회전된 refresh 토큰이 최대 7일 다시 유효했다. 만료 행은 `RevokedToken.revoke!` 가 지울 때마다 함께 정리한다 — 프로덕션엔 잡 스케줄러가 없어(`SOLID_QUEUE_IN_PUMA` 미설정·워커 없음) `recurring.yml` 이 돌지 않는다. 재시작 내성은 `token_revocation_persistence_spec.rb` 가 `Rails.cache.clear` 로 단언한다.
 - ⚠️ 프론트에서 마진 열·배지를 숨기는 것만으로는 부족하다. **응답에 값이 없어야** 개발자도구·공유 링크로도 안 보인다.
 
 ### UPS Zone Mapping (Z1-Z10) — per UPS 2026 Service Guide
@@ -275,6 +279,8 @@ Z1: SG/TW/MO/CN, Z2: JP/VN, Z3: TH/PH, Z4: AU/IN, Z5: CA/US, Z6: ES/IT/GB/FR, Z7
 Zone mappings are config-driven (`src/config/ups_zones.ts`, `src/config/dhl_zones.ts`, `src/config/fedex_zones.ts`).
 
 ⚠️ **폴백 존 없음 (2026-08-19)**: 세 캐리어 모두 존 테이블에 없는 국가는 `determine*Zone`이 `null`을 반환하고 계산기는 `ZoneNotFoundError`를 던진다(백엔드 미러 `Calculators::ZoneNotFoundError` → API `422 ZONE_NOT_FOUND`). UI는 결과 영역 안내 카드 + 비교 카드 "존 미지정" 컬럼 + 국가 드롭다운 접미사로 표시한다. 과거의 Rest-of-World(UPS Z10/DHL Z8)·FedEx J 폴백은 제거됨 — 임의 존으로 견적을 내지 않는다. `*_ZONE_COUNTRIES`(options.ts, 존 필터 UI)는 존 맵에서 파생되므로 존 맵만 수정하면 된다.
+
+⚠️ **비교 카드는 다른 캐리어를 직접 재계산한다** (`CarrierComparisonCard`). 그래서 그 캐리어의 입력을 따로 구해야 한다 — FSC 는 `useFscRates` 의 DB 주간값(상수는 폴백), 할증은 `useSurcharges(캐리어)` 결과. `input.resolvedSurcharges`·`input.fscPercent` 는 **선택된 캐리어 것**이라 그대로 넘기면 안 된다(2026-10-06 까지 상수 FSC + 현재 캐리어 할증으로 계산해 "어느 쪽이 싼가"가 틀렸다). 같은 이유로 `resolvedAddonRates` 도 현재 캐리어 것뿐이라 다른 캐리어 열은 부가요금이 하드코딩 폴백으로 계산된다 — 미해결.
 
 **DHL × CN-S**: DHL 존 시트는 중국을 분할하지 않는다 — CN-S는 CN과 동일한 **Z1** 요율이며 라벨 `Z1/Asia (S.China=CN)`로 표기(2026-08-19 사용자 확인). UPS Z10·FedEx K는 남중국을 별도 존으로 유지.
 

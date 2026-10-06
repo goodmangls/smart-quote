@@ -6,6 +6,9 @@ import { assignBadges } from '@/features/quote/services/carrierRanker';
 import { CARRIER_METADATA, CARRIER_SURFACE_CLASS } from '@/config/carrier_metadata';
 import { calculateCo2Kg } from '@/lib/co2';
 import { DEFAULT_EXCHANGE_RATE, defaultFscFor } from '@/config/rates';
+import { useFscRates } from '@/features/dashboard/hooks/useFscRates';
+import { useSurcharges } from '@/features/dashboard/hooks/useSurcharges';
+import { toQuoteSurcharges } from '@/features/quote/services/quoteSurcharges';
 import { formatKRW, formatUSDInt } from '@/lib/format';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { ArrowRightLeft, Check, ArrowUpDown } from 'lucide-react';
@@ -47,6 +50,16 @@ export const CarrierComparisonCard: React.FC<Props> = ({
   const [showKRW, setShowKRW] = useState(!hideMargin || isKorean);
   const currentCarrier = (input.overseasCarrier || 'UPS') as QuoteCarrier;
 
+  // The other columns are recalculated here, so each needs the inputs the
+  // calculator would use for that carrier: this week's FSC from the DB (the
+  // constant is only the fallback) and that carrier's own surcharges.
+  // `input.resolvedSurcharges` was resolved for the selected carrier only.
+  // Fixed hook order: one lookup per carrier, cached by useSurcharges.
+  const { data: fscRates } = useFscRates();
+  const upsSurcharges = useSurcharges('UPS', input.destinationCountry).surcharges;
+  const dhlSurcharges = useSurcharges('DHL', input.destinationCountry).surcharges;
+  const fedexSurcharges = useSurcharges('FEDEX', input.destinationCountry).surcharges;
+
   const { resultsByCarrier, zoneUnavailable } = useMemo<{
     resultsByCarrier: Partial<Record<QuoteCarrier, QuoteResult>>;
     zoneUnavailable: ReadonlySet<QuoteCarrier>;
@@ -55,13 +68,15 @@ export const CarrierComparisonCard: React.FC<Props> = ({
       [currentCarrier]: currentResult,
     };
     const noZone = new Set<QuoteCarrier>();
+    const surchargesFor = { UPS: upsSurcharges, DHL: dhlSurcharges, FEDEX: fedexSurcharges };
     for (const carrier of ALL_CARRIERS) {
       if (carrier === currentCarrier) continue;
       try {
         map[carrier] = calculateQuote({
           ...input,
           overseasCarrier: carrier,
-          fscPercent: defaultFscFor(carrier),
+          fscPercent: fscRates?.rates?.[carrier]?.international ?? defaultFscFor(carrier),
+          resolvedSurcharges: toQuoteSurcharges(surchargesFor[carrier]),
         });
       } catch (error) {
         // Destination without a zone for this carrier is an expected state:
@@ -76,7 +91,7 @@ export const CarrierComparisonCard: React.FC<Props> = ({
       }
     }
     return { resultsByCarrier: map, zoneUnavailable: noZone };
-  }, [input, currentResult, currentCarrier]);
+  }, [input, currentResult, currentCarrier, fscRates, upsSurcharges, dhlSurcharges, fedexSurcharges]);
 
   const badgedItems = useMemo<Record<string, CarrierComparisonItem> | null>(() => {
     const buildItem = (carrier: QuoteCarrier, result: QuoteResult): CarrierComparisonItem => {

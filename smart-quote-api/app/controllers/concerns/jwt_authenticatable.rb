@@ -1,6 +1,19 @@
 module JwtAuthenticatable
   extend ActiveSupport::Concern
 
+  # Never read from credentials: config/master.key was committed to a public
+  # repository, so config/credentials.yml.enc must be treated as public.
+  # Production signs with SECRET_KEY_BASE (Render generates it) and fails
+  # closed when it is missing rather than falling back to credentials, which
+  # is what Rails.application.secret_key_base would do.
+  def self.signing_secret
+    if Rails.env.production?
+      ENV.fetch("SECRET_KEY_BASE").presence || raise(KeyError, "SECRET_KEY_BASE is blank")
+    else
+      Rails.application.secret_key_base
+    end
+  end
+
   private
 
   def authenticate_user!
@@ -53,29 +66,18 @@ module JwtAuthenticatable
     User.find_by(id: payload["user_id"])
   end
 
-  # Revoke a JWT by jti until its natural expiry (Rails.cache TTL).
+  # Revoke a JWT by jti until its natural expiry. Kept in the database, not
+  # Rails.cache: production's cache is per-process memory, emptied by every
+  # redeploy and spin-down, which made revoked refresh tokens valid again.
   def revoke_token!(token)
     payload = decode_jwt_payload(token)
     return unless payload
 
-    revoke_jti!(payload["jti"], exp: payload["exp"].to_i)
-  end
-
-  def revoke_jti!(jti, exp:)
-    return if jti.blank?
-
-    ttl = exp - Time.current.to_i
-    return if ttl <= 0
-
-    Rails.cache.write(denylist_key(jti), true, expires_in: ttl.seconds)
+    RevokedToken.revoke!(payload["jti"], expires_at: Time.zone.at(payload["exp"].to_i))
   end
 
   def jti_revoked?(jti)
-    jti.present? && Rails.cache.exist?(denylist_key(jti))
-  end
-
-  def denylist_key(jti)
-    "jwt:denylist:#{jti}"
+    RevokedToken.revoked?(jti)
   end
 
   def decode_access_payload(token)
@@ -105,7 +107,7 @@ module JwtAuthenticatable
   end
 
   def jwt_secret
-    Rails.application.credentials.secret_key_base || Rails.application.secret_key_base
+    JwtAuthenticatable.signing_secret
   end
 
   def require_admin!
