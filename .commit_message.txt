@@ -1,1 +1,1 @@
-🔒 JWT 서명을 SECRET_KEY_BASE 로 고정하고 유출된 master.key 추적 해제, 멤버 export 원가·마진 제거, 견적 customer_id 소유권 검사, 토큰 폐기 목록 DB 이전, 비교 카드 DB FSC·캐리어별 할증 적용
+⛽ UPS·DHL·FedEx FSC 2026-10-12 주간 요율 반영 (UPS 52.50% / DHL 49.00% / FedEx 51.75%)
