@@ -153,6 +153,7 @@ class QuoteCalculator
       fsc_percent = @input[:fscPercent].to_f
     end
     fsc_rate = fsc_percent / 100.0
+    @applied_fsc_percent = fsc_percent.to_f
     @intl_fsc_new = (@base_with_margin * fsc_rate).round
 
     # Add-ons (no margin applied)
@@ -198,6 +199,7 @@ class QuoteCalculator
       appliedZone: @overseas_result[:applied_zone],
       transitTime: @overseas_result[:transit_time],
       carrier: @carrier,
+      appliedFscPercent: @applied_fsc_percent,
       warnings: @user_warnings,
       breakdown: {
         packingMaterial: @item_result[:packing_material_cost],

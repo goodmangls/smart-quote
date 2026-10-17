@@ -1,1 +1,1 @@
-⛽ UPS·DHL·FedEx FSC 2026-10-12 주간 요율 반영 (UPS 52.50% / DHL 49.00% / FedEx 51.75%)
+🔒 비로그인 견적 계산 응답에서 원가·마진·breakdown 제거(allowlist), 마진은 서버가 결정하고 appliedFscPercent 를 공개 필드로 추가

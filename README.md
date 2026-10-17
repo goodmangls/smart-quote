@@ -213,7 +213,7 @@ bin/rubocop          # Ruby linting
 
 ```
 # Quotes
-POST   /api/v1/quotes/calculate  # Stateless calculation
+POST   /api/v1/quotes/calculate  # Stateless calculation. 관리자=전체 응답, 그 외=공개 allowlist 응답(원가·마진 제외, appliedFscPercent 포함, marginPercent 무시)
 POST   /api/v1/quotes            # Calculate + save
 GET    /api/v1/quotes            # List (page, per_page, q, destination_country, date_from, date_to, status)
 GET    /api/v1/quotes/:id        # Detail

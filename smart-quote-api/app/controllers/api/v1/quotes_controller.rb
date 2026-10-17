@@ -44,14 +44,25 @@ module Api
       # api_create is partner (machine) traffic authenticated by X-API-Key, not by
       # a user JWT — so it is excluded from authenticate_user! and gated separately.
       before_action :authenticate_user!, except: [ :calculate, :api_create ]
+      before_action :authenticate_optional_user!, only: [ :calculate ]
       before_action :authenticate_api_key!, only: [ :api_create ]
 
       # POST /api/v1/quotes/calculate (public - stateless)
+      #
+      # Admins get the full calculator output and choose the margin. Everyone
+      # else gets PublicQuoteResponse at the server-side margin: cost and margin
+      # are the business's, and a caller who controls marginPercent could back
+      # out the cost basis from totalQuoteAmount.
       def calculate
         input = clean_params
         validate_quote_input!(input)
-        result = QuoteCalculator.call(input)
-        render json: result
+
+        if current_user&.admin?
+          render json: QuoteCalculator.call(input)
+        else
+          result = QuoteCalculator.call(public_calculate_input(input))
+          render json: PublicQuoteResponse.call(result)
+        end
       rescue InvalidInputError => e
         render json: { error: { code: "INVALID_INPUT", message: e.message } }, status: :unprocessable_content
       rescue Calculators::ZoneNotFoundError => e
@@ -360,6 +371,20 @@ module Api
           nationality: current_api_key&.nationality,
           weight: PartnerQuoteResponse.gross_weight(packages)
         )[:margin_percent].to_f
+      end
+
+      # The caller's marginPercent is replaced, not clamped: an anonymous request
+      # has no say in margin. The value comes from the same resolver partner
+      # traffic uses, called with no identity, so only rules that match everyone
+      # (a weight band with no email or nationality) apply; otherwise the
+      # resolver's DEFAULT_MARGIN.
+      def public_calculate_input(input)
+        input.merge("marginPercent" => anonymous_margin_percent(input))
+      end
+
+      def anonymous_margin_percent(input)
+        gross_weight = Array(input["items"]).sum { |item| item["weight"].to_f * (item["quantity"] || 1).to_i }
+        MarginRuleResolver.resolve(email: nil, nationality: nil, weight: gross_weight)[:margin_percent].to_f
       end
 
       def validate_quote_input!(input)

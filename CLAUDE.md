@@ -120,6 +120,7 @@ smart-quote-api/               # Backend (Rails 8 API-only, Ruby 3.4, PostgreSQL
     audit_log.rb               # Audit trail model
   app/services/
     quote_calculator.rb        # Main orchestrator
+    public_quote_response.rb   # calculate 비관리자 응답 allowlist (원가·마진·breakdown 제외, 마진 관련 경고문 필터)
     quote_searcher.rb          # Search/filter chain for quotes
     quote_exporter.rb          # CSV export with 10K limit
     quote_serializer.rb        # Quote summary/detail serialization
@@ -182,7 +183,7 @@ Context providers wrap the app: `ThemeProvider > LanguageProvider > BrowserRoute
 | Currency toggle (KRW/USD) | O | X |
 | Flight Schedule (/schedule) | O | X |
 | Quote history | O | O |
-| Margin / cost fields in quote API responses | O | **X — 응답에 실리지 않음** |
+| Margin / cost fields in quote API responses (`/quotes/calculate` 포함) | O | **X — 응답에 실리지 않음** |
 | Low Margin badge (<10%) in history | O | X |
 | Admin widgets panel (collapsible) | O | X |
 | Slack notification on save | X | O (auto) |
@@ -392,7 +393,7 @@ Express shipments (UPS/DHL/FedEx) → **DAP only** (no exceptions). AI chatbot e
 ## API Endpoints
 
 ```
-POST   /api/v1/quotes/calculate  # Stateless calculation
+POST   /api/v1/quotes/calculate  # Stateless calculation. 관리자=전체 응답·marginPercent 적용 / 그 외(비로그인·무효 토큰·멤버)=allowlist 응답(PublicQuoteResponse), marginPercent 무시하고 서버 마진 사용, appliedFscPercent 포함. 무효 토큰도 401 이 아니라 공개 형태
 POST   /api/v1/quotes            # Calculate + save
 GET    /api/v1/quotes            # List (page, per_page, q, destination_country, date_from, date_to, status)
 GET    /api/v1/quotes/:id        # Detail
