@@ -21,6 +21,13 @@ module JwtAuthenticatable
     render_unauthorized unless @current_user
   end
 
+  # Non-raising counterpart to authenticate_user!, for actions that serve every
+  # caller and only vary the response by role. A missing, expired, revoked or
+  # forged token leaves current_user nil and renders nothing.
+  def authenticate_optional_user!
+    @current_user = user_from_token
+  end
+
   def current_user
     @current_user
   end
