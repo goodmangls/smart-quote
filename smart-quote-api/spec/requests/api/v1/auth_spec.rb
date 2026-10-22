@@ -166,7 +166,7 @@ RSpec.describe "Api::V1::Auth", type: :request do
     it "returns 401 for an expired refresh token" do
       expired = JWT.encode(
         { user_id: user.id, type: "refresh", exp: 1.minute.ago.to_i },
-        Rails.application.credentials.secret_key_base || Rails.application.secret_key_base,
+        JwtAuthenticatable.signing_secret,
         "HS256"
       )
 

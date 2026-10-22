@@ -133,6 +133,52 @@ RSpec.describe "Quote margin visibility", type: :request do
     end
   end
 
+  describe "GET /api/v1/quotes/export" do
+    # The export file is the same data in another envelope — it used to carry
+    # "Total Cost (KRW)" and "Margin %" for every caller.
+    def xlsx_text(body)
+      require "zip"
+      text = +""
+      Zip::File.open_buffer(StringIO.new(body)) do |zip|
+        # Cell data only — the theme XML carries unrelated numbers (rev="1200000").
+        zip.entries.select { |e| e.name.match?(%r{\Axl/(worksheets/.+|sharedStrings)\.xml\z}) }
+           .each { |e| text << e.get_input_stream.read }
+      end
+      text
+    end
+
+    it "withholds cost and margin columns from a member's CSV" do
+      quote_for(member)
+      get "/api/v1/quotes/export.csv", headers: member_headers
+
+      expect(response).to have_http_status(:ok)
+      header = CSV.parse(response.body).first
+      expect(header).not_to include("Total Cost (KRW)", "Margin %")
+      expect(response.body).not_to include("1200000")
+    end
+
+    it "withholds cost and margin columns from a member's xlsx" do
+      quote_for(member)
+      get "/api/v1/quotes/export.xlsx", headers: member_headers
+
+      expect(response).to have_http_status(:ok)
+      text = xlsx_text(response.body)
+      expect(text).to include("Quote Amount (KRW)")
+      expect(text).not_to include("Total Cost (KRW)")
+      expect(text).not_to include("Margin %")
+      expect(text).not_to include("1200000")
+    end
+
+    it "keeps cost and margin columns for an admin" do
+      quote_for(admin)
+      get "/api/v1/quotes/export.csv", headers: admin_headers
+
+      header = CSV.parse(response.body).first
+      expect(header).to include("Total Cost (KRW)", "Margin %")
+      expect(response.body).to include("1200000")
+    end
+  end
+
   describe "the serializer default" do
     # Deny by default: a call site that forgets the flag must fail closed.
     it "omits the margin when nobody says otherwise" do

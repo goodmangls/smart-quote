@@ -44,14 +44,25 @@ module Api
       # api_create is partner (machine) traffic authenticated by X-API-Key, not by
       # a user JWT — so it is excluded from authenticate_user! and gated separately.
       before_action :authenticate_user!, except: [ :calculate, :api_create ]
+      before_action :authenticate_optional_user!, only: [ :calculate ]
       before_action :authenticate_api_key!, only: [ :api_create ]
 
       # POST /api/v1/quotes/calculate (public - stateless)
+      #
+      # Admins get the full calculator output and choose the margin. Everyone
+      # else gets PublicQuoteResponse at the server-side margin: cost and margin
+      # are the business's, and a caller who controls marginPercent could back
+      # out the cost basis from totalQuoteAmount.
       def calculate
         input = clean_params
         validate_quote_input!(input)
-        result = QuoteCalculator.call(input)
-        render json: result
+
+        if current_user&.admin?
+          render json: QuoteCalculator.call(input)
+        else
+          result = QuoteCalculator.call(public_calculate_input(input))
+          render json: PublicQuoteResponse.call(result)
+        end
       rescue InvalidInputError => e
         render json: { error: { code: "INVALID_INPUT", message: e.message } }, status: :unprocessable_content
       rescue Calculators::ZoneNotFoundError => e
@@ -63,6 +74,8 @@ module Api
 
       # POST /api/v1/quotes (calculate + save)
       def create
+        return render_invalid_customer unless customer_assignable?(params[:customerId])
+
         input = clean_params
         validate_quote_input!(input)
         result = QuoteCalculator.call(input)
@@ -165,6 +178,10 @@ module Api
         quote = scoped_quotes.find(params[:id])
         permitted = params.permit(:status, :notes, :customer_id)
 
+        if permitted.key?(:customer_id) && !customer_assignable?(permitted[:customer_id])
+          return render_invalid_customer
+        end
+
         if permitted[:status].present?
           unless Quote::VALID_STATUSES.include?(permitted[:status])
             return render json: { error: { code: "INVALID_STATUS", message: "Invalid status" } }, status: :unprocessable_content
@@ -225,7 +242,7 @@ module Api
         ).to_h
         filtered_scope = QuoteSearcher.call(scoped_quotes, export_filters)
         format = request.format.symbol == :xlsx ? :xlsx : :csv
-        result = QuoteExporter.call(filtered_scope, format: format)
+        result = QuoteExporter.call(filtered_scope, format: format, include_margin: current_user.admin?)
 
         AuditLog.track!(
           user: current_user,
@@ -284,6 +301,23 @@ module Api
         end
       end
 
+      # Customers are private to their creator (admins see all) — the same rule
+      # as CustomersController#scoped_customers. Without this a member could
+      # attach any customer id and read its company name back from
+      # `customerName`. A blank id means "no customer". Missing and foreign ids
+      # get the same answer so the response can't be used to probe ids.
+      def customer_assignable?(customer_id)
+        return true if customer_id.blank?
+
+        scope = current_user.admin? ? Customer.all : current_user.customers
+        scope.exists?(id: customer_id)
+      end
+
+      def render_invalid_customer
+        render json: { error: { code: "INVALID_CUSTOMER", message: "Customer not found" } },
+               status: :unprocessable_content
+      end
+
       # Field mapping lives in PartnerQuoteInput. Margin stays here because it
       # depends on the authenticated API key: a partner must never be able to set
       # its own margin, so resolving it at the call site keeps that rule visible.
@@ -337,6 +371,20 @@ module Api
           nationality: current_api_key&.nationality,
           weight: PartnerQuoteResponse.gross_weight(packages)
         )[:margin_percent].to_f
+      end
+
+      # The caller's marginPercent is replaced, not clamped: an anonymous request
+      # has no say in margin. The value comes from the same resolver partner
+      # traffic uses, called with no identity, so only rules that match everyone
+      # (a weight band with no email or nationality) apply; otherwise the
+      # resolver's DEFAULT_MARGIN.
+      def public_calculate_input(input)
+        input.merge("marginPercent" => anonymous_margin_percent(input))
+      end
+
+      def anonymous_margin_percent(input)
+        gross_weight = Array(input["items"]).sum { |item| item["weight"].to_f * (item["quantity"] || 1).to_i }
+        MarginRuleResolver.resolve(email: nil, nationality: nil, weight: gross_weight)[:margin_percent].to_f
       end
 
       def validate_quote_input!(input)

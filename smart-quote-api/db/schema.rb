@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_08_17_030000) do
+ActiveRecord::Schema[8.0].define(version: 2026_10_06_000001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -173,6 +173,14 @@ ActiveRecord::Schema[8.0].define(version: 2026_08_17_030000) do
     t.index ["user_id", "status", "created_at"], name: "idx_quotes_user_status_date"
     t.index ["user_id"], name: "index_quotes_on_user_id"
     t.index ["validity_date"], name: "idx_quotes_stale_drafts", where: "((status)::text = ANY (ARRAY[('draft'::character varying)::text, ('sent'::character varying)::text]))"
+  end
+
+  create_table "revoked_tokens", force: :cascade do |t|
+    t.string "jti", null: false
+    t.datetime "expires_at", null: false
+    t.datetime "created_at", null: false
+    t.index ["expires_at"], name: "index_revoked_tokens_on_expires_at"
+    t.index ["jti"], name: "index_revoked_tokens_on_jti", unique: true
   end
 
   create_table "surcharges", force: :cascade do |t|
