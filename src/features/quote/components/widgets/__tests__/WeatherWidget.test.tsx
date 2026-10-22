@@ -1,4 +1,4 @@
-import { render, screen, waitFor, act } from '@testing-library/react';
+import { render, screen, waitFor, act, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { WeatherWidget } from '../WeatherWidget';
 import type { PortWeather } from '@/types/dashboard';
@@ -168,5 +168,129 @@ describe('WeatherWidget', () => {
     // Plane icon for airport
     const planeIcons = container.querySelectorAll('.text-cyan-500.w-5.h-5');
     expect(planeIcons.length).toBeGreaterThanOrEqual(1);
+  });
+});
+
+// WAI-ARIA APG Carousel + WCAG 2.2.2: auto-rotation must be stoppable, and it
+// stops while the pointer or keyboard focus is inside the widget.
+describe('WeatherWidget carousel accessibility', () => {
+  const paginated = () =>
+    mockUsePortWeather.mockReturnValue({ data: mockData12, loading: false, error: null, retry: vi.fn() });
+
+  const tick = () =>
+    act(() => {
+      vi.advanceTimersByTime(5000);
+    });
+
+  beforeEach(() => vi.useFakeTimers());
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.unstubAllGlobals();
+  });
+
+  it('is a named carousel region with the current page announced as a slide', () => {
+    paginated();
+    render(<WeatherWidget />);
+
+    const carousel = screen.getByRole('region', { name: 'widget.weather' });
+    expect(carousel).toHaveAttribute('aria-roledescription', 'carousel');
+    const slide = screen.getByRole('group', { name: '1 of 2' });
+    expect(slide).toHaveAttribute('aria-roledescription', 'slide');
+  });
+
+  it('has no carousel semantics when everything fits on one page', () => {
+    mockUsePortWeather.mockReturnValue({ data: mockData6, loading: false, error: null, retry: vi.fn() });
+    render(<WeatherWidget />);
+
+    expect(screen.queryByRole('region', { name: 'widget.weather' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /automatic rotation/ })).not.toBeInTheDocument();
+  });
+
+  it('the rotation button stops and restarts auto-rotation', () => {
+    paginated();
+    render(<WeatherWidget />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Stop automatic rotation' }));
+    // Clicking focuses the button; blur so only the explicit pause is in effect.
+    act(() => (document.activeElement as HTMLElement | null)?.blur());
+    tick();
+    expect(screen.getByText('1 / 2')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Start automatic rotation' }));
+    act(() => (document.activeElement as HTMLElement | null)?.blur());
+    tick();
+    expect(screen.getByText('2 / 2')).toBeInTheDocument();
+  });
+
+  it('pauses while hovered and resumes on leave', () => {
+    paginated();
+    render(<WeatherWidget />);
+    const carousel = screen.getByRole('region', { name: 'widget.weather' });
+
+    fireEvent.mouseEnter(carousel);
+    tick();
+    expect(screen.getByText('1 / 2')).toBeInTheDocument();
+
+    fireEvent.mouseLeave(carousel);
+    tick();
+    expect(screen.getByText('2 / 2')).toBeInTheDocument();
+  });
+
+  it('pauses while keyboard focus is inside and resumes when it leaves', () => {
+    paginated();
+    render(<WeatherWidget />);
+
+    act(() => screen.getByRole('button', { name: 'Next page' }).focus());
+    tick();
+    expect(screen.getByText('1 / 2')).toBeInTheDocument();
+
+    act(() => (document.activeElement as HTMLElement).blur());
+    tick();
+    expect(screen.getByText('2 / 2')).toBeInTheDocument();
+  });
+
+  it('starts stopped under prefers-reduced-motion', () => {
+    vi.stubGlobal('matchMedia', (query: string) => ({
+      matches: query.includes('prefers-reduced-motion'),
+      media: query,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+    }));
+    paginated();
+    render(<WeatherWidget />);
+
+    expect(screen.getByRole('button', { name: 'Start automatic rotation' })).toBeInTheDocument();
+    tick();
+    expect(screen.getByText('1 / 2')).toBeInTheDocument();
+  });
+
+  it('does not advance while the browser tab is hidden', () => {
+    paginated();
+    render(<WeatherWidget />);
+    const hidden = vi.spyOn(document, 'hidden', 'get').mockReturnValue(true);
+
+    tick();
+    expect(screen.getByText('1 / 2')).toBeInTheDocument();
+
+    hidden.mockReturnValue(false);
+    tick();
+    expect(screen.getByText('2 / 2')).toBeInTheDocument();
+  });
+
+  it('silences the live region while rotating and makes it polite when stopped', () => {
+    paginated();
+    render(<WeatherWidget />);
+
+    expect(screen.getByRole('group', { name: '1 of 2' }).parentElement).toHaveAttribute('aria-live', 'off');
+    fireEvent.click(screen.getByRole('button', { name: 'Stop automatic rotation' }));
+    expect(screen.getByRole('group', { name: '1 of 2' }).parentElement).toHaveAttribute('aria-live', 'polite');
+  });
+
+  it('marks the current page dot with aria-current', () => {
+    paginated();
+    render(<WeatherWidget />);
+
+    expect(screen.getByLabelText('Page 1')).toHaveAttribute('aria-current', 'true');
+    expect(screen.getByLabelText('Page 2')).not.toHaveAttribute('aria-current');
   });
 });

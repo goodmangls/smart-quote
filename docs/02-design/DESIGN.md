@@ -1,6 +1,6 @@
 ---
 name: BridgeLogis Design System (smart-quote-main)
-version: 1.12.0
+version: 1.13.0
 description: >-
   BridgeLogis by KS Ways 웹 애플리케이션의 디자인 시스템 명세.
   외부 운영 중인 SaaS(bridgelogis.com)의 단일 진실 공급원(SSOT).
@@ -445,6 +445,15 @@ IntersectionObserver 훅을 `src/hooks/useScrollSpy.ts` 로 이식하면서 고�
 - 짧은 마지막 섹션은 기준선에 닿지 못하므로 페이지 바닥에서는 마지막 섹션을 활성화한다.
 - 활성 항목에 `aria-current="location"`. 미지원 환경에서는 클릭으로만 바뀐다.
 
+### 10.3 접기·탭·캐러셀 (키보드 · ARIA · 진입 모션)
+
+세 패턴 모두 WAI-ARIA APG 를 따른다. 진입 모션은 `animate-enter-fade`(200ms, opacity + 4px 내려앉기, `tailwind.config.cjs`) 하나만 쓰고 **진입에만** 건다 — 닫힘·퇴장은 즉시. 사용처는 반드시 `motion-reduce:animate-none` 을 함께 단다. 포커스 링은 `focus-visible:ring-2 focus-visible:ring-brand-blue-500`(행 전체 버튼은 `ring-inset`).
+
+- **접기 (`CollapsibleSection`)** — 버튼이 제목(`h4`) **안에** 있다(반대 금지). `aria-expanded` + `aria-controls`, 패널은 항상 존재하고 `hidden` 으로 숨긴다(참조가 끊기지 않게). 자식은 **열렸을 때만 마운트**한다 — 관리자 위젯이 마운트 시 조회하기 때문. 셰브런은 하나를 `rotate-90` 으로 돌린다.
+  - ⚠️ **패널이 자기 Suspense 경계를 가진다.** 자식이 `React.lazy` 인데 공용 경계 하나(`AdminWidgets`)로 새면, 섹션을 여는 순간 **모든 섹션이 숨겨지고 포커스가 `<body>` 로 떨어진다**(2026-10-05 실측). 경계를 위로 올리지 말 것.
+- **탭 (`NavigationTabs`)** — `role="tablist"` 는 `<nav>` 가 아니라 `<div>` 에 단다(랜드마크를 덮어쓰지 않게). 탭 정지점은 하나(roving `tabIndex`), `←/→`(순환)·`Home/End` 로 이동과 동시에 선택(자동 활성화 — 뷰가 둘뿐이고 전환이 가볍다). 두 탭은 같은 패널(`VIEW_PANEL_ID`, `QuoteCalculator`)을 가리키고 패널의 `aria-labelledby` 가 선택된 탭을 따른다.
+- **캐러셀 (`WeatherWidget`)** — 자동 회전은 WCAG 2.2.2 때문에 **멈출 수 있어야** 한다: 헤더의 정지/재생 버튼(회전 컨트롤이 탭 순서상 첫 번째). 포인터가 올라와 있거나 키보드 포커스가 안에 있는 동안, 탭이 백그라운드일 때도 멈춘다. 동작 줄이기는 **정지 상태로 시작**한다. 페이지 묶음은 `role="group"` + `aria-roledescription="slide"` + `"1 of 8"`, 래퍼의 `aria-live` 는 회전 중 `off`·정지 시 `polite`. 점은 8px 로 보이되 버튼은 24px(WCAG 2.5.8), 현재 점은 `aria-current`. 한 페이지에 다 들어가면 캐러셀 의미를 아예 붙이지 않는다.
+
 ## 11. Do's and Don'ts
 
 ### ✅ Do
@@ -484,6 +493,7 @@ IntersectionObserver 훅을 `src/hooks/useScrollSpy.ts` 로 이식하면서 고�
 
 ### Changelog
 
+- **1.13.0** (2026-10-22) — §10.3 접기·탭·캐러셀 규칙 신설. 관리자 위젯 접기에 APG Disclosure(제목 안 버튼·`aria-expanded`·패널별 Suspense — 열 때 포커스가 `<body>` 로 떨어지던 버그 수정), 계산기/이력 탭에 roving tabindex·화살표 키·tabpanel, 날씨 캐러셀에 정지 버튼·호버/포커스 정지·동작 줄이기 정지 시작(WCAG 2.2.2). 진입 모션 `animate-enter-fade` 토큰 추가.
 - **1.12.0** (2026-10-05) — §10.1 스크롤 진입 모션(랜딩 통계 카운트업·기능 목록 등장) · §10.2 가이드 목차 스크롤 스파이 신설.
   Mobbin 참고 + 21st.dev 컴포넌트를 새 의존성 없이 이식. prerender·이미 보이는 요소·동작 줄이기는 정적 유지.
 - **1.10.0** (2026-10-05) — 단일 사진을 5장 슬라이드쇼(`PhotoCarousel`)로 교체. 반응형 `srcset`(880w/1440w),

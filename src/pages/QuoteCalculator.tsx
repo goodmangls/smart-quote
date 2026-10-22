@@ -20,7 +20,7 @@ import { ZoneUnavailableNotice } from '@/features/quote/components/ZoneUnavailab
 import { trackEvent, IntercomEvents } from '@/lib/intercom';
 import { MobileLayout } from '@/components/layout/MobileLayout';
 import { QuoteHistoryPage } from '@/features/history/components/QuoteHistoryPage';
-import { AppView } from '@/components/layout/NavigationTabs';
+import { VIEW_PANEL_ID, viewTabId, type AppView } from '@/components/layout/quoteViews';
 import { InputSection } from '@/features/quote/components/InputSection';
 import { ResultSection } from '@/features/quote/components/ResultSection';
 import { Header } from '@/components/layout/Header';
@@ -259,73 +259,75 @@ const QuoteCalculator: React.FC<{ isPublic?: boolean }> = ({ isPublic = false })
         onToggleMobileView={() => setIsMobileView(!isMobileView)}
       />
 
-      {currentView === 'calculator' ? (
-        <>
-          {isMobileView ? (
-            <MobileLayout {...layoutProps} />
-          ) : (
-            <main className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-32 lg:pb-8'>
-              <div className='grid grid-cols-1 lg:grid-cols-12 gap-8 items-start'>
-                <div className='lg:col-span-7 space-y-8'>
-                  <div>
-                    <h2 className='text-xl font-semibold text-gray-900 dark:text-white'>
-                      {t('calc.shipmentConfig')}
-                    </h2>
-                    <p className='text-sm text-gray-500 dark:text-gray-400 mt-1'>
-                      {t('calc.shipmentConfigDesc')}
-                    </p>
-                  </div>
-                  <InputSection
-                    input={input}
-                    onChange={setInput}
-                    isMobileView={false}
-                    effectiveMarginPercent={result?.profitMargin}
-                    marginAmount={result?.profitAmount}
-                    totalQuoteAmount={result?.totalQuoteAmount}
-                    hideMargin={hideMargin}
-                    intlBase={result?.breakdown.intlBase}
-                    billableWeight={result?.billableWeight}
-                    resolvedMargin={resolvedMargin}
-                    carrierFscDefault={carrierFscDefault}
-                  />
-                  {isAdmin && <AdminWidgets />}
-                </div>
-                <div className='lg:col-span-5 lg:sticky top-24' id='result-section'>
-                  {!result && zoneUnavailable && (
-                    <ZoneUnavailableNotice
-                      carrier={activeCarrier}
-                      country={input.destinationCountry}
-                    />
-                  )}
-                  {result && (
-                    <ResultSection
-                      result={result}
+      <div role='tabpanel' id={VIEW_PANEL_ID} aria-labelledby={viewTabId(currentView)}>
+        {currentView === 'calculator' ? (
+          <>
+            {isMobileView ? (
+              <MobileLayout {...layoutProps} />
+            ) : (
+              <main className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-32 lg:pb-8'>
+                <div className='grid grid-cols-1 lg:grid-cols-12 gap-8 items-start'>
+                  <div className='lg:col-span-7 space-y-8'>
+                    <div>
+                      <h2 className='text-xl font-semibold text-gray-900 dark:text-white'>
+                        {t('calc.shipmentConfig')}
+                      </h2>
+                      <p className='text-sm text-gray-500 dark:text-gray-400 mt-1'>
+                        {t('calc.shipmentConfigDesc')}
+                      </p>
+                    </div>
+                    <InputSection
                       input={input}
+                      onChange={setInput}
+                      isMobileView={false}
+                      effectiveMarginPercent={result?.profitMargin}
+                      marginAmount={result?.profitAmount}
+                      totalQuoteAmount={result?.totalQuoteAmount}
                       hideMargin={hideMargin}
-                      onMarginChange={handleMarginChange}
-                      onDownloadPdf={handleDownloadPdf}
-                      onSwitchCarrier={(carrier) =>
-                        setInput((prev) => ({ ...prev, overseasCarrier: carrier }))
-                      }
-                      marginPercent={input.marginPercent}
-                      isKorean={isKorean}
+                      intlBase={result?.breakdown.intlBase}
+                      billableWeight={result?.billableWeight}
+                      resolvedMargin={resolvedMargin}
+                      carrierFscDefault={carrierFscDefault}
                     />
-                  )}
+                    {isAdmin && <AdminWidgets />}
+                  </div>
+                  <div className='lg:col-span-5 lg:sticky top-24' id='result-section'>
+                    {!result && zoneUnavailable && (
+                      <ZoneUnavailableNotice
+                        carrier={activeCarrier}
+                        country={input.destinationCountry}
+                      />
+                    )}
+                    {result && (
+                      <ResultSection
+                        result={result}
+                        input={input}
+                        hideMargin={hideMargin}
+                        onMarginChange={handleMarginChange}
+                        onDownloadPdf={handleDownloadPdf}
+                        onSwitchCarrier={(carrier) =>
+                          setInput((prev) => ({ ...prev, overseasCarrier: carrier }))
+                        }
+                        marginPercent={input.marginPercent}
+                        isKorean={isKorean}
+                      />
+                    )}
+                  </div>
                 </div>
-              </div>
-            </main>
-          )}
-          {result && !isMobileView && (
-            <MobileStickyBottomBar
-              result={result}
-              isKorean={isKorean}
-              onViewDetails={scrollToResults}
-            />
-          )}
-        </>
-      ) : (
-        <QuoteHistoryPage onDuplicate={handleDuplicate} hideMargin={hideMargin} />
-      )}
+              </main>
+            )}
+            {result && !isMobileView && (
+              <MobileStickyBottomBar
+                result={result}
+                isKorean={isKorean}
+                onViewDetails={scrollToResults}
+              />
+            )}
+          </>
+        ) : (
+          <QuoteHistoryPage onDuplicate={handleDuplicate} hideMargin={hideMargin} />
+        )}
+      </div>
 
       <div className='hidden lg:block'>
         <Footer />
