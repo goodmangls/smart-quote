@@ -4,6 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { InteractiveDotGrid } from '@/components/ui/InteractiveDotGrid';
+import { useScrollSpy } from '@/hooks/useScrollSpy';
 import {
   BookOpen,
   Rocket,
@@ -60,6 +61,9 @@ const ADMIN_SECTION_KEYS = [
 
 type SectionKey = (typeof MEMBER_SECTION_KEYS)[number] | (typeof ADMIN_SECTION_KEYS)[number];
 
+/** Sticky header (h-16, 64px) plus breathing room; sections land at scroll-mt-20. */
+const SCROLL_SPY_TOP_OFFSET_PX = 96;
+
 const SECTION_ICONS: Record<SectionKey, React.ReactNode> = {
   gettingStarted: <Rocket className="w-5 h-5" />,
   dashboard: <LayoutDashboard className="w-5 h-5" />,
@@ -81,7 +85,6 @@ const SECTION_ICONS: Record<SectionKey, React.ReactNode> = {
 const UserGuidePage: React.FC = () => {
   const { language } = useLanguage();
   const { user } = useAuth();
-  const [activeSection, setActiveSection] = useState<string>('gettingStarted');
   const [isTocOpen, setIsTocOpen] = useState(false);
 
   const isAdmin = user?.role === 'admin';
@@ -95,8 +98,17 @@ const UserGuidePage: React.FC = () => {
     return keys;
   }, [isAdmin]);
 
+  const sectionElementIds = useMemo(
+    () => visibleSectionKeys.map((key) => `guide-section-${key}`),
+    [visibleSectionKeys],
+  );
+  const { activeId, selectId } = useScrollSpy(sectionElementIds, {
+    topOffset: SCROLL_SPY_TOP_OFFSET_PX,
+  });
+  const activeSection = activeId.replace('guide-section-', '');
+
   const scrollToSection = (key: string) => {
-    setActiveSection(key);
+    selectId(`guide-section-${key}`);
     setIsTocOpen(false);
     const el = document.getElementById(`guide-section-${key}`);
     if (el) {
@@ -328,6 +340,7 @@ const UserGuidePage: React.FC = () => {
                     <button
                       key={key}
                       onClick={() => scrollToSection(key)}
+                      aria-current={activeSection === key ? 'location' : undefined}
                       className={`w-full flex items-center gap-3 px-4 py-2.5 text-left text-sm transition-colors ${
                         activeSection === key
                           ? 'bg-brand-blue-50 dark:bg-brand-blue-900/20 text-brand-blue-600 dark:text-brand-blue-400 font-semibold'
@@ -377,6 +390,7 @@ const UserGuidePage: React.FC = () => {
                         )}
                         <button
                           onClick={() => scrollToSection(key)}
+                          aria-current={activeSection === key ? 'location' : undefined}
                           className={`w-full flex items-center gap-2 px-4 py-2 text-left text-[13px] transition-colors group ${
                             activeSection === key
                               ? 'bg-brand-blue-50 dark:bg-brand-blue-900/20 text-brand-blue-600 dark:text-brand-blue-400 font-semibold border-l-2 border-brand-blue-500'
