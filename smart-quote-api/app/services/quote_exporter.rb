@@ -3,18 +3,31 @@ require "csv"
 class QuoteExporter
   MAX_EXPORT_COUNT = 10_000
 
-  HEADERS = [
-    "Reference No", "Date", "Destination", "Incoterm", "Billable Weight (kg)",
-    "Total Cost (KRW)", "Quote Amount (KRW)", "Quote Amount (USD)", "Margin %", "Status"
+  # [header, value, margin data?]. Cost and margin are admin-only — the same
+  # rule as QuoteSerializer, and for the same reason: either column against the
+  # quote amount gives the margin away.
+  COLUMNS = [
+    [ "Reference No",         ->(q) { q.reference_no },                          false ],
+    [ "Date",                 ->(q) { q.created_at.strftime("%Y-%m-%d") },       false ],
+    [ "Destination",          ->(q) { q.destination_country },                   false ],
+    [ "Incoterm",             ->(q) { q.incoterm },                              false ],
+    [ "Billable Weight (kg)", ->(q) { q.billable_weight.to_f },                  false ],
+    [ "Total Cost (KRW)",     ->(q) { q.total_cost_amount.to_i },                true ],
+    [ "Quote Amount (KRW)",   ->(q) { q.total_quote_amount.to_i },               false ],
+    [ "Quote Amount (USD)",   ->(q) { q.total_quote_amount_usd.to_f.round(2) },  false ],
+    [ "Margin %",             ->(q) { q.profit_margin.to_f },                    true ],
+    [ "Status",               ->(q) { q.status },                                false ]
   ].freeze
 
-  def self.call(scope, format: :csv)
-    new(scope, format: format).call
+  # Deny by default: a call site that forgets the flag gets the member file.
+  def self.call(scope, format: :csv, include_margin: false)
+    new(scope, format: format, include_margin: include_margin).call
   end
 
-  def initialize(scope, format: :csv)
+  def initialize(scope, format: :csv, include_margin: false)
     @scope = scope
     @format = format
+    @columns = include_margin ? COLUMNS : COLUMNS.reject { |(_, _, margin)| margin }
   end
 
   # Returns:
@@ -42,7 +55,7 @@ class QuoteExporter
 
   def generate_csv
     CSV.generate(headers: true) do |csv|
-      csv << HEADERS
+      csv << headers
       @scope.find_each { |q| csv << build_row(q) }
     end
   end
@@ -50,24 +63,17 @@ class QuoteExporter
   def generate_xlsx
     package = Axlsx::Package.new
     package.workbook.add_worksheet(name: "Quotes") do |sheet|
-      sheet.add_row HEADERS
+      sheet.add_row headers
       @scope.find_each { |q| sheet.add_row build_row(q) }
     end
     package.to_stream.read
   end
 
+  def headers
+    @columns.map(&:first)
+  end
+
   def build_row(q)
-    [
-      q.reference_no,
-      q.created_at.strftime("%Y-%m-%d"),
-      q.destination_country,
-      q.incoterm,
-      q.billable_weight.to_f,
-      q.total_cost_amount.to_i,
-      q.total_quote_amount.to_i,
-      q.total_quote_amount_usd.to_f.round(2),
-      q.profit_margin.to_f,
-      q.status
-    ]
+    @columns.map { |(_, value, _)| value.call(q) }
   end
 end

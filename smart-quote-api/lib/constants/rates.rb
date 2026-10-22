@@ -5,7 +5,7 @@ module Constants
     WAR_RISK_SURCHARGE_RATE = 0  # DEC-006: War risk surcharge removed
     PACKING_MATERIAL_BASE_COST = 15000
     PACKING_LABOR_UNIT_COST = 50000
-    DEFAULT_EXCHANGE_RATE = 1320 # 적용 기준환율 (2026-09-16 확인)
+    DEFAULT_EXCHANGE_RATE = 1300 # 적용 기준환율 (2026-10-06 확인)
 
     # ============================================================
     # FSC 주간 업데이트 — 변경 시 아래 두 파일을 반드시 함께 수정
@@ -18,9 +18,9 @@ module Constants
     #   출처: https://mydhl.express.dhl/kr/ko/ship/surcharges.html#/fuel_surcharge
     # FedEx FSC : 주간 업데이트 (EMAX 공지)
     # ============================================================
-    DEFAULT_FSC_PERCENT = 52.00 # UPS FSC, effective 2026-10-05
-    DEFAULT_FSC_PERCENT_DHL = 48.00 # DHL FSC, effective 2026-10-05
-    DEFAULT_FSC_PERCENT_FEDEX = 51.25 # FedEx FSC, effective 2026-10-05
+    DEFAULT_FSC_PERCENT = 52.50 # UPS FSC, effective 2026-10-12
+    DEFAULT_FSC_PERCENT_DHL = 49.00 # DHL FSC, effective 2026-10-12
+    DEFAULT_FSC_PERCENT_FEDEX = 51.75 # FedEx FSC, effective 2026-10-12
     # Two intentional margin ceilings:
     #   MAX_MARGIN_PERCENT      — clamp for ad-hoc marginPercent supplied on a
     #                             quote request (admin manual override headroom)

@@ -1,4 +1,5 @@
 import { QuoteInput, CostBreakdown } from '@/types';
+import type { ResolvedSurcharge } from '@/api/surchargeApi';
 
 type AppliedSurcharges = NonNullable<CostBreakdown['appliedSurcharges']>;
 
@@ -42,3 +43,21 @@ export const computeSystemSurcharges = (
     applied,
   };
 };
+
+/**
+ * Maps the surcharge API's snake_case rows onto QuoteInput's shape. Returns
+ * undefined for an empty list, matching the optional field.
+ */
+export const toQuoteSurcharges = (
+  rows: readonly ResolvedSurcharge[],
+): QuoteInput['resolvedSurcharges'] =>
+  rows.length > 0
+    ? rows.map((s) => ({
+        code: s.code,
+        name: s.name,
+        nameKo: s.name_ko,
+        chargeType: s.charge_type,
+        amount: s.amount,
+        sourceUrl: s.source_url,
+      }))
+    : undefined;

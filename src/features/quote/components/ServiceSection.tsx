@@ -11,6 +11,7 @@ import { PackingTypeInfo } from './PackingTypeInfo';
 import { useSurcharges } from '@/features/dashboard/hooks/useSurcharges';
 import { useAddonRates } from '@/features/dashboard/hooks/useAddonRates';
 import { useSyncToInput } from '@/features/quote/hooks/useSyncToInput';
+import { toQuoteSurcharges } from '@/features/quote/services/quoteSurcharges';
 import { HelpCircle, X } from 'lucide-react';
 
 interface Props {
@@ -41,21 +42,7 @@ export const ServiceSection: React.FC<Props> = ({ input, onFieldChange, isMobile
   const setField = onFieldChange as (key: string, value: unknown) => void;
 
   // Sync resolved surcharges into QuoteInput for calculateQuote()
-  const transformSurcharges = useCallback(
-    (src: typeof surcharges) => {
-      const mapped = src.map(s => ({
-        code: s.code,
-        name: s.name,
-        nameKo: s.name_ko,
-        chargeType: s.charge_type,
-        amount: s.amount,
-        sourceUrl: s.source_url,
-      }));
-      return mapped.length > 0 ? mapped : undefined;
-    },
-    [],
-  );
-  useSyncToInput(surcharges, 'resolvedSurcharges', setField, { transform: transformSurcharges });
+  useSyncToInput(surcharges, 'resolvedSurcharges', setField, { transform: toQuoteSurcharges });
 
   // Sync resolved addon rates into QuoteInput for calculateQuote()
   const transformAddonRates = useCallback(
