@@ -1,4 +1,4 @@
-import type { Quotation, QuotationItem, TradeItem } from './types';
+import type { ChargeLine, OrderLine, Quotation, QuotationItem, TradeItem } from './types';
 
 /**
  * Totals for the document sheets. Money is rounded to 2 decimals and weights
@@ -87,6 +87,40 @@ export const packingTotals = (items: readonly TradeItem[]): PackingTotals => ({
   grossWeightKg: roundWeight(sum(items.map((i) => i.grossWeightKg))),
   cbm: roundWeight(sum(items.map(lineCbm))),
 });
+
+// ── Orders (purchase order, offer sheet / sales contract) ────────────────────
+
+export interface OrderTotals {
+  subtotal: number;
+  tax: number;
+  total: number;
+}
+
+export const orderTotals = (items: readonly OrderLine[], taxRate = 0): OrderTotals => {
+  const subtotal = roundMoney(sum(items.map(lineAmount)));
+  const tax = taxRate > 0 ? roundMoney(subtotal * (taxRate / 100)) : 0;
+  return { subtotal, tax, total: roundMoney(subtotal + tax) };
+};
+
+// ── Forwarder charges (freight invoice, arrival notice) ──────────────────────
+
+export const chargeAmount = (line: Pick<ChargeLine, 'quantity' | 'rate'>): number =>
+  roundMoney(line.quantity * line.rate);
+
+export interface ChargeTotals {
+  taxable: number;
+  nonTaxable: number;
+  vat: number;
+  total: number;
+}
+
+/** VAT applies to taxable lines only — zero-rated international freight is left out. */
+export const chargeTotals = (charges: readonly ChargeLine[], vatRate: number): ChargeTotals => {
+  const taxable = roundMoney(sum(charges.filter((c) => c.taxable).map(chargeAmount)));
+  const nonTaxable = roundMoney(sum(charges.filter((c) => !c.taxable).map(chargeAmount)));
+  const vat = vatRate > 0 ? roundMoney(taxable * (vatRate / 100)) : 0;
+  return { taxable, nonTaxable, vat, total: roundMoney(taxable + nonTaxable + vat) };
+};
 
 // ── Formatting ───────────────────────────────────────────────────────────────
 

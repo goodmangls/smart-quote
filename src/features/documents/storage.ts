@@ -1,28 +1,33 @@
 import type { z } from 'zod';
-import { defaultQuotation, defaultTradeShipment } from './defaults';
-import { quotationSchema, tradeShipmentSchema } from './types';
-import type { DocumentType, Quotation, TradeShipment } from './types';
 
 /**
- * Drafts persist in this browser only. The commercial invoice and the packing
- * list share one key: customs compares the two documents, so they must be
- * edited from one record rather than kept in step by hand.
+ * Drafts persist in this browser only, one localStorage key per record. Some
+ * documents share a record — the commercial invoice, packing list and shipping
+ * instruction all read `trade`, because customs compares those documents and
+ * they must not drift apart.
+ *
+ * ⚠️ The `quotation` and `trade` keys and their export kinds date from v1.
+ * Renaming either strands every saved draft and exported file.
  */
 
-export const STORAGE_KEYS = {
-  quotation: 'smartQuote.documents.quotation',
-  trade: 'smartQuote.documents.trade',
-} as const;
+export interface DraftSpec<T> {
+  storageKey: string;
+  /** Written into exports so a file can't load into the wrong document. */
+  exportKind: string;
+  schema: z.ZodType<T>;
+  defaults: () => T;
+}
 
-/** JSON exports carry a kind so a packing-list file can't load into a quotation. */
-const EXPORT_KINDS = { quotation: 'quotation', trade: 'trade-shipment' } as const;
+const KEY_PREFIX = 'smartQuote.documents.';
 const EXPORT_VERSION = 1;
 const MAX_IMPORT_BYTES = 2_000_000;
 
-export type DraftKind = keyof typeof STORAGE_KEYS;
-
-export const draftKindFor = (type: DocumentType): DraftKind =>
-  type === 'quotation' ? 'quotation' : 'trade';
+export const draftSpec = <T>(
+  name: string,
+  exportKind: string,
+  schema: z.ZodType<T>,
+  defaults: () => T,
+): DraftSpec<T> => ({ storageKey: KEY_PREFIX + name, exportKind, schema, defaults });
 
 const readJson = (key: string): unknown => {
   try {
@@ -33,30 +38,25 @@ const readJson = (key: string): unknown => {
   }
 };
 
-const loadWith = <T>(key: string, schema: z.ZodType<T>, fallback: () => T): T => {
-  const parsed = schema.safeParse(readJson(key));
-  return parsed.success ? parsed.data : fallback();
+/** A missing, corrupt or invalid stored draft falls back to the blank document. */
+export const loadDraft = <T>(spec: DraftSpec<T>): T => {
+  const parsed = spec.schema.safeParse(readJson(spec.storageKey));
+  return parsed.success ? parsed.data : spec.defaults();
 };
 
-export const loadQuotation = (): Quotation =>
-  loadWith(STORAGE_KEYS.quotation, quotationSchema, defaultQuotation);
-
-export const loadTradeShipment = (): TradeShipment =>
-  loadWith(STORAGE_KEYS.trade, tradeShipmentSchema, defaultTradeShipment);
-
 /** Returns false when the browser refuses the write (quota, private mode). */
-export const saveDraft = (kind: DraftKind, value: Quotation | TradeShipment): boolean => {
+export const saveDraft = (storageKey: string, value: unknown): boolean => {
   try {
-    window.localStorage.setItem(STORAGE_KEYS[kind], JSON.stringify(value));
+    window.localStorage.setItem(storageKey, JSON.stringify(value));
     return true;
   } catch {
     return false;
   }
 };
 
-export const clearDraft = (kind: DraftKind): void => {
+export const clearDraft = (storageKey: string): void => {
   try {
-    window.localStorage.removeItem(STORAGE_KEYS[kind]);
+    window.localStorage.removeItem(storageKey);
   } catch {
     // Nothing to clear when storage is unavailable.
   }
@@ -64,12 +64,12 @@ export const clearDraft = (kind: DraftKind): void => {
 
 // ── JSON export / import ─────────────────────────────────────────────────────
 
-export const exportDraft = (kind: DraftKind, value: Quotation | TradeShipment): string =>
-  JSON.stringify({ kind: EXPORT_KINDS[kind], version: EXPORT_VERSION, data: value }, null, 2);
+export const exportDraft = <T>(spec: DraftSpec<T>, value: T): string =>
+  JSON.stringify({ kind: spec.exportKind, version: EXPORT_VERSION, data: value }, null, 2);
 
 export type ImportResult<T> = { ok: true; data: T } | { ok: false; error: string };
 
-const parseEnvelope = (text: string, kind: DraftKind): ImportResult<unknown> => {
+export const importDraft = <T>(spec: DraftSpec<T>, text: string): ImportResult<T> => {
   if (text.length > MAX_IMPORT_BYTES) {
     return { ok: false, error: 'The file is too large to be a document draft.' };
   }
@@ -82,16 +82,10 @@ const parseEnvelope = (text: string, kind: DraftKind): ImportResult<unknown> => 
   if (typeof parsed !== 'object' || parsed === null || !('kind' in parsed) || !('data' in parsed)) {
     return { ok: false, error: 'The file is not a Smart Quote document export.' };
   }
-  if (parsed.kind !== EXPORT_KINDS[kind]) {
+  if (parsed.kind !== spec.exportKind) {
     return { ok: false, error: 'This file belongs to a different document type.' };
   }
-  return { ok: true, data: parsed.data };
-};
-
-const importWith = <T>(text: string, kind: DraftKind, schema: z.ZodType<T>): ImportResult<T> => {
-  const envelope = parseEnvelope(text, kind);
-  if (!envelope.ok) return envelope;
-  const result = schema.safeParse(envelope.data);
+  const result = spec.schema.safeParse(parsed.data);
   if (!result.success) {
     const first = result.error.issues[0];
     const where = first?.path.join('.') || 'file';
@@ -99,9 +93,3 @@ const importWith = <T>(text: string, kind: DraftKind, schema: z.ZodType<T>): Imp
   }
   return { ok: true, data: result.data };
 };
-
-export const importQuotation = (text: string): ImportResult<Quotation> =>
-  importWith(text, 'quotation', quotationSchema);
-
-export const importTradeShipment = (text: string): ImportResult<TradeShipment> =>
-  importWith(text, 'trade', tradeShipmentSchema);

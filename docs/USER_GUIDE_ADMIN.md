@@ -2,7 +2,7 @@
 
 > **KS Ways** Internal Logistics Quoting System
 >
-> Version 3.8.3 | Last Updated: 2026-10-27
+> Version 3.8.4 | Last Updated: 2026-10-27
 
 ---
 
@@ -63,7 +63,7 @@ To log out, click your **name** in the top-right of the header and choose **Logo
 
 ---
 
-> **Documents** (`/documents` — quotation, commercial invoice, packing list) work the same for admins and members. See the Member Guide, section 6.
+> **Documents** (`/documents` — quotation, sales contract, PO, proforma, commercial invoice, packing list, shipping instruction, arrival notice, POD, freight invoice, customs POA) work the same for admins and members. See the Member Guide, section 6.
 
 ## 2. Dashboard
 

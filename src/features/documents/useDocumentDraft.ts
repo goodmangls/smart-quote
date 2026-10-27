@@ -1,11 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { saveDraft } from './storage';
-import type { DraftKind } from './storage';
-import type { Quotation, TradeShipment } from './types';
 
-type Draft = Quotation | TradeShipment;
-
-export interface DocumentDraft<T extends Draft> {
+export interface DocumentDraft<T> {
   value: T;
   update: (patch: Partial<T>) => void;
   replace: (next: T) => void;
@@ -19,8 +15,8 @@ const SAVE_DELAY_MS = 400;
  * Holds one document draft and writes it to localStorage shortly after each
  * edit. A failed write is surfaced through `saved` rather than swallowed.
  */
-export const useDocumentDraft = <T extends Draft>(
-  kind: DraftKind,
+export const useDocumentDraft = <T extends object>(
+  storageKey: string,
   load: () => T,
 ): DocumentDraft<T> => {
   const [value, setValue] = useState<T>(load);
@@ -38,18 +34,18 @@ export const useDocumentDraft = <T extends Draft>(
     dirty.current = true;
     const timer = window.setTimeout(() => {
       dirty.current = false;
-      setSaved(saveDraft(kind, value));
+      setSaved(saveDraft(storageKey, value));
     }, SAVE_DELAY_MS);
     return () => window.clearTimeout(timer);
-  }, [kind, value]);
+  }, [storageKey, value]);
 
-  // The invoice and packing list share a draft: flush a pending edit on unmount
-  // so switching between them right after typing does not drop it.
+  // Several documents share one draft: flush a pending edit on unmount so
+  // switching between them right after typing does not drop it.
   useEffect(
     () => () => {
-      if (dirty.current) saveDraft(kind, latest.current);
+      if (dirty.current) saveDraft(storageKey, latest.current);
     },
-    [kind],
+    [storageKey],
   );
 
   const update = useCallback(

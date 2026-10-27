@@ -207,7 +207,7 @@ bin/rubocop          # Ruby linting
 | `/quote`     | QuoteCalculator (isPublic=true)  | Protected  |
 | `/admin`     | QuoteCalculator (isPublic=false) | Admin only |
 | `/documents` | DocumentsPage (picker)          | Protected  |
-| `/documents/:type` | DocumentEditorPage (`quotation` · `commercial-invoice` · `packing-list`) | Protected |
+| `/documents/:type` | DocumentEditorPage (type 목록은 `src/features/documents/types.ts` 의 `DOCUMENT_TYPES`) | Protected |
 | `/guide`     | UserGuidePage                    | Public     |
 
 ### API Endpoints
