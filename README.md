@@ -206,7 +206,8 @@ bin/rubocop          # Ruby linting
 | `/dashboard` | CustomerDashboard                | Protected  |
 | `/quote`     | QuoteCalculator (isPublic=true)  | Protected  |
 | `/admin`     | QuoteCalculator (isPublic=false) | Admin only |
-| `/schedule`  | FlightSchedulePage               | Admin only |
+| `/documents` | DocumentsPage (picker)          | Protected  |
+| `/documents/:type` | DocumentEditorPage (`quotation` · `commercial-invoice` · `packing-list`) | Protected |
 | `/guide`     | UserGuidePage                    | Public     |
 
 ### API Endpoints

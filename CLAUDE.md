@@ -83,6 +83,12 @@ bundle exec rspec spec/requests/api/v1/quotes_spec.rb
         services/              # calculationService.ts (orchestrator), rateTableResolver.ts (carrier/document table select), fedexCalculation.ts, fedexAddonCalculator.ts, dhlAddonCalculator.ts, upsAddonCalculator.ts
         hooks/                 # useSyncToInput (generic data sync hook)
         components/PackingTypeInfo.tsx  # Packing type info panel with live cost preview
+      documents/               # 서류 작성(견적서·CI·PL) — 서버 호출 없음, 초안은 브라우저 localStorage
+        types.ts               # zod 스키마 = 타입 + JSON 가져오기·저장값 검증(로고는 image data URL 만, 길이 상한)
+        calc.ts                # 합계(VAT 별도/포함/없음, 단가×수량, 무게, CBM) — 금액 2자리·무게 3자리 반올림
+        storage.ts             # localStorage 저장/로드 + JSON 내보내기·가져오기(kind 로 서류 종류 구분)
+        useDocumentDraft.ts    # 자동 저장(400ms) + 언마운트 시 미저장분 flush
+        components/            # DocumentEditorLayout(미리보기+폼, 인쇄), QuotationSheet/Form, TradeSheets(CI·PL), TradeShipmentForm
       history/
         components/            # QuoteHistoryPage, QuoteHistoryTable, QuoteSearchBar, QuotePagination, QuoteDetailModal
         constants.ts           # Shared constants (STATUS_COLORS)
@@ -98,6 +104,8 @@ bundle exec rspec spec/requests/api/v1/quotes_spec.rb
       SignUpPage.tsx           # Auth signup (/signup)
       CustomerDashboard.tsx    # Dashboard with widgets (/dashboard)
       QuoteCalculator.tsx      # Calculator + history (/quote, /admin)
+      DocumentsPage.tsx        # 서류 선택 (/documents)
+      DocumentEditorPage.tsx   # 서류 편집기 (/documents/:type)
       components/              # CalculatorActionBar, AdminWidgets, MobileStickyBottomBar
     components/
       layout/                  # Header, MobileLayout, NavigationTabs, Footer
@@ -162,10 +170,22 @@ smart-quote-api/               # Backend (Rails 8 API-only, Ruby 3.4, PostgreSQL
 /quote         → QuoteCalculator isPublic=true (ProtectedRoute)
 /admin         → QuoteCalculator isPublic=false (ProtectedRoute requireAdmin)
 /guide         → UserGuidePage (public)
+/documents     → DocumentsPage (ProtectedRoute) — 견적서·Commercial Invoice·Packing List 선택
+/documents/:type → DocumentEditorPage (ProtectedRoute; type = quotation | commercial-invoice | packing-list, 그 외는 /documents 로)
 *              → redirect to /
 ```
 
 Context providers wrap the app: `ThemeProvider > LanguageProvider > BrowserRouter > AuthProvider`
+
+### 서류 작성 (/documents, 2026-10-27)
+
+견적서 · Commercial Invoice · Packing List 를 폼으로 채우고 A4 미리보기를 인쇄(PDF 저장)한다. eliwork.app 견적서 도구의 **화면 패턴**(왼쪽 미리보기·오른쪽 폼·자동 저장·JSON 내보내기/가져오기)을 참고해 새로 만들었다 — 그쪽 코드·템플릿·문구는 가져오지 않았다.
+
+- 🔴 **CI 와 PL 은 한 레코드(`smartQuote.documents.trade`)를 공유한다.** 세관이 두 서류를 대조하므로 송장번호·당사자·품목이 갈라지면 안 된다. 서류별로 저장소를 나누지 말 것. 탭을 빨리 오가도 마지막 입력이 남도록 `useDocumentDraft` 가 언마운트 시 flush 한다(`DocumentEditorPage.test.tsx` 가 단언).
+- ⚠️ **PL 치수에 `applyPackingDimensions` 를 쓰지 말 것.** 그 +10/+10/+15cm 는 포장비 산정용이다. 패킹리스트는 실측 포장 치수를 그대로 적는다 — CBM = L×W×H/1,000,000 × 포장 수.
+- 인쇄는 jsPDF 가 아니라 `window.print()` 다. `index.css` 의 `@media print` 가 `body:has(.document-sheet)` 일 때 시트 외 전부(헤더·폼·Intercom 런처)를 숨긴다. 시트는 다크 모드에서도 흰 바탕·검은 글씨로 고정.
+- 저장된 초안·가져온 JSON 은 신뢰하지 않는다 — `types.ts` 스키마를 통과해야 쓰고, 실패하면 기본값(저장값) 또는 오류 토스트(가져오기)로 떨어진다.
+- 견적 계산기에서 저장한 견적을 불러와 채우는 기능은 아직 없다(후속 후보).
 
 ### Role-Based Access
 

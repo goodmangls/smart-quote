@@ -21,6 +21,8 @@ const UserGuidePage = React.lazy(() => import('./pages/UserGuidePage'));
 
 const SharedQuotePage = React.lazy(() => import('./pages/SharedQuotePage'));
 const MagicLinkVerifyPage = React.lazy(() => import('./pages/MagicLinkVerifyPage'));
+const DocumentsPage = React.lazy(() => import('./pages/DocumentsPage'));
+const DocumentEditorPage = React.lazy(() => import('./pages/DocumentEditorPage'));
 
 function App() {
   return (
@@ -109,6 +111,29 @@ function App() {
                         <ProtectedRoute requireAdmin={true}>
                           <ErrorBoundary>
                             <QuoteCalculator isPublic={false} />
+                          </ErrorBoundary>
+                        </ProtectedRoute>
+                      }
+                    />
+
+                    {/* Documents - quotation, commercial invoice, packing list.
+                        Browser-only drafts; nothing is sent to the API. */}
+                    <Route
+                      path='/documents'
+                      element={
+                        <ProtectedRoute>
+                          <ErrorBoundary>
+                            <DocumentsPage />
+                          </ErrorBoundary>
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path='/documents/:type'
+                      element={
+                        <ProtectedRoute>
+                          <ErrorBoundary>
+                            <DocumentEditorPage />
                           </ErrorBoundary>
                         </ProtectedRoute>
                       }
