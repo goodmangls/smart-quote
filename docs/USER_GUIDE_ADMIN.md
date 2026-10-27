@@ -2,7 +2,7 @@
 
 > **KS Ways** Internal Logistics Quoting System
 >
-> Version 3.8.2 | Last Updated: 2026-10-04
+> Version 3.8.3 | Last Updated: 2026-10-27
 
 ---
 
@@ -62,6 +62,8 @@ To log out, click your **name** in the top-right of the header and choose **Logo
 | Slack notification on save | X | O (auto) |
 
 ---
+
+> **Documents** (`/documents` — quotation, commercial invoice, packing list) work the same for admins and members. See the Member Guide, section 6.
 
 ## 2. Dashboard
 

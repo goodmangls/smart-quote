@@ -40,3 +40,42 @@
     padding-bottom: env(safe-area-inset-bottom);
   }
 }
+
+/*
+ * Document editor printing (/documents/*): only the A4 sheet is printed. The
+ * visibility trick hides everything else — app header, form panel and the
+ * Intercom launcher, which is injected outside the React tree.
+ */
+@media print {
+  @page {
+    size: A4;
+    margin: 12mm;
+  }
+  body:has(.document-sheet) * {
+    visibility: hidden;
+  }
+  body:has(.document-sheet) .document-sheet,
+  body:has(.document-sheet) .document-sheet * {
+    visibility: visible;
+  }
+  body:has(.document-sheet) .document-sheet {
+    position: absolute;
+    inset: 0 0 auto 0;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  body:has(.document-sheet) {
+    background: #fff;
+  }
+  .document-sheet thead {
+    display: table-header-group;
+  }
+  /* Browsers repeat <tfoot> on every page; a grand total under page 1 of a
+     multi-page invoice reads as that page's total, so print it once. */
+  .document-sheet tfoot {
+    display: table-row-group;
+  }
+  .document-sheet .document-row {
+    break-inside: avoid;
+  }
+}

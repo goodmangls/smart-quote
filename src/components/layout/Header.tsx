@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useTheme } from '../../contexts/ThemeContext';
-import { Globe, Moon, Sun, LogOut, Menu, X, BookOpen } from 'lucide-react';
+import { Globe, Moon, Sun, LogOut, Menu, X, BookOpen, FileText } from 'lucide-react';
 import { AccountSettingsModal } from '@/features/dashboard/components/AccountSettingsModal';
 import { AccountMenu } from './AccountMenu';
 import { markSignedOut } from '@/pages/loginRedirect';
@@ -80,6 +80,13 @@ export const Header: React.FC = () => {
                     className='text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-brand-blue-600 dark:hover:text-white transition-colors'
                   >
                     {t('nav.dashboard')}
+                  </Link>
+                  <Link
+                    to='/documents'
+                    className='text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-brand-blue-600 dark:hover:text-white transition-colors flex items-center gap-1'
+                  >
+                    <FileText className='w-4 h-4' />
+                    {t('nav.documents')}
                   </Link>
                   <Link
                     to='/guide'
@@ -227,6 +234,14 @@ export const Header: React.FC = () => {
                   </Link>
                 )}
 
+                <Link
+                  to='/documents'
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className='flex items-center gap-1.5 py-2 text-sm text-gray-700 dark:text-gray-300 hover:text-brand-blue-600 dark:hover:text-white'
+                >
+                  <FileText className='w-4 h-4' />
+                  {t('nav.documents')}
+                </Link>
                 <Link
                   to='/guide'
                   onClick={() => setIsMobileMenuOpen(false)}

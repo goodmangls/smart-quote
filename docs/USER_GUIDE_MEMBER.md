@@ -2,7 +2,7 @@
 
 > **KS Ways** International Logistics Quoting System
 >
-> Version 3.9.3 | Last Updated: 2026-10-04
+> Version 3.10.0 | Last Updated: 2026-10-27
 
 ---
 
@@ -13,9 +13,10 @@
 3. [Quote Calculator](#3-quote-calculator)
 4. [Quote Results](#4-quote-results)
 5. [Saving & PDF Export](#5-saving--pdf-export)
-6. [Quote History](#6-quote-history)
-7. [Account Settings](#7-account-settings)
-8. [FAQ](#8-faq)
+6. [Documents](#6-documents)
+7. [Quote History](#7-quote-history)
+8. [Account Settings](#8-account-settings)
+9. [FAQ](#9-faq)
 
 ---
 
@@ -222,7 +223,38 @@ If you attempt to save the same quote inputs twice, a confirmation dialog appear
 
 ---
 
-## 6. Quote History
+## 6. Documents
+
+Open **Documents** in the header (or go to `/documents`) to fill in and print three documents:
+
+| Document | Use it for |
+|---|---|
+| **Quotation** | An itemised price quote with VAT, terms and a signature line |
+| **Commercial Invoice** | The customs invoice: shipper, consignee, Incoterm, HS codes, unit prices and the declared total |
+| **Packing List** | Packages, net and gross weight, dimensions and CBM for the same shipment |
+
+### How it works
+
+1. Pick a document. The A4 preview is on the left and the form on the right — the preview changes as you type
+2. Add or remove lines with **Add item** and the bin icon. Totals (amount, VAT, weights, CBM) are calculated for you
+3. Click **Print / Save PDF** and choose **Save as PDF**. Only the document itself is printed. Turn on **Background graphics** to keep the shaded table headings
+
+### Commercial invoice and packing list share one shipment
+
+Customs compares the two documents, so they are filled in from **one record**. The invoice number, parties, shipment details and item lines you enter on one appear on the other. Use the tabs at the top of the form to switch between them.
+
+- **CBM** is length × width × height of one package (in cm) ÷ 1,000,000 × the number of packages. Enter the real package size — no packing allowance is added
+- Net and gross weight are the **line totals**, not per package
+
+### Saving your work
+
+- Drafts are saved automatically **in this browser only**. Another computer or browser will not see them
+- **Export JSON** downloads the draft as a file; **Import JSON** loads it back (on any computer). A file from a different document type is refused
+- **Reset** clears the document back to the blank template — export first if you want to keep it
+
+---
+
+## 7. Quote History
 
 Access via the **History** tab in the quote calculator.
 
@@ -242,7 +274,7 @@ Access via the **History** tab in the quote calculator.
 
 ---
 
-## 7. Account Settings
+## 8. Account Settings
 
 Click your name in the header to open the account menu, then choose **Account Settings** (on a phone, it is in the ☰ menu).
 
@@ -257,7 +289,7 @@ Press **Escape** to close the settings modal.
 
 ---
 
-## 8. FAQ
+## 9. FAQ
 
 **Q: Why is my quote amount different from yesterday?**
 A: Exchange rates and FSC percentages are fetched live. These values change daily.
