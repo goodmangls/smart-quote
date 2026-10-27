@@ -1,13 +1,6 @@
 import { defaultQuotation, defaultTradeShipment } from '../defaults';
-import {
-  STORAGE_KEYS,
-  exportDraft,
-  importQuotation,
-  importTradeShipment,
-  loadQuotation,
-  loadTradeShipment,
-  saveDraft,
-} from '../storage';
+import { exportDraft, importDraft, loadDraft, saveDraft } from '../storage';
+import { proformaDraft, quotationDraft, tradeDraft } from '../specs';
 
 beforeEach(() => {
   window.localStorage.clear();
@@ -16,23 +9,26 @@ beforeEach(() => {
 describe('draft persistence', () => {
   it('round-trips a saved draft', () => {
     const draft = { ...defaultTradeShipment(), invoiceNo: 'CI-2026-001' };
-    expect(saveDraft('trade', draft)).toBe(true);
-    expect(loadTradeShipment().invoiceNo).toBe('CI-2026-001');
+    expect(saveDraft(tradeDraft.storageKey, draft)).toBe(true);
+    expect(loadDraft(tradeDraft).invoiceNo).toBe('CI-2026-001');
   });
 
   it('falls back to defaults when the stored value is corrupt or the wrong shape', () => {
-    window.localStorage.setItem(STORAGE_KEYS.quotation, '{not json');
-    expect(loadQuotation()).toEqual({ ...defaultQuotation(), date: loadQuotation().date });
+    window.localStorage.setItem(quotationDraft.storageKey, '{not json');
+    expect(loadDraft(quotationDraft)).toEqual({
+      ...defaultQuotation(),
+      date: loadDraft(quotationDraft).date,
+    });
 
-    window.localStorage.setItem(STORAGE_KEYS.trade, JSON.stringify({ items: 'nope' }));
-    expect(loadTradeShipment().items).toHaveLength(1);
+    window.localStorage.setItem(tradeDraft.storageKey, JSON.stringify({ items: 'nope' }));
+    expect(loadDraft(tradeDraft).items).toHaveLength(1);
   });
 
   it('reports a failed write instead of throwing', () => {
     const spy = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
       throw new Error('QuotaExceededError');
     });
-    expect(saveDraft('quotation', defaultQuotation())).toBe(false);
+    expect(saveDraft(quotationDraft.storageKey, defaultQuotation())).toBe(false);
     spy.mockRestore();
   });
 });
@@ -40,18 +36,20 @@ describe('draft persistence', () => {
 describe('JSON import', () => {
   it('accepts its own export', () => {
     const draft = { ...defaultQuotation(), quoteNo: 'Q-7' };
-    const result = importQuotation(exportDraft('quotation', draft));
+    const result = importDraft(quotationDraft, exportDraft(quotationDraft, draft));
     expect(result).toEqual({ ok: true, data: draft });
   });
 
   it('rejects a file exported from a different document type', () => {
-    const result = importQuotation(exportDraft('trade', defaultTradeShipment()));
-    expect(result.ok).toBe(false);
+    const shipment = exportDraft(tradeDraft, defaultTradeShipment());
+    expect(importDraft(quotationDraft, shipment).ok).toBe(false);
+    // Proforma and shipment records are near-identical in shape; the kind keeps them apart.
+    expect(importDraft(proformaDraft, shipment).ok).toBe(false);
   });
 
   it('rejects malformed JSON and files without the export envelope', () => {
-    expect(importTradeShipment('{oops').ok).toBe(false);
-    expect(importTradeShipment(JSON.stringify(defaultTradeShipment())).ok).toBe(false);
+    expect(importDraft(tradeDraft, '{oops').ok).toBe(false);
+    expect(importDraft(tradeDraft, JSON.stringify(defaultTradeShipment())).ok).toBe(false);
   });
 
   it('rejects a draft with an out-of-range value and names the field', () => {
@@ -59,12 +57,12 @@ describe('JSON import', () => {
       ...defaultTradeShipment(),
       items: [{ ...defaultTradeShipment().items[0], quantity: -1 }],
     };
-    const result = importTradeShipment(exportDraft('trade', bad));
+    const result = importDraft(tradeDraft, exportDraft(tradeDraft, bad));
     expect(result).toEqual({ ok: false, error: expect.stringContaining('items.0.quantity') });
   });
 
   it('rejects a logo that is not an image data URL', () => {
     const bad = { ...defaultTradeShipment(), logo: 'javascript:alert(1)' };
-    expect(importTradeShipment(exportDraft('trade', bad)).ok).toBe(false);
+    expect(importDraft(tradeDraft, exportDraft(tradeDraft, bad)).ok).toBe(false);
   });
 });

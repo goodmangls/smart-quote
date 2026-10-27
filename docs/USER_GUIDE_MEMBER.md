@@ -2,7 +2,7 @@
 
 > **KS Ways** International Logistics Quoting System
 >
-> Version 3.10.0 | Last Updated: 2026-10-27
+> Version 3.11.0 | Last Updated: 2026-10-27
 
 ---
 
@@ -225,13 +225,21 @@ If you attempt to save the same quote inputs twice, a confirmation dialog appear
 
 ## 6. Documents
 
-Open **Documents** in the header (or go to `/documents`) to fill in and print three documents:
+Open **Documents** in the header (or go to `/documents`) to fill in and print trade and logistics documents. The picker groups them by stage:
 
-| Document | Use it for |
-|---|---|
-| **Quotation** | An itemised price quote with VAT, terms and a signature line |
-| **Commercial Invoice** | The customs invoice: shipper, consignee, Incoterm, HS codes, unit prices and the declared total |
-| **Packing List** | Packages, net and gross weight, dimensions and CBM for the same shipment |
+| Group | Document | Use it for |
+|---|---|---|
+| Sales & orders | **Quotation** | An itemised price quote with VAT, terms and a signature line |
+| | **Offer Sheet / Sales Contract** | The seller's offer, or a contract signed by both sides — switch with **Document type** |
+| | **Purchase Order** | An order to a supplier, with an optional tax rate |
+| | **Proforma Invoice** | An invoice issued before shipment, for advance payment or an import licence |
+| Shipment | **Commercial Invoice** | The customs invoice: shipper, consignee, Incoterm, HS codes, unit prices and the declared total |
+| | **Packing List** | Packages, net and gross weight, dimensions and CBM for the same shipment |
+| | **Shipping Instruction** | The booking request to the forwarder: pickup, who pays freight and duties, insurance |
+| | **Arrival Notice** | Tells the consignee the cargo has arrived (air: MAWB/HAWB, ocean: B/L), with release charges |
+| | **Delivery Receipt (POD)** | Proof of delivery: what arrived, its condition, and both signatures |
+| Forwarder billing | **Freight Invoice / Debit Note** | Bill freight and local charges in one currency |
+| Customs | **수출입 통관 위임장** | Customs power of attorney (Korean) appointing a licensed customs broker |
 
 ### How it works
 
@@ -239,12 +247,24 @@ Open **Documents** in the header (or go to `/documents`) to fill in and print th
 2. Add or remove lines with **Add item** and the bin icon. Totals (amount, VAT, weights, CBM) are calculated for you
 3. Click **Print / Save PDF** and choose **Save as PDF**. Only the document itself is printed. Turn on **Background graphics** to keep the shaded table headings
 
-### Commercial invoice and packing list share one shipment
+### Commercial invoice, packing list and shipping instruction share one shipment
 
-Customs compares the two documents, so they are filled in from **one record**. The invoice number, parties, shipment details and item lines you enter on one appear on the other. Use the tabs at the top of the form to switch between them.
+Customs compares these documents, so they are filled in from **one record**. The invoice number, parties, shipment details and item lines you enter on one appear on the others. Use the **Invoice · Packing List · Instruction** tabs at the top of the form to switch between them. The shipping instruction adds its own booking fields (forwarder, pickup, payer, insurance) on top.
+
+The **Proforma Invoice** has its own record — it is a separate document issued before shipment. **Copy from commercial invoice** fills its parties, terms and item lines from the shipment record; its own number, date, validity and bank details are kept.
 
 - **CBM** is length × width × height of one package (in cm) ÷ 1,000,000 × the number of packages. Enter the real package size — no packing allowance is added
 - Net and gross weight are the **line totals**, not per package
+
+### Freight invoice and VAT
+
+- Use **one currency** per invoice. If you convert, note the rate in **Exchange rate note**
+- Tick **Subject to VAT** only on lines that carry VAT (local pickup, handling). International freight is usually zero-rated, so it is left unticked — VAT is calculated on the ticked lines only
+- This is a billing statement, **not a Korean tax invoice (세금계산서)**. Issue that through your e-invoicing system as usual
+
+### Customs power of attorney
+
+The 위임장 is a neutral starting form. If your customs broker asks for their own wording, use theirs.
 
 ### Saving your work
 

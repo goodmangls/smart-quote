@@ -1,47 +1,20 @@
 import React from 'react';
-import { Plus, Trash2 } from 'lucide-react';
-import { Incoterm } from '@/types';
 import { emptyTradeItem } from '../defaults';
-import type { Party, TradeItem, TradeShipment } from '../types';
-import { removeAt, replaceAt } from '../useDocumentDraft';
+import type { TradeCore, TradeItem } from '../types';
 import { FormSection, NumberField, SelectField, TextAreaField, TextField } from './fields';
+import { CurrencyField, INCOTERMS, LineList, PartyFields } from './formParts';
 import { LogoField } from './LogoField';
 
 export type TradeFormMode = 'invoice' | 'packing';
 
 interface TradeShipmentFormProps {
-  doc: TradeShipment;
-  update: (patch: Partial<TradeShipment>) => void;
-  /** Which item fields to show first; both documents edit the same lines. */
+  doc: TradeCore;
+  update: (patch: Partial<TradeCore>) => void;
+  /** Which item fields to show first; every shipment document edits the same lines. */
   mode: TradeFormMode;
+  /** Shown above the form when the record is shared between documents. */
+  sharedNote?: string;
 }
-
-const INCOTERMS = Object.values(Incoterm).map((value) => ({ value, label: value }));
-
-const CURRENCIES = [
-  { value: 'USD', label: 'USD' },
-  { value: 'EUR', label: 'EUR' },
-  { value: 'KRW', label: 'KRW' },
-  { value: 'JPY', label: 'JPY' },
-  { value: 'CNY', label: 'CNY' },
-] as const;
-
-const PartyFields = ({ party, onChange }: { party: Party; onChange: (party: Party) => void }) => (
-  <>
-    <TextField label='Name' value={party.name} onChange={(name) => onChange({ ...party, name })} />
-    <TextAreaField
-      label='Address'
-      rows={2}
-      value={party.address}
-      onChange={(address) => onChange({ ...party, address })}
-    />
-    <TextField
-      label='Contact (tel / email)'
-      value={party.contact}
-      onChange={(contact) => onChange({ ...party, contact })}
-    />
-  </>
-);
 
 const ItemFields = ({
   item,
@@ -144,12 +117,13 @@ const ItemFields = ({
   );
 };
 
-export const TradeShipmentForm = ({ doc, update, mode }: TradeShipmentFormProps) => (
+export const TradeShipmentForm = ({ doc, update, mode, sharedNote }: TradeShipmentFormProps) => (
   <div className='space-y-5'>
-    <p className='rounded-md bg-gray-50 dark:bg-gray-900 px-3 py-2 text-xs text-gray-600 dark:text-gray-400'>
-      The commercial invoice and the packing list share these details. A change here appears on
-      both.
-    </p>
+    {sharedNote && (
+      <p className='rounded-md bg-gray-50 dark:bg-gray-900 px-3 py-2 text-xs text-gray-600 dark:text-gray-400'>
+        {sharedNote}
+      </p>
+    )}
 
     <FormSection title='Invoice'>
       <div className='grid grid-cols-2 gap-3'>
@@ -227,53 +201,20 @@ export const TradeShipmentForm = ({ doc, update, mode }: TradeShipmentFormProps)
           value={doc.paymentTerms}
           onChange={(paymentTerms) => update({ paymentTerms })}
         />
-        <SelectField
-          label='Currency'
-          value={CURRENCIES.some((c) => c.value === doc.currency) ? doc.currency : 'USD'}
-          options={CURRENCIES}
-          onChange={(currency) => update({ currency })}
-        />
+        <CurrencyField value={doc.currency} onChange={(currency) => update({ currency })} />
       </div>
     </FormSection>
 
-    <FormSection
+    <LineList
       title='Items'
-      action={
-        <button
-          type='button'
-          onClick={() => update({ items: [...doc.items, emptyTradeItem()] })}
-          className='inline-flex items-center gap-1 text-xs font-medium text-brand-blue-600 dark:text-brand-blue-300 hover:underline'
-        >
-          <Plus className='h-3.5 w-3.5' />
-          Add item
-        </button>
-      }
-    >
-      {doc.items.map((item, i) => (
-        <div
-          key={i}
-          className='space-y-2 rounded-md border border-gray-200 dark:border-gray-800 p-3'
-        >
-          <div className='flex items-center justify-between'>
-            <span className='text-xs font-semibold text-gray-500'>Line {i + 1}</span>
-            <button
-              type='button'
-              aria-label={`Remove line ${i + 1}`}
-              onClick={() => update({ items: removeAt(doc.items, i) })}
-              className='rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-destructive-600 dark:hover:bg-gray-800'
-            >
-              <Trash2 className='h-3.5 w-3.5' />
-            </button>
-          </div>
-          <ItemFields
-            item={item}
-            mode={mode}
-            currency={doc.currency}
-            onChange={(patch) => update({ items: replaceAt(doc.items, i, patch) })}
-          />
-        </div>
-      ))}
-    </FormSection>
+      addLabel='Add item'
+      items={doc.items}
+      onChange={(items) => update({ items })}
+      create={emptyTradeItem}
+      renderLine={(item, patch) => (
+        <ItemFields item={item} mode={mode} currency={doc.currency} onChange={patch} />
+      )}
+    />
 
     <FormSection title='Footer'>
       <TextAreaField

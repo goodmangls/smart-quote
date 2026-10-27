@@ -83,12 +83,14 @@ bundle exec rspec spec/requests/api/v1/quotes_spec.rb
         services/              # calculationService.ts (orchestrator), rateTableResolver.ts (carrier/document table select), fedexCalculation.ts, fedexAddonCalculator.ts, dhlAddonCalculator.ts, upsAddonCalculator.ts
         hooks/                 # useSyncToInput (generic data sync hook)
         components/PackingTypeInfo.tsx  # Packing type info panel with live cost preview
-      documents/               # 서류 작성(견적서·CI·PL) — 서버 호출 없음, 초안은 브라우저 localStorage
-        types.ts               # zod 스키마 = 타입 + JSON 가져오기·저장값 검증(로고는 image data URL 만, 길이 상한)
-        calc.ts                # 합계(VAT 별도/포함/없음, 단가×수량, 무게, CBM) — 금액 2자리·무게 3자리 반올림
-        storage.ts             # localStorage 저장/로드 + JSON 내보내기·가져오기(kind 로 서류 종류 구분)
+      documents/               # 무역·물류 서류 작성 — 서버 호출 없음, 초안은 브라우저 localStorage
+        types.ts               # DOCUMENT_TYPES + zod 스키마 = 타입 + JSON 가져오기·저장값 검증(로고는 image data URL 만, 길이 상한)
+        calc.ts                # 합계(VAT 별도/포함/없음, 단가×수량, 과세 라인만 VAT, 무게, CBM) — 금액 2자리·무게 3자리 반올림
+        storage.ts             # 범용 DraftSpec: localStorage 저장/로드 + JSON 내보내기·가져오기(kind 로 서류 종류 구분)
+        specs.ts               # 서류별 DraftSpec(저장 키·export kind·스키마·기본값). quotation·trade 는 v1 이름 고정
+        registry.ts            # 선택 화면 메타데이터(제목·설명·그룹·아이콘)
         useDocumentDraft.ts    # 자동 저장(400ms) + 언마운트 시 미저장분 flush
-        components/            # DocumentEditorLayout(미리보기+폼, 인쇄), QuotationSheet/Form, TradeSheets(CI·PL), TradeShipmentForm
+        components/            # editors.ts(type→편집기 Record) · documentEditors · DraftEditor · DocumentEditorLayout(미리보기+폼, 인쇄) · sheetParts/formParts(공용 조각) · 서류별 Sheet/Form
       history/
         components/            # QuoteHistoryPage, QuoteHistoryTable, QuoteSearchBar, QuotePagination, QuoteDetailModal
         constants.ts           # Shared constants (STATUS_COLORS)
@@ -170,8 +172,8 @@ smart-quote-api/               # Backend (Rails 8 API-only, Ruby 3.4, PostgreSQL
 /quote         → QuoteCalculator isPublic=true (ProtectedRoute)
 /admin         → QuoteCalculator isPublic=false (ProtectedRoute requireAdmin)
 /guide         → UserGuidePage (public)
-/documents     → DocumentsPage (ProtectedRoute) — 견적서·Commercial Invoice·Packing List 선택
-/documents/:type → DocumentEditorPage (ProtectedRoute; type = quotation | commercial-invoice | packing-list, 그 외는 /documents 로)
+/documents     → DocumentsPage (ProtectedRoute) — 서류 선택(단계별 그룹)
+/documents/:type → DocumentEditorPage (ProtectedRoute; type = `DOCUMENT_TYPES` 중 하나, 그 외는 /documents 로)
 *              → redirect to /
 ```
 
@@ -179,9 +181,13 @@ Context providers wrap the app: `ThemeProvider > LanguageProvider > BrowserRoute
 
 ### 서류 작성 (/documents, 2026-10-27)
 
-견적서 · Commercial Invoice · Packing List 를 폼으로 채우고 A4 미리보기를 인쇄(PDF 저장)한다. eliwork.app 견적서 도구의 **화면 패턴**(왼쪽 미리보기·오른쪽 폼·자동 저장·JSON 내보내기/가져오기)을 참고해 새로 만들었다 — 그쪽 코드·템플릿·문구는 가져오지 않았다.
+무역·물류 서류를 폼으로 채우고 A4 미리보기를 인쇄(PDF 저장)한다 — 견적서 · Offer Sheet/Sales Contract · Purchase Order · Proforma Invoice · Commercial Invoice · Packing List · Shipping Instruction · Arrival Notice · Delivery Receipt(POD) · Freight Invoice/Debit Note · 수출입 통관 위임장. 목록의 단일 출처는 `types.ts` 의 `DOCUMENT_TYPES` 다. eliwork.app 견적서 도구의 **화면 패턴**(왼쪽 미리보기·오른쪽 폼·자동 저장·JSON 내보내기/가져오기)을 참고해 새로 만들었다 — 그쪽 코드·템플릿·문구는 가져오지 않았다.
 
-- 🔴 **CI 와 PL 은 한 레코드(`smartQuote.documents.trade`)를 공유한다.** 세관이 두 서류를 대조하므로 송장번호·당사자·품목이 갈라지면 안 된다. 서류별로 저장소를 나누지 말 것. 탭을 빨리 오가도 마지막 입력이 남도록 `useDocumentDraft` 가 언마운트 시 flush 한다(`DocumentEditorPage.test.tsx` 가 단언).
+- **서류 추가 순서**: `types.ts`(타입·스키마) → `defaults.ts` → `specs.ts`(DraftSpec) → `registry.ts`(선택 화면) → `components/documentEditors.tsx` + `editors.ts`. `EDITORS` 가 `Record<DocumentType, …>` 라 편집기를 빠뜨리면 컴파일이 깨지고, `DocumentEditorPage.test.tsx` 의 `describe.each(DOCUMENT_TYPES)` 가 모든 서류의 미리보기 렌더를 단언한다.
+- 🔴 **CI · PL · Shipping Instruction 은 한 레코드(`smartQuote.documents.trade`)를 공유한다.** 세관이 서류를 대조하므로 송장번호·당사자·품목이 갈라지면 안 된다. 서류별로 저장소를 나누지 말 것. S/I 전용 필드는 같은 레코드의 `instructions` 에 있다. 탭을 빨리 오가도 마지막 입력이 남도록 `useDocumentDraft` 가 언마운트 시 flush 한다(`DocumentEditorPage.test.tsx` 가 단언). Proforma 는 별도 레코드이고 "Copy from commercial invoice" 로만 가져온다(번호·날짜는 안 가져옴).
+- 🔴 **이미 저장된 초안이 계속 열려야 한다.** 저장값이 스키마를 통과 못 하면 **오류 없이 빈 서류로 떨어져** 사용자 작업이 사라진다. 기존 스키마에 필드를 추가하면 반드시 `.default(...)` 를 줄 것(`instructions` 가 그 예). `quotation`·`trade` 저장 키와 export kind(`quotation`·`trade-shipment`)는 v1 이름이라 바꾸면 안 된다. `__tests__/compat.test.ts` 가 **동결된 v1 픽스처**로 이를 단언한다 — 픽스처를 현재 기본값으로 재생성하지 말 것.
+- **Freight Invoice 는 한 통화만 쓰고, VAT 는 `taxable` 로 표시한 라인에만 붙는다**(국제 운임은 영세율). 세금계산서가 아니다 — 화면·가이드에 그렇게 적어 뒀으니 "세금계산서" 로 부르지 말 것.
+- 계약 조항(준거법·중재 등)과 위임장 문구는 **기본값을 비우거나 최소로** 둔다. 누군가 적은 문구만 인쇄되게 하기 위해서다.
 - ⚠️ **PL 치수에 `applyPackingDimensions` 를 쓰지 말 것.** 그 +10/+10/+15cm 는 포장비 산정용이다. 패킹리스트는 실측 포장 치수를 그대로 적는다 — CBM = L×W×H/1,000,000 × 포장 수.
 - 인쇄는 jsPDF 가 아니라 `window.print()` 다. `index.css` 의 `@media print` 가 `body:has(.document-sheet)` 일 때 시트 외 전부(헤더·폼·Intercom 런처)를 숨긴다. 시트는 다크 모드에서도 흰 바탕·검은 글씨로 고정.
 - 저장된 초안·가져온 JSON 은 신뢰하지 않는다 — `types.ts` 스키마를 통과해야 쓰고, 실패하면 기본값(저장값) 또는 오류 토스트(가져오기)로 떨어진다.

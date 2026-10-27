@@ -196,3 +196,28 @@ export const MultiLine = ({ text, className }: { text: string; className?: strin
       ))}
   </>
 );
+
+interface CheckboxFieldProps {
+  label: string;
+  checked: boolean;
+  onChange: (checked: boolean) => void;
+  className?: string;
+}
+
+export const CheckboxField = ({ label, checked, onChange, className = '' }: CheckboxFieldProps) => {
+  const id = useId();
+  return (
+    <div className={`flex items-center gap-2 ${className}`}>
+      <input
+        id={id}
+        type='checkbox'
+        checked={checked}
+        onChange={(e) => onChange(e.target.checked)}
+        className='h-4 w-4 rounded border-gray-300 text-brand-blue-600 focus:ring-brand-blue-500 dark:border-gray-600'
+      />
+      <label htmlFor={id} className='text-xs text-gray-700 dark:text-gray-300'>
+        {label}
+      </label>
+    </div>
+  );
+};

@@ -1,1 +1,1 @@
-📄 서류 작성 페이지 추가 — 견적서·Commercial Invoice·Packing List(CI·PL 데이터 공유, A4 미리보기·인쇄, 브라우저 자동 저장·JSON 내보내기/가져오기)
+📑 서류 작성에 무역·물류 서류 8종 추가 (Proforma·Offer Sheet/계약서·PO·S/I·Arrival Notice·POD·Freight Invoice·통관 위임장) + 서류 레지스트리 구조로 정리
