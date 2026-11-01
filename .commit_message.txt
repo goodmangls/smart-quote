@@ -1,1 +1,1 @@
-📑 서류 작성에 무역·물류 서류 8종 추가 (Proforma·Offer Sheet/계약서·PO·S/I·Arrival Notice·POD·Freight Invoice·통관 위임장) + 서류 레지스트리 구조로 정리
+⛽ UPS·DHL·FedEx FSC 2026-11-02 주간 요율 반영 (UPS 54.25% / DHL 49.50% / FedEx 53.50%)
