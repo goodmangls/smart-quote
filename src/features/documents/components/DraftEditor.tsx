@@ -1,5 +1,12 @@
 import React from 'react';
-import { clearDraft, exportDraft, importDraft, loadDraft, type DraftSpec } from '../storage';
+import {
+  clearDraft,
+  exportDraft,
+  fitDraft,
+  importDraft,
+  loadDraft,
+  type DraftSpec,
+} from '../storage';
 import { useDocumentDraft, type DocumentDraft } from '../useDocumentDraft';
 import { DocumentEditorLayout } from './DocumentEditorLayout';
 
@@ -27,7 +34,11 @@ export const DraftEditor = <T extends object>({
   sheet,
   form,
 }: DraftEditorProps<T>) => {
-  const draft = useDocumentDraft(spec.storageKey, () => loadDraft(spec));
+  const draft = useDocumentDraft(
+    spec.storageKey,
+    () => loadDraft(spec),
+    (value) => fitDraft(spec, value) as T,
+  );
   return (
     <DocumentEditorLayout
       title={title}

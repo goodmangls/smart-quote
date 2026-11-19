@@ -194,6 +194,7 @@ export const PurchaseOrderForm = ({ doc, update }: FormProps<PurchaseOrder>) => 
         <NumberField
           label='Tax rate (%)'
           step={0.1}
+          max={100}
           value={doc.taxRate}
           onChange={(taxRate) => update({ taxRate: Math.min(taxRate, 100) })}
         />

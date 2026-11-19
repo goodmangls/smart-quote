@@ -14,10 +14,15 @@ const SAVE_DELAY_MS = 400;
 /**
  * Holds one document draft and writes it to localStorage shortly after each
  * edit. A failed write is surfaced through `saved` rather than swallowed.
+ *
+ * `fit` runs on every change. `DraftEditor` passes the schema's limits here, so
+ * the form can never hold a value that would fail to load next time. Text
+ * stops at its limit and an over-range number snaps to the maximum.
  */
 export const useDocumentDraft = <T extends object>(
   storageKey: string,
   load: () => T,
+  fit: (value: T) => T = (value) => value,
 ): DocumentDraft<T> => {
   const [value, setValue] = useState<T>(load);
   const [saved, setSaved] = useState(true);
@@ -48,11 +53,15 @@ export const useDocumentDraft = <T extends object>(
     [storageKey],
   );
 
+  // `fit` is a fresh closure on every render; a ref keeps the callbacks stable.
+  const fitRef = useRef(fit);
+  fitRef.current = fit;
+
   const update = useCallback(
-    (patch: Partial<T>) => setValue((prev) => ({ ...prev, ...patch })),
+    (patch: Partial<T>) => setValue((prev) => fitRef.current({ ...prev, ...patch })),
     [],
   );
-  const replace = useCallback((next: T) => setValue(next), []);
+  const replace = useCallback((next: T) => setValue(fitRef.current(next)), []);
 
   return { value, update, replace, saved };
 };

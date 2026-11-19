@@ -191,6 +191,7 @@ Context providers wrap the app: `ThemeProvider > LanguageProvider > BrowserRoute
 - ⚠️ **PL 치수에 `applyPackingDimensions` 를 쓰지 말 것.** 그 +10/+10/+15cm 는 포장비 산정용이다. 패킹리스트는 실측 포장 치수를 그대로 적는다 — CBM = L×W×H/1,000,000 × 포장 수.
 - 인쇄는 jsPDF 가 아니라 `window.print()` 다. `index.css` 의 `@media print` 가 `body:has(.document-sheet)` 일 때 시트 외 전부(헤더·폼·Intercom 런처)를 숨긴다. 시트는 다크 모드에서도 흰 바탕·검은 글씨로 고정.
 - 저장된 초안·가져온 JSON 은 신뢰하지 않는다 — `types.ts` 스키마를 통과해야 쓰고, 실패하면 기본값(저장값) 또는 오류 토스트(가져오기)로 떨어진다.
+- **상한 초과는 버리지 않고 잘라낸다** (2026-11-18). `fitToSchema.ts` 가 스키마의 `.max()` 를 읽어 글자 수·숫자·목록 길이를 상한으로 맞춘다. 편집할 때마다(`useDocumentDraft` 의 `fit`), 불러올 때(`loadDraft`), 가져올 때(`importDraft`) 세 곳에 적용한다. 그 전에는 입력칸에 상한이 없어서 2,000자가 넘는 조건이나 VAT 150% 가 그대로 자동 저장됐고, 다음에 열면 서류 **전체**가 빈 서류로 떨어졌다. 하한(음수)과 타입 불일치는 고치지 않는다 — 스키마가 여전히 거부한다. 상한은 `.max()` 로 표현해야 자동 적용된다 — `.refine()` 안에만 적은 상한은 적용되지 않는다. `.max()` 와 `.refine()` 을 함께 가진 문자열(로고)은 **잘라내지 않고 비운다**(잘린 data URL 은 접두사 검사는 통과하지만 깨진 이미지다). 숫자칸은 `NumberField` 의 `max`(기본 = 금액 상한, 비율 칸은 `max={100}`)로 화면 값과 저장 값을 일치시킨다.
 - 견적 계산기에서 저장한 견적을 불러와 채우는 기능은 아직 없다(후속 후보).
 
 ### Role-Based Access

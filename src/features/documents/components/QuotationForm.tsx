@@ -75,6 +75,7 @@ export const QuotationForm = ({ doc, update }: QuotationFormProps) => {
           <NumberField
             label='VAT rate (%)'
             step={0.5}
+            max={100}
             value={doc.vatRate}
             onChange={(vatRate) => update({ vatRate })}
           />

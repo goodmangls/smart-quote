@@ -1,4 +1,5 @@
 import type { z } from 'zod';
+import { fitToSchema } from './fitToSchema';
 
 /**
  * Drafts persist in this browser only, one localStorage key per record. Some
@@ -38,9 +39,17 @@ const readJson = (key: string): unknown => {
   }
 };
 
-/** A missing, corrupt or invalid stored draft falls back to the blank document. */
+/** Pulls a draft back under its schema's upper limits; see `fitToSchema`. */
+export const fitDraft = <T>(spec: DraftSpec<T>, value: unknown): unknown =>
+  fitToSchema(spec.schema, value);
+
+/**
+ * A missing, corrupt or wrong-shaped stored draft falls back to the blank
+ * document. A value that only runs past a length or size limit is trimmed
+ * instead, so the rest of the draft survives.
+ */
 export const loadDraft = <T>(spec: DraftSpec<T>): T => {
-  const parsed = spec.schema.safeParse(readJson(spec.storageKey));
+  const parsed = spec.schema.safeParse(fitDraft(spec, readJson(spec.storageKey)));
   return parsed.success ? parsed.data : spec.defaults();
 };
 
@@ -85,7 +94,9 @@ export const importDraft = <T>(spec: DraftSpec<T>, text: string): ImportResult<T
   if (parsed.kind !== spec.exportKind) {
     return { ok: false, error: 'This file belongs to a different document type.' };
   }
-  const result = spec.schema.safeParse(parsed.data);
+  // Trim over-limit text first: a file exported from an older release, before
+  // the editor enforced the limits, must still import.
+  const result = spec.schema.safeParse(fitDraft(spec, parsed.data));
   if (!result.success) {
     const first = result.error.issues[0];
     const where = first?.path.join('.') || 'file';
