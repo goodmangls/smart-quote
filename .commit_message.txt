@@ -1,1 +1,1 @@
-👷 CI 백엔드 잡(rubocop·rspec)을 ubuntu-24.04 로 고정 — ubuntu-26.04 러너에 Ruby 3.4.5 가 없어 설치 단계부터 실패하던 문제
+⛽ UPS·DHL·FedEx FSC 2026-11-16 주간 요율 반영 (UPS 49.75% / DHL 50.00% / FedEx 49.00%)
