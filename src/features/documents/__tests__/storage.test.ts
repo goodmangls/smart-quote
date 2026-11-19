@@ -24,6 +24,23 @@ describe('draft persistence', () => {
     expect(loadDraft(tradeDraft).items).toHaveLength(1);
   });
 
+  it('keeps a stored draft whose values run past the schema limits, trimming only those values', () => {
+    const draft = {
+      ...defaultQuotation(),
+      recipient: 'Acme Trading',
+      terms: 't'.repeat(2100),
+      vatRate: 150,
+      items: Array.from({ length: 101 }, () => defaultQuotation().items[0]),
+    };
+    window.localStorage.setItem(quotationDraft.storageKey, JSON.stringify(draft));
+
+    const loaded = loadDraft(quotationDraft);
+    expect(loaded.recipient).toBe('Acme Trading');
+    expect(loaded.terms).toHaveLength(2000);
+    expect(loaded.vatRate).toBe(100);
+    expect(loaded.items).toHaveLength(100);
+  });
+
   it('reports a failed write instead of throwing', () => {
     const spy = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
       throw new Error('QuotaExceededError');
@@ -38,6 +55,27 @@ describe('JSON import', () => {
     const draft = { ...defaultQuotation(), quoteNo: 'Q-7' };
     const result = importDraft(quotationDraft, exportDraft(quotationDraft, draft));
     expect(result).toEqual({ ok: true, data: draft });
+  });
+
+  it('imports a file whose text runs past a limit, trimmed to fit', () => {
+    const draft = { ...defaultQuotation(), quoteNo: 'Q-8', terms: 't'.repeat(2100) };
+    const result = importDraft(quotationDraft, exportDraft(quotationDraft, draft));
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.data.quoteNo).toBe('Q-8');
+      expect(result.data.terms).toHaveLength(2000);
+    }
+  });
+
+  it('drops an oversized logo instead of cutting it into a broken image', () => {
+    const logo = 'data:image/png;base64,' + 'A'.repeat(400_000);
+    const draft = { ...defaultTradeShipment(), invoiceNo: 'CI-9', logo };
+    const result = importDraft(tradeDraft, exportDraft(tradeDraft, draft));
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.data.invoiceNo).toBe('CI-9');
+      expect(result.data.logo).toBe('');
+    }
   });
 
   it('rejects a file exported from a different document type', () => {

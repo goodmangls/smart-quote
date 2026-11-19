@@ -43,6 +43,36 @@ describe('DocumentEditorPage', () => {
     expect(within(sheet).getByText('KRW 1,100,000')).toBeInTheDocument();
   });
 
+  it('caps the VAT rate at 100% and keeps the draft after a reload', async () => {
+    const user = userEvent.setup();
+    const { unmount } = renderAt('/documents/quotation');
+
+    await user.type(screen.getByLabelText('To (recipient)'), 'Acme Trading');
+    const rate = screen.getByLabelText('VAT rate (%)');
+    await user.clear(rate);
+    await user.type(rate, '150');
+    expect(rate).toHaveValue(100);
+    // Typing past the cap again must not leave "1000" in the box over a stored 100.
+    await user.type(rate, '0');
+    expect(rate).toHaveValue(100);
+    unmount(); // flushes the pending save, as navigating away does
+
+    renderAt('/documents/quotation');
+    expect(screen.getByLabelText('To (recipient)')).toHaveValue('Acme Trading');
+    expect(screen.getByLabelText('VAT rate (%)')).toHaveValue(100);
+  });
+
+  it('stops quotation terms at the length a saved draft can hold', async () => {
+    const user = userEvent.setup();
+    renderAt('/documents/quotation');
+
+    const terms = screen.getByLabelText('Terms (one per line)');
+    await user.clear(terms);
+    await user.click(terms);
+    await user.paste('t'.repeat(2100));
+    expect((terms as HTMLTextAreaElement).value).toHaveLength(2000);
+  });
+
   it('accepts a decimal that starts with zero, typed key by key', async () => {
     const user = userEvent.setup();
     renderAt('/documents/commercial-invoice');

@@ -12,6 +12,12 @@ import { Incoterm } from '@/types';
  * fails its schema silently falls back to a blank document, so a field added
  * to an existing schema needs `.default(...)`. `compat.test.ts` pins this with
  * frozen v1 fixtures.
+ *
+ * Upper limits are the exception. `fitToSchema` trims text, numbers and lists
+ * to their `.max()` before parsing, on every edit, load and import. So express
+ * a new cap as `.max()`. A cap written only inside `.refine()` is not fitted
+ * and would discard the whole draft again. Text with both `.max()` and a
+ * `.refine()` (the logo) is cleared, not cut, when it runs over.
  */
 
 export const DOCUMENT_TYPES = [

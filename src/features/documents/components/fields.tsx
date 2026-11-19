@@ -86,8 +86,13 @@ interface NumberFieldProps {
   value: number;
   onChange: (value: number) => void;
   step?: number;
+  /** Largest accepted value. Defaults to the schema's amount cap; pass 100 for a percentage. */
+  max?: number;
   className?: string;
 }
+
+/** Mirrors the `amount` cap in `types.ts`. */
+const AMOUNT_MAX = 1e12;
 
 const parseAmount = (raw: string): number => {
   const next = Number(raw);
@@ -104,7 +109,14 @@ const formatAmount = (value: number): string =>
  * number blanked the "0" of "0.8" mid-typing and left ".8" on screen. The draft
  * resyncs only when the value changes from outside (import, reset).
  */
-export const NumberField = ({ label, value, onChange, step = 1, className }: NumberFieldProps) => {
+export const NumberField = ({
+  label,
+  value,
+  onChange,
+  step = 1,
+  max = AMOUNT_MAX,
+  className,
+}: NumberFieldProps) => {
   const id = useId();
   const [draft, setDraft] = useState(() => formatAmount(value));
   const [lastValue, setLastValue] = useState(value);
@@ -120,13 +132,19 @@ export const NumberField = ({ label, value, onChange, step = 1, className }: Num
         type='number'
         inputMode='decimal'
         min={0}
+        max={max}
         step={step}
         className={inputClass}
         value={draft}
         placeholder='0'
         onChange={(e) => {
-          setDraft(e.target.value);
-          onChange(parseAmount(e.target.value));
+          const typed = parseAmount(e.target.value);
+          const next = Math.min(typed, max);
+          // Over the cap, show the capped number. Otherwise the box keeps what
+          // was typed, and typing past the cap twice would leave "1000" on
+          // screen over a stored 100.
+          setDraft(next === typed ? e.target.value : formatAmount(next));
+          onChange(next);
         }}
       />
     </FieldShell>

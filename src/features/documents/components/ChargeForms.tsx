@@ -159,6 +159,7 @@ export const FreightInvoiceForm = ({ doc, update }: FormProps<FreightInvoice>) =
         <NumberField
           label='VAT rate (%)'
           step={0.1}
+          max={100}
           value={doc.vatRate}
           onChange={(vatRate) => update({ vatRate: clampPercent(vatRate) })}
         />
@@ -303,6 +304,7 @@ export const ArrivalNoticeForm = ({ doc, update }: FormProps<ArrivalNotice>) => 
           <NumberField
             label='VAT rate (%)'
             step={0.1}
+            max={100}
             value={doc.vatRate}
             onChange={(vatRate) => update({ vatRate: clampPercent(vatRate) })}
           />
