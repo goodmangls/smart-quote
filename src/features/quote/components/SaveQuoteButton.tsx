@@ -8,6 +8,8 @@ import { Save, Check, Loader2, ExternalLink } from 'lucide-react';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { useToast } from '@/components/ui/Toast';
 import { useAuth } from '@/contexts/AuthContext';
+import { formatKRW, formatUSD } from '@/lib/format';
+import { isKoreanNationality } from '@/pages/quoteAccess';
 
 interface Props {
   input: QuoteInput;
@@ -43,13 +45,29 @@ export const SaveQuoteButton: React.FC<Props> = ({ input, result, onSaved }) => 
       setShowNotes(false);
       setNotes('');
       toast('success', `Quote saved: ${detail.referenceNo}`);
+      // The server prices a non-admin's saved quote at their margin rule. If the
+      // page had not finished resolving that rule (or the lookup failed and it
+      // fell back), the saved price is not the one on screen — say which was kept.
+      // KRW is only shown to Korean accounts (and admins), matching the result panel.
+      if (result && Number(detail.totalQuoteAmount) !== result.totalQuoteAmount) {
+        const savedAmount =
+          user?.role === 'admin' || isKoreanNationality(user?.nationality)
+            ? formatKRW(Number(detail.totalQuoteAmount))
+            : formatUSD(Number(detail.totalQuoteAmountUSD));
+        toast(
+          'warning',
+          `${detail.referenceNo} was saved at ${savedAmount} — your margin rule was applied when saving, so it differs from the amount shown. Check the saved quote in History.`,
+        );
+      }
       // Notify Intercom so operator-side auto-messages and segments
       // can react to saved quotes (e.g., "first save" congrats).
       trackEvent(IntercomEvents.QuoteSaved, {
         reference_no: detail.referenceNo,
         carrier: input.overseasCarrier,
         destination: input.destinationCountry,
-        total_krw: result?.totalQuoteAmount ?? 0,
+        // The saved amount, not the on-screen one — the server may have re-priced
+        // a member's quote at their margin rule (see the warning above).
+        total_krw: Number(detail.totalQuoteAmount ?? result?.totalQuoteAmount ?? 0),
         is_duplicate: isDuplicate,
       });
       if (user && user.role === 'member' && !isDuplicate) {

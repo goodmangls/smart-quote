@@ -60,7 +60,11 @@ module Api
         if current_user&.admin?
           render json: QuoteCalculator.call(input)
         else
-          result = QuoteCalculator.call(public_calculate_input(input))
+          # A signed-in member is priced by their own rule — the same one their
+          # saved quote will use (create) — so calculate-then-save agrees.
+          # Anonymous callers keep the anonymous rule.
+          priced = current_user ? member_margin_input(input) : public_calculate_input(input)
+          result = QuoteCalculator.call(priced)
           render json: PublicQuoteResponse.call(result)
         end
       rescue InvalidInputError => e
@@ -78,6 +82,7 @@ module Api
 
         input = clean_params
         validate_quote_input!(input)
+        input = member_margin_input(input) unless current_user.admin?
         result = QuoteCalculator.call(input)
 
         quote = current_user.quotes.new(
@@ -380,6 +385,27 @@ module Api
       # resolver's DEFAULT_MARGIN.
       def public_calculate_input(input)
         input.merge("marginPercent" => anonymous_margin_percent(input))
+      end
+
+      # A saved quote's margin is its price, so only an admin picks it. For a
+      # signed-in non-admin the request's marginPercent is replaced by the rule
+      # that matches them — the same rule the calculator page resolves for them
+      # (email, nationality, billable weight via /margin_rules/resolve). Without
+      # this, calling the API directly with marginPercent 0 saved a quote at cost.
+      #
+      # Billable weight comes from a first calculator pass: it depends on the
+      # packages and carrier, never on the margin, so the second pass agrees.
+      # Rounded to 2 decimals like useResolvedMargin does before it asks
+      # /margin_rules/resolve — otherwise 19.999kg resolves as <20kg here and
+      # as 20kg on screen, picking a different rule at the boundary.
+      def member_margin_input(input)
+        billable_weight = QuoteCalculator.call(input)[:billableWeight].to_f.round(2)
+        margin = MarginRuleResolver.resolve(
+          email: current_user.email,
+          nationality: current_user.nationality,
+          weight: billable_weight
+        )[:margin_percent].to_f
+        input.merge("marginPercent" => margin)
       end
 
       def anonymous_margin_percent(input)
