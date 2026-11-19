@@ -7,14 +7,35 @@ vi.mock('@/api/quoteApi', () => ({
   saveQuote: vi.fn(),
 }));
 
+const { authState, toastSpy } = vi.hoisted(() => ({
+  authState: {
+    user: {
+      id: 1,
+      email: 'test@company.com',
+      role: 'member',
+      company: 'Test Corp',
+      name: 'Test User',
+      nationality: undefined as string | undefined,
+    },
+  },
+  toastSpy: vi.fn(),
+}));
+
 vi.mock('@/contexts/AuthContext', () => ({
-  useAuth: () => ({
-    user: { id: 1, email: 'test@company.com', role: 'member', company: 'Test Corp', name: 'Test User' },
-    isAuthenticated: true,
-  }),
+  useAuth: () => ({ user: authState.user, isAuthenticated: true }),
+}));
+
+vi.mock('@/components/ui/Toast', () => ({
+  useToast: () => ({ toast: toastSpy }),
+}));
+
+vi.mock('@/lib/intercom', () => ({
+  trackEvent: vi.fn(),
+  IntercomEvents: { QuoteSaved: 'quote_saved' },
 }));
 
 import { saveQuote } from '@/api/quoteApi';
+import { trackEvent } from '@/lib/intercom';
 
 const mockInput: QuoteInput = {
   originCountry: 'KR',
@@ -61,6 +82,7 @@ const mockResult: QuoteResult = {
 describe('SaveQuoteButton', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    authState.user.nationality = undefined;
     vi.useFakeTimers({ shouldAdvanceTime: true });
   });
 
@@ -242,4 +264,84 @@ describe('SaveQuoteButton', () => {
 
     vi.useRealTimers();
   });
+
+  // The server sets a non-admin's margin from their margin rule when it saves
+  // (POST /quotes). If the page had not finished resolving that rule — or the
+  // lookup failed and it fell back — the saved price differs from the one on
+  // screen, and the member must be told which one was saved.
+  describe('when the saved total differs from the one on screen', () => {
+    type Detail = Awaited<ReturnType<typeof saveQuote>>;
+    const saveAndConfirm = async () => {
+      render(<SaveQuoteButton input={mockInput} result={mockResult} />);
+      await userEvent.click(screen.getByText('Save Quote'));
+      await userEvent.click(screen.getByRole('button', { name: /save/i }));
+    };
+
+    it('warns with the saved USD amount for a non-Korean member', async () => {
+      vi.useRealTimers();
+      vi.mocked(saveQuote).mockResolvedValue({
+        referenceNo: 'SQ-2026-0100',
+        totalQuoteAmount: 201000,
+        totalQuoteAmountUSD: 154.62,
+      } as Detail);
+
+      await saveAndConfirm();
+
+      await waitFor(() => {
+        expect(toastSpy).toHaveBeenCalledWith('warning', expect.stringContaining('$154.62'));
+      });
+      const warning = toastSpy.mock.calls.find(([type]) => type === 'warning')![1] as string;
+      expect(warning).toContain('SQ-2026-0100');
+      expect(warning).not.toContain('₩');
+    });
+
+    it('warns with the saved KRW amount for a Korean member', async () => {
+      vi.useRealTimers();
+      authState.user.nationality = 'KR';
+      vi.mocked(saveQuote).mockResolvedValue({
+        referenceNo: 'SQ-2026-0101',
+        totalQuoteAmount: 201000,
+        totalQuoteAmountUSD: 154.62,
+      } as Detail);
+
+      await saveAndConfirm();
+
+      await waitFor(() => {
+        expect(toastSpy).toHaveBeenCalledWith('warning', expect.stringContaining('₩201,000'));
+      });
+    });
+
+    it('reports the saved amount, not the on-screen one, to Intercom', async () => {
+      vi.useRealTimers();
+      vi.mocked(saveQuote).mockResolvedValue({
+        referenceNo: 'SQ-2026-0103',
+        totalQuoteAmount: 201000,
+        totalQuoteAmountUSD: 154.62,
+      } as Detail);
+
+      await saveAndConfirm();
+
+      await waitFor(() => {
+        expect(trackEvent).toHaveBeenCalledWith(
+          'quote_saved',
+          expect.objectContaining({ reference_no: 'SQ-2026-0103', total_krw: 201000 }),
+        );
+      });
+    });
+
+    it('does not warn when the saved total matches the screen', async () => {
+      vi.useRealTimers();
+      vi.mocked(saveQuote).mockResolvedValue({
+        referenceNo: 'SQ-2026-0102',
+        totalQuoteAmount: mockResult.totalQuoteAmount,
+        totalQuoteAmountUSD: mockResult.totalQuoteAmountUSD,
+      } as Detail);
+
+      await saveAndConfirm();
+
+      await waitFor(() => expect(toastSpy).toHaveBeenCalledWith('success', expect.any(String)));
+      expect(toastSpy).not.toHaveBeenCalledWith('warning', expect.anything());
+    });
+  });
 });
+

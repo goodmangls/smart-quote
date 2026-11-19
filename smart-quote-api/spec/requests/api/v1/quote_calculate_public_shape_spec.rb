@@ -88,14 +88,6 @@ RSpec.describe "POST /api/v1/quotes/calculate (public shape)", type: :request do
       expect(json["totalQuoteAmount"]).to eq(omitted)
     end
 
-    it "resolves the margin server-side with no identity" do
-      expect(MarginRuleResolver).to receive(:resolve)
-        .with(email: nil, nationality: nil, weight: 10.0)
-        .and_call_original
-
-      post_calculate(params.merge(marginPercent: 0), headers: headers)
-    end
-
     it "reports the explicit fscPercent that was applied" do
       post_calculate(params, headers: headers)
 
@@ -134,6 +126,14 @@ RSpec.describe "POST /api/v1/quotes/calculate (public shape)", type: :request do
 
     it_behaves_like "the public shape"
 
+    it "resolves the margin server-side with no identity" do
+      expect(MarginRuleResolver).to receive(:resolve)
+        .with(email: nil, nationality: nil, weight: 10.0)
+        .and_call_original
+
+      post_calculate(params.merge(marginPercent: 0), headers: headers)
+    end
+
     it "drops a margin warning the calculator produced" do
       seen = nil
       allow(QuoteCalculator).to receive(:call).and_wrap_original do |original, input|
@@ -154,12 +154,43 @@ RSpec.describe "POST /api/v1/quotes/calculate (public shape)", type: :request do
     let(:headers) { invalid_headers }
 
     it_behaves_like "the public shape"
+
+    it "resolves the margin server-side with no identity" do
+      expect(MarginRuleResolver).to receive(:resolve)
+        .with(email: nil, nationality: nil, weight: 10.0)
+        .and_call_original
+
+      post_calculate(params.merge(marginPercent: 0), headers: headers)
+    end
   end
 
   context "as a non-admin member" do
     let(:headers) { member_headers }
 
     it_behaves_like "the public shape"
+
+    # A signed-in member is priced by their own rule (email, nationality,
+    # billable weight) — the rule POST /quotes uses when they save — so the
+    # same input does not get one price here and another once saved.
+    it "resolves the margin from the member's own rule, as saving does" do
+      expect(MarginRuleResolver).to receive(:resolve)
+        .with(email: member.email, nationality: member.nationality, weight: kind_of(Float))
+        .and_call_original
+
+      post_calculate(params.merge(marginPercent: 0), headers: headers)
+    end
+
+    it "quotes the same total that saving the same input stores" do
+      create(:margin_rule, :per_user, name: "Member", match_email: member.email, margin_percent: 12)
+      Rails.cache.clear
+
+      post_calculate(params.merge(marginPercent: 0), headers: headers)
+      calculated = json["totalQuoteAmount"]
+
+      post "/api/v1/quotes", params: params.merge(marginPercent: 0), headers: headers, as: :json
+      expect(response).to have_http_status(:created)
+      expect(Quote.order(:created_at).last.total_quote_amount.to_f).to eq(calculated.to_f)
+    end
   end
 
   context "as an admin" do
