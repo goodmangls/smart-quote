@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useId } from 'react';
 import { CargoItem, PackingType } from '@/types';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { isDhlOversizePiece, isDhlOverWeight } from '@/config/dhl_addons';
@@ -35,6 +35,7 @@ export const DhlAddOnPanel: React.FC<Props> = ({
   isMobileView,
   dbRates,
 }) => {
+  const fid = useId();
   const { language } = useLanguage();
   const isEn = language === 'en';
 
@@ -166,10 +167,10 @@ export const DhlAddOnPanel: React.FC<Props> = ({
   const footer = selectedAddOns.includes('INS') ? (
     <div className='mt-2 flex items-center gap-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2'>
       <Shield className='w-3.5 h-3.5 text-info-500 shrink-0' />
-      <label className='text-xs text-gray-600 dark:text-gray-400 whitespace-nowrap'>
+      <label htmlFor={`${fid}-1`} className='text-xs text-gray-600 dark:text-gray-400 whitespace-nowrap'>
         {isEn ? 'Declared Value' : '물품 신고가'}:
       </label>
-      <input
+      <input id={`${fid}-1`}
         type='number'
         value={declaredValue ?? ''}
         onChange={(e) =>

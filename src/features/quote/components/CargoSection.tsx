@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useId } from 'react';
 import { CargoItem, QuoteInput, ShippingItemType } from '@/types';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Package, Plus, Box, Trash2, Copy, Mail } from 'lucide-react';
@@ -82,6 +82,7 @@ export const CargoSection: React.FC<Props> = ({
   isMobileView,
   overseasCarrier = 'UPS',
 }) => {
+  const fid = useId();
   const [unitSystem, setUnitSystem] = useState<UnitSystem>('metric');
   const { inputClass, cardClass, labelClass } = inputStyles;
   const ic = inputClass(isMobileView);
@@ -294,8 +295,8 @@ export const CargoSection: React.FC<Props> = ({
                 <div
                   className={`col-span-4 ${!isMobileView ? (isDocument ? 'sm:col-span-3' : 'sm:col-span-2') : ''}`}
                 >
-                  <label className={cargoLabelClass}>Qty</label>
-                  <input
+                  <label htmlFor={`${fid}-${idx}-1`} className={cargoLabelClass}>Qty</label>
+                  <input id={`${fid}-${idx}-1`}
                     type='number'
                     min='1'
                     step='1'
@@ -312,8 +313,8 @@ export const CargoSection: React.FC<Props> = ({
                 <div
                   className={`col-span-6 ${!isMobileView ? (isDocument ? 'sm:col-span-7' : 'sm:col-span-3') : ''}`}
                 >
-                  <label className={cargoLabelClass}>Weight ({wtLabel})</label>
-                  <input
+                  <label htmlFor={`${fid}-${idx}-2`} className={cargoLabelClass}>Weight ({wtLabel})</label>
+                  <input id={`${fid}-${idx}-2`}
                     type='number'
                     step='0.1'
                     min='0.1'
@@ -357,8 +358,8 @@ export const CargoSection: React.FC<Props> = ({
                 {!isDocument && (
                   <>
                     <div className={`col-span-4 ${!isMobileView ? 'sm:col-span-2' : ''}`}>
-                      <label className={cargoLabelClass}>L ({dimLabel})</label>
-                      <input
+                      <label htmlFor={`${fid}-${idx}-3`} className={cargoLabelClass}>L ({dimLabel})</label>
+                      <input id={`${fid}-${idx}-3`}
                         type='number'
                         step='0.1'
                         min='0.1'
@@ -370,8 +371,8 @@ export const CargoSection: React.FC<Props> = ({
                       />
                     </div>
                     <div className={`col-span-4 ${!isMobileView ? 'sm:col-span-2' : ''}`}>
-                      <label className={cargoLabelClass}>W ({dimLabel})</label>
-                      <input
+                      <label htmlFor={`${fid}-${idx}-4`} className={cargoLabelClass}>W ({dimLabel})</label>
+                      <input id={`${fid}-${idx}-4`}
                         type='number'
                         step='0.1'
                         min='0.1'
@@ -383,8 +384,8 @@ export const CargoSection: React.FC<Props> = ({
                       />
                     </div>
                     <div className={`col-span-4 ${!isMobileView ? 'sm:col-span-2' : ''}`}>
-                      <label className={cargoLabelClass}>H ({dimLabel})</label>
-                      <input
+                      <label htmlFor={`${fid}-${idx}-5`} className={cargoLabelClass}>H ({dimLabel})</label>
+                      <input id={`${fid}-${idx}-5`}
                         type='number'
                         step='0.1'
                         min='0.1'

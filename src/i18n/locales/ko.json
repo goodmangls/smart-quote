@@ -94,6 +94,7 @@
   "auth.magicLink.usePassword": "비밀번호로 로그인하기",
   "auth.magicLink.emailRequired": "이메일을 입력해주세요.",
   "auth.magicLink.requestFailed": "로그인 링크 전송에 실패했습니다. 다시 시도해주세요.",
+  "calc.pageTitle": "견적 계산기",
   "calc.shipmentConfig": "화물 배송 설정",
   "calc.shipmentConfigDesc": "화물 세부 정보를 입력하여 해외 통합 견적을 생성합니다.",
   "calc.totalEstimate": "총 예상 견적",

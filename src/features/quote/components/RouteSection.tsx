@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useId } from 'react';
 import { QuoteInput } from '@/types';
 import { useLanguage } from '@/contexts/LanguageContext';
 import {
@@ -35,6 +35,7 @@ const selectChevron = (
 );
 
 export const RouteSection: React.FC<Props> = ({ input, onFieldChange, isMobileView }) => {
+  const fid = useId();
   const { inputClass, labelClass, cardClass, sectionTitleClass, twoColGrid } = inputStyles;
   const ic = inputClass(isMobileView);
   const lc = labelClass(isMobileView);
@@ -108,7 +109,7 @@ export const RouteSection: React.FC<Props> = ({ input, onFieldChange, isMobileVi
       <div className={grid}>
         {/* Row 1: Origin + Destination */}
         <div>
-          <label className={lc}>{t('calc.label.origin')}</label>
+          <span className={lc}>{t('calc.label.origin')}</span>
           <div
             className={`${ic} bg-gray-50 dark:bg-gray-600 text-gray-700 dark:text-gray-200 cursor-default flex items-center`}
           >
@@ -117,9 +118,9 @@ export const RouteSection: React.FC<Props> = ({ input, onFieldChange, isMobileVi
         </div>
 
         <div>
-          <label className={lc}>{t('calc.label.destination')}</label>
+          <label htmlFor={`${fid}-1`} className={lc}>{t('calc.label.destination')}</label>
           <div className='relative'>
-            <select
+            <select id={`${fid}-1`}
               value={input.destinationCountry}
               onChange={(e) => {
                 const country = e.target.value;
@@ -141,9 +142,9 @@ export const RouteSection: React.FC<Props> = ({ input, onFieldChange, isMobileVi
 
         {/* Row 2: Zone + Zip */}
         <div>
-          <label className={lc}>{t('calc.label.zone')}</label>
+          <label htmlFor={`${fid}-2`} className={lc}>{t('calc.label.zone')}</label>
           <div className='relative'>
-            <select
+            <select id={`${fid}-2`}
               value={selectedZone}
               onChange={(e) => {
                 const zone = e.target.value;
@@ -166,8 +167,8 @@ export const RouteSection: React.FC<Props> = ({ input, onFieldChange, isMobileVi
         </div>
 
         <div>
-          <label className={lc}>{t('calc.label.zip')}</label>
-          <input
+          <label htmlFor={`${fid}-3`} className={lc}>{t('calc.label.zip')}</label>
+          <input id={`${fid}-3`}
             type='text'
             value={input.destinationZip}
             onChange={(e) => onFieldChange('destinationZip', e.target.value)}
@@ -181,9 +182,9 @@ export const RouteSection: React.FC<Props> = ({ input, onFieldChange, isMobileVi
 
         {/* Row 3: Carrier + Mode (fixed) */}
         <div>
-          <label className={lc}>{t('calc.label.carrier')}</label>
+          <label htmlFor={`${fid}-4`} className={lc}>{t('calc.label.carrier')}</label>
           <div className='relative'>
-            <select
+            <select id={`${fid}-4`}
               value={input.overseasCarrier || 'UPS'}
               onChange={(e) => {
                 onFieldChange('overseasCarrier', e.target.value as QuoteInput['overseasCarrier']);
@@ -200,7 +201,7 @@ export const RouteSection: React.FC<Props> = ({ input, onFieldChange, isMobileVi
         </div>
 
         <div>
-          <label className={lc}>{t('calc.label.mode')}</label>
+          <span className={lc}>{t('calc.label.mode')}</span>
           <div
             className={`${ic} bg-gray-50 dark:bg-gray-600 text-gray-700 dark:text-gray-200 cursor-default flex items-center`}
           >

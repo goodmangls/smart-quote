@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useId } from 'react';
 import { CargoItem, PackingType } from '@/types';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { AlertTriangle, Info } from 'lucide-react';
@@ -43,6 +43,7 @@ export const FedExAddOnPanel: React.FC<Props> = ({
   dbRates,
   destinationCountry,
 }) => {
+  const fid = useId();
   const { language } = useLanguage();
   const isEn = language === 'en';
 
@@ -175,10 +176,10 @@ export const FedExAddOnPanel: React.FC<Props> = ({
       }
       footer={
         <div className='mt-3 pt-3 border-t border-purple-200 dark:border-purple-800'>
-          <label className='block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1'>
+          <label htmlFor={`${fid}-1`} className='block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1'>
             {isEn ? 'Declared Value (KRW)' : '운송 신고 금액 (원)'}
           </label>
-          <input
+          <input id={`${fid}-1`}
             type='number'
             min={0}
             step={10_000}

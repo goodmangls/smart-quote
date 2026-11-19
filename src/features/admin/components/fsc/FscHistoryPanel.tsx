@@ -105,8 +105,8 @@ export const FscHistoryPanel: React.FC<Props> = ({
             </p>
             <div className='flex flex-wrap items-end gap-2'>
               <div>
-                <label className='block text-[10px] text-gray-400 mb-0.5'>Carrier</label>
-                <select
+                <label htmlFor={'fsc-history-1'} className='block text-[10px] text-gray-400 mb-0.5'>Carrier</label>
+                <select id={'fsc-history-1'}
                   value={addCarrier}
                   onChange={(e) => onAddCarrierChange(e.target.value as HistoryCarrier)}
                   className='px-2 py-1 text-xs rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white'
@@ -117,8 +117,8 @@ export const FscHistoryPanel: React.FC<Props> = ({
                 </select>
               </div>
               <div>
-                <label className='block text-[10px] text-gray-400 mb-0.5'>Date (YYYY-MM-DD)</label>
-                <input
+                <label htmlFor={'fsc-history-2'} className='block text-[10px] text-gray-400 mb-0.5'>Date (YYYY-MM-DD)</label>
+                <input id={'fsc-history-2'}
                   type='date'
                   value={addDate}
                   onChange={(e) => onAddDateChange(e.target.value)}
@@ -126,8 +126,8 @@ export const FscHistoryPanel: React.FC<Props> = ({
                 />
               </div>
               <div>
-                <label className='block text-[10px] text-gray-400 mb-0.5'>Rate (%)</label>
-                <input
+                <label htmlFor={'fsc-history-3'} className='block text-[10px] text-gray-400 mb-0.5'>Rate (%)</label>
+                <input id={'fsc-history-3'}
                   type='number'
                   step='0.25'
                   min={0}

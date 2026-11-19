@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useId } from 'react';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 import { QuoteInput, PackingType, Incoterm, ShippingItemType } from '@/types';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -24,6 +24,7 @@ interface Props {
 }
 
 export const ServiceSection: React.FC<Props> = ({ input, onFieldChange, isMobileView, intlBase = 0, billableWeight = 0, hideMargin }) => {
+  const fid = useId();
   const { inputClass, labelClass, cardClass, sectionTitleClass, twoColGrid } = inputStyles;
   const ic = inputClass(isMobileView);
   const lc = labelClass(isMobileView);
@@ -87,9 +88,9 @@ export const ServiceSection: React.FC<Props> = ({ input, onFieldChange, isMobile
         {!hideMargin && (
           <>
             <div>
-              <label className={lc}>Special Packing</label>
+              <label htmlFor={`${fid}-1`} className={lc}>Special Packing</label>
               <div className="relative">
-                  <select
+                  <select id={`${fid}-1`}
                   value={input.packingType}
                   onChange={(e) => onFieldChange('packingType', e.target.value as PackingType)}
                   disabled={input.shippingItemType === ShippingItemType.DOCUMENT}
@@ -173,8 +174,8 @@ export const ServiceSection: React.FC<Props> = ({ input, onFieldChange, isMobile
 
         {input.incoterm === Incoterm.DDP && (
           <div>
-             <label className={lc}>Estimated Duty & Tax (KRW)</label>
-             <input
+             <label htmlFor={`${fid}-2`} className={lc}>Estimated Duty & Tax (KRW)</label>
+             <input id={`${fid}-2`}
               type="number"
               step="any"
               value={input.dutyTaxEstimate}
@@ -197,14 +198,15 @@ const PackingCostOverrideField: React.FC<{
   lc: string;
   ic: string;
 }> = ({ input, onFieldChange, lc, ic }) => {
+  const fid = useId();
   const { t } = useLanguage();
   const [showInfo, setShowInfo] = useState(false);
 
   return (
     <div>
-      <label className={lc}>Packing & Docs Cost Override (KRW)</label>
+      <label htmlFor={`${fid}-3`} className={lc}>Packing & Docs Cost Override (KRW)</label>
       <div className="relative">
-        <input
+        <input id={`${fid}-3`}
           type="number"
           step="any"
           value={input.manualPackingCost ?? ''}

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useId } from 'react';
 import { QuoteInput } from '@/types';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { UPS_FSC_URL, DHL_FSC_URL, FEDEX_FSC_URL, defaultFscFor } from '@/config/rates';
@@ -35,6 +35,7 @@ export const FinancialSection: React.FC<Props> = ({
   marginAmount,
   totalQuoteAmount,
 }) => {
+  const fid = useId();
   const { inputClass, labelClass, grayCardClass } = inputStyles;
   const ic = inputClass(isMobileView);
   const lc = labelClass(isMobileView);
@@ -109,12 +110,12 @@ export const FinancialSection: React.FC<Props> = ({
       </div>
       <div className={financialGrid}>
         <div>
-          <label className={lc}>Ex. Rate (KRW/USD)</label>
+          <label htmlFor={`${fid}-1`} className={lc}>Ex. Rate (KRW/USD)</label>
           <div className='relative rounded-lg shadow-sm'>
             <div className='pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3'>
               <span className='text-gray-500 sm:text-sm font-bold'>&#8361;</span>
             </div>
-            <input
+            <input id={`${fid}-1`}
               type='number'
               step='any'
               min='1'
@@ -134,9 +135,9 @@ export const FinancialSection: React.FC<Props> = ({
           </p>
         </div>
         <div>
-          <label className={lc}>FSC %</label>
+          <label htmlFor={`${fid}-2`} className={lc}>FSC %</label>
           <div className='relative rounded-lg shadow-sm'>
-            <input
+            <input id={`${fid}-2`}
               type='number'
               step='0.01'
               min='0'
@@ -157,9 +158,9 @@ export const FinancialSection: React.FC<Props> = ({
         </div>
         {!hideMargin && (
           <div>
-            <label className={lc}>Target Margin (%)</label>
+            <label htmlFor={`${fid}-3`} className={lc}>Target Margin (%)</label>
             <div className='relative rounded-lg shadow-sm'>
-              <input
+              <input id={`${fid}-3`}
                 type='number'
                 step='0.1'
                 min='0'

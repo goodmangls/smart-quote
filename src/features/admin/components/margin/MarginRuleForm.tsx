@@ -31,8 +31,8 @@ export const MarginRuleForm: React.FC<Props> = ({
       />
       <div className='grid grid-cols-2 gap-2'>
         <div>
-          <label className='text-[10px] text-gray-500'>Type</label>
-          <select
+          <label htmlFor={'margin-rule-form-1'} className='text-[10px] text-gray-500'>Type</label>
+          <select id={'margin-rule-form-1'}
             value={form.ruleType || 'weight_based'}
             onChange={(e) =>
               onChange({ ...form, ruleType: e.target.value as 'flat' | 'weight_based' })
@@ -44,8 +44,8 @@ export const MarginRuleForm: React.FC<Props> = ({
           </select>
         </div>
         <div>
-          <label className='text-[10px] text-gray-500'>Priority</label>
-          <input
+          <label htmlFor={'margin-rule-form-2'} className='text-[10px] text-gray-500'>Priority</label>
+          <input id={'margin-rule-form-2'}
             type='number'
             min={0}
             max={200}
@@ -57,8 +57,8 @@ export const MarginRuleForm: React.FC<Props> = ({
       </div>
       <div className='grid grid-cols-2 gap-2'>
         <div>
-          <label className='text-[10px] text-gray-500'>Match Email</label>
-          <input
+          <label htmlFor={'margin-rule-form-3'} className='text-[10px] text-gray-500'>Match Email</label>
+          <input id={'margin-rule-form-3'}
             type='text'
             placeholder='(optional)'
             value={form.matchEmail || ''}
@@ -67,8 +67,8 @@ export const MarginRuleForm: React.FC<Props> = ({
           />
         </div>
         <div>
-          <label className='text-[10px] text-gray-500'>Match Nationality</label>
-          <select
+          <label htmlFor={'margin-rule-form-4'} className='text-[10px] text-gray-500'>Match Nationality</label>
+          <select id={'margin-rule-form-4'}
             value={form.matchNationality || ''}
             onChange={(e) => onChange({ ...form, matchNationality: e.target.value || null })}
             className='w-full px-2 py-1 text-xs rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white'
@@ -84,8 +84,8 @@ export const MarginRuleForm: React.FC<Props> = ({
       </div>
       <div className='grid grid-cols-3 gap-2'>
         <div>
-          <label className='text-[10px] text-gray-500'>Weight Min (kg)</label>
-          <input
+          <label htmlFor={'margin-rule-form-5'} className='text-[10px] text-gray-500'>Weight Min (kg)</label>
+          <input id={'margin-rule-form-5'}
             type='number'
             step='0.5'
             placeholder='—'
@@ -97,8 +97,8 @@ export const MarginRuleForm: React.FC<Props> = ({
           />
         </div>
         <div>
-          <label className='text-[10px] text-gray-500'>Weight Max (kg)</label>
-          <input
+          <label htmlFor={'margin-rule-form-6'} className='text-[10px] text-gray-500'>Weight Max (kg)</label>
+          <input id={'margin-rule-form-6'}
             type='number'
             step='0.5'
             placeholder='—'
@@ -110,8 +110,8 @@ export const MarginRuleForm: React.FC<Props> = ({
           />
         </div>
         <div>
-          <label className='text-[10px] text-gray-500'>Margin %</label>
-          <input
+          <label htmlFor={'margin-rule-form-7'} className='text-[10px] text-gray-500'>Margin %</label>
+          <input id={'margin-rule-form-7'}
             type='number'
             step='0.5'
             min={5}

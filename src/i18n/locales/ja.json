@@ -94,6 +94,7 @@
   "auth.magicLink.usePassword": "パスワードでログインする",
   "auth.magicLink.emailRequired": "メールアドレスを入力してください。",
   "auth.magicLink.requestFailed": "ログインリンクの送信に失敗しました。もう一度お試しください。",
+  "calc.pageTitle": "見積もり計算機",
   "calc.shipmentConfig": "貨物設定",
   "calc.shipmentConfigDesc": "貨物の詳細を入力して海外統合見積を生成します。",
   "calc.totalEstimate": "合計見積",
