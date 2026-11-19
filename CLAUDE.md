@@ -420,8 +420,8 @@ Express shipments (UPS/DHL/FedEx) → **DAP only** (no exceptions). AI chatbot e
 ## API Endpoints
 
 ```
-POST   /api/v1/quotes/calculate  # Stateless calculation. 관리자=전체 응답·marginPercent 적용 / 그 외(비로그인·무효 토큰·멤버)=allowlist 응답(PublicQuoteResponse), marginPercent 무시하고 서버 마진 사용, appliedFscPercent 포함. 무효 토큰도 401 이 아니라 공개 형태
-POST   /api/v1/quotes            # Calculate + save
+POST   /api/v1/quotes/calculate  # Stateless calculation. 관리자=전체 응답·marginPercent 적용 / 그 외(비로그인·무효 토큰·멤버)=allowlist 응답(PublicQuoteResponse), marginPercent 무시하고 서버 마진 사용(비로그인·무효 토큰=신원 없는 룰, 로그인 멤버=본인 룰·청구중량 — 저장과 같은 가격), appliedFscPercent 포함. 무효 토큰도 401 이 아니라 공개 형태
+POST   /api/v1/quotes            # Calculate + save. 관리자만 요청의 marginPercent 를 쓴다. 그 외는 서버가 margin_rules 로 정한다(본인 email·nationality·청구중량 — 계산기 화면의 resolve 와 같은 룰). 2026-11-19 이전엔 API 로 0% 저장(원가 견적)이 가능했다
 GET    /api/v1/quotes            # List (page, per_page, q, destination_country, date_from, date_to, status)
 GET    /api/v1/quotes/:id        # Detail
 PATCH  /api/v1/quotes/:id        # Update status/notes/customer

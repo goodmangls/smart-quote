@@ -14,7 +14,11 @@ require "rails_helper"
 #   4. Ruby truthiness decides — only nil and false fall through, so 0 and ""
 #      are kept as supplied
 RSpec.describe "Quote input attribute mapping", type: :request do
-  let(:user) { create(:user) }
+  # An admin, because the request's marginPercent only reaches the mapping for
+  # admins — a member's margin is replaced server-side by their margin rule
+  # (see quote_create_margin_spec.rb). The mapping rules pinned here are the
+  # admin path.
+  let(:user) { create(:user, :admin) }
   let(:headers) { auth_headers(jwt_token_for(user)) }
 
   let(:calculator_result) do

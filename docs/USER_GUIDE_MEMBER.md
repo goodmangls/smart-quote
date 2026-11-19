@@ -2,7 +2,7 @@
 
 > **KS Ways** International Logistics Quoting System
 >
-> Version 3.11.0 | Last Updated: 2026-10-27
+> Version 3.11.1 | Last Updated: 2026-11-19
 
 ---
 
@@ -208,6 +208,8 @@ The system alerts you to:
 3. The system generates a reference number (e.g., `SQ-2026-0042`)
 
 > When you save a quote, a notification is automatically sent to the admin team via Slack.
+
+> The saved price uses the margin set for your account. If you save right after changing the shipment, before the price on screen has caught up, the saved amount can differ from the one shown. A notice then tells you the amount that was saved — check the quote in **History**.
 
 ### Duplicate Detection
 
