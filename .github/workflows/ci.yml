@@ -24,7 +24,9 @@ jobs:
       - run: npm run test:coverage
 
   backend-rubocop:
-    runs-on: ubuntu-latest
+    # ruby/setup-ruby 에 ubuntu-26.04 용 Ruby 3.4.5 가 없어 ubuntu-latest 에서는 설치 단계가 실패한다.
+    # .ruby-version·Render 와 같은 3.4.5 를 유지하려고 24.04 로 고정한다.
+    runs-on: ubuntu-24.04
     defaults:
       run:
         working-directory: smart-quote-api
@@ -39,7 +41,9 @@ jobs:
       - run: bundle exec rubocop --format github
 
   backend-rspec:
-    runs-on: ubuntu-latest
+    # ruby/setup-ruby 에 ubuntu-26.04 용 Ruby 3.4.5 가 없어 ubuntu-latest 에서는 설치 단계가 실패한다.
+    # .ruby-version·Render 와 같은 3.4.5 를 유지하려고 24.04 로 고정한다.
+    runs-on: ubuntu-24.04
     services:
       postgres:
         image: postgres:16
