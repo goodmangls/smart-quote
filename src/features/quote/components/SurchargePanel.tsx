@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useId } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { AppliedSurcharge } from '@/features/dashboard/hooks/useSurcharges';
 import { ResolvedSurcharge } from '@/api/surchargeApi';
@@ -43,6 +43,7 @@ export const SurchargePanel: React.FC<Props> = ({
   onRetry,
   isMobileView,
 }) => {
+  const fid = useId();
   const { t, language } = useLanguage();
   const isKo = language === 'ko';
 
@@ -57,10 +58,10 @@ export const SurchargePanel: React.FC<Props> = ({
     <div className="col-span-1 md:col-span-2">
       {/* Header */}
       <div className="flex items-center justify-between mb-1.5">
-        <label className={labelClass}>
+        <span className={labelClass}>
           <Shield className="w-3.5 h-3.5 inline mr-1 -mt-0.5 text-amber-500" />
           {t('calc.service.surcharge.title')}
-        </label>
+        </span>
         {loading && <Loader2 className="w-3.5 h-3.5 animate-spin text-gray-400" />}
       </div>
 
@@ -136,10 +137,10 @@ export const SurchargePanel: React.FC<Props> = ({
 
       {/* Manual Additional Surge Input */}
       <div className="mt-3">
-        <label className={`block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1 ml-0.5`}>
+        <label htmlFor={`${fid}-1`} className={`block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1 ml-0.5`}>
           {t('calc.service.surcharge.manualLabel')}
         </label>
-        <input
+        <input id={`${fid}-1`}
           type="number"
           step="1000"
           min="0"

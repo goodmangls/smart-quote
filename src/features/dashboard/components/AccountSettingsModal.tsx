@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useId } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { Settings, Key, Eye, EyeOff, Loader2, X } from 'lucide-react';
@@ -10,6 +10,7 @@ interface Props {
 }
 
 export const AccountSettingsModal: React.FC<Props> = ({ isOpen, onClose }) => {
+  const fid = useId();
   const { t } = useLanguage();
   const { updatePassword } = useAuth();
   const { toast } = useToast();
@@ -110,14 +111,14 @@ export const AccountSettingsModal: React.FC<Props> = ({ isOpen, onClose }) => {
             
             {/* Current Password */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+              <label htmlFor={`${fid}-1`} className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                 {t('settings.password.current')}
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <Key className="h-5 w-5 text-gray-400" />
                 </div>
-                <input
+                <input id={`${fid}-1`}
                   type={showCurrent ? 'text' : 'password'}
                   required
                   value={currentPassword}
@@ -136,14 +137,14 @@ export const AccountSettingsModal: React.FC<Props> = ({ isOpen, onClose }) => {
 
             {/* New Password */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+              <label htmlFor={`${fid}-2`} className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                 {t('settings.password.new')}
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <Key className="h-5 w-5 text-gray-400" />
                 </div>
-                <input
+                <input id={`${fid}-2`}
                   type={showNew ? 'text' : 'password'}
                   required
                   value={newPassword}
@@ -162,14 +163,14 @@ export const AccountSettingsModal: React.FC<Props> = ({ isOpen, onClose }) => {
 
             {/* Confirm New Password */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+              <label htmlFor={`${fid}-3`} className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                 {t('settings.password.confirm')}
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <Key className="h-5 w-5 text-gray-400" />
                 </div>
-                <input
+                <input id={`${fid}-3`}
                   type={showNew ? 'text' : 'password'}
                   required
                   value={confirmPassword}

@@ -114,4 +114,56 @@ describe('InputSection', () => {
 
     expect(screen.queryByText('Target Margin (%)')).not.toBeInTheDocument();
   });
+
+  // Every field's visible label must also be its accessible name. Without the
+  // htmlFor/id link a screen reader announces "spin button" with no name, and
+  // a click on the label does not focus the field (WCAG 1.3.1, 4.1.2).
+  describe('label association', () => {
+    it('names each route, cargo and financial field by its visible label', () => {
+      render(<InputSection {...defaultProps} />);
+
+      for (const name of [
+        'calc.label.destination',
+        'calc.label.zone',
+        'calc.label.zip',
+        'calc.label.carrier',
+        'Qty',
+        /^Weight/,
+        /^L \(/,
+        /^W \(/,
+        /^H \(/,
+        'Ex. Rate (KRW/USD)',
+        'FSC %',
+        'Target Margin (%)',
+      ]) {
+        const field = screen.getByLabelText(name);
+        expect(field.tagName).toMatch(/^(INPUT|SELECT|TEXTAREA)$/);
+      }
+    });
+
+    it('gives each cargo row its own ids, so row 2 labels point at row 2', () => {
+      const twoRows = {
+        ...mockInput,
+        items: [
+          { id: '1', width: 10, length: 10, height: 10, weight: 1, quantity: 1 },
+          { id: '2', width: 20, length: 20, height: 20, weight: 7, quantity: 3 },
+        ],
+      };
+      render(<InputSection {...defaultProps} input={twoRows} />);
+
+      const qty = screen.getAllByLabelText('Qty') as HTMLInputElement[];
+      expect(qty.map((el) => el.value)).toEqual(['1', '3']);
+      expect(new Set(qty.map((el) => el.id)).size).toBe(2);
+    });
+
+    it('keeps read-only displays (origin, mode) out of <label>', () => {
+      const { container } = render(<InputSection {...defaultProps} />);
+
+      const labelTexts = [...container.querySelectorAll('label')].map((l) => l.textContent);
+      expect(labelTexts).not.toContain('calc.label.origin');
+      expect(labelTexts).not.toContain('calc.label.mode');
+      expect(screen.getByText('calc.label.origin')).toBeInTheDocument();
+    });
+  });
 });
+

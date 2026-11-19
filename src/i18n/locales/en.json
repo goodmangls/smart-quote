@@ -94,6 +94,7 @@
   "auth.magicLink.usePassword": "Sign in with password instead",
   "auth.magicLink.emailRequired": "Email is required.",
   "auth.magicLink.requestFailed": "Failed to send sign-in link. Please try again.",
+  "calc.pageTitle": "Quote Calculator",
   "calc.shipmentConfig": "Shipment Configuration",
   "calc.shipmentConfigDesc": "Enter cargo details to generate an integrated international quote.",
   "calc.totalEstimate": "Total Estimated Quote",

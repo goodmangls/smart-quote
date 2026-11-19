@@ -1,9 +1,10 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useId } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Calculator, ArrowRightLeft } from 'lucide-react';
 import { useExchangeRates } from '@/features/dashboard/hooks/useExchangeRates';
 
 export const ExchangeRateCalculatorWidget: React.FC = () => {
+  const fid = useId();
   const { t } = useLanguage();
   const { data, loading } = useExchangeRates();
 
@@ -50,10 +51,10 @@ export const ExchangeRateCalculatorWidget: React.FC = () => {
         <div className="space-y-4">
           {/* Amount Input */}
           <div>
-            <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wider">
+            <label htmlFor={`${fid}-1`} className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wider">
               {t('common.amount')}
             </label>
-            <input
+            <input id={`${fid}-1`}
               type="number"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
@@ -66,11 +67,11 @@ export const ExchangeRateCalculatorWidget: React.FC = () => {
           <div className="flex items-center gap-3">
             {/* From Currency */}
             <div className="flex-1">
-              <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wider">
+              <label htmlFor={`${fid}-2`} className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wider">
                 {t('common.from')}
               </label>
               <div className="relative">
-                <select
+                <select id={`${fid}-2`}
                   value={fromCurrency}
                   onChange={(e) => setFromCurrency(e.target.value)}
                   className="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-md pl-3 pr-8 py-2.5 text-gray-900 dark:text-white font-bold focus:ring-2 focus:ring-brand-blue-500 focus:border-transparent transition-all outline-none appearance-none"
@@ -104,11 +105,11 @@ export const ExchangeRateCalculatorWidget: React.FC = () => {
 
             {/* To Currency */}
             <div className="flex-1">
-              <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wider">
+              <label htmlFor={`${fid}-3`} className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wider">
                 {t('common.to')}
               </label>
               <div className="relative">
-                <select
+                <select id={`${fid}-3`}
                   value={toCurrency}
                   onChange={(e) => setToCurrency(e.target.value)}
                   className="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-md pl-3 pr-8 py-2.5 text-gray-900 dark:text-white font-bold focus:ring-2 focus:ring-brand-blue-500 focus:border-transparent transition-all outline-none appearance-none"

@@ -94,6 +94,7 @@
   "auth.magicLink.usePassword": "改用密码登录",
   "auth.magicLink.emailRequired": "请输入电子邮件。",
   "auth.magicLink.requestFailed": "发送登录链接失败。请重试。",
+  "calc.pageTitle": "报价计算器",
   "calc.shipmentConfig": "货物配置",
   "calc.shipmentConfigDesc": "输入货物详情以生成海外综合报价。",
   "calc.totalEstimate": "总估算",

@@ -259,6 +259,9 @@ const QuoteCalculator: React.FC<{ isPublic?: boolean }> = ({ isPublic = false })
         onToggleMobileView={() => setIsMobileView(!isMobileView)}
       />
 
+      {/* The page's one h1, visually hidden: the visible headings are per-column
+          h2s, and desktop, mobile and history views all sit under this title. */}
+      <h1 className='sr-only'>{t('calc.pageTitle')}</h1>
       {currentView === 'calculator' ? (
         <>
           {isMobileView ? (
