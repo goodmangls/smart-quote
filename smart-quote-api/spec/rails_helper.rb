@@ -1,5 +1,9 @@
 # This file is copied to spec/ when you run 'rails generate rspec:install'
 
+# Bootsnap cannot serialize coverage-instrumented bytecode on Ruby 3.4.13.
+# Disable its compile cache only for specs; keep SimpleCov and its gates enabled.
+ENV['DISABLE_BOOTSNAP_COMPILE_CACHE'] = '1'
+
 # SimpleCov must start before any application code is loaded, otherwise lines
 # executed during boot are recorded as uncovered.
 #
