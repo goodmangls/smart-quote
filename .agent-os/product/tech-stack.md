@@ -17,7 +17,7 @@
 | Technology | Version | Purpose |
 |------------|---------|---------|
 | Ruby on Rails | ~> 8.0.4 | API framework (API-only mode) |
-| Ruby | 3.4.5 | Language runtime |
+| Ruby | 3.4.13 | Language runtime |
 | PostgreSQL | 15+ | Database (quotes persistence) |
 | Puma | >= 5.0 | Web server |
 | Kamal | latest | Docker deployment |
