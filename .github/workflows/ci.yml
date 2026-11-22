@@ -24,8 +24,7 @@ jobs:
       - run: npm run test:coverage
 
   backend-rubocop:
-    # ruby/setup-ruby 에 ubuntu-26.04 용 Ruby 3.4.5 가 없어 ubuntu-latest 에서는 설치 단계가 실패한다.
-    # .ruby-version·Render 와 같은 3.4.5 를 유지하려고 24.04 로 고정한다.
+    # Ruby patch version과 별개로 runner 변경을 피하려고 Ubuntu 24.04 고정을 유지한다.
     runs-on: ubuntu-24.04
     defaults:
       run:
@@ -34,15 +33,14 @@ jobs:
       - uses: actions/checkout@v4
       - uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.4.5'
+          ruby-version: '3.4.13'
           bundler-cache: true
           working-directory: smart-quote-api
       # Fail on any offense (Convention+) so style debt cannot re-accumulate.
       - run: bundle exec rubocop --format github
 
   backend-rspec:
-    # ruby/setup-ruby 에 ubuntu-26.04 용 Ruby 3.4.5 가 없어 ubuntu-latest 에서는 설치 단계가 실패한다.
-    # .ruby-version·Render 와 같은 3.4.5 를 유지하려고 24.04 로 고정한다.
+    # Ruby patch version과 별개로 runner 변경을 피하려고 Ubuntu 24.04 고정을 유지한다.
     runs-on: ubuntu-24.04
     services:
       postgres:
@@ -74,7 +72,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.4.5'
+          ruby-version: '3.4.13'
           bundler-cache: true
           working-directory: smart-quote-api
       # db:test:prepare loads schema WITHOUT seeds. db:prepare seeds margin_rules
@@ -84,7 +82,8 @@ jobs:
       - run: bundle exec rspec
 
   e2e:
-    runs-on: ubuntu-latest
+    # Playwright 1.58.2 does not support Chromium on the Ubuntu 26.04 runner.
+    runs-on: ubuntu-24.04
     needs: [check, backend-rspec, backend-rubocop]
     steps:
       - uses: actions/checkout@v4

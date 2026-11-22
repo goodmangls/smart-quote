@@ -4,7 +4,7 @@ This is the API backend for the Smart Quote application, built with Ruby on Rail
 
 ## Prerequisites
 
-- Ruby 3.4.5
+- Ruby 3.4.13
 - PostgreSQL
 - Docker (for deployment with Kamal)
 
