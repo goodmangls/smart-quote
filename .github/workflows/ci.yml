@@ -84,7 +84,8 @@ jobs:
       - run: bundle exec rspec
 
   e2e:
-    runs-on: ubuntu-latest
+    # Playwright 1.58.2 는 ubuntu-26.04 용 chromium 을 지원하지 않아 ubuntu-latest 에서는 브라우저 설치 단계가 실패한다.
+    runs-on: ubuntu-24.04
     needs: [check, backend-rspec, backend-rubocop]
     steps:
       - uses: actions/checkout@v4
