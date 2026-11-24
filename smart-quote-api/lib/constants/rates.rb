@@ -18,9 +18,9 @@ module Constants
     #   출처: https://mydhl.express.dhl/kr/ko/ship/surcharges.html#/fuel_surcharge
     # FedEx FSC : 주간 업데이트 (EMAX 공지)
     # ============================================================
-    DEFAULT_FSC_PERCENT = 49.75 # UPS FSC, effective 2026-11-16
-    DEFAULT_FSC_PERCENT_DHL = 50.00 # DHL FSC, effective 2026-11-16
-    DEFAULT_FSC_PERCENT_FEDEX = 49.00 # FedEx FSC, effective 2026-11-16
+    DEFAULT_FSC_PERCENT = 49.25 # UPS FSC, effective 2026-11-23
+    DEFAULT_FSC_PERCENT_DHL = 49.25 # DHL FSC, effective 2026-11-23
+    DEFAULT_FSC_PERCENT_FEDEX = 48.50 # FedEx FSC, effective 2026-11-23
     # Two intentional margin ceilings:
     #   MAX_MARGIN_PERCENT      — clamp for ad-hoc marginPercent supplied on a
     #                             quote request (admin manual override headroom)
